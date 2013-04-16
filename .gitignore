@@ -1,0 +1,8 @@
+# OSGi Target #
+###############
+wikipathways.app/target*
+
+# Eclipse stuff #
+#################
+.metadata*
+wikipathways.app/.*
