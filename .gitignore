@@ -1,6 +1,7 @@
 # OSGi Target #
 ###############
 wikipathways.app/target*
+wikipathways.app/dependency-reduced-pom.xml
 
 # Eclipse stuff #
 #################
