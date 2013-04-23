@@ -96,14 +96,6 @@
         	    					<include>org.pathvisio:pathvisio-core</include>
         	    				</includes>
         	    			</artifactSet>
-            				<!--  <filters>
-              					<filter>
-                		 			<artifact>org.pathvisio:pathvisio-core</artifact>
-                	 				<includes>
-                     					<include>**</include>
-                 					</includes>
-              					</filter>
-            				</filters>-->
             			</configuration>
           			</execution>
         		</executions>

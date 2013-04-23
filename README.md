@@ -21,6 +21,20 @@ ${home}/CytoscapeConfiguration/3/apps/installed/
 If Cytoscape 3 is started the plugin should show up or be updated.
 
 
+add other dependency
+================
+
+1) add jar in localRepo
+
+2) add one line in localsetup.sh (compare to org.pathvisio.core.jar as an example) and run localsetup.sh
+
+3) go to wikipathways.app/pom.xml
+
+4) add dependency under dependencies (again use org.pathvisio:pathvisio-core) as an example
+
+5) add artifact in plugin: maven-shade-plugin - in configuration
+
+6) run mvn install and see if the jar gets included
 troubleshooting
 ================
 
