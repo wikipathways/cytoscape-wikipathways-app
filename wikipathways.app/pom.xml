@@ -94,6 +94,10 @@
         	    			<artifactSet>
         	    				<includes>
         	    					<include>org.pathvisio:pathvisio-core</include>
+        	    					<include>jdom:jdom</include>
+        	    					<include>org.bridgedb:bridgedb</include>
+        	    					<include>org.bridgedb:bridgedb-bio</include>
+        	    					<include>derby:derby</include>
         	    				</includes>
         	    			</artifactSet>
             			</configuration>
@@ -105,7 +109,7 @@
 
 	<!-- Links to the Cytoscape Maven repositories. -->
 	<repositories>
-		<repository>
+		<!--<repository>
 			<id>cytoscape_snapshots</id>
 			<snapshots>
 			</snapshots>
@@ -114,7 +118,7 @@
 			</releases>
 			<name>Cytoscape Snapshots</name>
 			<url>http://code.cytoscape.org/nexus/content/repositories/snapshots/</url>
-		</repository>
+		</repository> -->
 		<repository>
 			<id>cytoscape_releases</id>
 			<snapshots>
@@ -150,6 +154,18 @@
 			<artifactId>session-api</artifactId>
 			<version>3.0.0</version>
 		</dependency>
+		
+		<dependency>
+    		<groupId>org.cytoscape</groupId>
+    		<artifactId>io-api</artifactId>
+    		<version>3.0.0</version>
+		</dependency>
+		
+		<dependency>
+    		<groupId>org.cytoscape</groupId>
+    		<artifactId>swing-app-api</artifactId>
+    	<version>3.0.0</version>
+		</dependency>
 
 		<!-- Logging -->
 		<dependency>
@@ -159,10 +175,40 @@
 			<scope>provided</scope>
 		</dependency>
 		
+		<!-- local dependencies -->
+		
+		<dependency>
+			<groupId>jdom</groupId>
+			<artifactId>jdom</artifactId>
+			<version>1.1.0</version>
+			<optional>true</optional>
+		</dependency>
+
 		<dependency> 
       		<groupId>org.pathvisio</groupId> 
       		<artifactId>pathvisio-core</artifactId> 
       		<version>3.0.0</version> 
+      		<optional>true</optional>
+    	</dependency> 
+ 
+ 		<dependency> 
+      		<groupId>org.bridgedb</groupId> 
+      		<artifactId>bridgedb</artifactId> 
+      		<version>1.1.0</version> 
+      		<optional>true</optional>
+    	</dependency> 
+
+		<dependency> 
+      		<groupId>org.bridgedb</groupId> 
+      		<artifactId>bridgedb-bio</artifactId> 
+      		<version>1.1.0</version> 
+      		<optional>true</optional>
+    	</dependency> 
+    	
+    	<dependency> 
+      		<groupId>derby</groupId> 
+      		<artifactId>derby</artifactId> 
+      		<version>10.4</version> 
       		<optional>true</optional>
     	</dependency> 
 
