@@ -37,7 +37,6 @@ public class GPMLNetworkImpl implements GPMLNetwork {
 			// only for testing: add all pathway element with a text label
 			for(PathwayElement element : pathway.getDataObjects()) {
 				if(element.getTextLabel() != null && !element.getTextLabel().equals("")) {
-					System.out.println("create new node");
 					CyNode node1 = pathwayView.addNode();
 					// Set name for new nodes
 					pathwayView.getRow(node1).set(CyNetwork.NAME, element.getTextLabel());
