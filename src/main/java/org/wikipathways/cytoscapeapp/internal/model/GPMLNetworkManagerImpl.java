@@ -15,7 +15,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-package org.cytoscape.wikipathways.app.internal.model;
+package org.wikipathways.cytoscapeapp.internal.model;
 
 import java.util.Collection;
 import java.util.HashMap;

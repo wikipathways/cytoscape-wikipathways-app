@@ -15,7 +15,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-package org.cytoscape.wikipathways.app.internal;
+package org.wikipathways.cytoscapeapp.internal;
 
 import java.util.Properties;
 
@@ -27,9 +27,9 @@ import org.cytoscape.service.util.AbstractCyActivator;
 import org.cytoscape.util.swing.FileUtil;
 import org.cytoscape.view.model.CyNetworkViewFactory;
 import org.cytoscape.view.model.CyNetworkViewManager;
-import org.cytoscape.wikipathways.app.internal.model.GPMLNetworkManager;
-import org.cytoscape.wikipathways.app.internal.model.GPMLNetworkManagerImpl;
-import org.cytoscape.wikipathways.app.internal.io.GpmlReaderTaskFactory;
+import org.wikipathways.cytoscapeapp.internal.model.GPMLNetworkManager;
+import org.wikipathways.cytoscapeapp.internal.model.GPMLNetworkManagerImpl;
+import org.wikipathways.cytoscapeapp.internal.io.GpmlReaderTaskFactory;
 import org.osgi.framework.BundleContext;
 import org.cytoscape.io.read.InputStreamTaskFactory;
 import org.cytoscape.io.util.StreamUtil;
@@ -43,16 +43,21 @@ import org.cytoscape.io.util.StreamUtil;
  */
 public class CyActivator extends AbstractCyActivator {
 
+    public static CyNetworkManager netMgr = null;
+    public static CyNetworkViewManager netViewMgr = null;
+    public static CyNetworkViewFactory netViewFactory = null;
+    public static CyNetworkFactory netFactory = null;
+
 	@Override
 	public void start(BundleContext context) throws Exception {
 		
 		// get Cytoscape services from OSGi context
 		CySwingApplication cySwingApp = getService(context,CySwingApplication.class);
 
-        CyNetworkManager cyNetMgr = getService(context,CyNetworkManager.class);
-        CyNetworkViewManager cyNetViewMgr = getService(context,CyNetworkViewManager.class);
-        CyNetworkViewFactory cyNetViewFactory = getService(context,CyNetworkViewFactory.class);
-        CyNetworkFactory cyNetFactory = getService(context,CyNetworkFactory.class);
+        netMgr = getService(context,CyNetworkManager.class);
+        netViewMgr = getService(context,CyNetworkViewManager.class);
+        netViewFactory = getService(context,CyNetworkViewFactory.class);
+        netFactory = getService(context,CyNetworkFactory.class);
         FileUtil fileUtil = getService(context,FileUtil.class);
         StreamUtil streamUtil = getService(context,StreamUtil.class);
         
@@ -63,7 +68,7 @@ public class CyActivator extends AbstractCyActivator {
 //      CyEventHelper cyEventHelper = getService(context,CyEventHelper.class);
 
         // initialize GPML network manager
-        GPMLNetworkManager gpmlNetMgr = new GPMLNetworkManagerImpl(cyNetMgr, cyNetFactory, cyNetViewFactory, cyNetViewMgr);
+        GPMLNetworkManager gpmlNetMgr = new GPMLNetworkManagerImpl(netMgr, netFactory, netViewFactory, netViewMgr);
 
         registerService(context, new GpmlReaderTaskFactory(streamUtil), InputStreamTaskFactory.class, new Properties());
 

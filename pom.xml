@@ -2,17 +2,17 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<properties>
-		<bundle.symbolicName>org.cytoscape.wikipathways.app</bundle.symbolicName>
-		<bundle.namespace>org.cytoscape.wikipathways.app</bundle.namespace>
+		<bundle.symbolicName>org.wikipathways.cytoscapeapp</bundle.symbolicName>
+		<bundle.namespace>org.wikipathways.cytoscapeapp</bundle.namespace>
 		<cytoscape.api.version>3.0.0</cytoscape.api.version>
 	</properties>
 
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.cytoscape.wikipathways.app</groupId>
-	<artifactId>wikipathways.app</artifactId>
+	<groupId>org.wikipathways</groupId>
+	<artifactId>cytoscapeapp</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 
-	<name>WikiPathways App</name>
+	<name>WikiPathways Cytoscape App</name>
 	
 	<packaging>bundle</packaging>
 

@@ -16,11 +16,11 @@
 // limitations under the License.
 //
 
-package org.cytoscape.wikipathways.app.internal.io;
+package org.wikipathways.cytoscapeapp.internal.io;
 
 import java.io.InputStream;
 
-import org.cytoscape.wikipathways.app.internal.model.GPMLNetworkManager;
+import org.wikipathways.cytoscapeapp.internal.model.GPMLNetworkManager;
 import org.cytoscape.work.TaskIterator;
 import org.cytoscape.io.read.AbstractInputStreamTaskFactory;
 import org.cytoscape.io.BasicCyFileFilter;
@@ -35,7 +35,7 @@ import org.cytoscape.io.util.StreamUtil;
  */
 public class GpmlReaderTaskFactory extends AbstractInputStreamTaskFactory {
 	public GpmlReaderTaskFactory(final StreamUtil streamUtil) {
-        super(new BasicCyFileFilter(new String[]{"gpml"}, new String[]{"text/xml"}, "GPML: GenMapp Pathway Markup Language", DataCategory.NETWORK, streamUtil));
+        super(new BasicCyFileFilter(new String[]{"gpml"}, new String[]{"text/xml"}, "GPML files", DataCategory.NETWORK, streamUtil));
 	}
 	
 	

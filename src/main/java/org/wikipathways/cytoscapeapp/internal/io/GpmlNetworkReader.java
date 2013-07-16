@@ -15,18 +15,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-package org.cytoscape.wikipathways.app.internal.io;
+package org.wikipathways.cytoscapeapp.internal.io;
 
 import java.io.InputStream;
 import java.io.IOException;
 
-import org.cytoscape.wikipathways.app.internal.model.GPMLNetwork;
-import org.cytoscape.wikipathways.app.internal.model.GPMLNetworkImpl;
-import org.cytoscape.wikipathways.app.internal.model.GPMLNetworkManager;
+import org.wikipathways.cytoscapeapp.internal.CyActivator;
+import org.wikipathways.cytoscapeapp.internal.model.GPMLNetwork;
+import org.wikipathways.cytoscapeapp.internal.model.GPMLNetworkImpl;
+import org.wikipathways.cytoscapeapp.internal.model.GPMLNetworkManager;
 import org.cytoscape.work.Task;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.io.read.CyNetworkReader;
 import org.cytoscape.model.CyNetwork;
+import org.cytoscape.model.CyNetworkManager;
+import org.cytoscape.model.CyNetworkFactory;
 import org.cytoscape.view.model.CyNetworkView;
 import org.pathvisio.core.model.Pathway;
 
@@ -38,8 +41,9 @@ import org.pathvisio.core.model.Pathway;
  */
 public class GpmlNetworkReader implements CyNetworkReader {
 
-	final InputStream input;
+	InputStream input = null;
     final String fileName;
+    CyNetwork net = null;
 
 	
 	protected GpmlNetworkReader(InputStream input, String fileName) {
@@ -53,15 +57,24 @@ public class GpmlNetworkReader implements CyNetworkReader {
 		monitor.setProgress(-1.0);
         Pathway pathway = new Pathway();
         pathway.readFromXml(input, true);
+        input = null;
+
+        net = CyActivator.netFactory.createNetwork();
 	}
 
-    public void cancel() {}
+    public void cancel() {
+        if (input != null) {
+            try {
+                input.close();
+            } catch (IOException e) {}
+        }
+    }
 
     public CyNetworkView buildCyNetworkView(CyNetwork network) {
-        return null;
+        return CyActivator.netViewFactory.createNetworkView(network);
     }
 
     public CyNetwork[] getNetworks() {
-        return new CyNetwork[0];
+        return new CyNetwork[]{net};
     }
 }
