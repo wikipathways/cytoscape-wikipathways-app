@@ -18,10 +18,14 @@
 
 package org.cytoscape.wikipathways.app.internal.io;
 
-import java.io.File;
+import java.io.InputStream;
 
 import org.cytoscape.wikipathways.app.internal.model.GPMLNetworkManager;
 import org.cytoscape.work.TaskIterator;
+import org.cytoscape.io.read.AbstractInputStreamTaskFactory;
+import org.cytoscape.io.BasicCyFileFilter;
+import org.cytoscape.io.DataCategory;
+import org.cytoscape.io.util.StreamUtil;
 
 /**
  * 
@@ -29,18 +33,14 @@ import org.cytoscape.work.TaskIterator;
  * this class creates a TaskIterator to load a GPML file
  *
  */
-public class GpmlFileReaderTaskFactory {
-	
-	private GPMLNetworkManager gpmlNetMgr;
-	
-	
-	public GpmlFileReaderTaskFactory(GPMLNetworkManager gpmlNetMgr) {
-		this.gpmlNetMgr = gpmlNetMgr;
+public class GpmlReaderTaskFactory extends AbstractInputStreamTaskFactory {
+	public GpmlReaderTaskFactory(final StreamUtil streamUtil) {
+        super(new BasicCyFileFilter(new String[]{"gpml"}, new String[]{"text/xml"}, "GPML: GenMapp Pathway Markup Language", DataCategory.NETWORK, streamUtil));
 	}
 	
 	
-	public TaskIterator createTaskIterator(File file) {
-		return new TaskIterator(new GpmlReaderImpl(file, gpmlNetMgr));
+	public TaskIterator createTaskIterator(InputStream inputStream, String fileName) {
+		return new TaskIterator(new GpmlNetworkReader(inputStream, fileName));
 	}
 
 }

@@ -27,11 +27,12 @@ import org.cytoscape.service.util.AbstractCyActivator;
 import org.cytoscape.util.swing.FileUtil;
 import org.cytoscape.view.model.CyNetworkViewFactory;
 import org.cytoscape.view.model.CyNetworkViewManager;
-import org.cytoscape.wikipathways.app.internal.io.MenuActionLoadGPML;
 import org.cytoscape.wikipathways.app.internal.model.GPMLNetworkManager;
 import org.cytoscape.wikipathways.app.internal.model.GPMLNetworkManagerImpl;
-import org.cytoscape.work.TaskManager;
+import org.cytoscape.wikipathways.app.internal.io.GpmlReaderTaskFactory;
 import org.osgi.framework.BundleContext;
+import org.cytoscape.io.read.InputStreamTaskFactory;
+import org.cytoscape.io.util.StreamUtil;
 
 /**
  * 
@@ -40,7 +41,7 @@ import org.osgi.framework.BundleContext;
  * initializes the GPMLNetworkManager
  *
  */
-public class CyActivator<T,C> extends AbstractCyActivator {
+public class CyActivator extends AbstractCyActivator {
 
 	@Override
 	public void start(BundleContext context) throws Exception {
@@ -53,7 +54,7 @@ public class CyActivator<T,C> extends AbstractCyActivator {
         CyNetworkViewFactory cyNetViewFactory = getService(context,CyNetworkViewFactory.class);
         CyNetworkFactory cyNetFactory = getService(context,CyNetworkFactory.class);
         FileUtil fileUtil = getService(context,FileUtil.class);
-		TaskManager<T,C> taskMgr = getService(context,TaskManager.class);
+        StreamUtil streamUtil = getService(context,StreamUtil.class);
         
         // currently not used - will probably be needed in the future
 //      VisualMappingManager visMappingMgr = getService(context,VisualMappingManager.class);
@@ -63,8 +64,9 @@ public class CyActivator<T,C> extends AbstractCyActivator {
 
         // initialize GPML network manager
         GPMLNetworkManager gpmlNetMgr = new GPMLNetworkManagerImpl(cyNetMgr, cyNetFactory, cyNetViewFactory, cyNetViewMgr);
-        MenuActionLoadGPML<T, C> loadAction = new MenuActionLoadGPML<T, C>(cySwingApp,taskMgr,gpmlNetMgr,fileUtil);
-        registerService(context,loadAction,CyAction.class, new Properties());  
+
+        registerService(context, new GpmlReaderTaskFactory(streamUtil), InputStreamTaskFactory.class, new Properties());
+
 	}
 
 }
