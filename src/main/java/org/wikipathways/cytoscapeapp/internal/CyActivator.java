@@ -23,6 +23,9 @@ import org.cytoscape.application.swing.CyAction;
 import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.model.CyNetworkFactory;
 import org.cytoscape.model.CyNetworkManager;
+import org.cytoscape.model.CyTableFactory;
+import org.cytoscape.model.CyTableManager;
+import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.service.util.AbstractCyActivator;
 import org.cytoscape.util.swing.FileUtil;
 import org.cytoscape.view.model.CyNetworkViewFactory;
@@ -47,6 +50,9 @@ public class CyActivator extends AbstractCyActivator {
     public static CyNetworkViewManager netViewMgr = null;
     public static CyNetworkViewFactory netViewFactory = null;
     public static CyNetworkFactory netFactory = null;
+    public static CyTableFactory tableFactory = null;
+    public static CyTableManager tableMgr = null;
+    public static CyEventHelper eventHelper;
 
 	@Override
 	public void start(BundleContext context) throws Exception {
@@ -60,12 +66,14 @@ public class CyActivator extends AbstractCyActivator {
         netFactory = getService(context,CyNetworkFactory.class);
         FileUtil fileUtil = getService(context,FileUtil.class);
         StreamUtil streamUtil = getService(context,StreamUtil.class);
-        
+        tableMgr = getService(context,CyTableManager.class);
+        tableFactory = getService(context,CyTableFactory.class);
+
         // currently not used - will probably be needed in the future
 //      VisualMappingManager visMappingMgr = getService(context,VisualMappingManager.class);
 //      CyApplicationManager cyAppMgr = getService(context,CyApplicationManager.class);
 //      StreamUtil streamUtil = getService(context,StreamUtil.class);
-//      CyEventHelper cyEventHelper = getService(context,CyEventHelper.class);
+      eventHelper = getService(context,CyEventHelper.class);
 
         // initialize GPML network manager
         GPMLNetworkManager gpmlNetMgr = new GPMLNetworkManagerImpl(netMgr, netFactory, netViewFactory, netViewMgr);

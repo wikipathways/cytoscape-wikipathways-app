@@ -60,6 +60,11 @@ public class GpmlNetworkReader implements CyNetworkReader {
         input = null;
 
         net = CyActivator.netFactory.createNetwork();
+        net.getRow(net).set(CyNetwork.NAME, "Pathway");
+        CyActivator.netMgr.addNetwork(net);
+        CyNetworkView view = CyActivator.netViewFactory.createNetworkView(net);
+        CyActivator.netViewMgr.addNetworkView(view);
+        (new PathwayToNetwork(pathway, view)).convertToTables();
 	}
 
     public void cancel() {
@@ -71,10 +76,10 @@ public class GpmlNetworkReader implements CyNetworkReader {
     }
 
     public CyNetworkView buildCyNetworkView(CyNetwork network) {
-        return CyActivator.netViewFactory.createNetworkView(network);
+        return null;
     }
 
     public CyNetwork[] getNetworks() {
-        return new CyNetwork[]{net};
+        return new CyNetwork[0];
     }
 }
