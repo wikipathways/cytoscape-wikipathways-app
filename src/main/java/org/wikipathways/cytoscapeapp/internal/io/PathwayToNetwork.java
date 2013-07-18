@@ -75,7 +75,14 @@ class PathwayToNetwork {
     return table;
   }
 
+  private void ensureGraphId(final PathwayElement elem) {
+    if (elem.getGraphId() != null)
+      return;
+    elem.setGraphId(pathway.getUniqueGraphId());
+  }
+
   private void addGraphId(final PathwayElement elem, final CyIdentifiable obj, final String type) {
+    ensureGraphId(elem);
     final CyRow row = graphIds.getRow(elem.getGraphId());
     row.set("SUID", obj.getSUID());
     row.set("type", type);
