@@ -86,12 +86,11 @@ class PathwayToNetwork {
     final CyTable dataNodeTable = dataNodeConverter.table();
     for (final CyNode node : network.getNodeList()) {
       final Long suid = node.getSUID();
-      System.out.println("Mapping " + suid);
       for (final Map.Entry<String,String> nodeStaticProp : nodeStaticProps.entrySet()) {
         final String staticPropName = nodeStaticProp.getKey();
-        final String value = dataNodeTable.getRow(suid).get(staticPropName, String.class);
+        final Object value = dataNodeTable.getRow(suid).getRaw(staticPropName);
+        if (value == null) continue;
         final String nodeColumn = nodeStaticProp.getValue();
-        System.out.println(String.format("%s (%s) => (%s)", value, staticPropName, nodeColumn));
         nodeTable.getRow(suid).set(nodeColumn, value);
       }
     }
@@ -101,20 +100,15 @@ class PathwayToNetwork {
     final CyTable dataNodeTable = dataNodeConverter.table();
     for (final View<CyNode> nodeView : networkView.getNodeViews()) {
       final Long suid = nodeView.getModel().getSUID();
-      System.out.println("Mapping " + suid);
       for (final Map.Entry<String,VisualProperty> nodeViewStaticProp : nodeViewStaticProps.entrySet()) {
         final String staticPropName = nodeViewStaticProp.getKey();
         final Object value = dataNodeTable.getRow(suid).getRaw(staticPropName);
+        if (value == null) continue;
         final VisualProperty vizProp = nodeViewStaticProp.getValue();
-        System.out.println(String.format("%s (%s) => (%s)", value, staticPropName, vizProp));
         nodeView.setVisualProperty(vizProp, value);
       }
     }
   }
-
-  private static Map<VisualProperty,Class> vizPropTypes = ezMap(VisualProperty.class, Class.class,
-    BasicVisualLexicon.NODE_X_LOCATION, Double.class
-    );
 
   private static Map<StaticPropertyType,Class<?>> staticPropTypeClasses = new EnumMap<StaticPropertyType,Class<?>>(StaticPropertyType.class);
   static {
@@ -126,14 +120,18 @@ class PathwayToNetwork {
     StaticProperty.GRAPHID,
     StaticProperty.TEXTLABEL,
     StaticProperty.CENTERX,
-    StaticProperty.CENTERY);
+    StaticProperty.CENTERY,
+    StaticProperty.WIDTH,
+    StaticProperty.HEIGHT);
 
   private static Map<String,String> nodeStaticProps = ezMap(
     StaticProperty.TEXTLABEL.tag(), CyNetwork.NAME);
 
   private static Map<String,VisualProperty> nodeViewStaticProps = ezMap(String.class, VisualProperty.class,
     StaticProperty.CENTERX.tag(), BasicVisualLexicon.NODE_X_LOCATION,
-    StaticProperty.CENTERY.tag(), BasicVisualLexicon.NODE_Y_LOCATION
+    StaticProperty.CENTERY.tag(), BasicVisualLexicon.NODE_Y_LOCATION,
+    StaticProperty.WIDTH.tag(),   BasicVisualLexicon.NODE_WIDTH,
+    StaticProperty.HEIGHT.tag(),  BasicVisualLexicon.NODE_HEIGHT
     );
 
   private static void createStaticPropColumns(final CyTable table) {
