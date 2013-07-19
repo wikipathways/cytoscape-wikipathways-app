@@ -36,6 +36,7 @@ import org.wikipathways.cytoscapeapp.internal.io.GpmlReaderTaskFactory;
 import org.osgi.framework.BundleContext;
 import org.cytoscape.io.read.InputStreamTaskFactory;
 import org.cytoscape.io.util.StreamUtil;
+import org.cytoscape.view.vizmap.VisualMappingManager;
 
 /**
  * 
@@ -52,7 +53,8 @@ public class CyActivator extends AbstractCyActivator {
     public static CyNetworkFactory netFactory = null;
     public static CyTableFactory tableFactory = null;
     public static CyTableManager tableMgr = null;
-    public static CyEventHelper eventHelper;
+    public static CyEventHelper eventHelper = null;
+    public static VisualMappingManager vizMapMgr = null;
 
 	@Override
 	public void start(BundleContext context) throws Exception {
@@ -70,7 +72,7 @@ public class CyActivator extends AbstractCyActivator {
         tableFactory = getService(context,CyTableFactory.class);
 
         // currently not used - will probably be needed in the future
-//      VisualMappingManager visMappingMgr = getService(context,VisualMappingManager.class);
+      vizMapMgr = getService(context,VisualMappingManager.class);
 //      CyApplicationManager cyAppMgr = getService(context,CyApplicationManager.class);
 //      StreamUtil streamUtil = getService(context,StreamUtil.class);
       eventHelper = getService(context,CyEventHelper.class);

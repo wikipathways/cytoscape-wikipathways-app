@@ -8,6 +8,7 @@ import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.pathvisio.core.model.Pathway;
 import org.pathvisio.core.model.PathwayElement;
@@ -45,9 +46,14 @@ class PathwayToNetwork {
 
 	public void convert() {
     convertDataNodes();
+
     CyActivator.eventHelper.flushPayloadEvents();
     DelayedVizProp.applyAll(networkView, delayedVizProps);
     delayedVizProps.clear();
+
+    CyActivator.vizMapMgr.getDefaultVisualStyle().apply(networkView);
+    networkView.fitContent();
+    networkView.updateView();
 	}
 
   private static Map<StaticPropertyType,Class<?>> staticPropTypeClasses = new EnumMap<StaticPropertyType,Class<?>>(StaticPropertyType.class);
@@ -66,11 +72,10 @@ class PathwayToNetwork {
     StaticProperty.HEIGHT,  BasicVisualLexicon.NODE_HEIGHT
     );
 
-  private static Set<VisualProperty> lockedVizProps = new HashSet<VisualProperty>();
-  static {
-    lockedVizProps.add(BasicVisualLexicon.NODE_WIDTH);
-    lockedVizProps.add(BasicVisualLexicon.NODE_HEIGHT);
-  }
+  private static Set<VisualProperty> lockedVizProps = new HashSet<VisualProperty>(Arrays.asList(
+    BasicVisualLexicon.NODE_WIDTH,
+    BasicVisualLexicon.NODE_HEIGHT
+    ));
 
   private void convertStaticProps(final PathwayElement elem, final Map<StaticProperty,String> staticProps, final CyTable table, final Object key) {
     for (final Map.Entry<StaticProperty,String> staticProp : staticProps.entrySet()) {
