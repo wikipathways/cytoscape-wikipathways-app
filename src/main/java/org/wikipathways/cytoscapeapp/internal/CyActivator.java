@@ -37,7 +37,8 @@ import org.osgi.framework.BundleContext;
 import org.cytoscape.io.read.InputStreamTaskFactory;
 import org.cytoscape.io.util.StreamUtil;
 import org.cytoscape.view.vizmap.VisualMappingManager;
-
+import org.cytoscape.view.presentation.annotations.AnnotationFactory;
+import org.cytoscape.view.presentation.annotations.AnnotationManager;
 /**
  * 
  * @author martinakutmon
@@ -55,6 +56,8 @@ public class CyActivator extends AbstractCyActivator {
     public static CyTableManager tableMgr = null;
     public static CyEventHelper eventHelper = null;
     public static VisualMappingManager vizMapMgr = null;
+    public static AnnotationManager annotationMgr = null;
+    public static AnnotationFactory annotationFactory = null;
 
 	@Override
 	public void start(BundleContext context) throws Exception {
@@ -70,12 +73,14 @@ public class CyActivator extends AbstractCyActivator {
         StreamUtil streamUtil = getService(context,StreamUtil.class);
         tableMgr = getService(context,CyTableManager.class);
         tableFactory = getService(context,CyTableFactory.class);
+        eventHelper = getService(context,CyEventHelper.class);
+        vizMapMgr = getService(context,VisualMappingManager.class);
+        //annotationMgr = getService(context, AnnotationManager.class);
+        //annotationFactory = getService(context, AnnotationFactory.class);
 
         // currently not used - will probably be needed in the future
-      vizMapMgr = getService(context,VisualMappingManager.class);
 //      CyApplicationManager cyAppMgr = getService(context,CyApplicationManager.class);
 //      StreamUtil streamUtil = getService(context,StreamUtil.class);
-      eventHelper = getService(context,CyEventHelper.class);
 
         // initialize GPML network manager
         GPMLNetworkManager gpmlNetMgr = new GPMLNetworkManagerImpl(netMgr, netFactory, netViewFactory, netViewMgr);
