@@ -16,6 +16,7 @@ import org.pathvisio.core.model.ObjectType;
 import org.pathvisio.core.model.StaticProperty;
 import org.pathvisio.core.model.StaticPropertyType;
 import org.pathvisio.core.model.GraphLink;
+import org.pathvisio.core.model.MLine;
 
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
@@ -35,6 +36,7 @@ import org.cytoscape.view.presentation.annotations.TextAnnotation;
 import org.wikipathways.cytoscapeapp.internal.CyActivator;
 
 import java.awt.Font;
+import java.awt.geom.Point2D;
 
 class PathwayToNetwork {
   final Map<GraphLink.GraphIdContainer,CyNode> nodes = new HashMap<GraphLink.GraphIdContainer,CyNode>();
@@ -54,7 +56,7 @@ class PathwayToNetwork {
     convertDataNodes();
     convertLabels();
     convertAnchors();
-    convertLinesWithoutAnchor();
+    convertLines();
 
     CyActivator.eventHelper.flushPayloadEvents();
     DelayedVizProp.applyAll(networkView, delayedVizProps);
@@ -161,18 +163,25 @@ class PathwayToNetwork {
   }
 
   private void convertAnchor(final PathwayElement elem) {
-    //System.out.println(String.format("Anchor: %s @ [%.2f, %.2f] [%.2f x %.2f]", elem.getGraphId(), elem.getMCenterX(), elem.getMCenterY(), elem.getMWidth(), elem.getMHeight()));
+    final MLine line = (MLine) elem;
+    final CyNode node = network.addNode();
+    final PathwayElement.MAnchor anchor = line.getMAnchors().get(0);
+    final Point2D p = line.getConnectorShape().fromLineCoordinate(anchor.getPosition());
+    delayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_X_LOCATION, p.getX(), false));
+    delayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_Y_LOCATION, p.getY(), false));
   }
 
-  private void convertLinesWithoutAnchor() {
+  private void convertLines() {
     for (final PathwayElement elem : pathway.getDataObjects()) {
       if (!elem.getObjectType().equals(ObjectType.LINE))
         continue;
       if (!areStartAndEndNodes(elem))
         continue;
-      if (elem.getMAnchors().size() > 0)
-        continue;
-      convertLineWithoutAnchor(elem);
+      if (elem.getMAnchors().size() > 0) {
+
+      } else {
+        convertLineWithoutAnchor(elem);
+      }
     }
   }
 
