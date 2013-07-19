@@ -35,6 +35,7 @@ import org.cytoscape.view.presentation.annotations.TextAnnotation;
 
 import org.wikipathways.cytoscapeapp.internal.CyActivator;
 
+import java.awt.Color;
 import java.awt.Font;
 import java.awt.geom.Point2D;
 
@@ -165,10 +166,19 @@ class PathwayToNetwork {
   private void convertAnchor(final PathwayElement elem) {
     final MLine line = (MLine) elem;
     final CyNode node = network.addNode();
-    final PathwayElement.MAnchor anchor = line.getMAnchors().get(0);
-    final Point2D p = line.getConnectorShape().fromLineCoordinate(anchor.getPosition());
-    delayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_X_LOCATION, p.getX(), false));
-    delayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_Y_LOCATION, p.getY(), false));
+    final PathwayElement.MAnchor firstAnchor = line.getMAnchors().get(0);
+    final Point2D firstAnchorPoint = line.getConnectorShape().fromLineCoordinate(firstAnchor.getPosition());
+    delayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_X_LOCATION, firstAnchorPoint.getX(), false));
+    delayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_Y_LOCATION, firstAnchorPoint.getY(), false));
+    delayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_FILL_COLOR, Color.WHITE, true));
+    delayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_BORDER_WIDTH, 1.0, true));
+    delayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_WIDTH, 5.0, true));
+    delayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_HEIGHT, 5.0, true));
+
+    nodes.put(elem, node);
+    for (final PathwayElement.MAnchor anchor : elem.getMAnchors()) {
+      nodes.put(anchor, node);
+    }
   }
 
   private void convertLines() {
@@ -178,25 +188,39 @@ class PathwayToNetwork {
       if (!areStartAndEndNodes(elem))
         continue;
       if (elem.getMAnchors().size() > 0) {
-
+        convertLineWithAnchor(elem);
       } else {
         convertLineWithoutAnchor(elem);
       }
     }
   }
 
+  private GraphLink.GraphIdContainer getStartOfLine(final PathwayElement line) {
+    return pathway.getGraphIdContainer(line.getMStart().getGraphRef());
+  }
+
+  private GraphLink.GraphIdContainer getEndOfLine(final PathwayElement line) {
+    return pathway.getGraphIdContainer(line.getMEnd().getGraphRef());
+  }
+
+  private void convertLineWithAnchor(final PathwayElement line) {
+    final CyNode start = nodes.get(getStartOfLine(line));
+    final CyNode middle = nodes.get(line);
+    final CyNode end = nodes.get(getEndOfLine(line));
+    network.addEdge(start, middle, true);
+    network.addEdge(middle, end, true);
+  }
+
   private void convertLineWithoutAnchor(final PathwayElement line) {
-    final CyNode start = nodes.get(pathway.getGraphIdContainer(line.getMStart().getGraphRef()));
-    final CyNode end = nodes.get(pathway.getGraphIdContainer(line.getMEnd().getGraphRef()));
+    final CyNode start = nodes.get(getStartOfLine(line));
+    final CyNode end = nodes.get(getEndOfLine(line));
     if (start == null || end == null)
       return;
-    network.addEdge(start, end, false);
+    network.addEdge(start, end, true);
   }
 
   private boolean areStartAndEndNodes(final PathwayElement elem) {
-    final GraphLink.GraphIdContainer start = pathway.getGraphIdContainer(elem.getMStart().getGraphRef());
-    final GraphLink.GraphIdContainer end = pathway.getGraphIdContainer(elem.getMEnd().getGraphRef());
-    return isNode(start) && isNode(end);
+    return isNode(getStartOfLine(elem)) && isNode(getEndOfLine(elem));
   }
 
   private boolean isNode(final GraphLink.GraphIdContainer elem) {
