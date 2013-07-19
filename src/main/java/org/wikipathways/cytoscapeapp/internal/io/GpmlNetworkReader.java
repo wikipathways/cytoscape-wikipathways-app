@@ -64,7 +64,7 @@ public class GpmlNetworkReader implements CyNetworkReader {
         CyActivator.netMgr.addNetwork(net);
         CyNetworkView view = CyActivator.netViewFactory.createNetworkView(net);
         CyActivator.netViewMgr.addNetworkView(view);
-        (new PathwayToNetwork(pathway, view)).convertToTables();
+        (new PathwayToNetwork(pathway, view)).convert();
 	}
 
     public void cancel() {
