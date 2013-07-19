@@ -37,6 +37,7 @@ import org.wikipathways.cytoscapeapp.internal.CyActivator;
 import java.awt.Font;
 
 class PathwayToNetwork {
+  final Map<GraphLink.GraphIdContainer,CyNode> nodes = new HashMap<GraphLink.GraphIdContainer,CyNode>();
   final List<DelayedVizProp> delayedVizProps = new ArrayList<DelayedVizProp>();
 
 	final Pathway pathway;
@@ -53,23 +54,18 @@ class PathwayToNetwork {
     convertDataNodes();
     convertLabels();
     convertAnchors();
+    convertLinesWithoutAnchor();
 
     CyActivator.eventHelper.flushPayloadEvents();
     DelayedVizProp.applyAll(networkView, delayedVizProps);
-    delayedVizProps.clear(); // garbage collect DelayedVizProps
 
     CyActivator.vizMapMgr.getDefaultVisualStyle().apply(networkView);
     networkView.fitContent();
     networkView.updateView();
-	}
 
-  /*
-  private static Map<StaticPropertyType,Class<?>> staticPropTypeClasses = new EnumMap<StaticPropertyType,Class<?>>(StaticPropertyType.class);
-  static {
-    staticPropTypeClasses.put(StaticPropertyType.STRING, String.class);
-    staticPropTypeClasses.put(StaticPropertyType.DOUBLE, Double.class);
-  }
-  */
+    nodes.clear();
+    delayedVizProps.clear();
+	}
 
   private static Map<StaticProperty,String> dataNodeStaticProps = ezMap(StaticProperty.class, String.class,
     StaticProperty.TEXTLABEL, CyNetwork.NAME);
@@ -86,14 +82,9 @@ class PathwayToNetwork {
     StaticProperty.LINETHICKNESS, BasicVisualLexicon.NODE_BORDER_WIDTH
     );
 
-  private static Set<VisualProperty> lockedVizProps = new HashSet<VisualProperty>(Arrays.asList(
-    BasicVisualLexicon.NODE_WIDTH,
-    BasicVisualLexicon.NODE_HEIGHT,
-    BasicVisualLexicon.NODE_BORDER_PAINT,
-    BasicVisualLexicon.NODE_FILL_COLOR,
-    BasicVisualLexicon.NODE_LABEL_FONT_SIZE,
-    BasicVisualLexicon.NODE_TRANSPARENCY,
-    BasicVisualLexicon.NODE_BORDER_WIDTH
+  private static Set<VisualProperty> unlockedVizProps = new HashSet<VisualProperty>(Arrays.asList(
+    BasicVisualLexicon.NODE_X_LOCATION,
+    BasicVisualLexicon.NODE_Y_LOCATION
     ));
 
   private void convertStaticProps(final PathwayElement elem, final Map<StaticProperty,String> staticProps, final CyTable table, final Object key) {
@@ -106,24 +97,17 @@ class PathwayToNetwork {
   }
 
   private void convertViewStaticProps(final PathwayElement elem, final Map<StaticProperty,VisualProperty> props, CyNode node) {
-    //System.out.print(elem.getGraphId() + ": ");
-    //System.out.flush();
     for (final Map.Entry<StaticProperty,VisualProperty> prop : props.entrySet()) {
       final StaticProperty staticProp = prop.getKey();
       Object value = elem.getStaticProperty(prop.getKey());
-      //System.out.print(staticProp + " = " + value + ", ");
-      //System.out.flush();
       if (value == null) continue;
       if (staticPropConverters.containsKey(staticProp)) {
-        //System.out.print("[CONVERT] " + value + ", ");
-        //System.out.flush();
         value = staticPropConverters.get(staticProp).convert(value);
       }
       final VisualProperty vizProp = prop.getValue();
-      final boolean locked = lockedVizProps.contains(vizProp);
+      final boolean locked = !unlockedVizProps.contains(vizProp);
       delayedVizProps.add(new DelayedVizProp(node, vizProp, value, locked));
     }
-    //System.out.println();
 
     delayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_LABEL_FONT_FACE, convertFontFromStaticProps(elem), true));
   }
@@ -136,30 +120,20 @@ class PathwayToNetwork {
     }
   }
 
+  private void convertDataNode(final PathwayElement dataNode) {
+    final CyNode node = network.addNode();
+    convertStaticProps(dataNode, dataNodeStaticProps, network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS), node.getSUID());
+    convertViewStaticProps(dataNode, dataNodeViewStaticProps, node);
+    nodes.put(dataNode, node);
+  }
+  
+
   private void convertLabels() {
     for (final PathwayElement elem : pathway.getDataObjects()) {
       if (!elem.getObjectType().equals(ObjectType.LABEL))
         continue;
       convertLabel(elem);
     }
-  }
-
-  private void convertAnchors() {
-    for (final PathwayElement elem : pathway.getDataObjects()) {
-      if (!elem.getObjectType().equals(ObjectType.LINE))
-        continue;
-      if (elem.getMAnchors().size() == 0)
-        continue;
-      if (!areStartAndEndNodes(elem))
-        continue;
-      convertAnchor(elem);
-    }
-  }
-
-  private void convertDataNode(final PathwayElement dataNode) {
-    final CyNode node = network.addNode();
-    convertStaticProps(dataNode, dataNodeStaticProps, network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS), node.getSUID());
-    convertViewStaticProps(dataNode, dataNodeViewStaticProps, node);
   }
 
   private void convertLabel(final PathwayElement label) {
@@ -174,8 +148,40 @@ class PathwayToNetwork {
     */
   }
 
+  private void convertAnchors() {
+    for (final PathwayElement elem : pathway.getDataObjects()) {
+      if (!elem.getObjectType().equals(ObjectType.LINE))
+        continue;
+      if (elem.getMAnchors().size() == 0)
+        continue;
+      if (!areStartAndEndNodes(elem))
+        continue;
+      convertAnchor(elem);
+    }
+  }
+
   private void convertAnchor(final PathwayElement elem) {
     //System.out.println(String.format("Anchor: %s @ [%.2f, %.2f] [%.2f x %.2f]", elem.getGraphId(), elem.getMCenterX(), elem.getMCenterY(), elem.getMWidth(), elem.getMHeight()));
+  }
+
+  private void convertLinesWithoutAnchor() {
+    for (final PathwayElement elem : pathway.getDataObjects()) {
+      if (!elem.getObjectType().equals(ObjectType.LINE))
+        continue;
+      if (!areStartAndEndNodes(elem))
+        continue;
+      if (elem.getMAnchors().size() > 0)
+        continue;
+      convertLineWithoutAnchor(elem);
+    }
+  }
+
+  private void convertLineWithoutAnchor(final PathwayElement line) {
+    final CyNode start = nodes.get(pathway.getGraphIdContainer(line.getMStart().getGraphRef()));
+    final CyNode end = nodes.get(pathway.getGraphIdContainer(line.getMEnd().getGraphRef()));
+    if (start == null || end == null)
+      return;
+    network.addEdge(start, end, false);
   }
 
   private boolean areStartAndEndNodes(final PathwayElement elem) {
