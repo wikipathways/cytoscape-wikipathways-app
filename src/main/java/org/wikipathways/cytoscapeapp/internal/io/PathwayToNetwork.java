@@ -40,7 +40,27 @@ import java.awt.Font;
 import java.awt.geom.Point2D;
 
 class PathwayToNetwork {
+  /**
+   * Maps a GPML pathway element to its representative CyNode in the network.
+   */
   final Map<GraphLink.GraphIdContainer,CyNode> nodes = new HashMap<GraphLink.GraphIdContainer,CyNode>();
+
+  /**
+   * In Cytoscape, first the network topology is created (via CyNetwork.add{Node|Edge}),
+   * then the view objects are created.
+   * Once that's done, the network's visual style can be created (via View.setVisualProperty)
+   * once all the view objects exist (ensured by CyEventHelper.flushPayloadEvents).
+   *
+   * However, while we're reading GPML, we need to create the network's visual style
+   * while we are creating the network toplogy. Otherwise we'd have to read the GPML twice,
+   * once for topology and again for the visual style.
+   *
+   * How do we get around this problem? While we're reading GPML, we create the network topology
+   * and store our desired visual style in DelayedVizProp objects (defined below).
+   * After we finish reading GPML, we ensure that view objects have been created for
+   * all our new nodes and edges (via CyEventHelper.flushPayloadEvents). Finally we apply
+   * the visual style stored in the DelayedVizProp objects.
+   */
   final List<DelayedVizProp> delayedVizProps = new ArrayList<DelayedVizProp>();
 
 	final Pathway pathway;
@@ -70,25 +90,26 @@ class PathwayToNetwork {
     delayedVizProps.clear();
 	}
 
-  private static Map<StaticProperty,String> dataNodeStaticProps = ezMap(StaticProperty.class, String.class,
-    StaticProperty.TEXTLABEL, CyNetwork.NAME);
-
-  private static Map<StaticProperty,VisualProperty> dataNodeViewStaticProps = ezMap(StaticProperty.class, VisualProperty.class,
-    StaticProperty.CENTERX, BasicVisualLexicon.NODE_X_LOCATION,
-    StaticProperty.CENTERY, BasicVisualLexicon.NODE_Y_LOCATION,
-    StaticProperty.WIDTH,   BasicVisualLexicon.NODE_WIDTH,
-    StaticProperty.HEIGHT,  BasicVisualLexicon.NODE_HEIGHT,
-    StaticProperty.COLOR, BasicVisualLexicon.NODE_BORDER_PAINT,
-    StaticProperty.FILLCOLOR, BasicVisualLexicon.NODE_FILL_COLOR,
-    StaticProperty.FONTSIZE, BasicVisualLexicon.NODE_LABEL_FONT_SIZE,
-    StaticProperty.TRANSPARENT, BasicVisualLexicon.NODE_TRANSPARENCY,
-    StaticProperty.LINETHICKNESS, BasicVisualLexicon.NODE_BORDER_WIDTH
-    );
+  /*
+   ========================================================
+     Static property conversion
+   ========================================================
+  */
 
   private static Set<VisualProperty> unlockedVizProps = new HashSet<VisualProperty>(Arrays.asList(
     BasicVisualLexicon.NODE_X_LOCATION,
     BasicVisualLexicon.NODE_Y_LOCATION
     ));
+
+  static interface StaticPropConverter<S,V> {
+    public V convert(S staticPropValue);
+  }
+
+  private static Map<StaticProperty,StaticPropConverter> staticPropConverters = ezMap(StaticProperty.class, StaticPropConverter.class,
+    StaticProperty.TRANSPARENT, new StaticPropConverter<Boolean,Integer>() {
+      public Integer convert(Boolean transparent) { return transparent ? 0 : 255; }
+    }
+    );
 
   private void convertStaticProps(final PathwayElement elem, final Map<StaticProperty,String> staticProps, final CyTable table, final Object key) {
     for (final Map.Entry<StaticProperty,String> staticProp : staticProps.entrySet()) {
@@ -115,6 +136,69 @@ class PathwayToNetwork {
     delayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_LABEL_FONT_FACE, convertFontFromStaticProps(elem), true));
   }
 
+  private static Font convertFontFromStaticProps(final PathwayElement elem) {
+    String fontFace = (String) elem.getStaticProperty(StaticProperty.FONTNAME);
+    if (fontFace == null)
+      fontFace = Font.SANS_SERIF;
+    int style = Font.PLAIN;
+    if (Boolean.TRUE.equals(elem.getStaticProperty(StaticProperty.FONTWEIGHT)))
+      style |= Font.BOLD;
+    if (Boolean.TRUE.equals(elem.getStaticProperty(StaticProperty.FONTSTYLE)))
+      style |= Font.ITALIC;
+    return new Font(fontFace, style, 12 /* size doesn't matter here -- there's another viz prop for font size */);
+  }
+
+  /*
+   ========================================================
+     GPML edge util methods
+   ========================================================
+  */
+
+  private GraphLink.GraphIdContainer getStartOfLine(final PathwayElement line) {
+    return pathway.getGraphIdContainer(line.getMStart().getGraphRef());
+  }
+
+  private GraphLink.GraphIdContainer getEndOfLine(final PathwayElement line) {
+    return pathway.getGraphIdContainer(line.getMEnd().getGraphRef());
+  }
+
+  private boolean areStartAndEndNodes(final PathwayElement elem) {
+    return isNode(getStartOfLine(elem)) && isNode(getEndOfLine(elem));
+  }
+
+  private boolean isNode(final GraphLink.GraphIdContainer elem) {
+    if (elem instanceof PathwayElement.MAnchor) {
+      return areStartAndEndNodes(((PathwayElement.MAnchor) elem).getParent());
+    } else if (elem instanceof PathwayElement) {
+      switch(((PathwayElement) elem).getObjectType()) {
+        case DATANODE: return true;
+        case GROUP: return true;
+      }
+    }
+    return false;
+  }
+
+  /*
+   ========================================================
+     Data nodes
+   ========================================================
+  */
+
+  private static Map<StaticProperty,String> dataNodeStaticProps = ezMap(StaticProperty.class, String.class,
+    StaticProperty.TEXTLABEL, CyNetwork.NAME);
+
+  private static Map<StaticProperty,VisualProperty> dataNodeViewStaticProps = ezMap(StaticProperty.class, VisualProperty.class,
+    StaticProperty.CENTERX, BasicVisualLexicon.NODE_X_LOCATION,
+    StaticProperty.CENTERY, BasicVisualLexicon.NODE_Y_LOCATION,
+    StaticProperty.WIDTH,   BasicVisualLexicon.NODE_WIDTH,
+    StaticProperty.HEIGHT,  BasicVisualLexicon.NODE_HEIGHT,
+    StaticProperty.COLOR, BasicVisualLexicon.NODE_BORDER_PAINT,
+    StaticProperty.FILLCOLOR, BasicVisualLexicon.NODE_FILL_COLOR,
+    StaticProperty.FONTSIZE, BasicVisualLexicon.NODE_LABEL_FONT_SIZE,
+    StaticProperty.TRANSPARENT, BasicVisualLexicon.NODE_TRANSPARENCY,
+    StaticProperty.LINETHICKNESS, BasicVisualLexicon.NODE_BORDER_WIDTH
+    );
+
   private void convertDataNodes() {
     for (final PathwayElement elem : pathway.getDataObjects()) {
       if (!elem.getObjectType().equals(ObjectType.DATANODE))
@@ -130,6 +214,11 @@ class PathwayToNetwork {
     nodes.put(dataNode, node);
   }
   
+  /*
+   ========================================================
+     Labels
+   ========================================================
+  */
 
   private void convertLabels() {
     for (final PathwayElement elem : pathway.getDataObjects()) {
@@ -140,6 +229,8 @@ class PathwayToNetwork {
   }
 
   private void convertLabel(final PathwayElement label) {
+    //Gah! Scooter has not added the annotations API...
+
     /*
     final Map<String,String> args = ezMap(
       Annotation.CANVAS, Annotation.FOREGROUND,
@@ -150,6 +241,12 @@ class PathwayToNetwork {
     CyActivator.annotationMgr.addAnnotation(annotation, networkView);
     */
   }
+  
+  /*
+   ========================================================
+     Anchors
+   ========================================================
+  */
 
   private void convertAnchors() {
     for (final PathwayElement elem : pathway.getDataObjects()) {
@@ -180,6 +277,12 @@ class PathwayToNetwork {
       nodes.put(anchor, node);
     }
   }
+  
+  /*
+   ========================================================
+     Lines
+   ========================================================
+  */
 
   private void convertLines() {
     for (final PathwayElement elem : pathway.getDataObjects()) {
@@ -195,17 +298,9 @@ class PathwayToNetwork {
     }
   }
 
-  private GraphLink.GraphIdContainer getStartOfLine(final PathwayElement line) {
-    return pathway.getGraphIdContainer(line.getMStart().getGraphRef());
-  }
-
-  private GraphLink.GraphIdContainer getEndOfLine(final PathwayElement line) {
-    return pathway.getGraphIdContainer(line.getMEnd().getGraphRef());
-  }
-
   private void convertLineWithAnchor(final PathwayElement line) {
     final CyNode start = nodes.get(getStartOfLine(line));
-    final CyNode middle = nodes.get(line);
+    final CyNode middle = nodes.get(line); // this node was created in convertAnchor()
     final CyNode end = nodes.get(getEndOfLine(line));
     network.addEdge(start, middle, true);
     network.addEdge(middle, end, true);
@@ -218,22 +313,12 @@ class PathwayToNetwork {
       return;
     network.addEdge(start, end, true);
   }
-
-  private boolean areStartAndEndNodes(final PathwayElement elem) {
-    return isNode(getStartOfLine(elem)) && isNode(getEndOfLine(elem));
-  }
-
-  private boolean isNode(final GraphLink.GraphIdContainer elem) {
-    if (elem instanceof PathwayElement.MAnchor) {
-      return areStartAndEndNodes(((PathwayElement.MAnchor) elem).getParent());
-    } else if (elem instanceof PathwayElement) {
-      switch(((PathwayElement) elem).getObjectType()) {
-        case DATANODE: return true;
-        case GROUP: return true;
-      }
-    }
-    return false;
-  }
+  
+  /*
+   ========================================================
+     Collection util methods
+   ========================================================
+  */
 
   private static <E> Map<E,E> ezMap(E ... elems) {
     final Map<E,E> map = new HashMap<E,E>();
@@ -249,35 +334,6 @@ class PathwayToNetwork {
       map.put(keyType.cast(elems[i]), valueType.cast(elems[i+1]));
     }
     return map;
-  }
-
-  private static Map<StaticProperty,StaticPropConverter> staticPropConverters = ezMap(StaticProperty.class, StaticPropConverter.class,
-    StaticProperty.TRANSPARENT, new TransparencyConverter()
-    );
-
-  private static Font convertFontFromStaticProps(final PathwayElement elem) {
-    String fontFace = (String) elem.getStaticProperty(StaticProperty.FONTNAME);
-    if (fontFace == null)
-      fontFace = Font.SANS_SERIF;
-    int style = Font.PLAIN;
-    if (Boolean.TRUE.equals(elem.getStaticProperty(StaticProperty.FONTWEIGHT)))
-      style |= Font.BOLD;
-    if (Boolean.TRUE.equals(elem.getStaticProperty(StaticProperty.FONTSTYLE)))
-      style |= Font.ITALIC;
-    return new Font(fontFace, style, 12);
-  }
-}
-
-interface StaticPropConverter<S,V> {
-  public V convert(S staticPropValue);
-}
-
-class TransparencyConverter implements StaticPropConverter<Boolean,Integer> {
-  public Integer convert(Boolean transparent) {
-    if (transparent)
-      return 0;
-    else
-      return 255;
   }
 }
 
@@ -304,10 +360,6 @@ class DelayedVizProp {
     this.isLocked = isLocked;
   }
 
-  public String toString() {
-    return String.format("[%s %d] %s -> %s [%s]%s", isNode ? "node":"edge", netObjSUID, prop.getDisplayName(), value, value.getClass(), isLocked ? " [locked]" : "");
-  }
-
   public static void applyAll(final CyNetworkView netView, final Iterable<DelayedVizProp> delayedProps) {
     final CyNetwork net = netView.getModel();
     for (final DelayedVizProp delayedProp : delayedProps) {
@@ -319,13 +371,6 @@ class DelayedVizProp {
         final CyEdge edge = net.getEdge(delayedProp.netObjSUID);
         view = netView.getEdgeView(edge);
       }
-
-      /*
-      if (delayedProp.prop.equals(BasicVisualLexicon.NODE_TRANSPARENCY)) {
-        System.out.println("Applying: " + delayedProp.toString());
-        System.out.flush();
-      }
-      */
 
       if (delayedProp.isLocked) {
         view.setLockedValue(delayedProp.prop, delayedProp.value);
