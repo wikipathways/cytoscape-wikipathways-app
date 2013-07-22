@@ -79,6 +79,7 @@ class PathwayToNetwork {
 
 	public void convert() {
     convertDataNodes();
+    convertStates();
     convertGroups();
     convertLabels();
     convertAnchors();
@@ -168,6 +169,12 @@ class PathwayToNetwork {
     return new Font(fontFace, style, 12 /* size doesn't matter here -- there's another viz prop for font size */);
   }
 
+  private void convertShapeTypeNone(final CyNode node, final PathwayElement elem) {
+    if (ShapeType.NONE.equals(elem.getShapeType())) {
+      delayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_BORDER_WIDTH, 0.0, true));
+    }
+  }
+
   /*
    ========================================================
      GPML edge util methods
@@ -232,10 +239,56 @@ class PathwayToNetwork {
     final CyNode node = network.addNode();
     convertStaticProps(dataNode, dataNodeStaticProps, network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS), node.getSUID());
     convertViewStaticProps(dataNode, dataNodeViewStaticProps, node);
-    if (ShapeType.NONE.equals(dataNode.getShapeType())) {
-      delayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_BORDER_WIDTH, 0.0, true)); // correctly handle ShapeType.NONE
-    }
+    convertShapeTypeNone(node, dataNode);
     nodes.put(dataNode, node);
+  }
+  
+  /*
+   ========================================================
+     States
+   ========================================================
+  */
+
+  private static Map<StaticProperty,String> stateStaticProps = ezMap(StaticProperty.class, String.class,
+    StaticProperty.TEXTLABEL, CyNetwork.NAME);
+
+  private static Map<StaticProperty,VisualProperty> stateViewStaticProps = ezMap(StaticProperty.class, VisualProperty.class,
+    StaticProperty.WIDTH,         BasicVisualLexicon.NODE_WIDTH,
+    StaticProperty.HEIGHT,        BasicVisualLexicon.NODE_HEIGHT,
+    StaticProperty.COLOR,         BasicVisualLexicon.NODE_BORDER_PAINT,
+    StaticProperty.FILLCOLOR,     BasicVisualLexicon.NODE_FILL_COLOR,
+    StaticProperty.FONTSIZE,      BasicVisualLexicon.NODE_LABEL_FONT_SIZE,
+    StaticProperty.TRANSPARENT,   BasicVisualLexicon.NODE_TRANSPARENCY,
+    StaticProperty.LINETHICKNESS, BasicVisualLexicon.NODE_BORDER_WIDTH,
+    StaticProperty.SHAPETYPE,     BasicVisualLexicon.NODE_SHAPE
+    );
+
+
+  private void convertStates() {
+    for (final PathwayElement elem : pathway.getDataObjects()) {
+      if (!elem.getObjectType().equals(ObjectType.STATE))
+        continue;
+      convertState(elem);
+    }
+  }
+
+  private void convertState(final PathwayElement state) {
+    final GraphLink.GraphIdContainer parentGIdC = pathway.getGraphIdContainer(state.getGraphRef());
+    if (!(parentGIdC instanceof PathwayElement))
+      return; // this should not happen
+    final PathwayElement parentElem = (PathwayElement) parentGIdC;
+
+    // TODO: refactor this as an annotation
+    final CyNode node = network.addNode();
+    convertStaticProps(state, stateStaticProps, network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS), node.getSUID());
+    convertViewStaticProps(state, stateViewStaticProps, node);
+    convertShapeTypeNone(node, state);
+
+    final double x = parentElem.getMCenterX() + state.getRelX() * parentElem.getMWidth() / 2.0;
+    final double y = parentElem.getMCenterY() + state.getRelY() * parentElem.getMHeight() / 2.0;
+
+    delayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_X_LOCATION, x, true));
+    delayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_Y_LOCATION, y, true));
   }
   
   /*
@@ -295,13 +348,12 @@ class PathwayToNetwork {
   }
 
   private void convertLabel(final PathwayElement label) {
+    // TODO: refactor this as an annotation
     final CyNode node = network.addNode();
     convertStaticProps(label, labelStaticProps, network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS), node.getSUID());
     convertViewStaticProps(label, labelViewStaticProps, node);
     delayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_TRANSPARENCY, 0, true)); // labels are always transparent
-    if (ShapeType.NONE.equals(label.getShapeType())) {
-      delayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_BORDER_WIDTH, 0.0, true)); // correctly handle ShapeType.NONE
-    }
+    convertShapeTypeNone(node, label);
     nodes.put(label, node);
   }
   
