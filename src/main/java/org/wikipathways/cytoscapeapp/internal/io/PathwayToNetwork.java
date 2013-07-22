@@ -17,6 +17,7 @@ import org.pathvisio.core.model.StaticProperty;
 import org.pathvisio.core.model.StaticPropertyType;
 import org.pathvisio.core.model.GraphLink;
 import org.pathvisio.core.model.MLine;
+import org.pathvisio.core.model.ShapeType;
 
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
@@ -30,6 +31,8 @@ import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.View;
 import org.cytoscape.view.model.VisualProperty;
 import org.cytoscape.view.presentation.property.BasicVisualLexicon;
+import org.cytoscape.view.presentation.property.NodeShapeVisualProperty;
+import org.cytoscape.view.presentation.property.values.NodeShape;
 import org.cytoscape.view.presentation.annotations.Annotation;
 import org.cytoscape.view.presentation.annotations.TextAnnotation;
 
@@ -108,6 +111,21 @@ class PathwayToNetwork {
   private static Map<StaticProperty,StaticPropConverter> staticPropConverters = ezMap(StaticProperty.class, StaticPropConverter.class,
     StaticProperty.TRANSPARENT, new StaticPropConverter<Boolean,Integer>() {
       public Integer convert(Boolean transparent) { return transparent ? 0 : 255; }
+    },
+    StaticProperty.SHAPETYPE, new StaticPropConverter<ShapeType,NodeShape>() {
+      public NodeShape convert(ShapeType shape) {
+        switch (shape) {
+          case OVAL:
+            return NodeShapeVisualProperty.ELLIPSE;
+          case HEXAGON:
+            return NodeShapeVisualProperty.HEXAGON;
+          case ROUNDED_RECTANGLE:
+            return NodeShapeVisualProperty.ROUND_RECTANGLE;
+          case TRIANGLE:
+            return NodeShapeVisualProperty.TRIANGLE;
+        }
+        return NodeShapeVisualProperty.RECTANGLE;
+      }
     }
     );
 
@@ -188,15 +206,16 @@ class PathwayToNetwork {
     StaticProperty.TEXTLABEL, CyNetwork.NAME);
 
   private static Map<StaticProperty,VisualProperty> dataNodeViewStaticProps = ezMap(StaticProperty.class, VisualProperty.class,
-    StaticProperty.CENTERX, BasicVisualLexicon.NODE_X_LOCATION,
-    StaticProperty.CENTERY, BasicVisualLexicon.NODE_Y_LOCATION,
-    StaticProperty.WIDTH,   BasicVisualLexicon.NODE_WIDTH,
-    StaticProperty.HEIGHT,  BasicVisualLexicon.NODE_HEIGHT,
-    StaticProperty.COLOR, BasicVisualLexicon.NODE_BORDER_PAINT,
-    StaticProperty.FILLCOLOR, BasicVisualLexicon.NODE_FILL_COLOR,
-    StaticProperty.FONTSIZE, BasicVisualLexicon.NODE_LABEL_FONT_SIZE,
-    StaticProperty.TRANSPARENT, BasicVisualLexicon.NODE_TRANSPARENCY,
-    StaticProperty.LINETHICKNESS, BasicVisualLexicon.NODE_BORDER_WIDTH
+    StaticProperty.CENTERX,       BasicVisualLexicon.NODE_X_LOCATION,
+    StaticProperty.CENTERY,       BasicVisualLexicon.NODE_Y_LOCATION,
+    StaticProperty.WIDTH,         BasicVisualLexicon.NODE_WIDTH,
+    StaticProperty.HEIGHT,        BasicVisualLexicon.NODE_HEIGHT,
+    StaticProperty.COLOR,         BasicVisualLexicon.NODE_BORDER_PAINT,
+    StaticProperty.FILLCOLOR,     BasicVisualLexicon.NODE_FILL_COLOR,
+    StaticProperty.FONTSIZE,      BasicVisualLexicon.NODE_LABEL_FONT_SIZE,
+    StaticProperty.TRANSPARENT,   BasicVisualLexicon.NODE_TRANSPARENCY,
+    StaticProperty.LINETHICKNESS, BasicVisualLexicon.NODE_BORDER_WIDTH,
+    StaticProperty.SHAPETYPE,     BasicVisualLexicon.NODE_SHAPE
     );
 
   private void convertDataNodes() {
@@ -220,6 +239,21 @@ class PathwayToNetwork {
    ========================================================
   */
 
+  private static Map<StaticProperty,String> labelStaticProps = ezMap(StaticProperty.class, String.class,
+    StaticProperty.TEXTLABEL, CyNetwork.NAME);
+
+  private static Map<StaticProperty,VisualProperty> labelViewStaticProps = ezMap(StaticProperty.class, VisualProperty.class,
+    StaticProperty.CENTERX,       BasicVisualLexicon.NODE_X_LOCATION,
+    StaticProperty.CENTERY,       BasicVisualLexicon.NODE_Y_LOCATION,
+    StaticProperty.WIDTH,         BasicVisualLexicon.NODE_WIDTH,
+    StaticProperty.HEIGHT,        BasicVisualLexicon.NODE_HEIGHT,
+    StaticProperty.COLOR,         BasicVisualLexicon.NODE_LABEL_COLOR,
+    StaticProperty.FILLCOLOR,     BasicVisualLexicon.NODE_FILL_COLOR,
+    StaticProperty.FONTSIZE,      BasicVisualLexicon.NODE_LABEL_FONT_SIZE,
+    StaticProperty.LINETHICKNESS, BasicVisualLexicon.NODE_BORDER_WIDTH,
+    StaticProperty.SHAPETYPE,     BasicVisualLexicon.NODE_SHAPE
+    );
+
   private void convertLabels() {
     for (final PathwayElement elem : pathway.getDataObjects()) {
       if (!elem.getObjectType().equals(ObjectType.LABEL))
@@ -229,17 +263,13 @@ class PathwayToNetwork {
   }
 
   private void convertLabel(final PathwayElement label) {
-    //Gah! Scooter has not added the annotations API...
-
-    /*
-    final Map<String,String> args = ezMap(
-      Annotation.CANVAS, Annotation.FOREGROUND,
-      Annotation.X, (String) label.getStaticProperty(StaticProperty.CENTERX),
-      Annotation.Y, (String) label.getStaticProperty(StaticProperty.CENTERY)
-      );
-    final TextAnnotation annotation = CyActivator.annotationFactory.createAnnotation(TextAnnotation.class, args);
-    CyActivator.annotationMgr.addAnnotation(annotation, networkView);
-    */
+    final CyNode node = network.addNode();
+    convertStaticProps(label, labelStaticProps, network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS), node.getSUID());
+    convertViewStaticProps(label, labelViewStaticProps, node);
+    delayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_TRANSPARENCY, 0, true)); // labels are always transparent
+    if (label.getShapeType().equals(ShapeType.NONE)) {
+      delayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_BORDER_WIDTH, 0.0, true)); // correctly handle ShapeType.NONE
+    }
   }
   
   /*
@@ -261,8 +291,16 @@ class PathwayToNetwork {
   }
 
   private void convertAnchor(final PathwayElement elem) {
-    final MLine line = (MLine) elem;
     final CyNode node = network.addNode();
+    assignAnchorVizStyle(node, (MLine) elem);
+
+    nodes.put(elem, node);
+    for (final PathwayElement.MAnchor anchor : elem.getMAnchors()) {
+      nodes.put(anchor, node);
+    }
+  }
+
+  private void assignAnchorVizStyle(final CyNode node, final MLine line) {
     final PathwayElement.MAnchor firstAnchor = line.getMAnchors().get(0);
     final Point2D firstAnchorPoint = line.getConnectorShape().fromLineCoordinate(firstAnchor.getPosition());
     delayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_X_LOCATION, firstAnchorPoint.getX(), false));
@@ -271,11 +309,6 @@ class PathwayToNetwork {
     delayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_BORDER_WIDTH, 1.0, true));
     delayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_WIDTH, 5.0, true));
     delayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_HEIGHT, 5.0, true));
-
-    nodes.put(elem, node);
-    for (final PathwayElement.MAnchor anchor : elem.getMAnchors()) {
-      nodes.put(anchor, node);
-    }
   }
   
   /*
