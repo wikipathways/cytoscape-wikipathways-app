@@ -12,6 +12,7 @@ import java.util.Arrays;
 
 import org.pathvisio.core.model.Pathway;
 import org.pathvisio.core.model.PathwayElement;
+import org.pathvisio.core.model.PathwayElement.MPoint;
 import org.pathvisio.core.model.ObjectType;
 import org.pathvisio.core.model.StaticProperty;
 import org.pathvisio.core.model.StaticPropertyType;
@@ -78,6 +79,7 @@ class PathwayToNetwork {
 	}
 
 	public void convert() {
+    // convert by each pathway element type
     convertDataNodes();
     convertStates();
     convertGroups();
@@ -85,13 +87,15 @@ class PathwayToNetwork {
     convertAnchors();
     convertLines();
 
-    CyActivator.eventHelper.flushPayloadEvents();
-    DelayedVizProp.applyAll(networkView, delayedVizProps);
+    CyActivator.eventHelper.flushPayloadEvents(); // guarantee that all node and edge views have been created
+    DelayedVizProp.applyAll(networkView, delayedVizProps); // apply our visual style
 
+    // update the network view
     CyActivator.vizMapMgr.getDefaultVisualStyle().apply(networkView);
     networkView.fitContent();
     networkView.updateView();
 
+    // clear our data structures just to be nice to the GC
     nodes.clear();
     delayedVizProps.clear();
 	}
@@ -377,7 +381,10 @@ class PathwayToNetwork {
 
   private void convertAnchor(final PathwayElement elem) {
     final CyNode node = network.addNode();
-    assignAnchorVizStyle(node, (MLine) elem);
+    final MLine line = (MLine) elem;
+    final PathwayElement.MAnchor firstAnchor = line.getMAnchors().get(0);
+    final Point2D firstAnchorPoint = line.getConnectorShape().fromLineCoordinate(firstAnchor.getPosition());
+    assignAnchorVizStyle(node, firstAnchorPoint);
 
     nodes.put(elem, node);
     for (final PathwayElement.MAnchor anchor : elem.getMAnchors()) {
@@ -385,11 +392,9 @@ class PathwayToNetwork {
     }
   }
 
-  private void assignAnchorVizStyle(final CyNode node, final MLine line) {
-    final PathwayElement.MAnchor firstAnchor = line.getMAnchors().get(0);
-    final Point2D firstAnchorPoint = line.getConnectorShape().fromLineCoordinate(firstAnchor.getPosition());
-    delayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_X_LOCATION, firstAnchorPoint.getX(), false));
-    delayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_Y_LOCATION, firstAnchorPoint.getY(), false));
+  private void assignAnchorVizStyle(final CyNode node, final Point2D position) {
+    delayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_X_LOCATION, position.getX(), false));
+    delayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_Y_LOCATION, position.getY(), false));
     delayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_FILL_COLOR, Color.WHITE, true));
     delayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_BORDER_WIDTH, 1.0, true));
     delayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_WIDTH, 5.0, true));
@@ -404,19 +409,21 @@ class PathwayToNetwork {
 
   private void convertLines() {
     for (final PathwayElement elem : pathway.getDataObjects()) {
-      if (!(elem.getObjectType().equals(ObjectType.LINE)))
+      if (!(elem.getObjectType().equals(ObjectType.LINE) || elem.getObjectType().equals(ObjectType.GRAPHLINE)))
         continue;
-      if (!areStartAndEndNodes(elem))
-        continue;
-      if (elem.getMAnchors().size() > 0) {
-        convertLineWithAnchor(elem);
+      if (areStartAndEndNodes(elem)) {
+        if (elem.getMAnchors().size() > 0) {
+          convertConnectedLineWithAnchor(elem);
+        } else {
+          convertConnectedLineWithoutAnchor(elem);
+        }
       } else {
-        convertLineWithoutAnchor(elem);
+        convertUnconnectedLine(elem);
       }
     }
   }
 
-  private void convertLineWithAnchor(final PathwayElement line) {
+  private void convertConnectedLineWithAnchor(final PathwayElement line) {
     final CyNode start = nodes.get(getStartOfLine(line));
     final CyNode middle = nodes.get(line); // this node was created in convertAnchor()
     final CyNode end = nodes.get(getEndOfLine(line));
@@ -424,10 +431,22 @@ class PathwayToNetwork {
     network.addEdge(middle, end, true);
   }
 
-  private void convertLineWithoutAnchor(final PathwayElement line) {
+  private void convertConnectedLineWithoutAnchor(final PathwayElement line) {
     final CyNode start = nodes.get(getStartOfLine(line));
     final CyNode end = nodes.get(getEndOfLine(line));
     network.addEdge(start, end, true);
+  }
+
+  private void convertUnconnectedLine(final PathwayElement line) {
+    final MPoint[] pts = line.getMPoints().toArray(new MPoint[0]);
+    final CyNode[] nodes = new CyNode[pts.length];
+    for (int i = 0; i < nodes.length; i++) {
+      nodes[i] = network.addNode();
+      assignAnchorVizStyle(nodes[i], new Point2D.Double(pts[i].getX(), pts[i].getY()));
+    }
+    for (int i = 0; i < nodes.length - 1; i++) {
+      network.addEdge(nodes[i], nodes[i + 1], false);
+    }
   }
   
   /*
