@@ -26,6 +26,7 @@ import org.cytoscape.model.CyTable;
 import org.cytoscape.model.CyIdentifiable;
 import org.cytoscape.model.CyColumn;
 import org.cytoscape.model.CyRow;
+import org.cytoscape.group.CyGroup;
 
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.View;
@@ -78,6 +79,7 @@ class PathwayToNetwork {
 
 	public void convert() {
     convertDataNodes();
+    convertGroups();
     convertLabels();
     convertAnchors();
     convertLines();
@@ -230,7 +232,37 @@ class PathwayToNetwork {
     final CyNode node = network.addNode();
     convertStaticProps(dataNode, dataNodeStaticProps, network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS), node.getSUID());
     convertViewStaticProps(dataNode, dataNodeViewStaticProps, node);
+    if (ShapeType.NONE.equals(dataNode.getShapeType())) {
+      delayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_BORDER_WIDTH, 0.0, true)); // correctly handle ShapeType.NONE
+    }
     nodes.put(dataNode, node);
+  }
+  
+  /*
+   ========================================================
+     Groups
+   ========================================================
+  */
+ 
+  private void convertGroups() {
+    for (final PathwayElement elem : pathway.getDataObjects()) {
+      if (!elem.getObjectType().equals(ObjectType.GROUP))
+        continue;
+      convertGroup(elem);
+    }
+  }
+
+  private void convertGroup(final PathwayElement group) {
+    List<CyNode> groupNodes = new ArrayList<CyNode>();
+    for (final PathwayElement elem : pathway.getGroupElements(group.getGroupId())) {
+      final CyNode node = nodes.get(elem);
+      if (node == null)
+        continue;
+      groupNodes.add(node);
+    }
+
+    final CyGroup cyGroup = CyActivator.groupFactory.createGroup(network, groupNodes, null, true);
+    nodes.put(group, cyGroup.getGroupNode());
   }
   
   /*
@@ -267,9 +299,10 @@ class PathwayToNetwork {
     convertStaticProps(label, labelStaticProps, network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS), node.getSUID());
     convertViewStaticProps(label, labelViewStaticProps, node);
     delayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_TRANSPARENCY, 0, true)); // labels are always transparent
-    if (label.getShapeType().equals(ShapeType.NONE)) {
+    if (ShapeType.NONE.equals(label.getShapeType())) {
       delayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_BORDER_WIDTH, 0.0, true)); // correctly handle ShapeType.NONE
     }
+    nodes.put(label, node);
   }
   
   /*
@@ -319,7 +352,7 @@ class PathwayToNetwork {
 
   private void convertLines() {
     for (final PathwayElement elem : pathway.getDataObjects()) {
-      if (!elem.getObjectType().equals(ObjectType.LINE))
+      if (!(elem.getObjectType().equals(ObjectType.LINE)))
         continue;
       if (!areStartAndEndNodes(elem))
         continue;
@@ -342,8 +375,6 @@ class PathwayToNetwork {
   private void convertLineWithoutAnchor(final PathwayElement line) {
     final CyNode start = nodes.get(getStartOfLine(line));
     final CyNode end = nodes.get(getEndOfLine(line));
-    if (start == null || end == null)
-      return;
     network.addEdge(start, end, true);
   }
   

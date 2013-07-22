@@ -30,6 +30,8 @@ import org.cytoscape.service.util.AbstractCyActivator;
 import org.cytoscape.util.swing.FileUtil;
 import org.cytoscape.view.model.CyNetworkViewFactory;
 import org.cytoscape.view.model.CyNetworkViewManager;
+import org.cytoscape.group.CyGroupFactory;
+import org.cytoscape.group.CyGroupManager;
 import org.wikipathways.cytoscapeapp.internal.model.GPMLNetworkManager;
 import org.wikipathways.cytoscapeapp.internal.model.GPMLNetworkManagerImpl;
 import org.wikipathways.cytoscapeapp.internal.io.GpmlReaderTaskFactory;
@@ -58,6 +60,8 @@ public class CyActivator extends AbstractCyActivator {
     public static VisualMappingManager vizMapMgr = null;
     public static AnnotationManager annotationMgr = null;
     public static AnnotationFactory annotationFactory = null;
+    public static CyGroupManager groupMgr = null;
+    public static CyGroupFactory groupFactory = null;
 
 	@Override
 	public void start(BundleContext context) throws Exception {
@@ -77,6 +81,8 @@ public class CyActivator extends AbstractCyActivator {
         vizMapMgr = getService(context,VisualMappingManager.class);
         //annotationMgr = getService(context, AnnotationManager.class);
         //annotationFactory = getService(context, AnnotationFactory.class);
+        groupMgr = getService(context,CyGroupManager.class);
+        groupFactory = getService(context,CyGroupFactory.class);
 
         // currently not used - will probably be needed in the future
 //      CyApplicationManager cyAppMgr = getService(context,CyApplicationManager.class);
