@@ -79,6 +79,8 @@ class PathwayToNetwork {
 	}
 
 	public void convert() {
+    network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS).createColumn("GraphID", String.class, false);
+
     // convert by each pathway element type
     convertDataNodes();
     convertStates();
@@ -216,6 +218,7 @@ class PathwayToNetwork {
   */
 
   private static Map<StaticProperty,String> dataNodeStaticProps = ezMap(StaticProperty.class, String.class,
+    StaticProperty.GRAPHID,  "GraphID",
     StaticProperty.TEXTLABEL, CyNetwork.NAME);
 
   private static Map<StaticProperty,VisualProperty> dataNodeViewStaticProps = ezMap(StaticProperty.class, VisualProperty.class,
@@ -245,6 +248,28 @@ class PathwayToNetwork {
     convertViewStaticProps(dataNode, dataNodeViewStaticProps, node);
     convertShapeTypeNone(node, dataNode);
     nodes.put(dataNode, node);
+  }
+
+  /*
+   ========================================================
+     Shapes
+   ========================================================
+  */
+
+  private void convertShapes() {
+    for (final PathwayElement elem : pathway.getDataObjects()) {
+      if (!elem.getObjectType().equals(ObjectType.SHAPE))
+        continue;
+      convertDataNode(elem);
+    }
+  }
+
+  private void convertShape(final PathwayElement shape) {
+    final CyNode node = network.addNode();
+    convertStaticProps(shape, dataNodeStaticProps, network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS), node.getSUID());
+    convertViewStaticProps(shape, dataNodeViewStaticProps, node);
+    convertShapeTypeNone(node, shape);
+    nodes.put(shape, node);
   }
   
   /*
