@@ -10,9 +10,13 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import org.pathvisio.core.model.AnchorType;
 import org.pathvisio.core.model.Pathway;
 import org.pathvisio.core.model.PathwayElement;
+import org.pathvisio.core.model.MLine;
+import org.pathvisio.core.model.PathwayElement.MAnchor;
 import org.pathvisio.core.model.PathwayElement.MPoint;
+import org.pathvisio.core.model.ConnectorShape;
 import org.pathvisio.core.model.ObjectType;
 import org.pathvisio.core.model.StaticProperty;
 import org.pathvisio.core.model.StaticPropertyType;
@@ -83,6 +87,7 @@ class PathwayToNetwork {
 
     // convert by each pathway element type
     convertDataNodes();
+    convertShapes();
     convertStates();
     convertGroups();
     convertLabels();
@@ -161,6 +166,20 @@ class PathwayToNetwork {
     }
 
     delayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_LABEL_FONT_FACE, convertFontFromStaticProps(elem), true));
+  }
+
+  private void convertViewStaticProps(final PathwayElement elem, final Map<StaticProperty,VisualProperty> props, CyEdge edge) {
+    for (final Map.Entry<StaticProperty,VisualProperty> prop : props.entrySet()) {
+      final StaticProperty staticProp = prop.getKey();
+      Object value = elem.getStaticProperty(prop.getKey());
+      if (value == null) continue;
+      if (staticPropConverters.containsKey(staticProp)) {
+        value = staticPropConverters.get(staticProp).convert(value);
+      }
+      final VisualProperty vizProp = prop.getValue();
+      final boolean locked = !unlockedVizProps.contains(vizProp);
+      delayedVizProps.add(new DelayedVizProp(edge, vizProp, value, locked));
+    }
   }
 
   private static Font convertFontFromStaticProps(final PathwayElement elem) {
@@ -398,33 +417,33 @@ class PathwayToNetwork {
         continue;
       if (elem.getMAnchors().size() == 0)
         continue;
-      if (!areStartAndEndNodes(elem))
-        continue;
-      convertAnchor(elem);
-    }
-  }
-
-  private void convertAnchor(final PathwayElement elem) {
-    final CyNode node = network.addNode();
-    final MLine line = (MLine) elem;
-    final PathwayElement.MAnchor firstAnchor = line.getMAnchors().get(0);
-    final Point2D firstAnchorPoint = line.getConnectorShape().fromLineCoordinate(firstAnchor.getPosition());
-    assignAnchorVizStyle(node, firstAnchorPoint);
-
-    nodes.put(elem, node);
-    for (final PathwayElement.MAnchor anchor : elem.getMAnchors()) {
-      nodes.put(anchor, node);
+      convertAnchorsInLine(elem);
     }
   }
 
   private void assignAnchorVizStyle(final CyNode node, final Point2D position) {
+    assignAnchorVizStyle(node, position, Color.WHITE);
+  }
+
+  private void assignAnchorVizStyle(final CyNode node, final Point2D position, final Color color) {
     delayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_X_LOCATION, position.getX(), false));
     delayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_Y_LOCATION, position.getY(), false));
-    delayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_FILL_COLOR, Color.WHITE, true));
-    delayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_BORDER_WIDTH, 1.0, true));
+    delayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_FILL_COLOR, color, true));
+    delayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_BORDER_WIDTH, 0.0, true));
     delayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_WIDTH, 5.0, true));
     delayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_HEIGHT, 5.0, true));
   }
+
+  private void convertAnchorsInLine(final PathwayElement elem) {
+    final MLine line = (MLine) elem;
+    for (final MAnchor anchor : elem.getMAnchors()) {
+      final CyNode node = network.addNode();
+      final Point2D position = line.getConnectorShape().fromLineCoordinate(anchor.getPosition());
+      nodes.put(anchor, node);
+      assignAnchorVizStyle(node, position, line.getColor());
+    }
+  }
+
   
   /*
    ========================================================
@@ -436,42 +455,48 @@ class PathwayToNetwork {
     for (final PathwayElement elem : pathway.getDataObjects()) {
       if (!(elem.getObjectType().equals(ObjectType.LINE) || elem.getObjectType().equals(ObjectType.GRAPHLINE)))
         continue;
-      if (areStartAndEndNodes(elem)) {
-        if (elem.getMAnchors().size() > 0) {
-          convertConnectedLineWithAnchor(elem);
-        } else {
-          convertConnectedLineWithoutAnchor(elem);
-        }
-      } else {
-        convertUnconnectedLine(elem);
+      convertLine(elem);
+    }
+  }
+
+  private void convertLine(final PathwayElement elem) {
+    final MLine line = (MLine) elem;
+    final String startRef = line.getMStart().getGraphRef();
+    final String endRef = line.getMEnd().getGraphRef();
+    CyNode startNode = startRef == null ? null : nodes.get(pathway.getGraphIdContainer(startRef));
+    if (startNode == null) {
+      startNode = network.addNode();
+      assignAnchorVizStyle(startNode, line.getStartPoint());
+    }
+    CyNode endNode = endRef == null ? null : nodes.get(pathway.getGraphIdContainer(endRef));
+    if (endRef == null) {
+      endNode = network.addNode();
+      assignAnchorVizStyle(endNode, line.getEndPoint());
+    }
+
+    final MAnchor[] anchors = elem.getMAnchors().toArray(new MAnchor[0]);
+    if (anchors.length > 0) {
+      final CyEdge firstEdge = network.addEdge(startNode, nodes.get(anchors[0]), true);
+      assignEdgeVizStyle(firstEdge, line, true);
+      for (int i = 1; i < anchors.length; i++) {
+        final CyEdge edge = network.addEdge(nodes.get(anchors[i - 1]), nodes.get(anchors[i]), true);
+        assignEdgeVizStyle(edge, line, true);
       }
+      final CyEdge lastEdge = network.addEdge(nodes.get(anchors[anchors.length - 1]), endNode, true);
+      assignEdgeVizStyle(lastEdge, line, true);
+    }
+    else {
+      final CyEdge edge = network.addEdge(startNode, endNode, true);
+      assignEdgeVizStyle(edge, line, true);
     }
   }
 
-  private void convertConnectedLineWithAnchor(final PathwayElement line) {
-    final CyNode start = nodes.get(getStartOfLine(line));
-    final CyNode middle = nodes.get(line); // this node was created in convertAnchor()
-    final CyNode end = nodes.get(getEndOfLine(line));
-    network.addEdge(start, middle, true);
-    network.addEdge(middle, end, true);
-  }
+  private static Map<StaticProperty,VisualProperty> lineViewStaticProps = ezMap(StaticProperty.class, VisualProperty.class,
+    StaticProperty.COLOR,         BasicVisualLexicon.EDGE_PAINT
+    );
 
-  private void convertConnectedLineWithoutAnchor(final PathwayElement line) {
-    final CyNode start = nodes.get(getStartOfLine(line));
-    final CyNode end = nodes.get(getEndOfLine(line));
-    network.addEdge(start, end, true);
-  }
-
-  private void convertUnconnectedLine(final PathwayElement line) {
-    final MPoint[] pts = line.getMPoints().toArray(new MPoint[0]);
-    final CyNode[] nodes = new CyNode[pts.length];
-    for (int i = 0; i < nodes.length; i++) {
-      nodes[i] = network.addNode();
-      assignAnchorVizStyle(nodes[i], new Point2D.Double(pts[i].getX(), pts[i].getY()));
-    }
-    for (int i = 0; i < nodes.length - 1; i++) {
-      network.addEdge(nodes[i], nodes[i + 1], false);
-    }
+  private void assignEdgeVizStyle(final CyEdge edge, final PathwayElement line, final boolean isLast) {
+    convertViewStaticProps(line, lineViewStaticProps, edge);
   }
   
   /*
