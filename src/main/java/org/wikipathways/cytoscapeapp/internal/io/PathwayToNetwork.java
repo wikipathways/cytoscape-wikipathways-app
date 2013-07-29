@@ -44,6 +44,7 @@ import org.cytoscape.view.presentation.property.BasicVisualLexicon;
 import org.cytoscape.view.presentation.property.NodeShapeVisualProperty;
 import org.cytoscape.view.presentation.property.values.NodeShape;
 import org.cytoscape.view.presentation.property.values.LineType;
+import org.cytoscape.view.presentation.property.values.ArrowShape;
 import org.cytoscape.view.presentation.annotations.Annotation;
 import org.cytoscape.view.presentation.annotations.TextAnnotation;
 
@@ -134,10 +135,37 @@ class PathwayToNetwork {
     }
   }
 
+  static Map<String,ArrowShape> ARROW_SHAPES = new HashMap<String,ArrowShape>();
+  static {
+    for (final ArrowShape arrowShape : ((DiscreteRange<ArrowShape>) BasicVisualLexicon.EDGE_SOURCE_ARROW_SHAPE.getRange()).values()) {
+      ARROW_SHAPES.put(arrowShape.getDisplayName(), arrowShape);
+    }
+  }
 
   static interface StaticPropConverter<S,V> {
     public V convert(S staticPropValue);
   }
+
+  static Map<String,String> GPML_ARROW_NAME_TO_CYTOSCAPE = ezMap(
+    "Arrow",              "Delta",
+    "TBar",               "T",
+    "mim-binding",        "Arrow",
+    "mim-conversion",     "Arrow",
+    "mim-modification",   "Arrow",
+    "mim-catalysis",      "Circle",
+    "mim-inhibition",     "T",
+    "mim-covalent-bond",  "T"
+    );
+
+  private static StaticPropConverter<org.pathvisio.core.model.LineType,ArrowShape> ARROW_SHAPE_CONVERTER = new StaticPropConverter<org.pathvisio.core.model.LineType,ArrowShape>() {
+    public ArrowShape convert(org.pathvisio.core.model.LineType lineType) {
+      final String gpmlArrowName = lineType.getGpmlName();
+      String cyArrowName = GPML_ARROW_NAME_TO_CYTOSCAPE.get(gpmlArrowName);
+      if (cyArrowName == null)
+        cyArrowName = "None";
+      return ARROW_SHAPES.get(cyArrowName);
+    }
+  };
 
   private static Map<StaticProperty,StaticPropConverter> staticPropConverters = ezMap(StaticProperty.class, StaticPropConverter.class,
     StaticProperty.TRANSPARENT, new StaticPropConverter<Boolean,Integer>() {
@@ -169,7 +197,9 @@ class PathwayToNetwork {
             return LINE_TYPES.get("Solid");
         }
       }
-    }
+    },
+    StaticProperty.STARTLINETYPE, ARROW_SHAPE_CONVERTER,
+    StaticProperty.ENDLINETYPE,   ARROW_SHAPE_CONVERTER
     );
 
   private void convertStaticProps(final PathwayElement elem, final Map<StaticProperty,String> staticProps, final CyTable table, final Object key) {
@@ -181,17 +211,21 @@ class PathwayToNetwork {
     }
   }
 
-  private void convertViewStaticProps(final PathwayElement elem, final Map<StaticProperty,VisualProperty> props, CyIdentifiable netObj) {
+  private void convertViewStaticProp(final PathwayElement elem, final CyIdentifiable netObj, final StaticProperty staticProp, final VisualProperty vizProp) {
+    Object value = elem.getStaticProperty(staticProp);
+    if (value == null) return;
+    if (staticPropConverters.containsKey(staticProp)) {
+      value = staticPropConverters.get(staticProp).convert(value);
+    }
+    final boolean locked = !unlockedVizProps.contains(vizProp);
+    delayedVizProps.add(new DelayedVizProp(netObj, vizProp, value, locked));
+  }
+
+  private void convertViewStaticProps(final PathwayElement elem, final Map<StaticProperty,VisualProperty> props, final CyIdentifiable netObj) {
     for (final Map.Entry<StaticProperty,VisualProperty> prop : props.entrySet()) {
       final StaticProperty staticProp = prop.getKey();
-      Object value = elem.getStaticProperty(prop.getKey());
-      if (value == null) continue;
-      if (staticPropConverters.containsKey(staticProp)) {
-        value = staticPropConverters.get(staticProp).convert(value);
-      }
       final VisualProperty vizProp = prop.getValue();
-      final boolean locked = !unlockedVizProps.contains(vizProp);
-      delayedVizProps.add(new DelayedVizProp(netObj, vizProp, value, locked));
+      convertViewStaticProp(elem, netObj, staticProp, vizProp);
     }
 
     if (netObj instanceof CyNode) {
@@ -494,17 +528,17 @@ class PathwayToNetwork {
     final MAnchor[] anchors = elem.getMAnchors().toArray(new MAnchor[0]);
     if (anchors.length > 0) {
       final CyEdge firstEdge = addEdgeProtected(startNode, nodes.get(anchors[0]), true);
-      assignEdgeVizStyle(firstEdge, line, false);
+      assignEdgeVizStyle(firstEdge, line, true, false);
       for (int i = 1; i < anchors.length; i++) {
         final CyEdge edge = addEdgeProtected(nodes.get(anchors[i - 1]), nodes.get(anchors[i]), true);
-        assignEdgeVizStyle(edge, line, false);
+        assignEdgeVizStyle(edge, line, false, false);
       }
       final CyEdge lastEdge = addEdgeProtected(nodes.get(anchors[anchors.length - 1]), endNode, true);
-      assignEdgeVizStyle(lastEdge, line, true);
+      assignEdgeVizStyle(lastEdge, line, false, true);
     }
     else {
       final CyEdge edge = addEdgeProtected(startNode, endNode, true);
-      assignEdgeVizStyle(edge, line, true);
+      assignEdgeVizStyle(edge, line, true, true);
     }
   }
 
@@ -523,9 +557,14 @@ class PathwayToNetwork {
     StaticProperty.LINETHICKNESS, BasicVisualLexicon.EDGE_WIDTH
     );
 
-  private void assignEdgeVizStyle(final CyEdge edge, final PathwayElement line, final boolean isLast) {
+  private void assignEdgeVizStyle(final CyEdge edge, final PathwayElement line, final boolean isFirst, final boolean isLast) {
     if (edge == null) return;
     convertViewStaticProps(line, lineViewStaticProps, edge);
+
+    if (isFirst)
+      convertViewStaticProp(line, edge, StaticProperty.STARTLINETYPE, BasicVisualLexicon.EDGE_SOURCE_ARROW_SHAPE);
+    if (isLast)
+      convertViewStaticProp(line, edge, StaticProperty.ENDLINETYPE, BasicVisualLexicon.EDGE_TARGET_ARROW_SHAPE);   
   }
   
   /*
