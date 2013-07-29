@@ -25,6 +25,8 @@ import org.pathvisio.core.model.MLine;
 import org.pathvisio.core.model.ShapeType;
 
 import org.cytoscape.model.CyNetwork;
+import org.cytoscape.model.subnetwork.CySubNetwork;
+import org.cytoscape.model.subnetwork.CyRootNetwork;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyTable;
@@ -75,11 +77,15 @@ class PathwayToNetwork {
 	final Pathway pathway;
   final CyNetworkView networkView;
 	final CyNetwork network;
+  final CySubNetwork subNetwork;
+  final CyRootNetwork rootNetwork;
 
 	public PathwayToNetwork(final Pathway pathway, final CyNetworkView networkView) {
 		this.pathway = pathway;
     this.networkView = networkView;
 		this.network = networkView.getModel();
+    this.subNetwork = (CySubNetwork) network;
+    this.rootNetwork = subNetwork.getRootNetwork();
 	}
 
 	public void convert() {
@@ -354,18 +360,19 @@ class PathwayToNetwork {
   }
 
   private void convertGroup(final PathwayElement group) {
-    List<CyNode> groupNodes = new ArrayList<CyNode>();
+    List<CyNode> groupMemberNodes = new ArrayList<CyNode>();
     for (final PathwayElement elem : pathway.getGroupElements(group.getGroupId())) {
       final CyNode node = nodes.get(elem);
       if (node == null)
         continue;
-      groupNodes.add(node);
+      groupMemberNodes.add(node);
     }
 
-    final CyGroup cyGroup = CyActivator.groupFactory.createGroup(network, groupNodes, null, true);
-    nodes.put(group, cyGroup.getGroupNode());
+    final CyGroup cyGroup = CyActivator.groupFactory.createGroup(network, groupMemberNodes, null, true);
+    final CyNode groupNode = cyGroup.getGroupNode();
+    nodes.put(group, groupNode);
   }
-  
+
   /*
    ========================================================
      Labels
@@ -443,7 +450,6 @@ class PathwayToNetwork {
       assignAnchorVizStyle(node, position, line.getColor());
     }
   }
-
   
   /*
    ========================================================
@@ -463,31 +469,37 @@ class PathwayToNetwork {
     final MLine line = (MLine) elem;
     final String startRef = line.getMStart().getGraphRef();
     final String endRef = line.getMEnd().getGraphRef();
-    CyNode startNode = startRef == null ? null : nodes.get(pathway.getGraphIdContainer(startRef));
+    CyNode startNode = nodes.get(pathway.getGraphIdContainer(startRef));
     if (startNode == null) {
       startNode = network.addNode();
       assignAnchorVizStyle(startNode, line.getStartPoint());
     }
-    CyNode endNode = endRef == null ? null : nodes.get(pathway.getGraphIdContainer(endRef));
-    if (endRef == null) {
+    CyNode endNode = nodes.get(pathway.getGraphIdContainer(endRef));
+    if (endNode == null) {
       endNode = network.addNode();
       assignAnchorVizStyle(endNode, line.getEndPoint());
     }
 
     final MAnchor[] anchors = elem.getMAnchors().toArray(new MAnchor[0]);
     if (anchors.length > 0) {
-      final CyEdge firstEdge = network.addEdge(startNode, nodes.get(anchors[0]), true);
-      assignEdgeVizStyle(firstEdge, line, true);
+      final CyEdge firstEdge = addEdgeProtected(startNode, nodes.get(anchors[0]), true, line);
       for (int i = 1; i < anchors.length; i++) {
-        final CyEdge edge = network.addEdge(nodes.get(anchors[i - 1]), nodes.get(anchors[i]), true);
-        assignEdgeVizStyle(edge, line, true);
+        final CyEdge edge = addEdgeProtected(nodes.get(anchors[i - 1]), nodes.get(anchors[i]), true, line);
       }
-      final CyEdge lastEdge = network.addEdge(nodes.get(anchors[anchors.length - 1]), endNode, true);
-      assignEdgeVizStyle(lastEdge, line, true);
+      final CyEdge lastEdge = addEdgeProtected(nodes.get(anchors[anchors.length - 1]), endNode, true, line);
     }
     else {
-      final CyEdge edge = network.addEdge(startNode, endNode, true);
-      assignEdgeVizStyle(edge, line, true);
+      final CyEdge edge = addEdgeProtected(startNode, endNode, true, line);
+    }
+  }
+
+  private CyEdge addEdgeProtected(final CyNode src, final CyNode trg, final boolean directed, final PathwayElement line) {
+    if (network.containsNode(src) && network.containsNode(trg)) {
+      final CyEdge edge = network.addEdge(src, trg, directed);
+      assignEdgeVizStyle(edge, line, false);
+      return edge;
+    } else {
+      return rootNetwork.addEdge(src, trg, directed);
     }
   }
 
