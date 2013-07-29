@@ -23,6 +23,7 @@ import org.pathvisio.core.model.StaticPropertyType;
 import org.pathvisio.core.model.GraphLink;
 import org.pathvisio.core.model.MLine;
 import org.pathvisio.core.model.ShapeType;
+import org.pathvisio.core.model.LineStyle;
 
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.subnetwork.CySubNetwork;
@@ -38,9 +39,11 @@ import org.cytoscape.group.CyGroup;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.View;
 import org.cytoscape.view.model.VisualProperty;
+import org.cytoscape.view.model.DiscreteRange;
 import org.cytoscape.view.presentation.property.BasicVisualLexicon;
 import org.cytoscape.view.presentation.property.NodeShapeVisualProperty;
 import org.cytoscape.view.presentation.property.values.NodeShape;
+import org.cytoscape.view.presentation.property.values.LineType;
 import org.cytoscape.view.presentation.annotations.Annotation;
 import org.cytoscape.view.presentation.annotations.TextAnnotation;
 
@@ -124,6 +127,14 @@ class PathwayToNetwork {
     BasicVisualLexicon.NODE_Y_LOCATION
     ));
 
+  static Map<String,LineType> LINE_TYPES = new HashMap<String,LineType>();
+  static {
+    for (final LineType lineType : ((DiscreteRange<LineType>) BasicVisualLexicon.EDGE_LINE_TYPE.getRange()).values()) {
+      LINE_TYPES.put(lineType.getDisplayName(), lineType);
+    }
+  }
+
+
   static interface StaticPropConverter<S,V> {
     public V convert(S staticPropValue);
   }
@@ -146,6 +157,18 @@ class PathwayToNetwork {
         }
         return NodeShapeVisualProperty.RECTANGLE;
       }
+    },
+    StaticProperty.LINESTYLE, new StaticPropConverter<Integer,LineType>() {
+      public LineType convert(Integer lineStyle) {
+        switch(lineStyle) {
+          case LineStyle.DOUBLE:
+            return LINE_TYPES.get("Parallel Lines");
+          case LineStyle.DASHED:
+            return LINE_TYPES.get("Dash");
+          default:
+            return LINE_TYPES.get("Solid");
+        }
+      }
     }
     );
 
@@ -158,7 +181,7 @@ class PathwayToNetwork {
     }
   }
 
-  private void convertViewStaticProps(final PathwayElement elem, final Map<StaticProperty,VisualProperty> props, CyNode node) {
+  private void convertViewStaticProps(final PathwayElement elem, final Map<StaticProperty,VisualProperty> props, CyIdentifiable netObj) {
     for (final Map.Entry<StaticProperty,VisualProperty> prop : props.entrySet()) {
       final StaticProperty staticProp = prop.getKey();
       Object value = elem.getStaticProperty(prop.getKey());
@@ -168,23 +191,11 @@ class PathwayToNetwork {
       }
       final VisualProperty vizProp = prop.getValue();
       final boolean locked = !unlockedVizProps.contains(vizProp);
-      delayedVizProps.add(new DelayedVizProp(node, vizProp, value, locked));
+      delayedVizProps.add(new DelayedVizProp(netObj, vizProp, value, locked));
     }
 
-    delayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_LABEL_FONT_FACE, convertFontFromStaticProps(elem), true));
-  }
-
-  private void convertViewStaticProps(final PathwayElement elem, final Map<StaticProperty,VisualProperty> props, CyEdge edge) {
-    for (final Map.Entry<StaticProperty,VisualProperty> prop : props.entrySet()) {
-      final StaticProperty staticProp = prop.getKey();
-      Object value = elem.getStaticProperty(prop.getKey());
-      if (value == null) continue;
-      if (staticPropConverters.containsKey(staticProp)) {
-        value = staticPropConverters.get(staticProp).convert(value);
-      }
-      final VisualProperty vizProp = prop.getValue();
-      final boolean locked = !unlockedVizProps.contains(vizProp);
-      delayedVizProps.add(new DelayedVizProp(edge, vizProp, value, locked));
+    if (netObj instanceof CyNode) {
+      delayedVizProps.add(new DelayedVizProp(netObj, BasicVisualLexicon.NODE_LABEL_FONT_FACE, convertFontFromStaticProps(elem), true));
     }
   }
 
@@ -482,32 +493,38 @@ class PathwayToNetwork {
 
     final MAnchor[] anchors = elem.getMAnchors().toArray(new MAnchor[0]);
     if (anchors.length > 0) {
-      final CyEdge firstEdge = addEdgeProtected(startNode, nodes.get(anchors[0]), true, line);
+      final CyEdge firstEdge = addEdgeProtected(startNode, nodes.get(anchors[0]), true);
+      assignEdgeVizStyle(firstEdge, line, false);
       for (int i = 1; i < anchors.length; i++) {
-        final CyEdge edge = addEdgeProtected(nodes.get(anchors[i - 1]), nodes.get(anchors[i]), true, line);
+        final CyEdge edge = addEdgeProtected(nodes.get(anchors[i - 1]), nodes.get(anchors[i]), true);
+        assignEdgeVizStyle(edge, line, false);
       }
-      final CyEdge lastEdge = addEdgeProtected(nodes.get(anchors[anchors.length - 1]), endNode, true, line);
+      final CyEdge lastEdge = addEdgeProtected(nodes.get(anchors[anchors.length - 1]), endNode, true);
+      assignEdgeVizStyle(lastEdge, line, true);
     }
     else {
-      final CyEdge edge = addEdgeProtected(startNode, endNode, true, line);
+      final CyEdge edge = addEdgeProtected(startNode, endNode, true);
+      assignEdgeVizStyle(edge, line, true);
     }
   }
 
-  private CyEdge addEdgeProtected(final CyNode src, final CyNode trg, final boolean directed, final PathwayElement line) {
+  private CyEdge addEdgeProtected(final CyNode src, final CyNode trg, final boolean directed) {
     if (network.containsNode(src) && network.containsNode(trg)) {
-      final CyEdge edge = network.addEdge(src, trg, directed);
-      assignEdgeVizStyle(edge, line, false);
-      return edge;
+      return network.addEdge(src, trg, directed);
     } else {
-      return rootNetwork.addEdge(src, trg, directed);
+      rootNetwork.addEdge(src, trg, directed);
+      return null;
     }
   }
 
   private static Map<StaticProperty,VisualProperty> lineViewStaticProps = ezMap(StaticProperty.class, VisualProperty.class,
-    StaticProperty.COLOR,         BasicVisualLexicon.EDGE_PAINT
+    StaticProperty.COLOR,         BasicVisualLexicon.EDGE_UNSELECTED_PAINT,
+    StaticProperty.LINESTYLE,     BasicVisualLexicon.EDGE_LINE_TYPE,
+    StaticProperty.LINETHICKNESS, BasicVisualLexicon.EDGE_WIDTH
     );
 
   private void assignEdgeVizStyle(final CyEdge edge, final PathwayElement line, final boolean isLast) {
+    if (edge == null) return;
     convertViewStaticProps(line, lineViewStaticProps, edge);
   }
   
@@ -535,23 +552,13 @@ class PathwayToNetwork {
 }
 
 class DelayedVizProp {
-  final long netObjSUID;
-  final boolean isNode;
+  final CyIdentifiable netObj;
   final VisualProperty<?> prop;
   final Object value;
   final boolean isLocked;
 
-  public DelayedVizProp(final CyNode node, final VisualProperty<?> prop, final Object value, final boolean isLocked) {
-    this.netObjSUID = node.getSUID();
-    this.isNode = true;
-    this.prop = prop;
-    this.value = value;
-    this.isLocked = isLocked;
-  }
-
-  public DelayedVizProp(final CyEdge edge, final VisualProperty<?> prop, final Object value, final boolean isLocked) {
-    this.netObjSUID = edge.getSUID();
-    this.isNode = false;
+  public DelayedVizProp(final CyIdentifiable netObj, final VisualProperty<?> prop, final Object value, final boolean isLocked) {
+    this.netObj = netObj;
     this.prop = prop;
     this.value = value;
     this.isLocked = isLocked;
@@ -560,12 +567,12 @@ class DelayedVizProp {
   public static void applyAll(final CyNetworkView netView, final Iterable<DelayedVizProp> delayedProps) {
     final CyNetwork net = netView.getModel();
     for (final DelayedVizProp delayedProp : delayedProps) {
-      View<?> view;
-      if (delayedProp.isNode) {
-        final CyNode node = net.getNode(delayedProp.netObjSUID);
+      View<?> view = null;
+      if (delayedProp.netObj instanceof CyNode) {
+        final CyNode node = (CyNode) delayedProp.netObj;
         view = netView.getNodeView(node);
-      } else {
-        final CyEdge edge = net.getEdge(delayedProp.netObjSUID);
+      } else if (delayedProp.netObj instanceof CyEdge) {
+        final CyEdge edge = (CyEdge) delayedProp.netObj;
         view = netView.getEdgeView(edge);
       }
 
