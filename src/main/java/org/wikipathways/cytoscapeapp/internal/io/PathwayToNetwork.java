@@ -167,6 +167,19 @@ class PathwayToNetwork {
     }
   };
 
+  private static StaticPropConverter<Integer,LineType> LINE_TYPE_CONVERTER = new StaticPropConverter<Integer,LineType>() {
+   public LineType convert(Integer lineStyle) {
+    switch(lineStyle) {
+      case LineStyle.DOUBLE:
+        return LINE_TYPES.get("Parallel Lines");
+      case LineStyle.DASHED:
+        return LINE_TYPES.get("Dash");
+      default:
+        return LINE_TYPES.get("Solid");
+      }
+    } 
+  };
+
   private static Map<StaticProperty,StaticPropConverter> staticPropConverters = ezMap(StaticProperty.class, StaticPropConverter.class,
     StaticProperty.TRANSPARENT, new StaticPropConverter<Boolean,Integer>() {
       public Integer convert(Boolean transparent) { return transparent ? 0 : 255; }
@@ -186,18 +199,7 @@ class PathwayToNetwork {
         return NodeShapeVisualProperty.RECTANGLE;
       }
     },
-    StaticProperty.LINESTYLE, new StaticPropConverter<Integer,LineType>() {
-      public LineType convert(Integer lineStyle) {
-        switch(lineStyle) {
-          case LineStyle.DOUBLE:
-            return LINE_TYPES.get("Parallel Lines");
-          case LineStyle.DASHED:
-            return LINE_TYPES.get("Dash");
-          default:
-            return LINE_TYPES.get("Solid");
-        }
-      }
-    },
+    StaticProperty.LINESTYLE,     LINE_TYPE_CONVERTER,
     StaticProperty.STARTLINETYPE, ARROW_SHAPE_CONVERTER,
     StaticProperty.ENDLINETYPE,   ARROW_SHAPE_CONVERTER
     );
@@ -301,7 +303,8 @@ class PathwayToNetwork {
     StaticProperty.FONTSIZE,      BasicVisualLexicon.NODE_LABEL_FONT_SIZE,
     StaticProperty.TRANSPARENT,   BasicVisualLexicon.NODE_TRANSPARENCY,
     StaticProperty.LINETHICKNESS, BasicVisualLexicon.NODE_BORDER_WIDTH,
-    StaticProperty.SHAPETYPE,     BasicVisualLexicon.NODE_SHAPE
+    StaticProperty.SHAPETYPE,     BasicVisualLexicon.NODE_SHAPE,
+    StaticProperty.LINESTYLE,     BasicVisualLexicon.NODE_BORDER_LINE_TYPE
     );
 
   private void convertDataNodes() {
