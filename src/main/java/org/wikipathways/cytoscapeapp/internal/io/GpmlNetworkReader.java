@@ -55,12 +55,16 @@ public class GpmlNetworkReader implements CyNetworkReader {
 	public void run(TaskMonitor monitor) throws Exception {
         monitor.setTitle("Read GPML file " + fileName);
 		monitor.setProgress(-1.0);
-        Pathway pathway = new Pathway();
+
+        monitor.setStatusMessage("Parsing GPML file");
+        final Pathway pathway = new Pathway();
         pathway.readFromXml(input, true);
         input = null;
 
+        monitor.setStatusMessage("Constructing network");
         net = CyActivator.netFactory.createNetwork();
-        net.getRow(net).set(CyNetwork.NAME, "Pathway");
+        final String name = pathway.getMappInfo().getMapInfoName();
+        net.getRow(net).set(CyNetwork.NAME, name);
         CyActivator.netMgr.addNetwork(net);
         CyNetworkView view = CyActivator.netViewFactory.createNetworkView(net);
         CyActivator.netViewMgr.addNetworkView(view);
