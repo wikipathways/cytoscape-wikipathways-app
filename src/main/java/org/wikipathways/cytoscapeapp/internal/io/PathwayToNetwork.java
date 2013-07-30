@@ -24,6 +24,7 @@ import org.pathvisio.core.model.GraphLink;
 import org.pathvisio.core.model.MLine;
 import org.pathvisio.core.model.ShapeType;
 import org.pathvisio.core.model.LineStyle;
+import org.pathvisio.core.model.IShape;
 
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
@@ -42,6 +43,7 @@ import org.cytoscape.view.presentation.property.NodeShapeVisualProperty;
 import org.cytoscape.view.presentation.property.values.NodeShape;
 import org.cytoscape.view.presentation.property.values.LineType;
 import org.cytoscape.view.presentation.property.values.ArrowShape;
+import org.cytoscape.view.presentation.property.ArrowShapeVisualProperty;
 import org.cytoscape.view.presentation.annotations.Annotation;
 import org.cytoscape.view.presentation.annotations.TextAnnotation;
 
@@ -125,6 +127,36 @@ class PathwayToNetwork {
   */
 
   /**
+   * Converts a GPML static property to a Cytoscape visual property.
+   */
+  static interface StaticPropConverter<S,V> {
+    public V convert(S staticPropValue);
+  }
+
+  private static Map<StaticProperty,StaticPropConverter> STATIC_PROP_CONVERTERS = ezMap(StaticProperty.class, StaticPropConverter.class
+  );
+
+  /**
+   * Copies a GPML pathway element's static properties to a CyTable's row of elements.
+   * @param elem The GPML pathway element from which static properties are copied.
+   * @param staticProps A map of the GPML pathway element's static properties and their corresponding Cytoscape CyTable column names.
+   * @param table A CyTable to which static properties are copied; this table must have the columns specified in {@code staticProps} already created with the correct types.
+   * @param key The row in the CyTable to which static properties are copied.
+   */
+  private void convertStaticProps(final PathwayElement elem, final Map<StaticProperty,String> staticProps, final CyTable table, final Object key) {
+    for (final Map.Entry<StaticProperty,String> staticPropEntry : staticProps.entrySet()) {
+      final StaticProperty staticProp = staticPropEntry.getKey();
+      Object value = elem.getStaticProperty(staticProp);
+      if (value == null) continue;
+      if (STATIC_PROP_CONVERTERS.containsKey(staticProp)) {
+        value = STATIC_PROP_CONVERTERS.get(staticProp).convert(value);
+      }
+      final String column = staticPropEntry.getValue();
+      table.getRow(key).set(column, value);
+    }
+  }
+
+  /**
    * Visual properties that should not be locked.
    */
   private static Set<VisualProperty> unlockedVizProps = new HashSet<VisualProperty>(Arrays.asList(
@@ -133,44 +165,17 @@ class PathwayToNetwork {
     ));
 
   /**
-   * A map of all Cytoscape's LineType instances.
-   */
-  static Map<String,LineType> LINE_TYPES = new HashMap<String,LineType>();
-  static {
-    for (final LineType lineType : ((DiscreteRange<LineType>) BasicVisualLexicon.EDGE_LINE_TYPE.getRange()).values()) {
-      LINE_TYPES.put(lineType.getDisplayName(), lineType);
-    }
-  }
-
-  /**
-   * A map of all Cytoscape's ArrowShape instances.
-   */
-  static Map<String,ArrowShape> ARROW_SHAPES = new HashMap<String,ArrowShape>();
-  static {
-    for (final ArrowShape arrowShape : ((DiscreteRange<ArrowShape>) BasicVisualLexicon.EDGE_SOURCE_ARROW_SHAPE.getRange()).values()) {
-      ARROW_SHAPES.put(arrowShape.getDisplayName(), arrowShape);
-    }
-  }
-
-  /**
-   * Converts a GPML static property to a Cytoscape visual property.
-   */
-  static interface StaticPropConverter<S,V> {
-    public V convert(S staticPropValue);
-  }
-
-  /**
    * GPML start/end line types and their corresponding Cytoscape ArrowShape names.
    */
-  static Map<String,String> GPML_ARROW_NAME_TO_CYTOSCAPE = ezMap(
-    "Arrow",              "Delta",
-    "TBar",               "T",
-    "mim-binding",        "Arrow",
-    "mim-conversion",     "Arrow",
-    "mim-modification",   "Arrow",
-    "mim-catalysis",      "Circle",
-    "mim-inhibition",     "T",
-    "mim-covalent-bond",  "T"
+  static Map<String,ArrowShape> GPML_ARROW_SHAPES = ezMap(String.class, ArrowShape.class,
+    "Arrow",              ArrowShapeVisualProperty.DELTA,
+    "TBar",               ArrowShapeVisualProperty.T,
+    "mim-binding",        ArrowShapeVisualProperty.ARROW,
+    "mim-conversion",     ArrowShapeVisualProperty.ARROW,
+    "mim-modification",   ArrowShapeVisualProperty.ARROW,
+    "mim-catalysis",      ArrowShapeVisualProperty.CIRCLE,
+    "mim-inhibition",     ArrowShapeVisualProperty.T,
+    "mim-covalent-bond",  ArrowShapeVisualProperty.T
     );
 
   /**
@@ -180,12 +185,24 @@ class PathwayToNetwork {
   private static StaticPropConverter<org.pathvisio.core.model.LineType,ArrowShape> ARROW_SHAPE_CONVERTER = new StaticPropConverter<org.pathvisio.core.model.LineType,ArrowShape>() {
     public ArrowShape convert(org.pathvisio.core.model.LineType lineType) {
       final String gpmlArrowName = lineType.getGpmlName();
-      String cyArrowName = GPML_ARROW_NAME_TO_CYTOSCAPE.get(gpmlArrowName);
-      if (cyArrowName == null)
-        cyArrowName = "None";
-      return ARROW_SHAPES.get(cyArrowName);
+      final ArrowShape arrowShape = GPML_ARROW_SHAPES.get(gpmlArrowName);
+      if (arrowShape == null)
+        return ArrowShapeVisualProperty.NONE;
+      return arrowShape;
     }
   };
+
+  /**
+   * A map of all Cytoscape's LineType instances.
+   * We can't use static fields in LineTypeVisualProperty because it doesn't contain all the
+   * LineTypes we need, like "Parallel Lines".
+   */
+  static Map<String,LineType> LINE_TYPES = new HashMap<String,LineType>();
+  static {
+    for (final LineType lineType : ((DiscreteRange<LineType>) BasicVisualLexicon.EDGE_LINE_TYPE.getRange()).values()) {
+      LINE_TYPES.put(lineType.getDisplayName(), lineType);
+    }
+  }
 
   /**
    * Converts a GPML line style (specified as an int) to a Cytoscape LineType object.
@@ -206,7 +223,7 @@ class PathwayToNetwork {
   /**
    * A map of converters from GPML static properties to Cytoscape visual properties.
    */
-  private static Map<StaticProperty,StaticPropConverter> STATIC_PROP_CONVERTERS = ezMap(StaticProperty.class, StaticPropConverter.class,
+  private static Map<StaticProperty,StaticPropConverter> VIZ_STATIC_PROP_CONVERTERS = ezMap(StaticProperty.class, StaticPropConverter.class,
     StaticProperty.TRANSPARENT, new StaticPropConverter<Boolean,Integer>() {
       public Integer convert(Boolean transparent) { return transparent ? 0 : 255; }
     },
@@ -233,22 +250,6 @@ class PathwayToNetwork {
   private static Color DEFAULT_SELECTED_NODE_COLOR = new Color(255, 255, 204, 127);
 
   /**
-   * Copies a GPML pathway element's static properties to a CyTable's row of elements.
-   * @param elem The GPML pathway element from which static properties are copied.
-   * @param staticProps A map of the GPML pathway element's static properties and their corresponding Cytoscape CyTable column names.
-   * @param table A CyTable to which static properties are copied; this table must have the columns specified in {@code staticProps} already created with the correct types.
-   * @param key The row in the CyTable to which static properties are copied.
-   */
-  private void convertStaticProps(final PathwayElement elem, final Map<StaticProperty,String> staticProps, final CyTable table, final Object key) {
-    for (final Map.Entry<StaticProperty,String> staticProp : staticProps.entrySet()) {
-      final Object value = elem.getStaticProperty(staticProp.getKey());
-      if (value == null) continue;
-      final String column = staticProp.getValue();
-      table.getRow(key).set(column, value);
-    }
-  }
-
-  /**
    * For a GPML pathway element, convert one of its static properties to a Cytoscape View's VisualProperty value and store it in {@code delayedVizProps}.
    * If {@code staticProp} is a key in {@code STATIC_PROP_CONVERTERS}, its converter will be invoked before it is set as a visual property value.
    *
@@ -260,8 +261,8 @@ class PathwayToNetwork {
   private void convertViewStaticProp(final PathwayElement elem, final CyIdentifiable netObj, final StaticProperty staticProp, final VisualProperty vizProp) {
     Object value = elem.getStaticProperty(staticProp);
     if (value == null) return;
-    if (STATIC_PROP_CONVERTERS.containsKey(staticProp)) {
-      value = STATIC_PROP_CONVERTERS.get(staticProp).convert(value);
+    if (VIZ_STATIC_PROP_CONVERTERS.containsKey(staticProp)) {
+      value = VIZ_STATIC_PROP_CONVERTERS.get(staticProp).convert(value);
     }
     final boolean locked = !unlockedVizProps.contains(vizProp);
     delayedVizProps.add(new DelayedVizProp(netObj, vizProp, value, locked));
@@ -287,7 +288,7 @@ class PathwayToNetwork {
   }
 
   /**
-   * Reads the FONTNAME, FONTWEIGHT, and FONTSTYLE static properties and converts them to a Font object.
+   * Reads the FONTNAME, FONTWEIGHT, and FONTSTYLE GPML static properties and converts them to a Font object.
    */
   private static Font convertFontFromStaticProps(final PathwayElement elem) {
     String fontFace = (String) elem.getStaticProperty(StaticProperty.FONTNAME);
@@ -318,7 +319,8 @@ class PathwayToNetwork {
 
   private static Map<StaticProperty,String> dataNodeStaticProps = ezMap(StaticProperty.class, String.class,
     StaticProperty.GRAPHID,  "GraphID",
-    StaticProperty.TEXTLABEL, CyNetwork.NAME);
+    StaticProperty.TEXTLABEL, CyNetwork.NAME
+    );
 
   private static Map<StaticProperty,VisualProperty> dataNodeViewStaticProps = ezMap(StaticProperty.class, VisualProperty.class,
     StaticProperty.CENTERX,       BasicVisualLexicon.NODE_X_LOCATION,
@@ -379,7 +381,8 @@ class PathwayToNetwork {
   */
 
   private static Map<StaticProperty,String> stateStaticProps = ezMap(StaticProperty.class, String.class,
-    StaticProperty.TEXTLABEL, CyNetwork.NAME);
+    StaticProperty.TEXTLABEL, CyNetwork.NAME
+    );
 
   private static Map<StaticProperty,VisualProperty> stateViewStaticProps = ezMap(StaticProperty.class, VisualProperty.class,
     StaticProperty.WIDTH,         BasicVisualLexicon.NODE_WIDTH,
@@ -388,8 +391,8 @@ class PathwayToNetwork {
     StaticProperty.FILLCOLOR,     BasicVisualLexicon.NODE_FILL_COLOR,
     StaticProperty.FONTSIZE,      BasicVisualLexicon.NODE_LABEL_FONT_SIZE,
     StaticProperty.TRANSPARENT,   BasicVisualLexicon.NODE_TRANSPARENCY,
-    StaticProperty.LINETHICKNESS, BasicVisualLexicon.NODE_BORDER_WIDTH,
-    StaticProperty.SHAPETYPE,     BasicVisualLexicon.NODE_SHAPE
+    StaticProperty.SHAPETYPE,     BasicVisualLexicon.NODE_SHAPE,
+    StaticProperty.LINETHICKNESS, BasicVisualLexicon.NODE_BORDER_WIDTH
     );
 
 
@@ -462,7 +465,8 @@ class PathwayToNetwork {
   */
 
   private static Map<StaticProperty,String> labelStaticProps = ezMap(StaticProperty.class, String.class,
-    StaticProperty.TEXTLABEL, CyNetwork.NAME);
+    StaticProperty.TEXTLABEL, CyNetwork.NAME
+    );
 
   private static Map<StaticProperty,VisualProperty> labelViewStaticProps = ezMap(StaticProperty.class, VisualProperty.class,
     StaticProperty.CENTERX,       BasicVisualLexicon.NODE_X_LOCATION,
@@ -472,8 +476,8 @@ class PathwayToNetwork {
     StaticProperty.COLOR,         BasicVisualLexicon.NODE_LABEL_COLOR,
     StaticProperty.FILLCOLOR,     BasicVisualLexicon.NODE_FILL_COLOR,
     StaticProperty.FONTSIZE,      BasicVisualLexicon.NODE_LABEL_FONT_SIZE,
-    StaticProperty.LINETHICKNESS, BasicVisualLexicon.NODE_BORDER_WIDTH,
-    StaticProperty.SHAPETYPE,     BasicVisualLexicon.NODE_SHAPE
+    StaticProperty.SHAPETYPE,     BasicVisualLexicon.NODE_SHAPE,
+    StaticProperty.LINETHICKNESS, BasicVisualLexicon.NODE_BORDER_WIDTH
     );
 
   private void convertLabels() {
