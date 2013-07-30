@@ -26,15 +26,12 @@ import org.pathvisio.core.model.ShapeType;
 import org.pathvisio.core.model.LineStyle;
 
 import org.cytoscape.model.CyNetwork;
-import org.cytoscape.model.subnetwork.CySubNetwork;
-import org.cytoscape.model.subnetwork.CyRootNetwork;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyTable;
 import org.cytoscape.model.CyIdentifiable;
 import org.cytoscape.model.CyColumn;
 import org.cytoscape.model.CyRow;
-import org.cytoscape.group.CyGroup;
 
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.View;
@@ -81,8 +78,6 @@ class PathwayToNetwork {
 	final Pathway pathway;
   final CyNetworkView networkView;
 	final CyNetwork network;
-  final CySubNetwork subNetwork;
-  final CyRootNetwork rootNetwork;
 
   /**
    * Create a converter from the given pathway and store it in the given network.
@@ -93,8 +88,6 @@ class PathwayToNetwork {
 		this.pathway = pathway;
     this.networkView = networkView;
 		this.network = networkView.getModel();
-    this.subNetwork = (CySubNetwork) network;
-    this.rootNetwork = subNetwork.getRootNetwork();
 	}
 
   /**
@@ -442,17 +435,24 @@ class PathwayToNetwork {
   }
 
   private void convertGroup(final PathwayElement group) {
-    List<CyNode> groupMemberNodes = new ArrayList<CyNode>();
+    final CyNode groupNode = network.addNode();
+    nodes.put(group, groupNode);
+
     for (final PathwayElement elem : pathway.getGroupElements(group.getGroupId())) {
       final CyNode node = nodes.get(elem);
       if (node == null)
         continue;
-      groupMemberNodes.add(node);
+      network.addEdge(node, groupNode, false);
     }
 
-    final CyGroup cyGroup = CyActivator.groupFactory.createGroup(network, groupMemberNodes, null, true);
-    final CyNode groupNode = cyGroup.getGroupNode();
-    nodes.put(group, groupNode);
+    delayedVizProps.add(new DelayedVizProp(groupNode, BasicVisualLexicon.NODE_X_LOCATION, group.getMCenterX(), false));
+    delayedVizProps.add(new DelayedVizProp(groupNode, BasicVisualLexicon.NODE_Y_LOCATION, group.getMCenterY(), false));
+    delayedVizProps.add(new DelayedVizProp(groupNode, BasicVisualLexicon.NODE_WIDTH, group.getMWidth(), true));
+    delayedVizProps.add(new DelayedVizProp(groupNode, BasicVisualLexicon.NODE_HEIGHT, group.getMHeight(), true));
+    delayedVizProps.add(new DelayedVizProp(groupNode, BasicVisualLexicon.NODE_BORDER_WIDTH, 1.0, true));
+    delayedVizProps.add(new DelayedVizProp(groupNode, BasicVisualLexicon.NODE_BORDER_LINE_TYPE, LINE_TYPES.get("Dots"), true));
+    delayedVizProps.add(new DelayedVizProp(groupNode, BasicVisualLexicon.NODE_TRANSPARENCY, 0, true));
+    delayedVizProps.add(new DelayedVizProp(groupNode, BasicVisualLexicon.NODE_SELECTED_PAINT, DEFAULT_SELECTED_NODE_COLOR, true));
   }
 
   /*
@@ -564,27 +564,18 @@ class PathwayToNetwork {
 
     final MAnchor[] anchors = elem.getMAnchors().toArray(new MAnchor[0]);
     if (anchors.length > 0) {
-      final CyEdge firstEdge = addEdgeProtected(startNode, nodes.get(anchors[0]), true);
+      final CyEdge firstEdge = network.addEdge(startNode, nodes.get(anchors[0]), true);
       assignEdgeVizStyle(firstEdge, line, true, false);
       for (int i = 1; i < anchors.length; i++) {
-        final CyEdge edge = addEdgeProtected(nodes.get(anchors[i - 1]), nodes.get(anchors[i]), true);
+        final CyEdge edge = network.addEdge(nodes.get(anchors[i - 1]), nodes.get(anchors[i]), true);
         assignEdgeVizStyle(edge, line, false, false);
       }
-      final CyEdge lastEdge = addEdgeProtected(nodes.get(anchors[anchors.length - 1]), endNode, true);
+      final CyEdge lastEdge = network.addEdge(nodes.get(anchors[anchors.length - 1]), endNode, true);
       assignEdgeVizStyle(lastEdge, line, false, true);
     }
     else {
-      final CyEdge edge = addEdgeProtected(startNode, endNode, true);
+      final CyEdge edge = network.addEdge(startNode, endNode, true);
       assignEdgeVizStyle(edge, line, true, true);
-    }
-  }
-
-  private CyEdge addEdgeProtected(final CyNode src, final CyNode trg, final boolean directed) {
-    if (network.containsNode(src) && network.containsNode(trg)) {
-      return network.addEdge(src, trg, directed);
-    } else {
-      rootNetwork.addEdge(src, trg, directed);
-      return null;
     }
   }
 
