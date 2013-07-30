@@ -204,6 +204,8 @@ class PathwayToNetwork {
     StaticProperty.ENDLINETYPE,   ARROW_SHAPE_CONVERTER
     );
 
+  private static Color DEFAULT_SELECTED_NODE_COLOR = new Color(255, 255, 204, 127);
+
   private void convertStaticProps(final PathwayElement elem, final Map<StaticProperty,String> staticProps, final CyTable table, final Object key) {
     for (final Map.Entry<StaticProperty,String> staticProp : staticProps.entrySet()) {
       final Object value = elem.getStaticProperty(staticProp.getKey());
@@ -232,6 +234,7 @@ class PathwayToNetwork {
 
     if (netObj instanceof CyNode) {
       delayedVizProps.add(new DelayedVizProp(netObj, BasicVisualLexicon.NODE_LABEL_FONT_FACE, convertFontFromStaticProps(elem), true));
+      delayedVizProps.add(new DelayedVizProp(netObj, BasicVisualLexicon.NODE_SELECTED_PAINT, DEFAULT_SELECTED_NODE_COLOR, true));
     }
   }
 
