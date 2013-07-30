@@ -84,6 +84,11 @@ class PathwayToNetwork {
   final CySubNetwork subNetwork;
   final CyRootNetwork rootNetwork;
 
+  /**
+   * Create a converter from the given pathway and store it in the given network.
+   * Constructing this object will not start the conversion and will not modify
+   * the given network in any way.
+   */
 	public PathwayToNetwork(final Pathway pathway, final CyNetworkView networkView) {
 		this.pathway = pathway;
     this.networkView = networkView;
@@ -92,6 +97,9 @@ class PathwayToNetwork {
     this.rootNetwork = subNetwork.getRootNetwork();
 	}
 
+  /**
+   * Convert the pathway given in the constructor.
+   */
 	public void convert() {
     network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS).createColumn("GraphID", String.class, false);
 
@@ -123,11 +131,17 @@ class PathwayToNetwork {
    ========================================================
   */
 
+  /**
+   * Visual properties that should not be locked.
+   */
   private static Set<VisualProperty> unlockedVizProps = new HashSet<VisualProperty>(Arrays.asList(
     BasicVisualLexicon.NODE_X_LOCATION,
     BasicVisualLexicon.NODE_Y_LOCATION
     ));
 
+  /**
+   * A map of all Cytoscape's LineType instances.
+   */
   static Map<String,LineType> LINE_TYPES = new HashMap<String,LineType>();
   static {
     for (final LineType lineType : ((DiscreteRange<LineType>) BasicVisualLexicon.EDGE_LINE_TYPE.getRange()).values()) {
@@ -135,6 +149,9 @@ class PathwayToNetwork {
     }
   }
 
+  /**
+   * A map of all Cytoscape's ArrowShape instances.
+   */
   static Map<String,ArrowShape> ARROW_SHAPES = new HashMap<String,ArrowShape>();
   static {
     for (final ArrowShape arrowShape : ((DiscreteRange<ArrowShape>) BasicVisualLexicon.EDGE_SOURCE_ARROW_SHAPE.getRange()).values()) {
@@ -142,10 +159,16 @@ class PathwayToNetwork {
     }
   }
 
+  /**
+   * Converts a GPML static property to a Cytoscape visual property.
+   */
   static interface StaticPropConverter<S,V> {
     public V convert(S staticPropValue);
   }
 
+  /**
+   * GPML start/end line types and their corresponding Cytoscape ArrowShape names.
+   */
   static Map<String,String> GPML_ARROW_NAME_TO_CYTOSCAPE = ezMap(
     "Arrow",              "Delta",
     "TBar",               "T",
@@ -157,6 +180,10 @@ class PathwayToNetwork {
     "mim-covalent-bond",  "T"
     );
 
+  /**
+   * Converts a GPML start/end line type to a Cytoscape ArrowShape object.
+   * This uses the {@code GPML_ARROW_NAME_TO_CYTOSCAPE} map to do the converstion.
+   */
   private static StaticPropConverter<org.pathvisio.core.model.LineType,ArrowShape> ARROW_SHAPE_CONVERTER = new StaticPropConverter<org.pathvisio.core.model.LineType,ArrowShape>() {
     public ArrowShape convert(org.pathvisio.core.model.LineType lineType) {
       final String gpmlArrowName = lineType.getGpmlName();
@@ -167,6 +194,9 @@ class PathwayToNetwork {
     }
   };
 
+  /**
+   * Converts a GPML line style (specified as an int) to a Cytoscape LineType object.
+   */
   private static StaticPropConverter<Integer,LineType> LINE_TYPE_CONVERTER = new StaticPropConverter<Integer,LineType>() {
    public LineType convert(Integer lineStyle) {
     switch(lineStyle) {
@@ -180,7 +210,10 @@ class PathwayToNetwork {
     } 
   };
 
-  private static Map<StaticProperty,StaticPropConverter> staticPropConverters = ezMap(StaticProperty.class, StaticPropConverter.class,
+  /**
+   * A map of converters from GPML static properties to Cytoscape visual properties.
+   */
+  private static Map<StaticProperty,StaticPropConverter> STATIC_PROP_CONVERTERS = ezMap(StaticProperty.class, StaticPropConverter.class,
     StaticProperty.TRANSPARENT, new StaticPropConverter<Boolean,Integer>() {
       public Integer convert(Boolean transparent) { return transparent ? 0 : 255; }
     },
@@ -206,6 +239,13 @@ class PathwayToNetwork {
 
   private static Color DEFAULT_SELECTED_NODE_COLOR = new Color(255, 255, 204, 127);
 
+  /**
+   * Copies a GPML pathway element's static properties to a CyTable's row of elements.
+   * @param elem The GPML pathway element from which static properties are copied.
+   * @param staticProps A map of the GPML pathway element's static properties and their corresponding Cytoscape CyTable column names.
+   * @param table A CyTable to which static properties are copied; this table must have the columns specified in {@code staticProps} already created with the correct types.
+   * @param key The row in the CyTable to which static properties are copied.
+   */
   private void convertStaticProps(final PathwayElement elem, final Map<StaticProperty,String> staticProps, final CyTable table, final Object key) {
     for (final Map.Entry<StaticProperty,String> staticProp : staticProps.entrySet()) {
       final Object value = elem.getStaticProperty(staticProp.getKey());
@@ -215,16 +255,31 @@ class PathwayToNetwork {
     }
   }
 
+  /**
+   * For a GPML pathway element, convert one of its static properties to a Cytoscape View's VisualProperty value and store it in {@code delayedVizProps}.
+   * If {@code staticProp} is a key in {@code STATIC_PROP_CONVERTERS}, its converter will be invoked before it is set as a visual property value.
+   *
+   * @param elem The GPML pathway element that contains a static property.
+   * @param netObj Either a Cytoscape CyNode or CyEdge whose corresponding View should have a new VisualProperty.
+   * @param staticProp The static property whose value is to be converted to a VisualProperty value.
+   * @param vizProp The visual property to which to convert the static property's value.
+   */
   private void convertViewStaticProp(final PathwayElement elem, final CyIdentifiable netObj, final StaticProperty staticProp, final VisualProperty vizProp) {
     Object value = elem.getStaticProperty(staticProp);
     if (value == null) return;
-    if (staticPropConverters.containsKey(staticProp)) {
-      value = staticPropConverters.get(staticProp).convert(value);
+    if (STATIC_PROP_CONVERTERS.containsKey(staticProp)) {
+      value = STATIC_PROP_CONVERTERS.get(staticProp).convert(value);
     }
     final boolean locked = !unlockedVizProps.contains(vizProp);
     delayedVizProps.add(new DelayedVizProp(netObj, vizProp, value, locked));
   }
 
+  /**
+   * Converts a series of a GPML pathway element's static proeprties to Cytoscape visual property values.
+   * @param elem The GPML pathway element whose static properties are to be converted to visual property values.
+   * @param props GPML static properties and their corresponding Cytoscape visual properties of which to convert.
+   * @param netObj Either a CyNode or a CyEdge whose View would contain the visual properties.
+   */
   private void convertViewStaticProps(final PathwayElement elem, final Map<StaticProperty,VisualProperty> props, final CyIdentifiable netObj) {
     for (final Map.Entry<StaticProperty,VisualProperty> prop : props.entrySet()) {
       final StaticProperty staticProp = prop.getKey();
@@ -238,6 +293,9 @@ class PathwayToNetwork {
     }
   }
 
+  /**
+   * Reads the FONTNAME, FONTWEIGHT, and FONTSTYLE static properties and converts them to a Font object.
+   */
   private static Font convertFontFromStaticProps(final PathwayElement elem) {
     String fontFace = (String) elem.getStaticProperty(StaticProperty.FONTNAME);
     if (fontFace == null)
@@ -250,6 +308,9 @@ class PathwayToNetwork {
     return new Font(fontFace, style, 12 /* size doesn't matter here -- there's another viz prop for font size */);
   }
 
+  /**
+   * Overrides a node's border width by setting it to zero if the pathway element has a shape of type NONE.
+   */
   private void convertShapeTypeNone(final CyNode node, final PathwayElement elem) {
     if (ShapeType.NONE.equals(elem.getShapeType())) {
       delayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_BORDER_WIDTH, 0.0, true));
