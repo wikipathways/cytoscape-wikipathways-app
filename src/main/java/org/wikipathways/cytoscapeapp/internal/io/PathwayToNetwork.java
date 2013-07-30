@@ -255,36 +255,6 @@ class PathwayToNetwork {
 
   /*
    ========================================================
-     GPML edge util methods
-   ========================================================
-  */
-
-  private GraphLink.GraphIdContainer getStartOfLine(final PathwayElement line) {
-    return pathway.getGraphIdContainer(line.getMStart().getGraphRef());
-  }
-
-  private GraphLink.GraphIdContainer getEndOfLine(final PathwayElement line) {
-    return pathway.getGraphIdContainer(line.getMEnd().getGraphRef());
-  }
-
-  private boolean areStartAndEndNodes(final PathwayElement elem) {
-    return isNode(getStartOfLine(elem)) && isNode(getEndOfLine(elem));
-  }
-
-  private boolean isNode(final GraphLink.GraphIdContainer elem) {
-    if (elem instanceof PathwayElement.MAnchor) {
-      return areStartAndEndNodes(((PathwayElement.MAnchor) elem).getParent());
-    } else if (elem instanceof PathwayElement) {
-      switch(((PathwayElement) elem).getObjectType()) {
-        case DATANODE: return true;
-        case GROUP: return true;
-      }
-    }
-    return false;
-  }
-
-  /*
-   ========================================================
      Data nodes
    ========================================================
   */
