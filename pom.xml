@@ -174,7 +174,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.cytoscape</groupId>
-			<artifactId>group-api</artifactId>
+			<artifactId>webservice-api</artifactId>
 			<version>${cytoscape.api.version}</version>
 		</dependency>
 		<dependency>
