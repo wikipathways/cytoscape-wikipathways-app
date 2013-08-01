@@ -32,6 +32,7 @@ import org.cytoscape.view.model.CyNetworkViewFactory;
 import org.cytoscape.view.model.CyNetworkViewManager;
 import org.osgi.framework.BundleContext;
 import org.cytoscape.io.read.InputStreamTaskFactory;
+import org.cytoscape.io.read.CyNetworkReaderManager;
 import org.cytoscape.io.util.StreamUtil;
 import org.cytoscape.io.webservice.NetworkImportWebServiceClient;
 import org.cytoscape.io.webservice.SearchWebServiceClient;
@@ -39,6 +40,8 @@ import org.cytoscape.io.webservice.WebServiceClient;
 import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.view.presentation.annotations.AnnotationFactory;
 import org.cytoscape.view.presentation.annotations.AnnotationManager;
+import org.cytoscape.work.TaskManager;
+import org.cytoscape.work.swing.DialogTaskManager;
 
 import org.wikipathways.cytoscapeapp.internal.model.GPMLNetworkManager;
 import org.wikipathways.cytoscapeapp.internal.model.GPMLNetworkManagerImpl;
@@ -63,6 +66,8 @@ public class CyActivator extends AbstractCyActivator {
     public static VisualMappingManager vizMapMgr = null;
     public static AnnotationManager annotationMgr = null;
     public static AnnotationFactory annotationFactory = null;
+    public static CyNetworkReaderManager netReaderMgr = null;
+    public static TaskManager taskMgr = null;
 
 	@Override
 	public void start(BundleContext context) throws Exception {
@@ -82,6 +87,8 @@ public class CyActivator extends AbstractCyActivator {
         vizMapMgr = getService(context,VisualMappingManager.class);
         //annotationMgr = getService(context, AnnotationManager.class);
         //annotationFactory = getService(context, AnnotationFactory.class);
+        netReaderMgr = getService(context, CyNetworkReaderManager.class);
+        taskMgr = getService(context, DialogTaskManager.class);
 
         // currently not used - will probably be needed in the future
 //      CyApplicationManager cyAppMgr = getService(context,CyApplicationManager.class);

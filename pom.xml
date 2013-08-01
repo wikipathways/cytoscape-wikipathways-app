@@ -120,9 +120,8 @@
 		</plugins>
 	</build>
 
-	<!-- Links to the Cytoscape Maven repositories. -->
 	<repositories>
-		<!--<repository>
+             <repository>
 			<id>cytoscape_snapshots</id>
 			<snapshots>
 			</snapshots>
@@ -131,7 +130,7 @@
 			</releases>
 			<name>Cytoscape Snapshots</name>
 			<url>http://code.cytoscape.org/nexus/content/repositories/snapshots/</url>
-		</repository> -->
+		</repository>
 		<repository>
 			<id>cytoscape_releases</id>
 			<snapshots>
@@ -142,7 +141,8 @@
 			<name>Cytoscape Releases</name>
 			<url>http://code.cytoscape.org/nexus/content/repositories/releases/</url>
 		</repository>
-	</repositories>
+         <repository> <id>com.springsource.repository.bundles.release</id> <name>SpringSource Enterprise Bundle Repository - SpringSource Bundle Releases</name> <url>http://repository.springsource.com/maven/bundles/release</url> </repository> <repository> <id>com.springsource.repository.bundles.external</id> <name>SpringSource Enterprise Bundle Repository - External Bundle Releases</name> <url>http://repository.springsource.com/maven/bundles/external</url> </repository>
+    </repositories>
 
 	<!-- Dependencies needed to compile this project. -->
 	<dependencies>
@@ -247,6 +247,13 @@
       		<version>10.4</version> 
       		<optional>true</optional>
     	</dependency> 
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>com.springsource.org.apache.commons.httpclient</artifactId>
+            <version>3.1.0</version>
+            <scope>provided</scope>
+        </dependency>
+
 			<!-- Webservice libs -->
     	<!--<dependency> 
       		<groupId>javax.xml</groupId> 
