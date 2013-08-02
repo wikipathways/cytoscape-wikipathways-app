@@ -31,12 +31,14 @@ import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.TaskIterator;
 
 import org.cytoscape.io.read.CyNetworkReader;
+import org.cytoscape.io.read.InputStreamTaskFactory;
 
 import org.wikipathways.cytoscapeapp.internal.CyActivator;
 import org.wikipathways.cytoscapeapp.internal.webclient.WPClient.PathwayRef;
 
 public class CyWPClient extends AbstractWebServiceGUIClient implements NetworkImportWebServiceClient, SearchWebServiceClient {
   static final String[] RESULTS_TABLE_COLUMN_NAMES = {"Pathway Name", "Species"};
+  final InputStreamTaskFactory gpmlReader;
   final JTextField searchField = new JTextField();
   final JCheckBox speciesCheckBox = new JCheckBox("Only: ");
   final JComboBox speciesComboBox = new JComboBox();
@@ -45,8 +47,10 @@ public class CyWPClient extends AbstractWebServiceGUIClient implements NetworkIm
   final JTable resultsTable = new JTable(tableModel);
   WPClient client;
 
-  public CyWPClient() {
+  public CyWPClient(InputStreamTaskFactory gpmlReader) {
     super("http://www.wikipathways.org", "WikiPathways", "WikiPathways");
+
+    this.gpmlReader = gpmlReader;
 
     try {
       client = new WPClient();
@@ -160,10 +164,7 @@ public class CyWPClient extends AbstractWebServiceGUIClient implements NetworkIm
         return;
       monitor.setTitle("Opening from WikiPathways: " + pathwayRef.getName());
       final InputStream gpmlStream = client.loadPathway(pathwayRef);
-      final CyNetworkReader netReader = CyActivator.netReaderMgr.getReader(gpmlStream, pathwayRef.getName() + ".gpml");
-      if (netReader == null)
-        throw new Exception("Could not load GPML file");
-      taskIterator.append(netReader);
+      taskIterator.append(gpmlReader.createTaskIterator(gpmlStream, pathwayRef.getName() + ".gpml"));
     }
   }
 

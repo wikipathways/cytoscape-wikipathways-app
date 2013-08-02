@@ -96,10 +96,11 @@ public class CyActivator extends AbstractCyActivator {
 
         // initialize GPML network manager
         GPMLNetworkManager gpmlNetMgr = new GPMLNetworkManagerImpl(netMgr, netFactory, netViewFactory, netViewMgr);
-        registerService(context, new GpmlReaderTaskFactory(streamUtil), InputStreamTaskFactory.class, new Properties());
+        final GpmlReaderTaskFactory gpmlReaderTaskFactory = new GpmlReaderTaskFactory(streamUtil);
+        registerService(context, gpmlReaderTaskFactory, InputStreamTaskFactory.class, new Properties());
 
         // initialize web service client
-        final CyWPClient wpClient = new CyWPClient();
+        final CyWPClient wpClient = new CyWPClient(gpmlReaderTaskFactory);
         registerAllServices(context, wpClient, new Properties());
 
 	}
