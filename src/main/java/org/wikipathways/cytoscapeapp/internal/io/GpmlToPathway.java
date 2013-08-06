@@ -98,11 +98,6 @@ class GpmlToPathway {
     CyActivator.eventHelper.flushPayloadEvents(); // guarantee that all node and edge views have been created
     DelayedVizProp.applyAll(networkView, delayedVizProps); // apply our visual style
 
-    // update the network view
-    CyActivator.vizMapMgr.getDefaultVisualStyle().apply(networkView);
-    networkView.fitContent();
-    networkView.updateView();
-
     // clear our data structures just to be nice to the GC
     nodes.clear();
     delayedVizProps.clear();
@@ -316,7 +311,7 @@ class GpmlToPathway {
     dataNodeViewStaticProps.put(StaticProperty.CENTERY,       BasicVisualLexicon.NODE_Y_LOCATION);
     dataNodeViewStaticProps.put(StaticProperty.WIDTH,         BasicVisualLexicon.NODE_WIDTH);
     dataNodeViewStaticProps.put(StaticProperty.HEIGHT,        BasicVisualLexicon.NODE_HEIGHT);
-    dataNodeViewStaticProps.put(StaticProperty.COLOR,         BasicVisualLexicon.NODE_BORDER_PAINT);
+    //dataNodeViewStaticProps.put(StaticProperty.COLOR,         BasicVisualLexicon.NODE_BORDER_PAINT);
     dataNodeViewStaticProps.put(StaticProperty.FILLCOLOR,     BasicVisualLexicon.NODE_FILL_COLOR);
     dataNodeViewStaticProps.put(StaticProperty.FONTSIZE,      BasicVisualLexicon.NODE_LABEL_FONT_SIZE);
     dataNodeViewStaticProps.put(StaticProperty.TRANSPARENT,   BasicVisualLexicon.NODE_TRANSPARENCY);

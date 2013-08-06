@@ -37,6 +37,7 @@ import org.cytoscape.io.util.StreamUtil;
 import org.cytoscape.io.webservice.NetworkImportWebServiceClient;
 import org.cytoscape.io.webservice.SearchWebServiceClient;
 import org.cytoscape.io.webservice.WebServiceClient;
+import org.cytoscape.view.vizmap.VisualStyleFactory;
 import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.view.presentation.annotations.AnnotationFactory;
 import org.cytoscape.view.presentation.annotations.AnnotationManager;
@@ -64,6 +65,7 @@ public class CyActivator extends AbstractCyActivator {
     public static CyTableManager tableMgr = null;
     public static CyEventHelper eventHelper = null;
     public static VisualMappingManager vizMapMgr = null;
+    public static VisualStyleFactory vizStyleFactory = null;
     public static AnnotationManager annotationMgr = null;
     public static AnnotationFactory annotationFactory = null;
     public static CyNetworkReaderManager netReaderMgr = null;
@@ -85,6 +87,7 @@ public class CyActivator extends AbstractCyActivator {
         tableFactory = getService(context,CyTableFactory.class);
         eventHelper = getService(context,CyEventHelper.class);
         vizMapMgr = getService(context,VisualMappingManager.class);
+        vizStyleFactory = getService(context,VisualStyleFactory.class);
         //annotationMgr = getService(context, AnnotationManager.class);
         //annotationFactory = getService(context, AnnotationFactory.class);
         netReaderMgr = getService(context, CyNetworkReaderManager.class);

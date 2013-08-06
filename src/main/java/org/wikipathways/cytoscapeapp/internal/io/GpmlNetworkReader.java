@@ -63,6 +63,7 @@ public class GpmlNetworkReader implements CyNetworkReader {
         final String name = pathway.getMappInfo().getMapInfoName();
         final CyNetworkView view = newNetwork(name);
         (new GpmlToPathway(pathway, view)).convert();
+        updateNetworkView(view);
 	}
 
     public void cancel() {
@@ -88,5 +89,11 @@ public class GpmlNetworkReader implements CyNetworkReader {
         final CyNetworkView view = CyActivator.netViewFactory.createNetworkView(net);
         CyActivator.netViewMgr.addNetworkView(view);
         return view;
+    }
+
+    private static void updateNetworkView(final CyNetworkView netView) {
+        GpmlVizStyle.get().apply(netView);
+        netView.fitContent();
+        netView.updateView();
     }
 }
