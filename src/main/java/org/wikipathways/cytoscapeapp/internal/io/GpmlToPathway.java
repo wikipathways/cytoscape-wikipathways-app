@@ -21,7 +21,6 @@ import org.pathvisio.core.model.ObjectType;
 import org.pathvisio.core.model.StaticProperty;
 import org.pathvisio.core.model.StaticPropertyType;
 import org.pathvisio.core.model.GraphLink;
-import org.pathvisio.core.model.MLine;
 import org.pathvisio.core.model.ShapeType;
 import org.pathvisio.core.model.LineStyle;
 import org.pathvisio.core.model.IShape;
@@ -133,9 +132,6 @@ class GpmlToPathway {
     public V convert(S staticPropValue);
   }
 
-  private static Map<StaticProperty,StaticPropConverter> STATIC_PROP_CONVERTERS = ezMap(StaticProperty.class, StaticPropConverter.class
-  );
-
   /**
    * Copies a GPML pathway element's static properties to a CyTable's row of elements.
    * @param elem The GPML pathway element from which static properties are copied.
@@ -148,9 +144,6 @@ class GpmlToPathway {
       final StaticProperty staticProp = staticPropEntry.getKey();
       Object value = elem.getStaticProperty(staticProp);
       if (value == null) continue;
-      if (STATIC_PROP_CONVERTERS.containsKey(staticProp)) {
-        value = STATIC_PROP_CONVERTERS.get(staticProp).convert(value);
-      }
       final String column = staticPropEntry.getValue();
       table.getRow(key).set(column, value);
     }
@@ -167,16 +160,17 @@ class GpmlToPathway {
   /**
    * GPML start/end line types and their corresponding Cytoscape ArrowShape names.
    */
-  static Map<String,ArrowShape> GPML_ARROW_SHAPES = ezMap(String.class, ArrowShape.class,
-    "Arrow",              ArrowShapeVisualProperty.DELTA,
-    "TBar",               ArrowShapeVisualProperty.T,
-    "mim-binding",        ArrowShapeVisualProperty.ARROW,
-    "mim-conversion",     ArrowShapeVisualProperty.ARROW,
-    "mim-modification",   ArrowShapeVisualProperty.ARROW,
-    "mim-catalysis",      ArrowShapeVisualProperty.CIRCLE,
-    "mim-inhibition",     ArrowShapeVisualProperty.T,
-    "mim-covalent-bond",  ArrowShapeVisualProperty.T
-    );
+  static Map<String,ArrowShape> GPML_ARROW_SHAPES = new HashMap<String,ArrowShape>();
+  static {
+    GPML_ARROW_SHAPES.put("Arrow",              ArrowShapeVisualProperty.DELTA);
+    GPML_ARROW_SHAPES.put("TBar",               ArrowShapeVisualProperty.T);
+    GPML_ARROW_SHAPES.put("mim-binding",        ArrowShapeVisualProperty.ARROW);
+    GPML_ARROW_SHAPES.put("mim-conversion",     ArrowShapeVisualProperty.ARROW);
+    GPML_ARROW_SHAPES.put("mim-modification",   ArrowShapeVisualProperty.ARROW);
+    GPML_ARROW_SHAPES.put("mim-catalysis",      ArrowShapeVisualProperty.CIRCLE);
+    GPML_ARROW_SHAPES.put("mim-inhibition",     ArrowShapeVisualProperty.T);
+    GPML_ARROW_SHAPES.put("mim-covalent-bond",  ArrowShapeVisualProperty.T);
+  }
 
   /**
    * Converts a GPML start/end line type to a Cytoscape ArrowShape object.
@@ -223,11 +217,14 @@ class GpmlToPathway {
   /**
    * A map of converters from GPML static properties to Cytoscape visual properties.
    */
-  private static Map<StaticProperty,StaticPropConverter> VIZ_STATIC_PROP_CONVERTERS = ezMap(StaticProperty.class, StaticPropConverter.class,
-    StaticProperty.TRANSPARENT, new StaticPropConverter<Boolean,Integer>() {
+  private static Map<StaticProperty,StaticPropConverter> VIZ_STATIC_PROP_CONVERTERS = new HashMap<StaticProperty,StaticPropConverter>();
+  static {
+    VIZ_STATIC_PROP_CONVERTERS.put(StaticProperty.TRANSPARENT,
+      new StaticPropConverter<Boolean,Integer>() {
       public Integer convert(Boolean transparent) { return transparent ? 0 : 255; }
-    },
-    StaticProperty.SHAPETYPE, new StaticPropConverter<ShapeType,NodeShape>() {
+    });
+    VIZ_STATIC_PROP_CONVERTERS.put(StaticProperty.SHAPETYPE,
+      new StaticPropConverter<ShapeType,NodeShape>() {
       public NodeShape convert(ShapeType shape) {
         switch (shape) {
           case OVAL:
@@ -238,14 +235,15 @@ class GpmlToPathway {
             return NodeShapeVisualProperty.ROUND_RECTANGLE;
           case TRIANGLE:
             return NodeShapeVisualProperty.TRIANGLE;
+          default:
+            return NodeShapeVisualProperty.RECTANGLE;
         }
-        return NodeShapeVisualProperty.RECTANGLE;
       }
-    },
-    StaticProperty.LINESTYLE,     LINE_TYPE_CONVERTER,
-    StaticProperty.STARTLINETYPE, ARROW_SHAPE_CONVERTER,
-    StaticProperty.ENDLINETYPE,   ARROW_SHAPE_CONVERTER
-    );
+    });
+    VIZ_STATIC_PROP_CONVERTERS.put(StaticProperty.LINESTYLE,     LINE_TYPE_CONVERTER);
+    VIZ_STATIC_PROP_CONVERTERS.put(StaticProperty.STARTLINETYPE, ARROW_SHAPE_CONVERTER);
+    VIZ_STATIC_PROP_CONVERTERS.put(StaticProperty.ENDLINETYPE,   ARROW_SHAPE_CONVERTER);
+  }
 
   private static Color DEFAULT_SELECTED_NODE_COLOR = new Color(255, 255, 204, 127);
 
@@ -258,7 +256,7 @@ class GpmlToPathway {
    * @param staticProp The static property whose value is to be converted to a VisualProperty value.
    * @param vizProp The visual property to which to convert the static property's value.
    */
-  private void convertViewStaticProp(final PathwayElement elem, final CyIdentifiable netObj, final StaticProperty staticProp, final VisualProperty vizProp) {
+  private void convertViewStaticProp(final PathwayElement elem, final CyIdentifiable netObj, final StaticProperty staticProp, final VisualProperty<?> vizProp) {
     Object value = elem.getStaticProperty(staticProp);
     if (value == null) return;
     if (VIZ_STATIC_PROP_CONVERTERS.containsKey(staticProp)) {
@@ -274,8 +272,8 @@ class GpmlToPathway {
    * @param props GPML static properties and their corresponding Cytoscape visual properties of which to convert.
    * @param netObj Either a CyNode or a CyEdge whose View would contain the visual properties.
    */
-  private void convertViewStaticProps(final PathwayElement elem, final Map<StaticProperty,VisualProperty> props, final CyIdentifiable netObj) {
-    for (final Map.Entry<StaticProperty,VisualProperty> prop : props.entrySet()) {
+  private void convertViewStaticProps(final PathwayElement elem, final Map<StaticProperty,VisualProperty<?>> props, final CyIdentifiable netObj) {
+    for (final Map.Entry<StaticProperty,VisualProperty<?>> prop : props.entrySet()) {
       final StaticProperty staticProp = prop.getKey();
       final VisualProperty vizProp = prop.getValue();
       convertViewStaticProp(elem, netObj, staticProp, vizProp);
@@ -317,24 +315,26 @@ class GpmlToPathway {
    ========================================================
   */
 
-  private static Map<StaticProperty,String> dataNodeStaticProps = ezMap(StaticProperty.class, String.class,
-    StaticProperty.GRAPHID,  "GraphID",
-    StaticProperty.TEXTLABEL, CyNetwork.NAME
-    );
+  private static Map<StaticProperty,String> dataNodeStaticProps = new HashMap<StaticProperty,String>();
+  static {
+    dataNodeStaticProps.put(StaticProperty.GRAPHID,  "GraphID");
+    dataNodeStaticProps.put(StaticProperty.TEXTLABEL, CyNetwork.NAME);
+  }
 
-  private static Map<StaticProperty,VisualProperty> dataNodeViewStaticProps = ezMap(StaticProperty.class, VisualProperty.class,
-    StaticProperty.CENTERX,       BasicVisualLexicon.NODE_X_LOCATION,
-    StaticProperty.CENTERY,       BasicVisualLexicon.NODE_Y_LOCATION,
-    StaticProperty.WIDTH,         BasicVisualLexicon.NODE_WIDTH,
-    StaticProperty.HEIGHT,        BasicVisualLexicon.NODE_HEIGHT,
-    StaticProperty.COLOR,         BasicVisualLexicon.NODE_BORDER_PAINT,
-    StaticProperty.FILLCOLOR,     BasicVisualLexicon.NODE_FILL_COLOR,
-    StaticProperty.FONTSIZE,      BasicVisualLexicon.NODE_LABEL_FONT_SIZE,
-    StaticProperty.TRANSPARENT,   BasicVisualLexicon.NODE_TRANSPARENCY,
-    StaticProperty.LINETHICKNESS, BasicVisualLexicon.NODE_BORDER_WIDTH,
-    StaticProperty.SHAPETYPE,     BasicVisualLexicon.NODE_SHAPE,
-    StaticProperty.LINESTYLE,     BasicVisualLexicon.NODE_BORDER_LINE_TYPE
-    );
+  private static Map<StaticProperty,VisualProperty<?>> dataNodeViewStaticProps = new HashMap<StaticProperty,VisualProperty<?>>();
+  static {
+    dataNodeViewStaticProps.put(StaticProperty.CENTERX,       BasicVisualLexicon.NODE_X_LOCATION);
+    dataNodeViewStaticProps.put(StaticProperty.CENTERY,       BasicVisualLexicon.NODE_Y_LOCATION);
+    dataNodeViewStaticProps.put(StaticProperty.WIDTH,         BasicVisualLexicon.NODE_WIDTH);
+    dataNodeViewStaticProps.put(StaticProperty.HEIGHT,        BasicVisualLexicon.NODE_HEIGHT);
+    dataNodeViewStaticProps.put(StaticProperty.COLOR,         BasicVisualLexicon.NODE_BORDER_PAINT);
+    dataNodeViewStaticProps.put(StaticProperty.FILLCOLOR,     BasicVisualLexicon.NODE_FILL_COLOR);
+    dataNodeViewStaticProps.put(StaticProperty.FONTSIZE,      BasicVisualLexicon.NODE_LABEL_FONT_SIZE);
+    dataNodeViewStaticProps.put(StaticProperty.TRANSPARENT,   BasicVisualLexicon.NODE_TRANSPARENCY);
+    dataNodeViewStaticProps.put(StaticProperty.LINETHICKNESS, BasicVisualLexicon.NODE_BORDER_WIDTH);
+    dataNodeViewStaticProps.put(StaticProperty.SHAPETYPE,     BasicVisualLexicon.NODE_SHAPE);
+    dataNodeViewStaticProps.put(StaticProperty.LINESTYLE,     BasicVisualLexicon.NODE_BORDER_LINE_TYPE);
+  }
 
   private void convertDataNodes() {
     for (final PathwayElement elem : pathway.getDataObjects()) {
@@ -380,20 +380,22 @@ class GpmlToPathway {
    ========================================================
   */
 
-  private static Map<StaticProperty,String> stateStaticProps = ezMap(StaticProperty.class, String.class,
-    StaticProperty.TEXTLABEL, CyNetwork.NAME
-    );
+  private static Map<StaticProperty,String> stateStaticProps = new HashMap<StaticProperty,String>();
+  static {
+    stateStaticProps.put(StaticProperty.TEXTLABEL, CyNetwork.NAME);
+  }
 
-  private static Map<StaticProperty,VisualProperty> stateViewStaticProps = ezMap(StaticProperty.class, VisualProperty.class,
-    StaticProperty.WIDTH,         BasicVisualLexicon.NODE_WIDTH,
-    StaticProperty.HEIGHT,        BasicVisualLexicon.NODE_HEIGHT,
-    StaticProperty.COLOR,         BasicVisualLexicon.NODE_BORDER_PAINT,
-    StaticProperty.FILLCOLOR,     BasicVisualLexicon.NODE_FILL_COLOR,
-    StaticProperty.FONTSIZE,      BasicVisualLexicon.NODE_LABEL_FONT_SIZE,
-    StaticProperty.TRANSPARENT,   BasicVisualLexicon.NODE_TRANSPARENCY,
-    StaticProperty.SHAPETYPE,     BasicVisualLexicon.NODE_SHAPE,
-    StaticProperty.LINETHICKNESS, BasicVisualLexicon.NODE_BORDER_WIDTH
-    );
+  private static Map<StaticProperty,VisualProperty<?>> stateViewStaticProps = new HashMap<StaticProperty,VisualProperty<?>>();
+  static {
+    stateViewStaticProps.put(StaticProperty.WIDTH,         BasicVisualLexicon.NODE_WIDTH);
+    stateViewStaticProps.put(StaticProperty.HEIGHT,        BasicVisualLexicon.NODE_HEIGHT);
+    stateViewStaticProps.put(StaticProperty.COLOR,         BasicVisualLexicon.NODE_BORDER_PAINT);
+    stateViewStaticProps.put(StaticProperty.FILLCOLOR,     BasicVisualLexicon.NODE_FILL_COLOR);
+    stateViewStaticProps.put(StaticProperty.FONTSIZE,      BasicVisualLexicon.NODE_LABEL_FONT_SIZE);
+    stateViewStaticProps.put(StaticProperty.TRANSPARENT,   BasicVisualLexicon.NODE_TRANSPARENCY);
+    stateViewStaticProps.put(StaticProperty.SHAPETYPE,     BasicVisualLexicon.NODE_SHAPE);
+    stateViewStaticProps.put(StaticProperty.LINETHICKNESS, BasicVisualLexicon.NODE_BORDER_WIDTH);
+  }
 
 
   private void convertStates() {
@@ -464,21 +466,24 @@ class GpmlToPathway {
    ========================================================
   */
 
-  private static Map<StaticProperty,String> labelStaticProps = ezMap(StaticProperty.class, String.class,
-    StaticProperty.TEXTLABEL, CyNetwork.NAME
-    );
+  private static Map<StaticProperty,String> labelStaticProps = new HashMap<StaticProperty,String>();
+  static {
+    labelStaticProps.put(StaticProperty.TEXTLABEL, CyNetwork.NAME);
+  }
 
-  private static Map<StaticProperty,VisualProperty> labelViewStaticProps = ezMap(StaticProperty.class, VisualProperty.class,
-    StaticProperty.CENTERX,       BasicVisualLexicon.NODE_X_LOCATION,
-    StaticProperty.CENTERY,       BasicVisualLexicon.NODE_Y_LOCATION,
-    StaticProperty.WIDTH,         BasicVisualLexicon.NODE_WIDTH,
-    StaticProperty.HEIGHT,        BasicVisualLexicon.NODE_HEIGHT,
-    StaticProperty.COLOR,         BasicVisualLexicon.NODE_LABEL_COLOR,
-    StaticProperty.FILLCOLOR,     BasicVisualLexicon.NODE_FILL_COLOR,
-    StaticProperty.FONTSIZE,      BasicVisualLexicon.NODE_LABEL_FONT_SIZE,
-    StaticProperty.SHAPETYPE,     BasicVisualLexicon.NODE_SHAPE,
-    StaticProperty.LINETHICKNESS, BasicVisualLexicon.NODE_BORDER_WIDTH
-    );
+  private static Map<StaticProperty,VisualProperty<?>> labelViewStaticProps = new HashMap<StaticProperty,VisualProperty<?>>();
+  static {
+    labelViewStaticProps.put(StaticProperty.CENTERX,       BasicVisualLexicon.NODE_X_LOCATION);
+    labelViewStaticProps.put(StaticProperty.CENTERY,       BasicVisualLexicon.NODE_Y_LOCATION);
+    labelViewStaticProps.put(StaticProperty.WIDTH,         BasicVisualLexicon.NODE_WIDTH);
+    labelViewStaticProps.put(StaticProperty.HEIGHT,        BasicVisualLexicon.NODE_HEIGHT);
+    labelViewStaticProps.put(StaticProperty.COLOR,         BasicVisualLexicon.NODE_LABEL_COLOR);
+    labelViewStaticProps.put(StaticProperty.FILLCOLOR,     BasicVisualLexicon.NODE_FILL_COLOR);
+    labelViewStaticProps.put(StaticProperty.FONTSIZE,      BasicVisualLexicon.NODE_LABEL_FONT_SIZE);
+    labelViewStaticProps.put(StaticProperty.SHAPETYPE,     BasicVisualLexicon.NODE_SHAPE);
+    labelViewStaticProps.put(StaticProperty.LINETHICKNESS, BasicVisualLexicon.NODE_BORDER_WIDTH);
+
+  }
 
   private void convertLabels() {
     for (final PathwayElement elem : pathway.getDataObjects()) {
@@ -583,11 +588,12 @@ class GpmlToPathway {
     }
   }
 
-  private static Map<StaticProperty,VisualProperty> lineViewStaticProps = ezMap(StaticProperty.class, VisualProperty.class,
-    StaticProperty.COLOR,         BasicVisualLexicon.EDGE_UNSELECTED_PAINT,
-    StaticProperty.LINESTYLE,     BasicVisualLexicon.EDGE_LINE_TYPE,
-    StaticProperty.LINETHICKNESS, BasicVisualLexicon.EDGE_WIDTH
-    );
+  private static Map<StaticProperty,VisualProperty<?>> lineViewStaticProps = new HashMap<StaticProperty,VisualProperty<?>>();
+  static {
+    lineViewStaticProps.put(StaticProperty.COLOR,         BasicVisualLexicon.EDGE_UNSELECTED_PAINT);
+    lineViewStaticProps.put(StaticProperty.LINESTYLE,     BasicVisualLexicon.EDGE_LINE_TYPE);
+    lineViewStaticProps.put(StaticProperty.LINETHICKNESS, BasicVisualLexicon.EDGE_WIDTH);
+  }
 
   private void assignEdgeVizStyle(final CyEdge edge, final PathwayElement line, final boolean isFirst, final boolean isLast) {
     if (edge == null) return;
@@ -597,28 +603,6 @@ class GpmlToPathway {
       convertViewStaticProp(line, edge, StaticProperty.STARTLINETYPE, BasicVisualLexicon.EDGE_SOURCE_ARROW_SHAPE);
     if (isLast)
       convertViewStaticProp(line, edge, StaticProperty.ENDLINETYPE, BasicVisualLexicon.EDGE_TARGET_ARROW_SHAPE);   
-  }
-  
-  /*
-   ========================================================
-     Collection util methods
-   ========================================================
-  */
-
-  private static <E> Map<E,E> ezMap(E ... elems) {
-    final Map<E,E> map = new HashMap<E,E>();
-    for (int i = 0; i < elems.length; i += 2) {
-      map.put(elems[i], elems[i+1]);
-    }
-    return map;
-  }
-
-  private static <K,V> Map<K,V> ezMap(Class<? extends K> keyType, Class<? extends V> valueType, Object ... elems) {
-    final Map<K,V> map = new HashMap<K,V>();
-    for (int i = 0; i < elems.length; i += 2) {
-      map.put(keyType.cast(elems[i]), valueType.cast(elems[i+1]));
-    }
-    return map;
   }
 }
 
@@ -636,7 +620,6 @@ class DelayedVizProp {
   }
 
   public static void applyAll(final CyNetworkView netView, final Iterable<DelayedVizProp> delayedProps) {
-    final CyNetwork net = netView.getModel();
     for (final DelayedVizProp delayedProp : delayedProps) {
       View<?> view = null;
       if (delayedProp.netObj instanceof CyNode) {
