@@ -53,7 +53,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.geom.Point2D;
 
-class PathwayToNetwork {
+class GpmlToPathway {
   /**
    * Maps a GPML pathway element to its representative CyNode in the network.
    */
@@ -86,7 +86,7 @@ class PathwayToNetwork {
    * Constructing this object will not start the conversion and will not modify
    * the given network in any way.
    */
-	public PathwayToNetwork(final Pathway pathway, final CyNetworkView networkView) {
+	public GpmlToPathway(final Pathway pathway, final CyNetworkView networkView) {
 		this.pathway = pathway;
     this.networkView = networkView;
 		this.network = networkView.getModel();
