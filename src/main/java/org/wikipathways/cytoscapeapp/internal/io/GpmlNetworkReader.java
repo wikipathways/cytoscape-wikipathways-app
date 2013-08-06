@@ -43,8 +43,6 @@ public class GpmlNetworkReader implements CyNetworkReader {
 
 	InputStream input = null;
     final String fileName;
-    CyNetwork net = null;
-
 	
 	protected GpmlNetworkReader(InputStream input, String fileName) {
         this.input = input;
@@ -62,12 +60,8 @@ public class GpmlNetworkReader implements CyNetworkReader {
         input = null;
 
         monitor.setStatusMessage("Constructing network");
-        net = CyActivator.netFactory.createNetwork();
         final String name = pathway.getMappInfo().getMapInfoName();
-        net.getRow(net).set(CyNetwork.NAME, name);
-        CyActivator.netMgr.addNetwork(net);
-        CyNetworkView view = CyActivator.netViewFactory.createNetworkView(net);
-        CyActivator.netViewMgr.addNetworkView(view);
+        final CyNetworkView view = newNetwork(name);
         (new GpmlToPathway(pathway, view)).convert();
 	}
 
@@ -85,5 +79,14 @@ public class GpmlNetworkReader implements CyNetworkReader {
 
     public CyNetwork[] getNetworks() {
         return new CyNetwork[0];
+    }
+
+    private static CyNetworkView newNetwork(final String name) {
+        final CyNetwork net = CyActivator.netFactory.createNetwork();
+        net.getRow(net).set(CyNetwork.NAME, name);
+        CyActivator.netMgr.addNetwork(net);
+        final CyNetworkView view = CyActivator.netViewFactory.createNetworkView(net);
+        CyActivator.netViewMgr.addNetworkView(view);
+        return view;
     }
 }
