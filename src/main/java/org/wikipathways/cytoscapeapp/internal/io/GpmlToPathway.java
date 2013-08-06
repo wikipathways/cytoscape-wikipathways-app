@@ -4,34 +4,25 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.HashSet;
-import java.util.EnumMap;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import org.pathvisio.core.model.AnchorType;
 import org.pathvisio.core.model.Pathway;
 import org.pathvisio.core.model.PathwayElement;
 import org.pathvisio.core.model.MLine;
 import org.pathvisio.core.model.PathwayElement.MAnchor;
-import org.pathvisio.core.model.PathwayElement.MPoint;
-import org.pathvisio.core.model.ConnectorShape;
 import org.pathvisio.core.model.ObjectType;
 import org.pathvisio.core.model.StaticProperty;
-import org.pathvisio.core.model.StaticPropertyType;
 import org.pathvisio.core.model.GraphLink;
 import org.pathvisio.core.model.ShapeType;
 import org.pathvisio.core.model.LineStyle;
-import org.pathvisio.core.model.IShape;
 
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyTable;
 import org.cytoscape.model.CyIdentifiable;
-import org.cytoscape.model.CyColumn;
-import org.cytoscape.model.CyRow;
 
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.View;
@@ -43,8 +34,6 @@ import org.cytoscape.view.presentation.property.values.NodeShape;
 import org.cytoscape.view.presentation.property.values.LineType;
 import org.cytoscape.view.presentation.property.values.ArrowShape;
 import org.cytoscape.view.presentation.property.ArrowShapeVisualProperty;
-import org.cytoscape.view.presentation.annotations.Annotation;
-import org.cytoscape.view.presentation.annotations.TextAnnotation;
 
 import org.wikipathways.cytoscapeapp.internal.CyActivator;
 
@@ -152,7 +141,7 @@ class GpmlToPathway {
   /**
    * Visual properties that should not be locked.
    */
-  private static Set<VisualProperty> unlockedVizProps = new HashSet<VisualProperty>(Arrays.asList(
+  private static Set<VisualProperty<?>> unlockedVizProps = new HashSet<VisualProperty<?>>(Arrays.asList(
     BasicVisualLexicon.NODE_X_LOCATION,
     BasicVisualLexicon.NODE_Y_LOCATION
     ));
@@ -256,7 +245,7 @@ class GpmlToPathway {
    * @param staticProp The static property whose value is to be converted to a VisualProperty value.
    * @param vizProp The visual property to which to convert the static property's value.
    */
-  private void convertViewStaticProp(final PathwayElement elem, final CyIdentifiable netObj, final StaticProperty staticProp, final VisualProperty<?> vizProp) {
+  private void convertViewStaticProp(final PathwayElement elem, final CyIdentifiable netObj, final StaticProperty staticProp, final VisualProperty vizProp) {
     Object value = elem.getStaticProperty(staticProp);
     if (value == null) return;
     if (VIZ_STATIC_PROP_CONVERTERS.containsKey(staticProp)) {
@@ -275,7 +264,7 @@ class GpmlToPathway {
   private void convertViewStaticProps(final PathwayElement elem, final Map<StaticProperty,VisualProperty<?>> props, final CyIdentifiable netObj) {
     for (final Map.Entry<StaticProperty,VisualProperty<?>> prop : props.entrySet()) {
       final StaticProperty staticProp = prop.getKey();
-      final VisualProperty vizProp = prop.getValue();
+      final VisualProperty<?> vizProp = prop.getValue();
       convertViewStaticProp(elem, netObj, staticProp, vizProp);
     }
 
@@ -362,10 +351,11 @@ class GpmlToPathway {
     for (final PathwayElement elem : pathway.getDataObjects()) {
       if (!elem.getObjectType().equals(ObjectType.SHAPE))
         continue;
-      convertDataNode(elem);
+      convertDataNode(elem); // shapes are treated just like data nodes, but this will change in the future with annotations
     }
   }
 
+  /*
   private void convertShape(final PathwayElement shape) {
     final CyNode node = network.addNode();
     convertStaticProps(shape, dataNodeStaticProps, network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS), node.getSUID());
@@ -373,6 +363,7 @@ class GpmlToPathway {
     convertShapeTypeNone(node, shape);
     nodes.put(shape, node);
   }
+  */
   
   /*
    ========================================================
