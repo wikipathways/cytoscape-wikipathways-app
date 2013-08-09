@@ -85,6 +85,8 @@ class GpmlToPathway {
    */
 	public void convert() {
     network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS).createColumn("GraphID", String.class, false);
+    network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS).createColumn("GeneID", String.class, false);
+    network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS).createColumn("Datasource", String.class, false);
 
     // convert by each pathway element type
     convertDataNodes();
@@ -321,15 +323,21 @@ class GpmlToPathway {
   }
 
   private void convertDataNodes() {
+	dataNodeStaticProps.put(StaticProperty.GENEID, "GeneID");
     for (final PathwayElement elem : pathway.getDataObjects()) {
       if (!elem.getObjectType().equals(ObjectType.DATANODE))
         continue;
       convertDataNode(elem);
     }
+    dataNodeStaticProps.remove(StaticProperty.GENEID);
   }
 
   private void convertDataNode(final PathwayElement dataNode) {
     final CyNode node = network.addNode();
+    
+    if(dataNode.getDataSource() != null && dataNode.getDataSource().getFullName() != null) {
+    	network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS).getRow(node.getSUID()).set("Datasource", dataNode.getDataSource().getFullName());
+    }
     convertStaticProps(dataNode, dataNodeStaticProps, network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS), node.getSUID());
     convertViewStaticProps(dataNode, dataNodeViewStaticProps, node);
     convertShapeTypeNone(node, dataNode);
@@ -481,6 +489,7 @@ class GpmlToPathway {
 
   private void convertLabel(final PathwayElement label) {
     // TODO: refactor this as an annotation
+	// comment Tina: not sure if they can all be replaced by annotations because they are often connected with data nodes
     final CyNode node = network.addNode();
     convertStaticProps(label, labelStaticProps, network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS), node.getSUID());
     convertViewStaticProps(label, labelViewStaticProps, node);
