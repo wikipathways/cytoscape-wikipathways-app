@@ -17,21 +17,16 @@
 //
 package org.wikipathways.cytoscapeapp.internal.io;
 
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
-import org.wikipathways.cytoscapeapp.internal.CyActivator;
-import org.wikipathways.cytoscapeapp.internal.model.GPMLNetwork;
-import org.wikipathways.cytoscapeapp.internal.model.GPMLNetworkImpl;
-import org.wikipathways.cytoscapeapp.internal.model.GPMLNetworkManager;
-import org.cytoscape.work.Task;
-import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.io.read.CyNetworkReader;
 import org.cytoscape.model.CyNetwork;
-import org.cytoscape.model.CyNetworkManager;
-import org.cytoscape.model.CyNetworkFactory;
 import org.cytoscape.view.model.CyNetworkView;
+import org.cytoscape.work.TaskMonitor;
+import org.cytoscape.work.Tunable;
 import org.pathvisio.core.model.Pathway;
+import org.wikipathways.cytoscapeapp.internal.CyActivator;
 
 /**
  * 
@@ -44,6 +39,9 @@ public class GpmlNetworkReader implements CyNetworkReader {
 	InputStream input = null;
     final String fileName;
 	
+    @Tunable(description="Import as pathway? Deselect if you want to load network view.", groups={"WikiPathways App"})
+    public boolean importAsPathway = true;
+    
 	protected GpmlNetworkReader(InputStream input, String fileName) {
         this.input = input;
         this.fileName = fileName;
@@ -62,7 +60,11 @@ public class GpmlNetworkReader implements CyNetworkReader {
         monitor.setStatusMessage("Constructing network");
         final String name = pathway.getMappInfo().getMapInfoName();
         final CyNetworkView view = newNetwork(name);
-        (new GpmlToPathway(pathway, view)).convert();
+        if(importAsPathway) {
+        	(new GpmlToPathway(pathway, view)).convert();
+        } else {
+        	(new GpmlToNetwork(pathway, view)).convert();
+        }
         updateNetworkView(view);
 	}
 
