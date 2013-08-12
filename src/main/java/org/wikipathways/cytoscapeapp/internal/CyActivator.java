@@ -28,6 +28,7 @@ import org.cytoscape.model.CyTableManager;
 import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.service.util.AbstractCyActivator;
 import org.cytoscape.util.swing.FileUtil;
+import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
 import org.cytoscape.view.model.CyNetworkViewFactory;
 import org.cytoscape.view.model.CyNetworkViewManager;
 import org.osgi.framework.BundleContext;
@@ -70,6 +71,7 @@ public class CyActivator extends AbstractCyActivator {
     public static AnnotationFactory annotationFactory = null;
     public static CyNetworkReaderManager netReaderMgr = null;
     public static TaskManager taskMgr = null;
+    public static CyLayoutAlgorithmManager layoutMgr = null;
 
 	@Override
 	public void start(BundleContext context) throws Exception {
@@ -92,7 +94,8 @@ public class CyActivator extends AbstractCyActivator {
         //annotationFactory = getService(context, AnnotationFactory.class);
         netReaderMgr = getService(context, CyNetworkReaderManager.class);
         taskMgr = getService(context, DialogTaskManager.class);
-
+        layoutMgr = getService(context, CyLayoutAlgorithmManager.class);
+        
         // currently not used - will probably be needed in the future
 //      CyApplicationManager cyAppMgr = getService(context,CyApplicationManager.class);
 //      StreamUtil streamUtil = getService(context,StreamUtil.class);

@@ -19,10 +19,16 @@ package org.wikipathways.cytoscapeapp.internal.io;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.cytoscape.io.read.CyNetworkReader;
 import org.cytoscape.model.CyNetwork;
+import org.cytoscape.model.CyNode;
+import org.cytoscape.view.layout.CyLayoutAlgorithm;
 import org.cytoscape.view.model.CyNetworkView;
+import org.cytoscape.view.model.View;
+import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.Tunable;
 import org.pathvisio.core.model.Pathway;
@@ -34,7 +40,7 @@ import org.wikipathways.cytoscapeapp.internal.CyActivator;
  * Reads the GPML file and creates a GPMLNetwork 
  * TODO: currently network and pathway view are initialized --> setting!
  */
-public class GpmlNetworkReader implements CyNetworkReader {
+public class GpmlNetworkReader extends AbstractTask implements CyNetworkReader {
 
 	InputStream input = null;
     final String fileName;
@@ -64,6 +70,8 @@ public class GpmlNetworkReader implements CyNetworkReader {
         	(new GpmlToPathway(pathway, view)).convert();
         } else {
         	(new GpmlToNetwork(pathway, view)).convert();
+        	CyLayoutAlgorithm layout = CyActivator.layoutMgr.getLayout("force-directed");
+        	insertTasksAfterCurrentTask(layout.createTaskIterator(view, layout.createLayoutContext(), CyLayoutAlgorithm.ALL_NODE_VIEWS, null));
         }
         updateNetworkView(view);
 	}
