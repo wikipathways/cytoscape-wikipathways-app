@@ -437,13 +437,6 @@ class GpmlToPathway {
     final CyNode groupNode = network.addNode();
     nodes.put(group, groupNode);
 
-    for (final PathwayElement elem : pathway.getGroupElements(group.getGroupId())) {
-      final CyNode node = nodes.get(elem);
-      if (node == null)
-        continue;
-      network.addEdge(node, groupNode, false);
-    }
-
     delayedVizProps.add(new DelayedVizProp(groupNode, BasicVisualLexicon.NODE_X_LOCATION, group.getMCenterX(), false));
     delayedVizProps.add(new DelayedVizProp(groupNode, BasicVisualLexicon.NODE_Y_LOCATION, group.getMCenterY(), false));
     delayedVizProps.add(new DelayedVizProp(groupNode, BasicVisualLexicon.NODE_WIDTH, group.getMWidth(), true));
