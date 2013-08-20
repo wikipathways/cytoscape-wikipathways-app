@@ -40,8 +40,8 @@ import org.cytoscape.io.webservice.SearchWebServiceClient;
 import org.cytoscape.io.webservice.WebServiceClient;
 import org.cytoscape.view.vizmap.VisualStyleFactory;
 import org.cytoscape.view.vizmap.VisualMappingManager;
-import org.cytoscape.view.presentation.annotations.AnnotationFactory;
-import org.cytoscape.view.presentation.annotations.AnnotationManager;
+//import org.cytoscape.view.presentation.annotations.AnnotationFactory;
+//import org.cytoscape.view.presentation.annotations.AnnotationManager;
 import org.cytoscape.work.TaskManager;
 import org.cytoscape.work.swing.DialogTaskManager;
 
@@ -67,8 +67,8 @@ public class CyActivator extends AbstractCyActivator {
     public static CyEventHelper eventHelper = null;
     public static VisualMappingManager vizMapMgr = null;
     public static VisualStyleFactory vizStyleFactory = null;
-    public static AnnotationManager annotationMgr = null;
-    public static AnnotationFactory annotationFactory = null;
+    //public static AnnotationManager annotationMgr = null;
+    //public static AnnotationFactory annotationFactory = null;
     public static CyNetworkReaderManager netReaderMgr = null;
     public static TaskManager taskMgr = null;
     public static CyLayoutAlgorithmManager layoutMgr = null;

@@ -10,6 +10,8 @@ import java.util.List;
 import java.io.InputStream;
 
 import javax.swing.ListSelectionModel;
+import javax.swing.JProgressBar;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.JCheckBox;
@@ -18,7 +20,12 @@ import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.JButton;
 import javax.swing.JScrollPane;
+import java.awt.Font;
+import java.awt.BorderLayout;
+import java.awt.GridLayout;
+import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.CardLayout;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.ActionEvent;
@@ -44,6 +51,9 @@ public class CyWPClient extends AbstractWebServiceGUIClient implements NetworkIm
   final JComboBox speciesComboBox = new JComboBox();
   final JButton searchButton = new JButton("Search");
   final PathwayRefsTableModel tableModel = new PathwayRefsTableModel();
+  final CardLayout cardLayout = new CardLayout();
+  final JPanel cardPanel = new JPanel(cardLayout);
+  final JLabel loadingLabel = new JLabel();
   final JTable resultsTable = new JTable(tableModel);
   WPClient client;
 
@@ -88,13 +98,30 @@ public class CyWPClient extends AbstractWebServiceGUIClient implements NetworkIm
       }
     });
 
+    final JPanel resultsPanel = new JPanel(new GridLayout(1, 1));
+    resultsPanel.add(new JScrollPane(resultsTable));
+
+    final JPanel loadingPanel = new JPanel(new GridBagLayout());
+    final JPanel innerLoadingPanel = new JPanel(new GridLayout(2, 1));
+    loadingLabel.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 14));
+    loadingPanel.add(loadingLabel);
+    final JProgressBar loadingBar = new JProgressBar();
+    loadingBar.setIndeterminate(true);
+    innerLoadingPanel.add(loadingLabel);
+    innerLoadingPanel.add(loadingBar);
+    loadingPanel.add(innerLoadingPanel, new GridBagConstraints());
+
+    cardPanel.add(resultsPanel, "results");
+    cardPanel.add(loadingPanel, "loading");
+
     super.gui = new JPanel(new GridBagLayout());
     EasyGBC c = new EasyGBC();
     super.gui.add(searchField, c.expandHoriz().insets(0, 10, 5, 0));
     super.gui.add(speciesCheckBox, c.noExpand().right().insets(0, 5, 5, 0));
     super.gui.add(speciesComboBox, c.right().insets(0, 0, 5, 5));
     super.gui.add(searchButton, c.right().insets(0, 0, 5, 10));
-    super.gui.add(new JScrollPane(resultsTable), c.down().expandBoth().spanHoriz(4).insets(0, 10, 10, 10));
+    super.gui.add(cardPanel, c.down().expandBoth().spanHoriz(4).insets(0, 10, 10, 10));
+    cardLayout.show(cardPanel, "results");
 
     CyActivator.taskMgr.execute(new TaskIterator(new PopulateSpecies()));
   }
@@ -162,9 +189,17 @@ public class CyWPClient extends AbstractWebServiceGUIClient implements NetworkIm
       final PathwayRef pathwayRef = tableModel.getSelectedPathwayRef();
       if (pathwayRef == null)
         return;
-      monitor.setTitle("Opening from WikiPathways: " + pathwayRef.getName());
+      monitor.setTitle(String.format("Opening '%s' from WikiPathways", pathwayRef.getName()));
+      loadingLabel.setText(String.format("Opening '%s'", pathwayRef.getName()));
+      cardLayout.show(cardPanel, "loading");
       final InputStream gpmlStream = client.loadPathway(pathwayRef);
       taskIterator.append(gpmlReader.createTaskIterator(gpmlStream, pathwayRef.getName() + ".gpml"));
+      taskIterator.append(new Task() {
+        public void run(TaskMonitor monitor) {
+          cardLayout.show(cardPanel, "results");
+        }
+        public void cancel() {}
+      });
     }
   }
 
