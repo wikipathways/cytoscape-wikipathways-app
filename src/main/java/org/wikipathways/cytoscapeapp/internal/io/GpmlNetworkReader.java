@@ -22,6 +22,8 @@ import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.swing.JOptionPane;
+
 import org.cytoscape.io.read.CyNetworkReader;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
@@ -69,7 +71,13 @@ public class GpmlNetworkReader extends AbstractTask implements CyNetworkReader {
         if(importAsPathway) {
         	(new GpmlToPathway(pathway, view)).convert();
         } else {
-        	(new GpmlToNetwork(pathway, view)).convert();
+        	Boolean unconnected = (new GpmlToNetwork(pathway, view)).convert();
+        	if(unconnected) {
+	        	JOptionPane.showMessageDialog(CyActivator.cySwingApp.getJFrame(),
+	        		    "<html>Some of the lines in the pathways are not connected.<br>Therefore some nodes might not be connected.</html>",
+	        		    "Unconnected lines warning",
+	        		    JOptionPane.WARNING_MESSAGE);
+        	}
         	CyLayoutAlgorithm layout = CyActivator.layoutMgr.getLayout("force-directed");
         	insertTasksAfterCurrentTask(layout.createTaskIterator(view, layout.createLayoutContext(), CyLayoutAlgorithm.ALL_NODE_VIEWS, null));
         }

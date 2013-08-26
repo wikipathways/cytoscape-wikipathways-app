@@ -72,12 +72,13 @@ public class CyActivator extends AbstractCyActivator {
     public static CyNetworkReaderManager netReaderMgr = null;
     public static TaskManager taskMgr = null;
     public static CyLayoutAlgorithmManager layoutMgr = null;
+    public static CySwingApplication cySwingApp = null;
 
 	@Override
 	public void start(BundleContext context) throws Exception {
 		
 		// get Cytoscape services from OSGi context
-		CySwingApplication cySwingApp = getService(context,CySwingApplication.class);
+		cySwingApp = getService(context,CySwingApplication.class);
 
         netMgr = getService(context,CyNetworkManager.class);
         netViewMgr = getService(context,CyNetworkViewManager.class);

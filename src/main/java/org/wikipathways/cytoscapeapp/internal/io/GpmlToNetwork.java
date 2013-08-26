@@ -18,6 +18,7 @@ import org.cytoscape.view.presentation.property.ArrowShapeVisualProperty;
 import org.cytoscape.view.presentation.property.BasicVisualLexicon;
 import org.cytoscape.view.presentation.property.values.ArrowShape;
 import org.pathvisio.core.model.GraphLink;
+import org.pathvisio.core.model.GraphLink.GraphIdContainer;
 import org.pathvisio.core.model.MLine;
 import org.pathvisio.core.model.ObjectType;
 import org.pathvisio.core.model.Pathway;
@@ -32,7 +33,7 @@ class GpmlToNetwork {
 	 * Maps a GPML pathway element to its representative CyNode in the network.
 	 */
 	final Map<GraphLink.GraphIdContainer, CyNode> nodes = new HashMap<GraphLink.GraphIdContainer, CyNode>();
-
+	
 	/**
 	 * In Cytoscape, first the network topology is created (via
 	 * CyNetwork.add{Node|Edge}), then the view objects are created. Once that's
@@ -56,7 +57,10 @@ class GpmlToNetwork {
 	final Pathway pathway;
 	final CyNetworkView networkView;
 	final CyNetwork network;
-
+	
+	private List<PathwayElement> edges;
+	private List<MAnchor> anchors;
+	
 	/**
 	 * Create a converter from the given pathway and store it in the given
 	 * network. Constructing this object will not start the conversion and will
@@ -67,19 +71,25 @@ class GpmlToNetwork {
 		this.networkView = networkView;
 		this.network = networkView.getModel();
 	}
+	
+	private Boolean unconnectedLines = false;
 
 	/**
 	 * Convert the pathway given in the constructor.
 	 */
-	public void convert() {
+	public Boolean convert() {
 		network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS).createColumn("GraphID", String.class, false);
 		network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS).createColumn("GeneID", String.class, false);
 		network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS).createColumn("Datasource", String.class, false);
+		network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS).createColumn("WP.type", String.class, false);
+		network.getTable(CyEdge.class, CyNetwork.DEFAULT_ATTRS).createColumn("WP.type", String.class, false);
 
 		// convert by each pathway element type
 		convertDataNodes();
 		convertGroups();
 		convertLabels();
+		
+		findEdges();
 		convertAnchors();
 		convertLines();
 
@@ -92,6 +102,66 @@ class GpmlToNetwork {
 		// clear our data structures just to be nice to the GC
 		nodes.clear();
 		delayedVizProps.clear();
+		return unconnectedLines;
+	}
+
+	/**
+	 * filters out all edges that are not connected in the pathway
+	 * only those edges and anchor nodes will be created
+	 * important in network view
+	 */
+	private void findEdges() {
+		Map<String, MLine> map = new HashMap<String, MLine>();
+		edges = new ArrayList<PathwayElement>();
+		anchors = new ArrayList<MAnchor>();
+		for (PathwayElement elem : pathway.getDataObjects()) {
+			if (elem.getObjectType().equals(ObjectType.LINE)) {
+				if(isEdge(elem)) {
+					final MLine line = (MLine) elem;
+					final String startRef = line.getMStart().getGraphRef();
+					final String endRef = line.getMEnd().getGraphRef();
+					edges.add(line);
+					map.put(startRef, line);
+					map.put(endRef, line);
+				} else {
+					unconnectedLines = true;
+				}
+			}
+		}
+		
+		for (PathwayElement elem : pathway.getDataObjects()) {
+			if (elem.getObjectType().equals(ObjectType.LINE)) {
+				final MLine line = (MLine) elem;
+				if(edges.contains(line)) {
+					for(MAnchor a : line.getMAnchors()) {
+						if(map.containsKey(a.getGraphId())) {
+							anchors.add(a);
+						}
+	 				}
+				}
+			}
+		}
+	}
+	
+	private boolean isEdge(PathwayElement e) {
+		GraphIdContainer start = pathway.getGraphIdContainer(e.getMStart().getGraphRef());
+		GraphIdContainer end = pathway.getGraphIdContainer(e.getMEnd().getGraphRef());
+		return isNode(start) && isNode(end);
+	}
+
+	private boolean isNode(GraphIdContainer idc) {
+		if(idc instanceof MAnchor) {
+			//only valid if the parent line is an edge
+			return isEdge(((MAnchor)idc).getParent());
+		} else if(idc instanceof PathwayElement) {
+			ObjectType ot = ((PathwayElement)idc).getObjectType();
+			return
+				ot == ObjectType.DATANODE ||
+				ot == ObjectType.GROUP ||
+				ot == ObjectType.LABEL;
+		} else {
+			return false;
+		}
 	}
 
 	/*
@@ -228,6 +298,7 @@ class GpmlToNetwork {
 	static {
 		dataNodeStaticProps.put(StaticProperty.GRAPHID, "GraphID");
 		dataNodeStaticProps.put(StaticProperty.TEXTLABEL, CyNetwork.NAME);
+		dataNodeStaticProps.put(StaticProperty.TYPE, "WP.type");
 	}
 
 	private Map<Xref, PathwayElement> elements;
@@ -283,11 +354,13 @@ class GpmlToNetwork {
 				continue;
 			network.addEdge(node, groupNode, false);
 		}
-
+		network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS).getRow(groupNode.getSUID()).set("WP.type", "Group");
+		
 		delayedVizProps.add(new DelayedVizProp(groupNode,BasicVisualLexicon.NODE_FILL_COLOR, Color.blue, true));
 		delayedVizProps.add(new DelayedVizProp(groupNode,BasicVisualLexicon.NODE_BORDER_WIDTH, 0.0, true));
 		delayedVizProps.add(new DelayedVizProp(groupNode,BasicVisualLexicon.NODE_WIDTH, 5.0, true));
 		delayedVizProps.add(new DelayedVizProp(groupNode,BasicVisualLexicon.NODE_HEIGHT, 5.0, true));
+		
 	}
 
 	/*
@@ -326,6 +399,8 @@ class GpmlToNetwork {
 		// TODO: refactor this as an annotation 
 		// comment Tina: not sure if they can all be replaced by annotations because they are often connected with data nodes
 		final CyNode node = network.addNode();
+		network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS).getRow(node.getSUID()).set("WP.type", "Label");
+
 		convertStaticProps(label, labelStaticProps, network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS), node.getSUID());
 		convertShapeTypeNone(node, label);
 		nodes.put(label, node);
@@ -337,35 +412,23 @@ class GpmlToNetwork {
 	 */
 
 	private void convertAnchors() {
-		for (final PathwayElement elem : pathway.getDataObjects()) {
-			if (!elem.getObjectType().equals(ObjectType.LINE))
-				continue;
-			if (elem.getMAnchors().size() == 0)
-				continue;
-			
-			// TODO: only draw anchor if line is connected 
-			convertAnchorsInLine(elem);
+		for(MAnchor anchor : anchors) {
+			convertAnchor(anchor);
 		}
 	}
-
-	private void assignAnchorVizStyle(final CyNode node) {
-		assignAnchorVizStyle(node, Color.WHITE);
-	}
-
+	
 	private void assignAnchorVizStyle(final CyNode node, final Color color) {
 		delayedVizProps.add(new DelayedVizProp(node,BasicVisualLexicon.NODE_FILL_COLOR, color, true));
 		delayedVizProps.add(new DelayedVizProp(node,BasicVisualLexicon.NODE_BORDER_WIDTH, 0.0, true));
 		delayedVizProps.add(new DelayedVizProp(node,BasicVisualLexicon.NODE_WIDTH, 5.0, true));
 		delayedVizProps.add(new DelayedVizProp(node,BasicVisualLexicon.NODE_HEIGHT, 5.0, true));
 	}
-
-	private void convertAnchorsInLine(final PathwayElement elem) {
-		final MLine line = (MLine) elem;
-		for (final MAnchor anchor : elem.getMAnchors()) {
-			final CyNode node = network.addNode();
-			nodes.put(anchor, node);
-			assignAnchorVizStyle(node, line.getColor());
-		}
+	
+	private void convertAnchor(MAnchor anchor) {
+		final CyNode node = network.addNode();
+		nodes.put(anchor, node);
+		assignAnchorVizStyle(node, Color.gray);
+		network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS).getRow(node.getSUID()).set("WP.type", "Anchor");
 	}
 
 	/*
@@ -373,11 +436,14 @@ class GpmlToNetwork {
 	 * ========================================================
 	 */
 
+	private static Map<StaticProperty, String> lineStaticProps = new HashMap<StaticProperty, String>();
+	static {
+		lineStaticProps.put(StaticProperty.TYPE, "WP.type");
+	}
+	
 	private void convertLines() {
-		for (final PathwayElement elem : pathway.getDataObjects()) {
-			if (!(elem.getObjectType().equals(ObjectType.LINE) || elem.getObjectType().equals(ObjectType.GRAPHLINE)))
-				continue;
-			convertLine(elem);
+		for(PathwayElement line : edges) {
+			convertLine(line);
 		}
 	}
 
@@ -397,13 +463,15 @@ class GpmlToNetwork {
 		if (createLine) {
 			CyNode startNode = nodes.get(pathway.getGraphIdContainer(startRef));
 			if (startNode == null) {
+				System.out.println("ERROR");
 				startNode = network.addNode();
-				assignAnchorVizStyle(startNode);
+				assignAnchorVizStyle(startNode, Color.white);
 			}
 			CyNode endNode = nodes.get(pathway.getGraphIdContainer(endRef));
 			if (endNode == null) {
+				System.out.println("ERROR");
 				endNode = network.addNode();
-				assignAnchorVizStyle(endNode);
+				assignAnchorVizStyle(endNode, Color.white);
 			}
 
 			final MAnchor[] anchors = elem.getMAnchors().toArray(new MAnchor[0]);
@@ -427,6 +495,8 @@ class GpmlToNetwork {
 	private void assignEdgeVizStyle(final CyEdge edge, final PathwayElement line, final boolean isFirst, final boolean isLast) {
 		if (edge == null)
 			return;
+
+		network.getTable(CyEdge.class, CyNetwork.DEFAULT_ATTRS).getRow(edge.getSUID()).set("WP.type", "Line");
 
 		if (isFirst)
 			convertViewStaticProp(line, edge, StaticProperty.STARTLINETYPE, BasicVisualLexicon.EDGE_SOURCE_ARROW_SHAPE);
