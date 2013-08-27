@@ -45,8 +45,6 @@ import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.work.TaskManager;
 import org.cytoscape.work.swing.DialogTaskManager;
 
-import org.wikipathways.cytoscapeapp.internal.model.GPMLNetworkManager;
-import org.wikipathways.cytoscapeapp.internal.model.GPMLNetworkManagerImpl;
 import org.wikipathways.cytoscapeapp.internal.io.GpmlReaderTaskFactory;
 import org.wikipathways.cytoscapeapp.internal.webclient.CyWPClient;
 /**
@@ -101,8 +99,6 @@ public class CyActivator extends AbstractCyActivator {
 //      CyApplicationManager cyAppMgr = getService(context,CyApplicationManager.class);
 //      StreamUtil streamUtil = getService(context,StreamUtil.class);
 
-        // initialize GPML network manager
-        GPMLNetworkManager gpmlNetMgr = new GPMLNetworkManagerImpl(netMgr, netFactory, netViewFactory, netViewMgr);
         final GpmlReaderTaskFactory gpmlReaderTaskFactory = new GpmlReaderTaskFactory(streamUtil);
         registerService(context, gpmlReaderTaskFactory, InputStreamTaskFactory.class, new Properties());
 

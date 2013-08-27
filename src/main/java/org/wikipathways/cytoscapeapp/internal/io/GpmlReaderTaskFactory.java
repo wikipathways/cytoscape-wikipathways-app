@@ -20,7 +20,6 @@ package org.wikipathways.cytoscapeapp.internal.io;
 
 import java.io.InputStream;
 
-import org.wikipathways.cytoscapeapp.internal.model.GPMLNetworkManager;
 import org.cytoscape.work.TaskIterator;
 import org.cytoscape.io.read.AbstractInputStreamTaskFactory;
 import org.cytoscape.io.BasicCyFileFilter;
@@ -40,7 +39,7 @@ public class GpmlReaderTaskFactory extends AbstractInputStreamTaskFactory {
 	
 	
 	public TaskIterator createTaskIterator(InputStream inputStream, String fileName) {
-		return new TaskIterator(new GpmlNetworkReader(inputStream, fileName));
+		return new TaskIterator(new GpmlReaderTask(inputStream, fileName));
 	}
 
 }

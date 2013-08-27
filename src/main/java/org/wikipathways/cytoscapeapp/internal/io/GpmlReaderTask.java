@@ -43,15 +43,19 @@ import org.wikipathways.cytoscapeapp.internal.CyActivator;
  * Reads the GPML file and creates a GPMLNetwork 
  * TODO: currently network and pathway view are initialized --> setting!
  */
-public class GpmlNetworkReader extends AbstractTask implements CyNetworkReader {
+public class GpmlReaderTask extends AbstractTask implements CyNetworkReader {
 
 	InputStream input = null;
     final String fileName;
 	
+    private final String PATHWAY_IMG = getClass().getResource("/pathway.png").toString();
+    private final String NETWORK_IMG = getClass().getResource("/network.png").toString();
+    private final String PATHWAY_DESC = "<html>Pathway<br><img src=\"" + PATHWAY_IMG + "\"></html>";
+    private final String NETWORK_DESC = "<html>Network<br><img src=\"" + NETWORK_IMG + "\"></html>";
     @Tunable(description="Import as:", groups={"WikiPathways"})
-    public ListSingleSelection<String> importMethod = new ListSingleSelection<String>("Pathway", "Network");
+    public ListSingleSelection<String> importMethod = new ListSingleSelection<String>(PATHWAY_DESC, NETWORK_DESC);
     
-	protected GpmlNetworkReader(InputStream input, String fileName) {
+	protected GpmlReaderTask(InputStream input, String fileName) {
         this.input = input;
         this.fileName = fileName;
 	}
@@ -69,7 +73,7 @@ public class GpmlNetworkReader extends AbstractTask implements CyNetworkReader {
         monitor.setStatusMessage("Constructing network");
         final String name = pathway.getMappInfo().getMapInfoName();
         final CyNetworkView view = newNetwork(name);
-        if(importMethod.getSelectedValue().equals("Pathway")) {
+        if(importMethod.getSelectedValue().equals(PATHWAY_DESC)) {
         	(new GpmlToPathway(pathway, view)).convert();
         } else {
         	Boolean unconnected = (new GpmlToNetwork(pathway, view)).convert();
