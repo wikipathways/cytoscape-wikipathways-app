@@ -10,7 +10,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.wikipathways</groupId>
 	<artifactId>cytoscapeapp</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0</version>
 
 	<name>WikiPathways Cytoscape App</name>
 	
@@ -81,6 +81,7 @@
 							javax.xml.transform.stream;resolution:=optional,
 							javax.xml.parsers;resolution:=optional,org.xml.sax.helpers;resolution:=optional,
 							org.xml.sax.ext;resolution:=optional,javax.xml.validation;resolution:=optional,*</Import-Package>
+                        <Bundle-Name>WikiPathways</Bundle-Name>
 					</instructions>
 				</configuration>
 			</plugin>
