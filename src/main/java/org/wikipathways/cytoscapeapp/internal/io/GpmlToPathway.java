@@ -41,7 +41,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.geom.Point2D;
 
-class GpmlToPathway {
+public class GpmlToPathway {
   /**
    * Maps a GPML pathway element to its representative CyNode in the network.
    */

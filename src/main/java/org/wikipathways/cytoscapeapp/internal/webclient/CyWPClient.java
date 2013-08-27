@@ -15,11 +15,14 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.JCheckBox;
+import javax.swing.JRadioButton;
+import javax.swing.ButtonGroup;
 import javax.swing.JComboBox;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.JButton;
 import javax.swing.JScrollPane;
+import javax.swing.JOptionPane;
 import java.awt.Font;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
@@ -33,19 +36,30 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseAdapter;
 
+import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.Task;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.TaskIterator;
+
+import org.cytoscape.model.CyNetwork;
+import org.cytoscape.view.model.CyNetworkView;
+import org.cytoscape.view.layout.CyLayoutAlgorithm;
 
 import org.cytoscape.io.read.CyNetworkReader;
 import org.cytoscape.io.read.InputStreamTaskFactory;
 
 import org.wikipathways.cytoscapeapp.internal.CyActivator;
+import org.wikipathways.cytoscapeapp.internal.io.GpmlVizStyle;
+import org.wikipathways.cytoscapeapp.internal.io.GpmlToNetwork;
+import org.wikipathways.cytoscapeapp.internal.io.GpmlToPathway;
 import org.wikipathways.cytoscapeapp.internal.webclient.WPClient.PathwayRef;
 
+import org.pathvisio.core.model.Pathway;
+
 public class CyWPClient extends AbstractWebServiceGUIClient implements NetworkImportWebServiceClient, SearchWebServiceClient {
+  final String PATHWAY_IMG = getClass().getResource("/pathway.png").toString();
+  final String NETWORK_IMG = getClass().getResource("/network.png").toString();
   static final String[] RESULTS_TABLE_COLUMN_NAMES = {"Pathway Name", "Species"};
-  final InputStreamTaskFactory gpmlReader;
   final JTextField searchField = new JTextField();
   final JCheckBox speciesCheckBox = new JCheckBox("Only: ");
   final JComboBox speciesComboBox = new JComboBox();
@@ -55,12 +69,12 @@ public class CyWPClient extends AbstractWebServiceGUIClient implements NetworkIm
   final JPanel cardPanel = new JPanel(cardLayout);
   final JLabel loadingLabel = new JLabel();
   final JTable resultsTable = new JTable(tableModel);
+  final JRadioButton pathwayButton = new JRadioButton("<html>Pathway<br><br><img src=\"" + PATHWAY_IMG.toString() + "\"></html>", true);
+  final JRadioButton networkButton = new JRadioButton("<html>Network<br><br><img src=\"" + NETWORK_IMG.toString() + "\"></html>", false);
   WPClient client;
 
-  public CyWPClient(InputStreamTaskFactory gpmlReader) {
+  public CyWPClient() {
     super("http://www.wikipathways.org", "WikiPathways", "WikiPathways");
-
-    this.gpmlReader = gpmlReader;
 
     try {
       client = new WPClient();
@@ -88,31 +102,10 @@ public class CyWPClient extends AbstractWebServiceGUIClient implements NetworkIm
     searchField.addActionListener(performSearch);
 
     resultsTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION); 
-    resultsTable.addMouseListener(new MouseAdapter() {
-      public void mouseClicked(MouseEvent e) {
-        if (e.getClickCount() != 2)
-          return;
-        final TaskIterator taskIterator = new TaskIterator();
-        taskIterator.append(new LoadPathway(taskIterator));
-        CyActivator.taskMgr.execute(taskIterator);
-      }
-    });
+    resultsTable.addMouseListener(new LoadPathway());
 
-    final JPanel resultsPanel = new JPanel(new GridLayout(1, 1));
-    resultsPanel.add(new JScrollPane(resultsTable));
-
-    final JPanel loadingPanel = new JPanel(new GridBagLayout());
-    final JPanel innerLoadingPanel = new JPanel(new GridLayout(2, 1));
-    loadingLabel.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 14));
-    loadingPanel.add(loadingLabel);
-    final JProgressBar loadingBar = new JProgressBar();
-    loadingBar.setIndeterminate(true);
-    innerLoadingPanel.add(loadingLabel);
-    innerLoadingPanel.add(loadingBar);
-    loadingPanel.add(innerLoadingPanel, new GridBagConstraints());
-
-    cardPanel.add(resultsPanel, "results");
-    cardPanel.add(loadingPanel, "loading");
+    cardPanel.add(newResultsPanel(), "results");
+    cardPanel.add(newLoadingPanel(), "loading");
 
     super.gui = new JPanel(new GridBagLayout());
     EasyGBC c = new EasyGBC();
@@ -126,11 +119,44 @@ public class CyWPClient extends AbstractWebServiceGUIClient implements NetworkIm
     CyActivator.taskMgr.execute(new TaskIterator(new PopulateSpecies()));
   }
 
+  private JPanel newResultsPanel() {
+    final EasyGBC c = new EasyGBC();
+
+    pathwayButton.setVerticalTextPosition(JRadioButton.TOP);
+    networkButton.setVerticalTextPosition(JRadioButton.TOP);
+    final ButtonGroup group = new ButtonGroup();
+    group.add(pathwayButton);
+    group.add(networkButton);
+
+    final JPanel importPanel = new JPanel(new GridBagLayout());
+    importPanel.add(new JLabel("Import as:"), c.spanHoriz(2).anchor("west").insets(10, 0, 10, 0));
+    importPanel.add(pathwayButton, c.noSpan().down().insets(0, 0, 0, 20));
+    importPanel.add(networkButton, c.right().noInsets());
+
+    final JPanel resultsPanel = new JPanel(new GridBagLayout());
+    resultsPanel.add(new JScrollPane(resultsTable), c.reset().expandBoth());
+    resultsPanel.add(importPanel, c.anchor("west").noExpand().down());
+    return resultsPanel;
+  }
+
+  private JPanel newLoadingPanel() {
+    final JPanel loadingPanel = new JPanel(new GridBagLayout());
+    final JPanel innerLoadingPanel = new JPanel(new GridLayout(2, 1));
+    loadingLabel.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 14));
+    loadingPanel.add(loadingLabel);
+    final JProgressBar loadingBar = new JProgressBar();
+    loadingBar.setIndeterminate(true);
+    innerLoadingPanel.add(loadingLabel);
+    innerLoadingPanel.add(loadingBar);
+    loadingPanel.add(innerLoadingPanel, new GridBagConstraints());
+    return loadingPanel;
+  }
+
   public TaskIterator createTaskIterator(Object query) {
     return new TaskIterator();
   }
 
-  abstract class InterruptableTask implements Task {
+  abstract class InterruptableTask extends AbstractTask {
     public abstract void interruptableRun(TaskMonitor monitor) throws Exception;
 
     protected Thread thread = null;
@@ -179,28 +205,96 @@ public class CyWPClient extends AbstractWebServiceGUIClient implements NetworkIm
     }
   }
 
-  class LoadPathway extends InterruptableTask {
-    final TaskIterator taskIterator;
-    public LoadPathway(TaskIterator taskIterator) {
-      this.taskIterator = taskIterator;
+  class LoadPathway extends MouseAdapter {
+    public void mouseClicked(MouseEvent e) {
+      if (e.getClickCount() != 2)
+        return;
+      final TaskIterator taskIterator = new TaskIterator();
+      taskIterator.append(new LoadPathwayTask());
+      CyActivator.taskMgr.execute(taskIterator);
+    }
+  }
+
+  class LoadPathwayTask extends InterruptableTask {
+    InputStream gpmlStream = null;
+    public void interruptableRun(TaskMonitor monitor) throws Exception {
+      try {
+        innerRun(monitor);
+      } catch (Exception e) {
+        cleanUIAfterPathwayLoading();
+        throw e;
+      }
     }
 
-    public void interruptableRun(TaskMonitor monitor) throws Exception {
+    public void cancel() {
+      cleanUIAfterPathwayLoading();
+      if (gpmlStream != null) {
+        try {
+          gpmlStream.close();
+        } catch (Exception e) {}
+      }
+      super.cancel();
+    }
+
+    private void innerRun(TaskMonitor monitor) throws Exception {
       final PathwayRef pathwayRef = tableModel.getSelectedPathwayRef();
       if (pathwayRef == null)
         return;
-      monitor.setTitle(String.format("Opening '%s' from WikiPathways", pathwayRef.getName()));
-      loadingLabel.setText(String.format("Opening '%s'", pathwayRef.getName()));
-      cardLayout.show(cardPanel, "loading");
-      final InputStream gpmlStream = client.loadPathway(pathwayRef);
-      taskIterator.append(gpmlReader.createTaskIterator(gpmlStream, pathwayRef.getName() + ".gpml"));
-      taskIterator.append(new Task() {
-        public void run(TaskMonitor monitor) {
-          cardLayout.show(cardPanel, "results");
+      monitor.setTitle(String.format("Open '%s' from WikiPathways", pathwayRef.getName()));
+      setupUIBeforePathwayLoading(pathwayRef.getName());
+
+      monitor.setStatusMessage("Download pathways file");
+      gpmlStream = client.loadPathway(pathwayRef);
+
+      monitor.setStatusMessage("Parsing pathways file");
+      final Pathway pathway = new Pathway();
+      pathway.readFromXml(gpmlStream, true);
+      gpmlStream = null;
+
+      monitor.setStatusMessage("Constructing network");
+      final String name = pathway.getMappInfo().getMapInfoName();
+      final CyNetworkView view = newNetwork(name);
+
+      if (pathwayButton.isSelected()) {
+        (new GpmlToPathway(pathway, view)).convert();
+      } else {
+        Boolean unconnected = (new GpmlToNetwork(pathway, view)).convert();
+        if(unconnected) {
+          JOptionPane.showMessageDialog(CyActivator.cySwingApp.getJFrame(),
+            "<html>Some of the lines in the pathways are not connected.<br>Therefore some nodes might not be connected.</html>",
+            "Unconnected lines warning",
+            JOptionPane.WARNING_MESSAGE);
         }
-        public void cancel() {}
-      });
+        CyLayoutAlgorithm layout = CyActivator.layoutMgr.getLayout("force-directed");
+        insertTasksAfterCurrentTask(layout.createTaskIterator(view, layout.createLayoutContext(), CyLayoutAlgorithm.ALL_NODE_VIEWS, null));
+      }
+      updateNetworkView(view);
+      cleanUIAfterPathwayLoading();
     }
+  }
+
+  private void setupUIBeforePathwayLoading(final String pathwayName) {
+    cardLayout.show(cardPanel, "loading");
+    loadingLabel.setText(String.format("Loading '%s'", pathwayName));
+  }
+
+  private void cleanUIAfterPathwayLoading() {
+    cardLayout.show(cardPanel, "results");
+  }
+
+  private static CyNetworkView newNetwork(final String name) {
+    final CyNetwork net = CyActivator.netFactory.createNetwork();
+    net.getRow(net).set(CyNetwork.NAME, name);
+    CyActivator.netMgr.addNetwork(net);
+    final CyNetworkView view = CyActivator.netViewFactory.createNetworkView(net);
+    CyActivator.netViewMgr.addNetworkView(view);
+    return view;
+  }
+
+  private static void updateNetworkView(final CyNetworkView netView) {
+    GpmlVizStyle.get().apply(netView);
+    netView.fitContent();
+    netView.updateView();
   }
 
   class PathwayRefsTableModel extends AbstractTableModel {

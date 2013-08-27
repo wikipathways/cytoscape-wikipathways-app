@@ -28,7 +28,7 @@ import org.pathvisio.core.model.ShapeType;
 import org.pathvisio.core.model.StaticProperty;
 import org.wikipathways.cytoscapeapp.internal.CyActivator;
 
-class GpmlToNetwork {
+public class GpmlToNetwork {
 	/**
 	 * Maps a GPML pathway element to its representative CyNode in the network.
 	 */

@@ -44,18 +44,15 @@ import org.wikipathways.cytoscapeapp.internal.CyActivator;
  * TODO: currently network and pathway view are initialized --> setting!
  */
 public class GpmlReaderTask extends AbstractTask implements CyNetworkReader {
-
 	InputStream input = null;
     final String fileName;
 	
-    private final String PATHWAY_IMG = getClass().getResource("/pathway.png").toString();
-    private final String NETWORK_IMG = getClass().getResource("/network.png").toString();
-    private final String PATHWAY_DESC = "<html>Pathway<br><img src=\"" + PATHWAY_IMG + "\"></html>";
-    private final String NETWORK_DESC = "<html>Network<br><img src=\"" + NETWORK_IMG + "\"></html>";
+    public static final String PATHWAY_DESC = "Pathway";
+    public static final String NETWORK_DESC = "Network";
     @Tunable(description="Import as:", groups={"WikiPathways"})
     public ListSingleSelection<String> importMethod = new ListSingleSelection<String>(PATHWAY_DESC, NETWORK_DESC);
-    
-	protected GpmlReaderTask(InputStream input, String fileName) {
+
+	public GpmlReaderTask(InputStream input, String fileName) {
         this.input = input;
         this.fileName = fileName;
 	}

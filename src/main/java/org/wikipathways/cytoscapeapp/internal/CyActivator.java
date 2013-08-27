@@ -103,7 +103,7 @@ public class CyActivator extends AbstractCyActivator {
         registerService(context, gpmlReaderTaskFactory, InputStreamTaskFactory.class, new Properties());
 
         // initialize web service client
-        final CyWPClient wpClient = new CyWPClient(gpmlReaderTaskFactory);
+        final CyWPClient wpClient = new CyWPClient();
         registerAllServices(context, wpClient, new Properties());
 
 	}

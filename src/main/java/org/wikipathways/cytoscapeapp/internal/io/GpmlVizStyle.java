@@ -6,7 +6,7 @@ import java.awt.Color;
 
 import org.wikipathways.cytoscapeapp.internal.CyActivator;
 
-class GpmlVizStyle {
+public class GpmlVizStyle {
   private static VisualStyle create() {
     final VisualStyle vizStyle = CyActivator.vizStyleFactory.createVisualStyle(CyActivator.vizMapMgr.getDefaultVisualStyle());
     vizStyle.setTitle("WikiPathways");
