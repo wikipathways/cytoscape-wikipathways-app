@@ -33,6 +33,7 @@ import org.cytoscape.view.model.View;
 import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.Tunable;
+import org.cytoscape.work.util.ListSingleSelection;
 import org.pathvisio.core.model.Pathway;
 import org.wikipathways.cytoscapeapp.internal.CyActivator;
 
@@ -47,8 +48,8 @@ public class GpmlNetworkReader extends AbstractTask implements CyNetworkReader {
 	InputStream input = null;
     final String fileName;
 	
-    @Tunable(description="Import as pathway? Deselect if you want to load network view.", groups={"WikiPathways App"})
-    public boolean importAsPathway = true;
+    @Tunable(description="Import as:", groups={"WikiPathways"})
+    public ListSingleSelection<String> importMethod = new ListSingleSelection<String>("Pathway", "Network");
     
 	protected GpmlNetworkReader(InputStream input, String fileName) {
         this.input = input;
@@ -68,7 +69,7 @@ public class GpmlNetworkReader extends AbstractTask implements CyNetworkReader {
         monitor.setStatusMessage("Constructing network");
         final String name = pathway.getMappInfo().getMapInfoName();
         final CyNetworkView view = newNetwork(name);
-        if(importAsPathway) {
+        if(importMethod.getSelectedValue().equals("Pathway")) {
         	(new GpmlToPathway(pathway, view)).convert();
         } else {
         	Boolean unconnected = (new GpmlToNetwork(pathway, view)).convert();
