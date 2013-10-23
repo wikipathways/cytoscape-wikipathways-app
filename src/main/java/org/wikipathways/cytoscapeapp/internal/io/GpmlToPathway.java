@@ -164,7 +164,7 @@ public class GpmlToPathway {
    */
   private static StaticPropConverter<org.pathvisio.core.model.LineType,ArrowShape> ARROW_SHAPE_CONVERTER = new StaticPropConverter<org.pathvisio.core.model.LineType,ArrowShape>() {
     public ArrowShape convert(org.pathvisio.core.model.LineType lineType) {
-      final String gpmlArrowName = lineType.getGpmlName();
+      final String gpmlArrowName = lineType.getName();
       final ArrowShape arrowShape = GPML_ARROW_SHAPES.get(gpmlArrowName);
       if (arrowShape == null)
         return ArrowShapeVisualProperty.NONE;

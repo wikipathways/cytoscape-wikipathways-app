@@ -10,7 +10,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.wikipathways</groupId>
 	<artifactId>cytoscapeapp</artifactId>
-	<version>1.0</version>
+	<version>1.1</version>
 
 	<name>WikiPathways Cytoscape App</name>
 	
@@ -99,19 +99,20 @@
         	    			<artifactSet>
         	    				<includes>
         	    					<include>org.pathvisio:pathvisio-core</include>
+							<include>org.wikipathways:client</include>
         	    					<include>com.springsource:org.jdom</include>
         	    					<include>org.bridgedb:bridgedb</include>
         	    					<include>org.bridgedb:bridgedb-bio</include>
         	    					<include>derby:derby</include>
         	    					<include>org.apache:xerces</include>
         	    					<include>javax.xml:javax.xml</include>
-												<!--<include>axis:axis-core</include>
-												<include>axis:axis-ant</include>
-												<include>org.apache.commons:discovery</include>
-												<include>org.apache.commons:logging</include>
-												<include>jaxrpc:jaxrpc</include>
-												<include>javax.xml.soap:saaj</include>
-												<include>wsdl4j:wsdl4j</include>  -->
+							<include>axis:axis-core</include>
+							<include>axis:axis-ant</include>
+							<include>org.apache.commons:discovery</include>
+							<include>org.apache.commons:logging</include>
+							<include>jaxrpc:jaxrpc</include>
+							<include>javax.xml.soap:saaj</include>
+							<include>wsdl4j:wsdl4j</include>
         	    				</includes>
         	    			</artifactSet>
             			</configuration>
@@ -229,22 +230,28 @@
 			<version>1.1.0</version>
 			<optional>true</optional>
 		</dependency>
-		<dependency> 
+	<dependency> 
       		<groupId>org.pathvisio</groupId> 
       		<artifactId>pathvisio-core</artifactId> 
-      		<version>3.0.0</version> 
+      		<version>3.1.1</version> 
+      		<optional>true</optional>
+    	</dependency> 
+	<dependency> 
+      		<groupId>org.wikipathways</groupId> 
+      		<artifactId>client</artifactId> 
+      		<version>3.1.1</version> 
       		<optional>true</optional>
     	</dependency> 
  		<dependency> 
       		<groupId>org.bridgedb</groupId> 
       		<artifactId>bridgedb</artifactId> 
-      		<version>1.1.0</version> 
+      		<version>1.2.2</version> 
       		<optional>true</optional>
     	</dependency>
 		<dependency> 
       		<groupId>org.bridgedb</groupId> 
       		<artifactId>bridgedb-bio</artifactId> 
-      		<version>1.1.0</version> 
+      		<version>1.2.2</version> 
       		<optional>true</optional>
     	</dependency> 
     	<dependency> 
@@ -274,7 +281,7 @@
       		<optional>true</optional>
     	</dependency> -->
         
-    	<!--<dependency> 
+    	<dependency> 
       		<groupId>axis</groupId> 
       		<artifactId>axis-core</artifactId> 
       		<version>1.4</version> 
@@ -315,7 +322,7 @@
       		<artifactId>wsdl4j</artifactId> 
       		<version>1.5.1</version> 
       		<optional>true</optional>
-    	</dependency>   -->
+    	</dependency> 
 	</dependencies>
 
 </project>

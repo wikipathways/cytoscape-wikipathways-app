@@ -1,60 +1,48 @@
 package org.wikipathways.cytoscapeapp.internal.webclient;
 
-import org.cytoscape.work.TaskIterator;
+import java.awt.CardLayout;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.InputStream;
+import java.util.List;
+
+import javax.swing.ButtonGroup;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
+import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
+import javax.swing.table.AbstractTableModel;
 
 import org.cytoscape.io.webservice.NetworkImportWebServiceClient;
 import org.cytoscape.io.webservice.SearchWebServiceClient;
 import org.cytoscape.io.webservice.swing.AbstractWebServiceGUIClient;
-
-import java.util.List;
-import java.io.InputStream;
-
-import javax.swing.ListSelectionModel;
-import javax.swing.JProgressBar;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-import javax.swing.JCheckBox;
-import javax.swing.JRadioButton;
-import javax.swing.ButtonGroup;
-import javax.swing.JComboBox;
-import javax.swing.JTable;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.JButton;
-import javax.swing.JScrollPane;
-import javax.swing.JOptionPane;
-import java.awt.Font;
-import java.awt.BorderLayout;
-import java.awt.GridLayout;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.CardLayout;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseAdapter;
-
-import org.cytoscape.work.AbstractTask;
-import org.cytoscape.work.Task;
-import org.cytoscape.work.TaskMonitor;
-import org.cytoscape.work.TaskIterator;
-
 import org.cytoscape.model.CyNetwork;
-import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.layout.CyLayoutAlgorithm;
-
-import org.cytoscape.io.read.CyNetworkReader;
-import org.cytoscape.io.read.InputStreamTaskFactory;
-
+import org.cytoscape.view.model.CyNetworkView;
+import org.cytoscape.work.AbstractTask;
+import org.cytoscape.work.TaskIterator;
+import org.cytoscape.work.TaskMonitor;
+import org.pathvisio.core.model.Pathway;
 import org.wikipathways.cytoscapeapp.internal.CyActivator;
-import org.wikipathways.cytoscapeapp.internal.io.GpmlVizStyle;
 import org.wikipathways.cytoscapeapp.internal.io.GpmlToNetwork;
 import org.wikipathways.cytoscapeapp.internal.io.GpmlToPathway;
-import org.wikipathways.cytoscapeapp.internal.webclient.WPClient.PathwayRef;
-
-import org.pathvisio.core.model.Pathway;
+import org.wikipathways.cytoscapeapp.internal.io.GpmlVizStyle;
 
 public class CyWPClient extends AbstractWebServiceGUIClient implements NetworkImportWebServiceClient, SearchWebServiceClient {
   final String PATHWAY_IMG = getClass().getResource("/pathway.png").toString();
@@ -71,13 +59,13 @@ public class CyWPClient extends AbstractWebServiceGUIClient implements NetworkIm
   final JTable resultsTable = new JTable(tableModel);
   final JRadioButton pathwayButton = new JRadioButton("<html>Pathway<br><br><img src=\"" + PATHWAY_IMG.toString() + "\"></html>", true);
   final JRadioButton networkButton = new JRadioButton("<html>Network<br><br><img src=\"" + NETWORK_IMG.toString() + "\"></html>", false);
-  WPClient client;
+  WPClientREST client;
 
   public CyWPClient() {
     super("http://www.wikipathways.org", "WikiPathways", "WikiPathways");
 
     try {
-      client = new WPClient();
+      client = new WPClientREST();
     } catch (Exception e) {
       // TODO: log this exception
       client = null;

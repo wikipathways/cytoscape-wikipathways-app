@@ -26,6 +26,7 @@ import org.pathvisio.core.model.PathwayElement;
 import org.pathvisio.core.model.PathwayElement.MAnchor;
 import org.pathvisio.core.model.ShapeType;
 import org.pathvisio.core.model.StaticProperty;
+import org.pathvisio.core.view.Group;
 import org.wikipathways.cytoscapeapp.internal.CyActivator;
 
 public class GpmlToNetwork {
@@ -85,12 +86,18 @@ public class GpmlToNetwork {
 		network.getTable(CyEdge.class, CyNetwork.DEFAULT_ATTRS).createColumn("WP.type", String.class, false);
 
 		// convert by each pathway element type
+		System.out.println("convert data nodes");
 		convertDataNodes();
+		System.out.println("convert groups");
 		convertGroups();
+		System.out.println("convert labels");
 		convertLabels();
 		
+		System.out.println("find edges");
 		findEdges();
+		System.out.println("convert anchors");
 		convertAnchors();
+		System.out.println("convert lines");
 		convertLines();
 
 		CyActivator.eventHelper.flushPayloadEvents(); // guarantee that all node
@@ -204,7 +211,6 @@ public class GpmlToNetwork {
 		}
 	}
 
-
 	/**
 	 * GPML start/end line types and their corresponding Cytoscape ArrowShape
 	 * names.
@@ -228,7 +234,7 @@ public class GpmlToNetwork {
 	 */
 	private static StaticPropConverter<org.pathvisio.core.model.LineType, ArrowShape> ARROW_SHAPE_CONVERTER = new StaticPropConverter<org.pathvisio.core.model.LineType, ArrowShape>() {
 		public ArrowShape convert(org.pathvisio.core.model.LineType lineType) {
-			final String gpmlArrowName = lineType.getGpmlName();
+			final String gpmlArrowName = lineType.getName();
 			final ArrowShape arrowShape = GPML_ARROW_SHAPES.get(gpmlArrowName);
 			if (arrowShape == null)
 				return ArrowShapeVisualProperty.NONE;
@@ -335,7 +341,7 @@ public class GpmlToNetwork {
 	 * ======================================================== Groups
 	 * ========================================================
 	 */
-
+	
 	private void convertGroups() {
 		for (final PathwayElement elem : pathway.getDataObjects()) {
 			if (!elem.getObjectType().equals(ObjectType.GROUP))
@@ -355,7 +361,8 @@ public class GpmlToNetwork {
 			network.addEdge(node, groupNode, false);
 		}
 		network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS).getRow(groupNode.getSUID()).set("WP.type", "Group");
-		
+		network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS).getRow(groupNode.getSUID()).set("GraphID", group.getGraphId());
+
 		delayedVizProps.add(new DelayedVizProp(groupNode,BasicVisualLexicon.NODE_FILL_COLOR, Color.blue, true));
 		delayedVizProps.add(new DelayedVizProp(groupNode,BasicVisualLexicon.NODE_BORDER_WIDTH, 0.0, true));
 		delayedVizProps.add(new DelayedVizProp(groupNode,BasicVisualLexicon.NODE_WIDTH, 5.0, true));
@@ -371,6 +378,7 @@ public class GpmlToNetwork {
 	private static Map<StaticProperty, String> labelStaticProps = new HashMap<StaticProperty, String>();
 	static {
 		labelStaticProps.put(StaticProperty.TEXTLABEL, CyNetwork.NAME);
+		labelStaticProps.put(StaticProperty.GRAPHID, "GraphID");
 	}
 
 	private void convertLabels() {
@@ -410,7 +418,7 @@ public class GpmlToNetwork {
 	 * ======================================================== Anchors
 	 * ========================================================
 	 */
-
+	
 	private void convertAnchors() {
 		for(MAnchor anchor : anchors) {
 			convertAnchor(anchor);
@@ -428,6 +436,7 @@ public class GpmlToNetwork {
 		final CyNode node = network.addNode();
 		nodes.put(anchor, node);
 		assignAnchorVizStyle(node, Color.gray);
+		network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS).getRow(node.getSUID()).set("GraphID", anchor.getGraphId());
 		network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS).getRow(node.getSUID()).set("WP.type", "Anchor");
 	}
 
@@ -478,7 +487,7 @@ public class GpmlToNetwork {
 			if (anchors.length > 0) {
 				final CyEdge firstEdge = network.addEdge(startNode,nodes.get(anchors[0]), true);
 				assignEdgeVizStyle(firstEdge, line, true, false);
-				for (int i = 1; i < anchors.length; i++) {
+				for (int i = 1; i < anchors.length; i++) {					
 					final CyEdge edge = network.addEdge(nodes.get(anchors[i - 1]), nodes.get(anchors[i]),true);
 					assignEdgeVizStyle(edge, line, false, false);
 				}
