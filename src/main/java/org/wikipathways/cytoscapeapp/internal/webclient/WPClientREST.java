@@ -52,10 +52,14 @@ class WPClientREST {
 
     // issue get request
     final HttpClient client = new HttpClient();
-    client.executeMethod(method);
-
-    // parse response
-    return xmlParser.parse(method.getResponseBodyAsStream());
+    
+    try {
+        client.executeMethod(method);
+        // parse response
+        return xmlParser.parse(method.getResponseBodyAsStream());
+    } finally {
+        method.releaseConnection();
+    }  
   }
 
   public List<String> getSpecies() throws IOException, SAXException {
