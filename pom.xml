@@ -99,20 +99,10 @@
         	    			<artifactSet>
         	    				<includes>
         	    					<include>org.pathvisio:pathvisio-core</include>
-							<include>org.wikipathways:client</include>
         	    					<include>com.springsource:org.jdom</include>
         	    					<include>org.bridgedb:bridgedb</include>
         	    					<include>org.bridgedb:bridgedb-bio</include>
         	    					<include>derby:derby</include>
-        	    					<include>org.apache:xerces</include>
-        	    					<include>javax.xml:javax.xml</include>
-							<include>axis:axis-core</include>
-							<include>axis:axis-ant</include>
-							<include>org.apache.commons:discovery</include>
-							<include>org.apache.commons:logging</include>
-							<include>jaxrpc:jaxrpc</include>
-							<include>javax.xml.soap:saaj</include>
-							<include>wsdl4j:wsdl4j</include>
         	    				</includes>
         	    			</artifactSet>
             			</configuration>
@@ -230,15 +220,9 @@
 			<version>1.1.0</version>
 			<optional>true</optional>
 		</dependency>
-	<dependency> 
+		<dependency> 
       		<groupId>org.pathvisio</groupId> 
       		<artifactId>pathvisio-core</artifactId> 
-      		<version>3.1.1</version> 
-      		<optional>true</optional>
-    	</dependency> 
-	<dependency> 
-      		<groupId>org.wikipathways</groupId> 
-      		<artifactId>client</artifactId> 
       		<version>3.1.1</version> 
       		<optional>true</optional>
     	</dependency> 
@@ -266,63 +250,6 @@
             <version>3.1.0</version>
             <scope>provided</scope>
         </dependency>
-
-			<!-- Webservice libs -->
-    	<!--<dependency> 
-      		<groupId>javax.xml</groupId> 
-      		<artifactId>javax.xml</artifactId> 
-      		<version>1.3.4</version> 
-      		<optional>true</optional>
-    	</dependency> 
-    	<dependency> 
-      		<groupId>org.apache</groupId> 
-      		<artifactId>xerces</artifactId> 
-      		<version>2.9.0</version> 
-      		<optional>true</optional>
-    	</dependency> -->
-        
-    	<dependency> 
-      		<groupId>axis</groupId> 
-      		<artifactId>axis-core</artifactId> 
-      		<version>1.4</version> 
-      		<optional>true</optional>
-    	</dependency> 
-    	<dependency> 
-      		<groupId>axis</groupId> 
-      		<artifactId>axis-ant</artifactId> 
-      		<version>1.4</version> 
-      		<optional>true</optional>
-    	</dependency> 
-    	<dependency> 
-      		<groupId>org.apache.commons</groupId> 
-      		<artifactId>discovery</artifactId> 
-      		<version>0.2</version> 
-      		<optional>true</optional>
-    	</dependency> 
-    	<dependency> 
-      		<groupId>org.apache.commons</groupId> 
-      		<artifactId>logging</artifactId> 
-      		<version>1.0.4</version> 
-      		<optional>true</optional>
-    	</dependency> 
-    	<dependency> 
-      		<groupId>jaxrpc</groupId> 
-      		<artifactId>jaxrpc</artifactId> 
-      		<version>1.1</version> 
-      		<optional>true</optional>
-    	</dependency> 
-    	<dependency> 
-      		<groupId>javax.xml.soap</groupId> 
-      		<artifactId>saaj</artifactId> 
-      		<version>1.1</version> 
-      		<optional>true</optional>
-    	</dependency> 
-    	<dependency> 
-      		<groupId>wsdl4j</groupId> 
-      		<artifactId>wsdl4j</artifactId> 
-      		<version>1.5.1</version> 
-      		<optional>true</optional>
-    	</dependency> 
 	</dependencies>
 
 </project>

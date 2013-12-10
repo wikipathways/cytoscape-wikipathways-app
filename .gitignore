@@ -7,3 +7,6 @@ dependency-reduced-pom.xml
 #################
 .metadata*
 wikipathways.app/.*
+.classpath
+.project
+.settings*
