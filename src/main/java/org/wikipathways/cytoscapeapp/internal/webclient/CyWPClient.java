@@ -246,17 +246,13 @@ public class CyWPClient extends AbstractWebServiceGUIClient implements NetworkIm
       if (pathwayButton.isSelected()) {
         (new GpmlToPathway(pathway, view)).convert();
       } else {
-        Boolean unconnected = (new GpmlToNetwork(pathway, view)).convert();
-        if(unconnected) {
-          JOptionPane.showMessageDialog(CyActivator.cySwingApp.getJFrame(),
-            "<html>Some of the lines in the pathways are not connected.<br>Therefore some nodes might not be connected.</html>",
-            "Unconnected lines warning",
-            JOptionPane.WARNING_MESSAGE);
-        }
+       (new GpmlToNetwork(pathway, view)).convert();
         CyLayoutAlgorithm layout = CyActivator.layoutMgr.getLayout("force-directed");
         insertTasksAfterCurrentTask(layout.createTaskIterator(view, layout.createLayoutContext(), CyLayoutAlgorithm.ALL_NODE_VIEWS, null));
+       
       }
       updateNetworkView(view);
+      
       cleanUIAfterPathwayLoading();
     }
   }

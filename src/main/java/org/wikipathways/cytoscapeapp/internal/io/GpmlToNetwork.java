@@ -26,7 +26,6 @@ import org.pathvisio.core.model.PathwayElement;
 import org.pathvisio.core.model.PathwayElement.MAnchor;
 import org.pathvisio.core.model.ShapeType;
 import org.pathvisio.core.model.StaticProperty;
-import org.pathvisio.core.view.Group;
 import org.wikipathways.cytoscapeapp.internal.CyActivator;
 
 public class GpmlToNetwork {
@@ -460,7 +459,7 @@ public class GpmlToNetwork {
 		final MLine line = (MLine) elem;
 		final String startRef = line.getMStart().getGraphRef();
 		final String endRef = line.getMEnd().getGraphRef();
-
+		
 		// don't draw unconnected lines without anchors
 		boolean createLine = true;
 		if (startRef == null || endRef == null) {
@@ -468,7 +467,7 @@ public class GpmlToNetwork {
 				createLine = false;
 			}
 		}
-
+		
 		if (createLine) {
 			CyNode startNode = nodes.get(pathway.getGraphIdContainer(startRef));
 			if (startNode == null) {
@@ -485,14 +484,24 @@ public class GpmlToNetwork {
 
 			final MAnchor[] anchors = elem.getMAnchors().toArray(new MAnchor[0]);
 			if (anchors.length > 0) {
-				final CyEdge firstEdge = network.addEdge(startNode,nodes.get(anchors[0]), true);
-				assignEdgeVizStyle(firstEdge, line, true, false);
-				for (int i = 1; i < anchors.length; i++) {					
-					final CyEdge edge = network.addEdge(nodes.get(anchors[i - 1]), nodes.get(anchors[i]),true);
-					assignEdgeVizStyle(edge, line, false, false);
+				List<MAnchor> existingAnchors = new ArrayList<PathwayElement.MAnchor>();
+				for (int i = 0; i < anchors.length; i++) {
+					if(nodes.get(anchors[i]) != null) {
+						existingAnchors.add(anchors[i]);
+					}
 				}
-				final CyEdge lastEdge = network.addEdge(nodes.get(anchors[anchors.length - 1]), endNode, true);
-				assignEdgeVizStyle(lastEdge, line, false, true);
+				if(existingAnchors.size() > 0) {
+					final CyEdge firstEdge = network.addEdge(startNode,nodes.get(existingAnchors.get(0)), true);
+					assignEdgeVizStyle(firstEdge, line, true, false);
+					
+					for (int i = 1; i < existingAnchors.size(); i++) {
+						final CyEdge edge = network.addEdge(nodes.get(existingAnchors.get(i-1)), nodes.get(existingAnchors.get(i)),true);
+						assignEdgeVizStyle(edge, line, false, false);
+					}
+					
+					final CyEdge lastEdge = network.addEdge(nodes.get(existingAnchors.get(existingAnchors.size()-1)), endNode, true);
+					assignEdgeVizStyle(lastEdge, line, false, true);
+				}
 			} else {
 				final CyEdge edge = network.addEdge(startNode, endNode, true);
 				assignEdgeVizStyle(edge, line, true, true);
