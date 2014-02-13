@@ -74,7 +74,7 @@
 					<instructions>
 						<Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
 						<Bundle-Version>${project.version}</Bundle-Version>
-						<Private-Package>${bundle.namespace}.internal.*</Private-Package>
+						<Private-Package>${bundle.namespace}.internal.*,${bundle.namespace}.impl.*</Private-Package>
             <Export-Package>${bundle.namespace}</Export-Package>
 						<Bundle-Activator>${bundle.namespace}.internal.CyActivator</Bundle-Activator>
 						<Import-Package>org.xml.sax;resolution:=optional,javax.xml.transform;resolution:=optional,
