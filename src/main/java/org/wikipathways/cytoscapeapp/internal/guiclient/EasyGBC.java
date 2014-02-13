@@ -1,4 +1,4 @@
-package org.wikipathways.cytoscapeapp.internal.webclient;
+package org.wikipathways.cytoscapeapp.internal.guiclient;
 
 import java.awt.GridBagConstraints;
 import java.util.Map;

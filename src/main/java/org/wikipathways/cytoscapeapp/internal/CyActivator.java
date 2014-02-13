@@ -50,7 +50,7 @@ import org.wikipathways.cytoscapeapp.WPClientFactory;
 import org.wikipathways.cytoscapeapp.impl.WPClientRESTFactoryImpl;
 
 import org.wikipathways.cytoscapeapp.internal.io.GpmlReaderTaskFactory;
-import org.wikipathways.cytoscapeapp.internal.webclient.WPCyGUIClient;
+import org.wikipathways.cytoscapeapp.internal.guiclient.WPCyGUIClient;
 /**
  * 
  * @author martinakutmon
