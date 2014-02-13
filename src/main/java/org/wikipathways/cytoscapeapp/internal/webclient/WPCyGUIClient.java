@@ -38,7 +38,12 @@ import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskMonitor;
+
 import org.pathvisio.core.model.Pathway;
+
+import org.wikipathways.cytoscapeapp.ResultTask;
+import org.wikipathways.cytoscapeapp.WPClient;
+import org.wikipathways.cytoscapeapp.WPPathway;
 import org.wikipathways.cytoscapeapp.internal.CyActivator;
 import org.wikipathways.cytoscapeapp.internal.io.GpmlToNetwork;
 import org.wikipathways.cytoscapeapp.internal.io.GpmlToPathway;
@@ -47,30 +52,20 @@ import org.wikipathways.cytoscapeapp.internal.io.GpmlVizStyle;
 public class WPCyGUIClient extends AbstractWebServiceGUIClient implements NetworkImportWebServiceClient, SearchWebServiceClient {
   final String PATHWAY_IMG = getClass().getResource("/pathway.png").toString();
   final String NETWORK_IMG = getClass().getResource("/network.png").toString();
-  static final String[] RESULTS_TABLE_COLUMN_NAMES = {"Pathway Name", "Species"};
+
   final JTextField searchField = new JTextField();
   final JCheckBox speciesCheckBox = new JCheckBox("Only: ");
   final JComboBox speciesComboBox = new JComboBox();
   final JButton searchButton = new JButton("Search");
   final PathwayRefsTableModel tableModel = new PathwayRefsTableModel();
-  final CardLayout cardLayout = new CardLayout();
-  final JPanel cardPanel = new JPanel(cardLayout);
-  final JLabel loadingLabel = new JLabel();
   final JTable resultsTable = new JTable(tableModel);
-  final JRadioButton pathwayButton = new JRadioButton("<html>Pathway<br><br><img src=\"" + PATHWAY_IMG.toString() + "\"></html>", true);
-  final JRadioButton networkButton = new JRadioButton("<html>Network<br><br><img src=\"" + NETWORK_IMG.toString() + "\"></html>", false);
-  WPClientREST client;
+  final JRadioButton pathwayButton = new JRadioButton("<html>Pathway<br><br><img src=\"" + PATHWAY_IMG + "\"></html>", true);
+  final JRadioButton networkButton = new JRadioButton("<html>Network<br><br><img src=\"" + NETWORK_IMG + "\"></html>", false);
+  final WPClient client;
 
-  public WPCyGUIClient() {
+  public WPCyGUIClient(final WPClient client) {
     super("http://www.wikipathways.org", "WikiPathways", "WikiPathways");
-
-    try {
-      client = new WPClientREST();
-    } catch (Exception e) {
-      // TODO: log this exception
-      client = null;
-      return;
-    }
+    this.client = client;
 
     speciesCheckBox.addItemListener(new ItemListener() {
       public void itemStateChanged(ItemEvent e) {
@@ -81,19 +76,14 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
     speciesCheckBox.setSelected(false);
     speciesComboBox.setEnabled(false);
 
-    final ActionListener performSearch = new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        CyActivator.taskMgr.execute(new TaskIterator(new PerformSearch()));
-      }
-    };
+    final ActionListener performSearch = new SearchForPathways();
     searchButton.addActionListener(performSearch);
     searchField.addActionListener(performSearch);
 
     resultsTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION); 
     resultsTable.addMouseListener(new LoadPathway());
 
-    cardPanel.add(newResultsPanel(), "results");
-    cardPanel.add(newLoadingPanel(), "loading");
+    final JPanel resultsPanel = newResultsPanel();
 
     super.gui = new JPanel(new GridBagLayout());
     EasyGBC c = new EasyGBC();
@@ -101,10 +91,10 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
     super.gui.add(speciesCheckBox, c.noExpand().right().insets(0, 5, 5, 0));
     super.gui.add(speciesComboBox, c.right().insets(0, 0, 5, 5));
     super.gui.add(searchButton, c.right().insets(0, 0, 5, 10));
-    super.gui.add(cardPanel, c.down().expandBoth().spanHoriz(4).insets(0, 10, 10, 10));
-    cardLayout.show(cardPanel, "results");
+    super.gui.add(resultsPanel, c.down().expandBoth().spanHoriz(4).insets(0, 10, 10, 10));
 
-    CyActivator.taskMgr.execute(new TaskIterator(new PopulateSpecies()));
+    final ResultTask<List<String>> speciesTask = client.newSpeciesTask();
+    CyActivator.taskMgr.execute(new TaskIterator(speciesTask, new PopulateSpecies(speciesTask)));
   }
 
   private JPanel newResultsPanel() {
@@ -127,69 +117,33 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
     return resultsPanel;
   }
 
-  private JPanel newLoadingPanel() {
-    final JPanel loadingPanel = new JPanel(new GridBagLayout());
-    final JPanel innerLoadingPanel = new JPanel(new GridLayout(2, 1));
-    loadingLabel.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 14));
-    loadingPanel.add(loadingLabel);
-    final JProgressBar loadingBar = new JProgressBar();
-    loadingBar.setIndeterminate(true);
-    innerLoadingPanel.add(loadingLabel);
-    innerLoadingPanel.add(loadingBar);
-    loadingPanel.add(innerLoadingPanel, new GridBagConstraints());
-    return loadingPanel;
-  }
-
   public TaskIterator createTaskIterator(Object query) {
     return new TaskIterator();
   }
 
-  abstract class InterruptableTask extends AbstractTask {
-    public abstract void interruptableRun(TaskMonitor monitor) throws Exception;
-
-    protected Thread thread = null;
+  class PopulateSpecies extends AbstractTask {
+    final ResultTask<List<String>> speciesTask;
+    public PopulateSpecies(final ResultTask<List<String>> speciesTask) {
+      this.speciesTask = speciesTask;
+    }
     public void run(TaskMonitor monitor) throws Exception {
-      thread = Thread.currentThread();
-      interruptableRun(monitor);
-      thread = null;
-    }
-
-    public void cancel() {
-      if (thread != null)
-        thread.interrupt();
-    }
-  }
-
-  class PopulateSpecies extends InterruptableTask {
-    public void interruptableRun(TaskMonitor monitor) throws Exception {
+      final List<String> allSpecies = speciesTask.get();
       monitor.setTitle("Obtain list of species from WikiPathways");
-      for (final String species : client.getSpecies())
+      for (final String species : allSpecies)
         speciesComboBox.addItem(species);
     }
   }
 
-  class PerformSearch extends InterruptableTask {
-    public void interruptableRun(TaskMonitor monitor) throws Exception {
+  class SearchForPathways implements ActionListener {
+    public void actionPerformed(ActionEvent e) {
       final String query = searchField.getText();
-      if (query == null || query.length() == 0)
-        return;
-      monitor.setTitle(String.format("Search WikiPathways for '%s'", query));
-
-      searchButton.setEnabled(false);
-      searchButton.setText("Searching...");
-
-      List<PathwayRef> pathwayRefs = null;
-      if (speciesCheckBox.isSelected()) {
-        final String species = (String) speciesComboBox.getSelectedItem();
-        pathwayRefs = client.freeTextSearch(query, species);
-      } else {
-        pathwayRefs = client.freeTextSearch(query);
-      }
-
-      tableModel.setPathwayRefs(pathwayRefs);
-
-      searchButton.setEnabled(true);
-      searchButton.setText("Search");
+      final String species = speciesCheckBox.isSelected() ? speciesComboBox.getSelectedItem().toString() : null;
+      final ResultTask<List<WPPathway>> searchTask = client.newFreeTextSearchTask(query, species);
+      CyActivator.taskMgr.execute(new TaskIterator(searchTask, new AbstractTask() {
+        public void run(final TaskMonitor monitor) {
+          tableModel.setPathwayRefs(searchTask.get());
+        }
+      }));
     }
   }
 
@@ -197,42 +151,33 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
     public void mouseClicked(MouseEvent e) {
       if (e.getClickCount() != 2)
         return;
-      final TaskIterator taskIterator = new TaskIterator();
-      taskIterator.append(new LoadPathwayTask());
+      final WPPathway pathway = tableModel.getSelectedPathwayRef();
+      final ResultTask<InputStream> loadPathwayTask = client.newLoadPathwayTask(pathway);
+      final LoadPathwayFromStreamTask fromStreamTask = new LoadPathwayFromStreamTask(loadPathwayTask);
+      final TaskIterator taskIterator = new TaskIterator(loadPathwayTask, fromStreamTask);
       CyActivator.taskMgr.execute(taskIterator);
     }
   }
 
-  class LoadPathwayTask extends InterruptableTask {
+  class LoadPathwayFromStreamTask extends AbstractTask {
+    final ResultTask<InputStream> streamTask;
     InputStream gpmlStream = null;
-    public void interruptableRun(TaskMonitor monitor) throws Exception {
-      try {
-        innerRun(monitor);
-      } catch (Exception e) {
-        cleanUIAfterPathwayLoading();
-        throw e;
-      }
+
+    public LoadPathwayFromStreamTask(final ResultTask<InputStream> streamTask) {
+      this.streamTask = streamTask;
     }
 
     public void cancel() {
-      cleanUIAfterPathwayLoading();
-      if (gpmlStream != null) {
+      final InputStream gpmlStream2 = gpmlStream;
+      if (gpmlStream2 != null) {
         try {
-          gpmlStream.close();
+          gpmlStream2.close();
         } catch (Exception e) {}
       }
-      super.cancel();
     }
 
-    private void innerRun(TaskMonitor monitor) throws Exception {
-      final PathwayRef pathwayRef = tableModel.getSelectedPathwayRef();
-      if (pathwayRef == null)
-        return;
-      monitor.setTitle(String.format("Open '%s' from WikiPathways", pathwayRef.getName()));
-      setupUIBeforePathwayLoading(pathwayRef.getName());
-
-      monitor.setStatusMessage("Download pathways file");
-      gpmlStream = client.loadPathway(pathwayRef);
+    public void run(final TaskMonitor monitor) throws Exception {
+      gpmlStream = streamTask.get();
 
       monitor.setStatusMessage("Parsing pathways file");
       final Pathway pathway = new Pathway();
@@ -249,21 +194,9 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
        (new GpmlToNetwork(pathway, view)).convert();
         CyLayoutAlgorithm layout = CyActivator.layoutMgr.getLayout("force-directed");
         insertTasksAfterCurrentTask(layout.createTaskIterator(view, layout.createLayoutContext(), CyLayoutAlgorithm.ALL_NODE_VIEWS, null));
-       
       }
       updateNetworkView(view);
-      
-      cleanUIAfterPathwayLoading();
     }
-  }
-
-  private void setupUIBeforePathwayLoading(final String pathwayName) {
-    cardLayout.show(cardPanel, "loading");
-    loadingLabel.setText(String.format("Loading '%s'", pathwayName));
-  }
-
-  private void cleanUIAfterPathwayLoading() {
-    cardLayout.show(cardPanel, "results");
   }
 
   private static CyNetworkView newNetwork(final String name) {
@@ -282,9 +215,9 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
   }
 
   class PathwayRefsTableModel extends AbstractTableModel {
-    List<PathwayRef> pathwayRefs = null;
+    List<WPPathway> pathwayRefs = null;
 
-    public void setPathwayRefs(List<PathwayRef> pathwayRefs) {
+    public void setPathwayRefs(List<WPPathway> pathwayRefs) {
       this.pathwayRefs = pathwayRefs;
       super.fireTableDataChanged();
     }
@@ -298,7 +231,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
     }
 
     public Object getValueAt(int row, int col) {
-      final PathwayRef pathwayRef = pathwayRefs.get(row);
+      final WPPathway pathwayRef = pathwayRefs.get(row);
       switch(col) {
         case 0: return pathwayRef.getName();
         case 1: return pathwayRef.getSpecies();
@@ -308,7 +241,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
 
     public String getColumnName(int col) {
       switch(col) {
-        case 0: return "Pathway Name";
+        case 0: return "Pathway";
         case 1: return "Species";
         default: return null;
       }
@@ -318,7 +251,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
       return false;
     }
 
-    public PathwayRef getSelectedPathwayRef() {
+    public WPPathway getSelectedPathwayRef() {
       final int row = resultsTable.getSelectedRow();
       if (row < 0)
         return null;
