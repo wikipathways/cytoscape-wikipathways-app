@@ -50,7 +50,7 @@ import org.wikipathways.cytoscapeapp.WPClientFactory;
 import org.wikipathways.cytoscapeapp.impl.WPClientRESTFactoryImpl;
 
 import org.wikipathways.cytoscapeapp.internal.io.GpmlReaderTaskFactory;
-import org.wikipathways.cytoscapeapp.internal.webclient.CyWPClient;
+import org.wikipathways.cytoscapeapp.internal.webclient.WPCyGUIClient;
 /**
  * 
  * @author martinakutmon
@@ -111,8 +111,7 @@ public class CyActivator extends AbstractCyActivator {
         registerService(context, gpmlReaderTaskFactory, InputStreamTaskFactory.class, new Properties());
 
         // initialize web service client
-        final CyWPClient wpClient = new CyWPClient();
-        registerAllServices(context, wpClient, new Properties());
+        registerAllServices(context, new WPCyGUIClient(), new Properties());
 
 	}
 

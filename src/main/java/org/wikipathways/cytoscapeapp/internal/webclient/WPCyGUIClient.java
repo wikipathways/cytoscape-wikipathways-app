@@ -44,7 +44,7 @@ import org.wikipathways.cytoscapeapp.internal.io.GpmlToNetwork;
 import org.wikipathways.cytoscapeapp.internal.io.GpmlToPathway;
 import org.wikipathways.cytoscapeapp.internal.io.GpmlVizStyle;
 
-public class CyWPClient extends AbstractWebServiceGUIClient implements NetworkImportWebServiceClient, SearchWebServiceClient {
+public class WPCyGUIClient extends AbstractWebServiceGUIClient implements NetworkImportWebServiceClient, SearchWebServiceClient {
   final String PATHWAY_IMG = getClass().getResource("/pathway.png").toString();
   final String NETWORK_IMG = getClass().getResource("/network.png").toString();
   static final String[] RESULTS_TABLE_COLUMN_NAMES = {"Pathway Name", "Species"};
@@ -61,7 +61,7 @@ public class CyWPClient extends AbstractWebServiceGUIClient implements NetworkIm
   final JRadioButton networkButton = new JRadioButton("<html>Network<br><br><img src=\"" + NETWORK_IMG.toString() + "\"></html>", false);
   WPClientREST client;
 
-  public CyWPClient() {
+  public WPCyGUIClient() {
     super("http://www.wikipathways.org", "WikiPathways", "WikiPathways");
 
     try {
