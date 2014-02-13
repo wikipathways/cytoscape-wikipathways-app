@@ -45,6 +45,10 @@ import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.work.TaskManager;
 import org.cytoscape.work.swing.DialogTaskManager;
 
+import org.wikipathways.cytoscapeapp.WPClient;
+import org.wikipathways.cytoscapeapp.WPClientFactory;
+import org.wikipathways.cytoscapeapp.impl.WPClientRESTFactoryImpl;
+
 import org.wikipathways.cytoscapeapp.internal.io.GpmlReaderTaskFactory;
 import org.wikipathways.cytoscapeapp.internal.webclient.CyWPClient;
 /**
@@ -94,7 +98,11 @@ public class CyActivator extends AbstractCyActivator {
         netReaderMgr = getService(context, CyNetworkReaderManager.class);
         taskMgr = getService(context, DialogTaskManager.class);
         layoutMgr = getService(context, CyLayoutAlgorithmManager.class);
-        
+
+        final WPClientFactory clientFactory = new WPClientRESTFactoryImpl();
+        registerService(context, clientFactory, WPClientFactory.class, new Properties());
+        final WPClient client = clientFactory.create();
+
         // currently not used - will probably be needed in the future
 //      CyApplicationManager cyAppMgr = getService(context,CyApplicationManager.class);
 //      StreamUtil streamUtil = getService(context,StreamUtil.class);
