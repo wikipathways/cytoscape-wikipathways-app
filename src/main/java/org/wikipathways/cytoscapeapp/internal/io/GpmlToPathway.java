@@ -24,6 +24,8 @@ import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyTable;
 import org.cytoscape.model.CyIdentifiable;
 
+import org.cytoscape.event.CyEventHelper;
+
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.View;
 import org.cytoscape.view.model.VisualProperty;
@@ -34,8 +36,6 @@ import org.cytoscape.view.presentation.property.values.NodeShape;
 import org.cytoscape.view.presentation.property.values.LineType;
 import org.cytoscape.view.presentation.property.values.ArrowShape;
 import org.cytoscape.view.presentation.property.ArrowShapeVisualProperty;
-
-import org.wikipathways.cytoscapeapp.internal.CyActivator;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -65,6 +65,7 @@ public class GpmlToPathway {
    */
   final List<DelayedVizProp> delayedVizProps = new ArrayList<DelayedVizProp>();
 
+  final CyEventHelper eventHelper;
 	final Pathway pathway;
   final CyNetworkView networkView;
 	final CyNetwork network;
@@ -74,7 +75,8 @@ public class GpmlToPathway {
    * Constructing this object will not start the conversion and will not modify
    * the given network in any way.
    */
-	public GpmlToPathway(final Pathway pathway, final CyNetworkView networkView) {
+	public GpmlToPathway(final CyEventHelper eventHelper, final Pathway pathway, final CyNetworkView networkView) {
+    this.eventHelper = eventHelper;
 		this.pathway = pathway;
     this.networkView = networkView;
 		this.network = networkView.getModel();
@@ -97,7 +99,7 @@ public class GpmlToPathway {
     convertAnchors();
     convertLines();
 
-    CyActivator.eventHelper.flushPayloadEvents(); // guarantee that all node and edge views have been created
+    eventHelper.flushPayloadEvents(); // guarantee that all node and edge views have been created
     DelayedVizProp.applyAll(networkView, delayedVizProps); // apply our visual style
 
     // clear our data structures just to be nice to the GC

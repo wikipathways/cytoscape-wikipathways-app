@@ -20,7 +20,13 @@ package org.wikipathways.cytoscapeapp.internal.io;
 
 import java.io.InputStream;
 
+import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.work.TaskIterator;
+import org.cytoscape.model.CyNetworkManager;
+import org.cytoscape.model.CyNetworkFactory;
+import org.cytoscape.view.model.CyNetworkViewManager;
+import org.cytoscape.view.model.CyNetworkViewFactory;
+import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
 import org.cytoscape.io.read.AbstractInputStreamTaskFactory;
 import org.cytoscape.io.BasicCyFileFilter;
 import org.cytoscape.io.DataCategory;
@@ -33,13 +39,27 @@ import org.cytoscape.io.util.StreamUtil;
  *
  */
 public class GpmlReaderTaskFactory extends AbstractInputStreamTaskFactory {
-	public GpmlReaderTaskFactory(final StreamUtil streamUtil) {
-        super(new BasicCyFileFilter(new String[]{"gpml"}, new String[]{"text/xml"}, "GPML files", DataCategory.NETWORK, streamUtil));
-	}
+  final CyEventHelper eventHelper;
+  final CyNetworkFactory netFactory;
+  final CyNetworkManager netMgr;
+  final CyNetworkViewFactory netViewFactory;
+  final CyNetworkViewManager netViewMgr;
+  final CyLayoutAlgorithmManager layoutMgr;
+  final GpmlVizStyle vizStyle;
+
+  public GpmlReaderTaskFactory(final CyEventHelper eventHelper, final CyNetworkFactory netFactory, final CyNetworkManager netMgr, final CyNetworkViewFactory netViewFactory, final CyNetworkViewManager netViewMgr, final CyLayoutAlgorithmManager layoutMgr, final StreamUtil streamUtil, final GpmlVizStyle vizStyle) {
+    super(new BasicCyFileFilter(new String[]{"gpml"}, new String[]{"text/xml"}, "GPML files", DataCategory.NETWORK, streamUtil));
+    this.eventHelper = eventHelper;
+    this.netFactory = netFactory;
+    this.netMgr = netMgr;
+    this.netViewFactory = netViewFactory;
+    this.netViewMgr = netViewMgr;
+    this.layoutMgr = layoutMgr;
+    this.vizStyle = vizStyle;
+  }
 	
 	
 	public TaskIterator createTaskIterator(InputStream inputStream, String fileName) {
-		return new TaskIterator(new GpmlReaderTask(inputStream, fileName));
+		return new TaskIterator(new GpmlReaderTask(eventHelper, netFactory, netMgr, netViewFactory, netViewMgr, layoutMgr, vizStyle, inputStream, fileName));
 	}
-
 }

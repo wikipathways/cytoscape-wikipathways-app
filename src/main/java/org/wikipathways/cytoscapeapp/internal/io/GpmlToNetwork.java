@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.bridgedb.Xref;
+import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyIdentifiable;
 import org.cytoscape.model.CyNetwork;
@@ -54,6 +55,7 @@ public class GpmlToNetwork {
 	 */
 	final List<DelayedVizProp> delayedVizProps = new ArrayList<DelayedVizProp>();
 
+  final CyEventHelper eventHelper;
 	final Pathway pathway;
 	final CyNetworkView networkView;
 	final CyNetwork network;
@@ -66,7 +68,8 @@ public class GpmlToNetwork {
 	 * network. Constructing this object will not start the conversion and will
 	 * not modify the given network in any way.
 	 */
-	public GpmlToNetwork(final Pathway pathway, final CyNetworkView networkView) {
+	public GpmlToNetwork(final CyEventHelper eventHelper, final Pathway pathway, final CyNetworkView networkView) {
+		this.eventHelper = eventHelper;
 		this.pathway = pathway;
 		this.networkView = networkView;
 		this.network = networkView.getModel();
@@ -99,7 +102,7 @@ public class GpmlToNetwork {
 		System.out.println("convert lines");
 		convertLines();
 
-		CyActivator.eventHelper.flushPayloadEvents(); // guarantee that all node
+		eventHelper.flushPayloadEvents(); // guarantee that all node
 														// and edge views have
 														// been created
 		DelayedVizProp.applyAll(networkView, delayedVizProps); // apply our

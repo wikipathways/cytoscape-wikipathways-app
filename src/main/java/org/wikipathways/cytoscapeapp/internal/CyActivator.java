@@ -49,6 +49,7 @@ import org.wikipathways.cytoscapeapp.WPClient;
 import org.wikipathways.cytoscapeapp.WPClientFactory;
 import org.wikipathways.cytoscapeapp.impl.WPClientRESTFactoryImpl;
 
+import org.wikipathways.cytoscapeapp.internal.io.GpmlVizStyle;
 import org.wikipathways.cytoscapeapp.internal.io.GpmlReaderTaskFactory;
 import org.wikipathways.cytoscapeapp.internal.guiclient.WPCyGUIClient;
 /**
@@ -59,60 +60,36 @@ import org.wikipathways.cytoscapeapp.internal.guiclient.WPCyGUIClient;
  *
  */
 public class CyActivator extends AbstractCyActivator {
-
-    public static CyNetworkManager netMgr = null;
-    public static CyNetworkViewManager netViewMgr = null;
-    public static CyNetworkViewFactory netViewFactory = null;
-    public static CyNetworkFactory netFactory = null;
-    public static CyTableFactory tableFactory = null;
-    public static CyTableManager tableMgr = null;
-    public static CyEventHelper eventHelper = null;
-    public static VisualMappingManager vizMapMgr = null;
-    public static VisualStyleFactory vizStyleFactory = null;
-    //public static AnnotationManager annotationMgr = null;
-    //public static AnnotationFactory annotationFactory = null;
-    public static CyNetworkReaderManager netReaderMgr = null;
-    public static TaskManager taskMgr = null;
-    public static CyLayoutAlgorithmManager layoutMgr = null;
-    public static CySwingApplication cySwingApp = null;
-
 	@Override
 	public void start(BundleContext context) throws Exception {
-		
-		// get Cytoscape services from OSGi context
-		cySwingApp = getService(context,CySwingApplication.class);
+		final CySwingApplication cySwingApp = getService(context,CySwingApplication.class);
+    final CyNetworkManager netMgr = getService(context,CyNetworkManager.class);
+    final CyNetworkViewManager netViewMgr = getService(context,CyNetworkViewManager.class);
+    final CyNetworkViewFactory netViewFactory = getService(context,CyNetworkViewFactory.class);
+    final CyNetworkFactory netFactory = getService(context,CyNetworkFactory.class);
+    final FileUtil fileUtil = getService(context,FileUtil.class);
+    final StreamUtil streamUtil = getService(context,StreamUtil.class);
+    final CyTableManager tableMgr = getService(context,CyTableManager.class);
+    final CyTableFactory tableFactory = getService(context,CyTableFactory.class);
+    final CyEventHelper eventHelper = getService(context,CyEventHelper.class);
+    final VisualMappingManager vizMapMgr = getService(context,VisualMappingManager.class);
+    final VisualStyleFactory vizStyleFactory = getService(context,VisualStyleFactory.class);
+    //final AnnotationManager annotationMgr = getService(context, AnnotationManager.class);
+    //final AnnotationFactory annotationFactory = getService(context, AnnotationFactory.class);
+    final CyNetworkReaderManager netReaderMgr = getService(context, CyNetworkReaderManager.class);
+    final TaskManager taskMgr = getService(context, DialogTaskManager.class);
+    final CyLayoutAlgorithmManager layoutMgr = getService(context, CyLayoutAlgorithmManager.class);
 
-        netMgr = getService(context,CyNetworkManager.class);
-        netViewMgr = getService(context,CyNetworkViewManager.class);
-        netViewFactory = getService(context,CyNetworkViewFactory.class);
-        netFactory = getService(context,CyNetworkFactory.class);
-        FileUtil fileUtil = getService(context,FileUtil.class);
-        StreamUtil streamUtil = getService(context,StreamUtil.class);
-        tableMgr = getService(context,CyTableManager.class);
-        tableFactory = getService(context,CyTableFactory.class);
-        eventHelper = getService(context,CyEventHelper.class);
-        vizMapMgr = getService(context,VisualMappingManager.class);
-        vizStyleFactory = getService(context,VisualStyleFactory.class);
-        //annotationMgr = getService(context, AnnotationManager.class);
-        //annotationFactory = getService(context, AnnotationFactory.class);
-        netReaderMgr = getService(context, CyNetworkReaderManager.class);
-        taskMgr = getService(context, DialogTaskManager.class);
-        layoutMgr = getService(context, CyLayoutAlgorithmManager.class);
+    final WPClientFactory clientFactory = new WPClientRESTFactoryImpl();
+    registerService(context, clientFactory, WPClientFactory.class, new Properties());
 
-        final WPClientFactory clientFactory = new WPClientRESTFactoryImpl();
-        registerService(context, clientFactory, WPClientFactory.class, new Properties());
-        final WPClient client = clientFactory.create();
+    final WPClient client = clientFactory.create();
+    final GpmlVizStyle gpmlStyle = new GpmlVizStyle(vizStyleFactory, vizMapMgr);
 
-        // currently not used - will probably be needed in the future
-//      CyApplicationManager cyAppMgr = getService(context,CyApplicationManager.class);
-//      StreamUtil streamUtil = getService(context,StreamUtil.class);
+    final GpmlReaderTaskFactory gpmlReaderTaskFactory = new GpmlReaderTaskFactory(eventHelper, netFactory, netMgr, netViewFactory, netViewMgr, layoutMgr, streamUtil, gpmlStyle);
+    registerService(context, gpmlReaderTaskFactory, InputStreamTaskFactory.class, new Properties());
 
-        final GpmlReaderTaskFactory gpmlReaderTaskFactory = new GpmlReaderTaskFactory(streamUtil);
-        registerService(context, gpmlReaderTaskFactory, InputStreamTaskFactory.class, new Properties());
-
-        // initialize web service client
-        registerAllServices(context, new WPCyGUIClient(client), new Properties());
-
-	}
-
+    final WPCyGUIClient guiClient = new WPCyGUIClient(eventHelper, taskMgr, netFactory, netMgr, netViewFactory, netViewMgr, layoutMgr, gpmlStyle, client);
+    registerAllServices(context, guiClient, new Properties());
+  }
 }

@@ -25,17 +25,22 @@ import java.util.Set;
 import javax.swing.JOptionPane;
 
 import org.cytoscape.io.read.CyNetworkReader;
+import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.model.CyNetwork;
+import org.cytoscape.model.CyNetworkManager;
+import org.cytoscape.model.CyNetworkFactory;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.view.layout.CyLayoutAlgorithm;
 import org.cytoscape.view.model.CyNetworkView;
+import org.cytoscape.view.model.CyNetworkViewManager;
+import org.cytoscape.view.model.CyNetworkViewFactory;
 import org.cytoscape.view.model.View;
+import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
 import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.Tunable;
 import org.cytoscape.work.util.ListSingleSelection;
 import org.pathvisio.core.model.Pathway;
-import org.wikipathways.cytoscapeapp.internal.CyActivator;
 
 /**
  * 
@@ -44,15 +49,31 @@ import org.wikipathways.cytoscapeapp.internal.CyActivator;
  * TODO: currently network and pathway view are initialized --> setting!
  */
 public class GpmlReaderTask extends AbstractTask implements CyNetworkReader {
-	InputStream input = null;
-    final String fileName;
-	
     public static final String PATHWAY_DESC = "Pathway";
     public static final String NETWORK_DESC = "Network";
+
+    final CyEventHelper eventHelper;
+    final CyNetworkFactory netFactory;
+    final CyNetworkManager netMgr;
+    final CyNetworkViewFactory netViewFactory;
+    final CyNetworkViewManager netViewMgr;
+    final CyLayoutAlgorithmManager layoutMgr;
+    final GpmlVizStyle vizStyle;
+
+	InputStream input = null;
+    final String fileName;
+
     @Tunable(description="Import as:", groups={"WikiPathways"})
     public ListSingleSelection<String> importMethod = new ListSingleSelection<String>(PATHWAY_DESC, NETWORK_DESC);
 
-	public GpmlReaderTask(InputStream input, String fileName) {
+	public GpmlReaderTask(final CyEventHelper eventHelper, final CyNetworkFactory netFactory, final CyNetworkManager netMgr, final CyNetworkViewFactory netViewFactory, final CyNetworkViewManager netViewMgr, final CyLayoutAlgorithmManager layoutMgr, final GpmlVizStyle vizStyle, final InputStream input, final String fileName) {
+        this.eventHelper = eventHelper;
+        this.netFactory = netFactory;
+        this.netMgr = netMgr;
+        this.netViewFactory = netViewFactory;
+        this.netViewMgr = netViewMgr;
+        this.layoutMgr = layoutMgr;
+        this.vizStyle = vizStyle;
         this.input = input;
         this.fileName = fileName;
 	}
@@ -71,10 +92,10 @@ public class GpmlReaderTask extends AbstractTask implements CyNetworkReader {
         final String name = pathway.getMappInfo().getMapInfoName();
         final CyNetworkView view = newNetwork(name);
         if(importMethod.getSelectedValue().equals(PATHWAY_DESC)) {
-        	(new GpmlToPathway(pathway, view)).convert();
+        	(new GpmlToPathway(eventHelper, pathway, view)).convert();
         } else {
-        	(new GpmlToNetwork(pathway, view)).convert();
-        	CyLayoutAlgorithm layout = CyActivator.layoutMgr.getLayout("force-directed");
+        	(new GpmlToNetwork(eventHelper, pathway, view)).convert();
+        	CyLayoutAlgorithm layout = layoutMgr.getLayout("force-directed");
         	insertTasksAfterCurrentTask(layout.createTaskIterator(view, layout.createLayoutContext(), CyLayoutAlgorithm.ALL_NODE_VIEWS, null));
         }
         updateNetworkView(view);
@@ -96,17 +117,17 @@ public class GpmlReaderTask extends AbstractTask implements CyNetworkReader {
         return new CyNetwork[0];
     }
 
-    private static CyNetworkView newNetwork(final String name) {
-        final CyNetwork net = CyActivator.netFactory.createNetwork();
+    private CyNetworkView newNetwork(final String name) {
+        final CyNetwork net = netFactory.createNetwork();
         net.getRow(net).set(CyNetwork.NAME, name);
-        CyActivator.netMgr.addNetwork(net);
-        final CyNetworkView view = CyActivator.netViewFactory.createNetworkView(net);
-        CyActivator.netViewMgr.addNetworkView(view);
+        netMgr.addNetwork(net);
+        final CyNetworkView view = netViewFactory.createNetworkView(net);
+        netViewMgr.addNetworkView(view);
         return view;
     }
 
-    private static void updateNetworkView(final CyNetworkView netView) {
-        GpmlVizStyle.get().apply(netView);
+    private void updateNetworkView(final CyNetworkView netView) {
+        vizStyle.get().apply(netView);
         netView.fitContent();
         netView.updateView();
     }

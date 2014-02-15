@@ -32,19 +32,25 @@ import javax.swing.table.AbstractTableModel;
 import org.cytoscape.io.webservice.NetworkImportWebServiceClient;
 import org.cytoscape.io.webservice.SearchWebServiceClient;
 import org.cytoscape.io.webservice.swing.AbstractWebServiceGUIClient;
+import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.model.CyNetwork;
+import org.cytoscape.model.CyNetworkManager;
+import org.cytoscape.model.CyNetworkFactory;
+import org.cytoscape.view.model.CyNetworkViewManager;
+import org.cytoscape.view.model.CyNetworkViewFactory;
+import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
 import org.cytoscape.view.layout.CyLayoutAlgorithm;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskMonitor;
+import org.cytoscape.work.TaskManager;
 
 import org.pathvisio.core.model.Pathway;
 
 import org.wikipathways.cytoscapeapp.ResultTask;
 import org.wikipathways.cytoscapeapp.WPClient;
 import org.wikipathways.cytoscapeapp.WPPathway;
-import org.wikipathways.cytoscapeapp.internal.CyActivator;
 import org.wikipathways.cytoscapeapp.internal.io.GpmlToNetwork;
 import org.wikipathways.cytoscapeapp.internal.io.GpmlToPathway;
 import org.wikipathways.cytoscapeapp.internal.io.GpmlVizStyle;
@@ -52,6 +58,16 @@ import org.wikipathways.cytoscapeapp.internal.io.GpmlVizStyle;
 public class WPCyGUIClient extends AbstractWebServiceGUIClient implements NetworkImportWebServiceClient, SearchWebServiceClient {
   final String PATHWAY_IMG = getClass().getResource("/pathway.png").toString();
   final String NETWORK_IMG = getClass().getResource("/network.png").toString();
+
+  final CyEventHelper eventHelper;
+  final TaskManager taskMgr;
+  final CyNetworkFactory netFactory;
+  final CyNetworkManager netMgr;
+  final CyNetworkViewFactory netViewFactory;
+  final CyNetworkViewManager netViewMgr;
+  final CyLayoutAlgorithmManager layoutMgr;
+  final GpmlVizStyle vizStyle;
+  final WPClient client;
 
   final JTextField searchField = new JTextField();
   final JCheckBox speciesCheckBox = new JCheckBox("Only: ");
@@ -61,11 +77,18 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
   final JTable resultsTable = new JTable(tableModel);
   final JRadioButton pathwayButton = new JRadioButton("<html>Pathway<br><br><img src=\"" + PATHWAY_IMG + "\"></html>", true);
   final JRadioButton networkButton = new JRadioButton("<html>Network<br><br><img src=\"" + NETWORK_IMG + "\"></html>", false);
-  final WPClient client;
 
-  public WPCyGUIClient(final WPClient client) {
+  public WPCyGUIClient(final CyEventHelper eventHelper, final TaskManager taskMgr, final CyNetworkFactory netFactory, final CyNetworkManager netMgr, final CyNetworkViewFactory netViewFactory, final CyNetworkViewManager netViewMgr, final CyLayoutAlgorithmManager layoutMgr, final GpmlVizStyle vizStyle, final WPClient client) {
     super("http://www.wikipathways.org", "WikiPathways", "WikiPathways");
+    this.eventHelper = eventHelper;
+    this.taskMgr = taskMgr;
     this.client = client;
+    this.netFactory = netFactory;
+    this.netMgr = netMgr;
+    this.netViewFactory = netViewFactory;
+    this.netViewMgr = netViewMgr;
+    this.vizStyle = vizStyle;
+    this.layoutMgr = layoutMgr;
 
     speciesCheckBox.addItemListener(new ItemListener() {
       public void itemStateChanged(ItemEvent e) {
@@ -94,7 +117,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
     super.gui.add(resultsPanel, c.down().expandBoth().spanHoriz(4).insets(0, 10, 10, 10));
 
     final ResultTask<List<String>> speciesTask = client.newSpeciesTask();
-    CyActivator.taskMgr.execute(new TaskIterator(speciesTask, new PopulateSpecies(speciesTask)));
+    taskMgr.execute(new TaskIterator(speciesTask, new PopulateSpecies(speciesTask)));
   }
 
   private JPanel newResultsPanel() {
@@ -139,7 +162,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
       final String query = searchField.getText();
       final String species = speciesCheckBox.isSelected() ? speciesComboBox.getSelectedItem().toString() : null;
       final ResultTask<List<WPPathway>> searchTask = client.newFreeTextSearchTask(query, species);
-      CyActivator.taskMgr.execute(new TaskIterator(searchTask, new AbstractTask() {
+      taskMgr.execute(new TaskIterator(searchTask, new AbstractTask() {
         public void run(final TaskMonitor monitor) {
           tableModel.setPathwayRefs(searchTask.get());
         }
@@ -155,7 +178,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
       final ResultTask<InputStream> loadPathwayTask = client.newLoadPathwayTask(pathway);
       final LoadPathwayFromStreamTask fromStreamTask = new LoadPathwayFromStreamTask(loadPathwayTask);
       final TaskIterator taskIterator = new TaskIterator(loadPathwayTask, fromStreamTask);
-      CyActivator.taskMgr.execute(taskIterator);
+      taskMgr.execute(taskIterator);
     }
   }
 
@@ -189,27 +212,27 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
       final CyNetworkView view = newNetwork(name);
 
       if (pathwayButton.isSelected()) {
-        (new GpmlToPathway(pathway, view)).convert();
+        (new GpmlToPathway(eventHelper, pathway, view)).convert();
       } else {
-       (new GpmlToNetwork(pathway, view)).convert();
-        CyLayoutAlgorithm layout = CyActivator.layoutMgr.getLayout("force-directed");
+       (new GpmlToNetwork(eventHelper, pathway, view)).convert();
+        CyLayoutAlgorithm layout = layoutMgr.getLayout("force-directed");
         insertTasksAfterCurrentTask(layout.createTaskIterator(view, layout.createLayoutContext(), CyLayoutAlgorithm.ALL_NODE_VIEWS, null));
       }
       updateNetworkView(view);
     }
   }
 
-  private static CyNetworkView newNetwork(final String name) {
-    final CyNetwork net = CyActivator.netFactory.createNetwork();
+  private CyNetworkView newNetwork(final String name) {
+    final CyNetwork net = netFactory.createNetwork();
     net.getRow(net).set(CyNetwork.NAME, name);
-    CyActivator.netMgr.addNetwork(net);
-    final CyNetworkView view = CyActivator.netViewFactory.createNetworkView(net);
-    CyActivator.netViewMgr.addNetworkView(view);
+    netMgr.addNetwork(net);
+    final CyNetworkView view = netViewFactory.createNetworkView(net);
+    netViewMgr.addNetworkView(view);
     return view;
   }
 
-  private static void updateNetworkView(final CyNetworkView netView) {
-    GpmlVizStyle.get().apply(netView);
+  private void updateNetworkView(final CyNetworkView netView) {
+    vizStyle.get().apply(netView);
     netView.fitContent();
     netView.updateView();
   }
