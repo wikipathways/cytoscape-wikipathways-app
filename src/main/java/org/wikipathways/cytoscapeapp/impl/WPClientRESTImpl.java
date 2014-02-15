@@ -97,6 +97,7 @@ public class WPClientRESTImpl implements WPClient {
   public ResultTask<List<String>> newSpeciesTask() {
     return new ReqTask<List<String>>() {
       protected List<String> checkedRun(final TaskMonitor monitor) throws Exception {
+        monitor.setTitle("Retrieve list of organisms from WikiPathways");
         final Document doc = xmlGet(BASE_URL + "listOrganisms");
         final Node responseNode = doc.getFirstChild();
         final NodeList organismNodes = responseNode.getChildNodes(); 
@@ -113,6 +114,7 @@ public class WPClientRESTImpl implements WPClient {
   public ResultTask<List<WPPathway>> newFreeTextSearchTask(final String query, final String species) {
     return new ReqTask<List<WPPathway>>() {
       protected List<WPPathway> checkedRun(final TaskMonitor monitor) throws Exception {
+        monitor.setTitle("Search WikiPathways for \'" + query + "\'");
         final Document doc = xmlGet(BASE_URL + "findPathwaysByText", "query", query, "species", species == null ? "" : species);
         final Node responseNode = doc.getFirstChild();
         final NodeList resultNodes = responseNode.getChildNodes(); 
@@ -155,6 +157,7 @@ public class WPClientRESTImpl implements WPClient {
   public ResultTask<InputStream> newLoadPathwayTask(final WPPathway pathway) {
     return new ReqTask<InputStream>() {
       protected InputStream checkedRun(final TaskMonitor monitor) throws Exception {
+        monitor.setTitle("Download pathway \'" + pathway.getName() + "\' from WikiPathways");
         final Document doc = xmlGet(BASE_URL + "getPathway", "pwId", pathway.getId(), "revision", pathway.getRevision());
         final Node responseNode = doc.getFirstChild();
         final Node pathwayNode = responseNode.getFirstChild(); 
