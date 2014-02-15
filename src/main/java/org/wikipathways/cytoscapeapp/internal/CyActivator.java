@@ -40,8 +40,8 @@ import org.cytoscape.io.webservice.SearchWebServiceClient;
 import org.cytoscape.io.webservice.WebServiceClient;
 import org.cytoscape.view.vizmap.VisualStyleFactory;
 import org.cytoscape.view.vizmap.VisualMappingManager;
-//import org.cytoscape.view.presentation.annotations.AnnotationFactory;
-//import org.cytoscape.view.presentation.annotations.AnnotationManager;
+import org.cytoscape.view.presentation.annotations.AnnotationFactory;
+import org.cytoscape.view.presentation.annotations.AnnotationManager;
 import org.cytoscape.work.TaskManager;
 import org.cytoscape.work.swing.DialogTaskManager;
 
@@ -74,8 +74,8 @@ public class CyActivator extends AbstractCyActivator {
     final CyEventHelper eventHelper = getService(context,CyEventHelper.class);
     final VisualMappingManager vizMapMgr = getService(context,VisualMappingManager.class);
     final VisualStyleFactory vizStyleFactory = getService(context,VisualStyleFactory.class);
-    //final AnnotationManager annotationMgr = getService(context, AnnotationManager.class);
-    //final AnnotationFactory annotationFactory = getService(context, AnnotationFactory.class);
+    final AnnotationManager annotationMgr = getService(context, AnnotationManager.class);
+    final AnnotationFactory annotationFactory = getService(context, AnnotationFactory.class);
     final CyNetworkReaderManager netReaderMgr = getService(context, CyNetworkReaderManager.class);
     final TaskManager taskMgr = getService(context, DialogTaskManager.class);
     final CyLayoutAlgorithmManager layoutMgr = getService(context, CyLayoutAlgorithmManager.class);

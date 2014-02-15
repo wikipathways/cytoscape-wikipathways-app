@@ -75,6 +75,7 @@ public class WPClientRESTImpl implements WPClient {
       } finally {
         req.releaseConnection();
         req = null;
+        stream = null;
       }  
     }
 
