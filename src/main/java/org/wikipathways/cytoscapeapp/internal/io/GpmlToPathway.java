@@ -30,6 +30,8 @@ import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.View;
 import org.cytoscape.view.model.VisualProperty;
 import org.cytoscape.view.model.DiscreteRange;
+import org.cytoscape.view.presentation.annotations.AnnotationFactory;
+import org.cytoscape.view.presentation.annotations.AnnotationManager;
 import org.cytoscape.view.presentation.property.BasicVisualLexicon;
 import org.cytoscape.view.presentation.property.NodeShapeVisualProperty;
 import org.cytoscape.view.presentation.property.values.NodeShape;
@@ -65,18 +67,32 @@ public class GpmlToPathway {
    */
   final List<DelayedVizProp> delayedVizProps = new ArrayList<DelayedVizProp>();
 
-  final CyEventHelper eventHelper;
-	final Pathway pathway;
-  final CyNetworkView networkView;
-	final CyNetwork network;
+  final CyEventHelper     eventHelper;
+  final AnnotationManager annotMgr;
+  final AnnotationFactory annotFactory;
+	final Pathway           pathway;
+  final CyNetworkView     networkView;
+	final CyNetwork         network;
 
   /**
    * Create a converter from the given pathway and store it in the given network.
    * Constructing this object will not start the conversion and will not modify
    * the given network in any way.
+   * @param eventHelper The {@code CyEventHelper} service -- used to flush network object creation events
+   * @param annotMgr The {@code AnnotationManager} service -- used for registering pathway annotations
+   * @param annotFactory The {@code AnnotationFactory} service -- used for creating pathway annotations
+   * @param pathway The GPML pathway object from which to convert
+   * @param networkView The Cytoscape network to contain the GPML pathway
    */
-	public GpmlToPathway(final CyEventHelper eventHelper, final Pathway pathway, final CyNetworkView networkView) {
+	public GpmlToPathway(
+      final CyEventHelper     eventHelper,
+      final AnnotationManager annotMgr,
+      final AnnotationFactory annotFactory,
+      final Pathway           pathway,
+      final CyNetworkView     networkView) {
     this.eventHelper = eventHelper;
+    this.annotMgr = annotMgr;
+    this.annotFactory = annotFactory;
 		this.pathway = pathway;
     this.networkView = networkView;
 		this.network = networkView.getModel();

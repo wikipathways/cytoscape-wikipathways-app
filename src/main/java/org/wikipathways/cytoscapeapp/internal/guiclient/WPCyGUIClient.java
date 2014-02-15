@@ -41,6 +41,8 @@ import org.cytoscape.view.model.CyNetworkViewFactory;
 import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
 import org.cytoscape.view.layout.CyLayoutAlgorithm;
 import org.cytoscape.view.model.CyNetworkView;
+import org.cytoscape.view.presentation.annotations.AnnotationFactory;
+import org.cytoscape.view.presentation.annotations.AnnotationManager;
 import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskMonitor;
@@ -66,6 +68,8 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
   final CyNetworkViewFactory netViewFactory;
   final CyNetworkViewManager netViewMgr;
   final CyLayoutAlgorithmManager layoutMgr;
+  final AnnotationManager annotMgr;
+  final AnnotationFactory annotFactory;
   final GpmlVizStyle vizStyle;
   final WPClient client;
 
@@ -78,7 +82,18 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
   final JRadioButton pathwayButton = new JRadioButton("<html>Pathway<br><br><img src=\"" + PATHWAY_IMG + "\"></html>", true);
   final JRadioButton networkButton = new JRadioButton("<html>Network<br><br><img src=\"" + NETWORK_IMG + "\"></html>", false);
 
-  public WPCyGUIClient(final CyEventHelper eventHelper, final TaskManager taskMgr, final CyNetworkFactory netFactory, final CyNetworkManager netMgr, final CyNetworkViewFactory netViewFactory, final CyNetworkViewManager netViewMgr, final CyLayoutAlgorithmManager layoutMgr, final GpmlVizStyle vizStyle, final WPClient client) {
+  public WPCyGUIClient(
+      final CyEventHelper eventHelper,
+      final TaskManager taskMgr,
+      final CyNetworkFactory netFactory,
+      final CyNetworkManager netMgr,
+      final CyNetworkViewFactory netViewFactory,
+      final CyNetworkViewManager netViewMgr,
+      final CyLayoutAlgorithmManager layoutMgr,
+      final AnnotationManager annotMgr,
+      final AnnotationFactory annotFactory,
+      final GpmlVizStyle vizStyle,
+      final WPClient client) {
     super("http://www.wikipathways.org", "WikiPathways", "WikiPathways");
     this.eventHelper = eventHelper;
     this.taskMgr = taskMgr;
@@ -87,6 +102,8 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
     this.netMgr = netMgr;
     this.netViewFactory = netViewFactory;
     this.netViewMgr = netViewMgr;
+    this.annotMgr = annotMgr;
+    this.annotFactory = annotFactory;
     this.vizStyle = vizStyle;
     this.layoutMgr = layoutMgr;
 
@@ -212,7 +229,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
       final CyNetworkView view = newNetwork(name);
 
       if (pathwayButton.isSelected()) {
-        (new GpmlToPathway(eventHelper, pathway, view)).convert();
+        (new GpmlToPathway(eventHelper, annotMgr, annotFactory, pathway, view)).convert();
       } else {
        (new GpmlToNetwork(eventHelper, pathway, view)).convert();
         CyLayoutAlgorithm layout = layoutMgr.getLayout("force-directed");

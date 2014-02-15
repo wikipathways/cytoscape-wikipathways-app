@@ -27,6 +27,8 @@ import org.cytoscape.model.CyNetworkFactory;
 import org.cytoscape.view.model.CyNetworkViewManager;
 import org.cytoscape.view.model.CyNetworkViewFactory;
 import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
+import org.cytoscape.view.presentation.annotations.AnnotationFactory;
+import org.cytoscape.view.presentation.annotations.AnnotationManager;
 import org.cytoscape.io.read.AbstractInputStreamTaskFactory;
 import org.cytoscape.io.BasicCyFileFilter;
 import org.cytoscape.io.DataCategory;
@@ -39,15 +41,27 @@ import org.cytoscape.io.util.StreamUtil;
  *
  */
 public class GpmlReaderTaskFactory extends AbstractInputStreamTaskFactory {
-  final CyEventHelper eventHelper;
-  final CyNetworkFactory netFactory;
-  final CyNetworkManager netMgr;
-  final CyNetworkViewFactory netViewFactory;
-  final CyNetworkViewManager netViewMgr;
-  final CyLayoutAlgorithmManager layoutMgr;
-  final GpmlVizStyle vizStyle;
+  final CyEventHelper             eventHelper;
+  final CyNetworkFactory          netFactory;
+  final CyNetworkManager          netMgr;
+  final CyNetworkViewFactory      netViewFactory;
+  final CyNetworkViewManager      netViewMgr;
+  final CyLayoutAlgorithmManager  layoutMgr;
+  final AnnotationManager         annotMgr;
+  final AnnotationFactory         annotFactory;
+  final GpmlVizStyle              vizStyle;
 
-  public GpmlReaderTaskFactory(final CyEventHelper eventHelper, final CyNetworkFactory netFactory, final CyNetworkManager netMgr, final CyNetworkViewFactory netViewFactory, final CyNetworkViewManager netViewMgr, final CyLayoutAlgorithmManager layoutMgr, final StreamUtil streamUtil, final GpmlVizStyle vizStyle) {
+  public GpmlReaderTaskFactory(
+      final CyEventHelper             eventHelper,
+      final CyNetworkFactory          netFactory,
+      final CyNetworkManager          netMgr,
+      final CyNetworkViewFactory      netViewFactory,
+      final CyNetworkViewManager      netViewMgr,
+      final CyLayoutAlgorithmManager  layoutMgr,
+      final StreamUtil                streamUtil,
+      final AnnotationManager         annotMgr,
+      final AnnotationFactory         annotFactory,
+      final GpmlVizStyle              vizStyle) {
     super(new BasicCyFileFilter(new String[]{"gpml"}, new String[]{"text/xml"}, "GPML files", DataCategory.NETWORK, streamUtil));
     this.eventHelper = eventHelper;
     this.netFactory = netFactory;
@@ -55,11 +69,13 @@ public class GpmlReaderTaskFactory extends AbstractInputStreamTaskFactory {
     this.netViewFactory = netViewFactory;
     this.netViewMgr = netViewMgr;
     this.layoutMgr = layoutMgr;
+    this.annotMgr = annotMgr;
+    this.annotFactory = annotFactory;
     this.vizStyle = vizStyle;
   }
 	
 	
 	public TaskIterator createTaskIterator(InputStream inputStream, String fileName) {
-		return new TaskIterator(new GpmlReaderTask(eventHelper, netFactory, netMgr, netViewFactory, netViewMgr, layoutMgr, vizStyle, inputStream, fileName));
+		return new TaskIterator(new GpmlReaderTask(eventHelper, netFactory, netMgr, netViewFactory, netViewMgr, layoutMgr, annotMgr, annotFactory, vizStyle, inputStream, fileName));
 	}
 }
