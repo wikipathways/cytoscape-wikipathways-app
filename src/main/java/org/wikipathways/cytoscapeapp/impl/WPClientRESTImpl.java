@@ -61,6 +61,7 @@ public class WPClientRESTImpl implements WPClient {
     }
 
     protected HttpMethod req = null;
+    protected InputStream stream = null;
 
     protected Document xmlGet(final String url, final String ... args) throws IOException, SAXException {
       // build our get request
@@ -69,7 +70,8 @@ public class WPClientRESTImpl implements WPClient {
 
       try {
         client.executeMethod(req);
-        return xmlParser.parse(req.getResponseBodyAsStream());
+        stream = req.getResponseBodyAsStream();
+        return xmlParser.parse(stream);
       } finally {
         req.releaseConnection();
         req = null;
@@ -80,6 +82,14 @@ public class WPClientRESTImpl implements WPClient {
       final HttpMethod req2 = req; // copy the ref to req so that it doesn't become null when trying to abort it
       if (req2 != null) {
         req2.abort();
+      }
+      final InputStream stream2 = stream;
+      if (stream2 != null) {
+        try {
+          stream2.close();
+        } catch (IOException e) {
+          // don't bother with the exception when trying to close the stream
+        }
       }
     }
   }
