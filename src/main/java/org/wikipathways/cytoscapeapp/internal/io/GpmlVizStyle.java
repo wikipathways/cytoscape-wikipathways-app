@@ -1,5 +1,6 @@
 package org.wikipathways.cytoscapeapp.internal.io;
 
+import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.vizmap.VisualStyleFactory;
 import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.view.vizmap.VisualStyle;
@@ -7,9 +8,11 @@ import org.cytoscape.view.presentation.property.BasicVisualLexicon;
 import java.awt.Color;
 
 public class GpmlVizStyle {
+  final VisualMappingManager vizMapMgr;
   final VisualStyle vizStyle;
 
   public GpmlVizStyle(final VisualStyleFactory vizStyleFactory, final VisualMappingManager vizMapMgr) {
+    this.vizMapMgr = vizMapMgr;
     this.vizStyle = create(vizStyleFactory, vizMapMgr);
   }
 
@@ -21,7 +24,7 @@ public class GpmlVizStyle {
     return vizStyle;
   }
 
-  public VisualStyle get() {
-    return vizStyle;
+  public void apply(final CyNetworkView view) {
+    vizMapMgr.setVisualStyle(vizStyle, view);
   }
 }

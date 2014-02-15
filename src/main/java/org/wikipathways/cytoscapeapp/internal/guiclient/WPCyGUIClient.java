@@ -249,7 +249,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
   }
 
   private void updateNetworkView(final CyNetworkView netView) {
-    vizStyle.get().apply(netView);
+    vizStyle.apply(netView);
     netView.fitContent();
     netView.updateView();
   }

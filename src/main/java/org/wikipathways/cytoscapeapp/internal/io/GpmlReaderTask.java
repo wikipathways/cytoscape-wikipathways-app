@@ -144,7 +144,7 @@ public class GpmlReaderTask extends AbstractTask implements CyNetworkReader {
     }
 
     private void updateNetworkView(final CyNetworkView netView) {
-        vizStyle.get().apply(netView);
+        vizStyle.apply(netView);
         netView.fitContent();
         netView.updateView();
     }
