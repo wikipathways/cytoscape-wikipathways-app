@@ -35,8 +35,6 @@ import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.CyNetworkViewManager;
 import org.cytoscape.view.model.CyNetworkViewFactory;
 import org.cytoscape.view.model.View;
-import org.cytoscape.view.presentation.annotations.AnnotationFactory;
-import org.cytoscape.view.presentation.annotations.AnnotationManager;
 import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
 import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.TaskMonitor;
@@ -60,8 +58,7 @@ public class GpmlReaderTask extends AbstractTask implements CyNetworkReader {
     final CyNetworkViewFactory netViewFactory;
     final CyNetworkViewManager netViewMgr;
     final CyLayoutAlgorithmManager layoutMgr;
-    final AnnotationManager annotMgr;
-    final AnnotationFactory annotFactory;
+    final Annots annots;
     final GpmlVizStyle vizStyle;
 
 	InputStream input = null;
@@ -77,8 +74,7 @@ public class GpmlReaderTask extends AbstractTask implements CyNetworkReader {
             final CyNetworkViewFactory netViewFactory,
             final CyNetworkViewManager netViewMgr,
             final CyLayoutAlgorithmManager layoutMgr,
-            final AnnotationManager annotMgr,
-            final AnnotationFactory annotFactory,
+            final Annots annots,
             final GpmlVizStyle vizStyle,
             final InputStream input,
             final String fileName) {
@@ -88,8 +84,7 @@ public class GpmlReaderTask extends AbstractTask implements CyNetworkReader {
         this.netViewFactory = netViewFactory;
         this.netViewMgr = netViewMgr;
         this.layoutMgr = layoutMgr;
-        this.annotMgr = annotMgr;
-        this.annotFactory = annotFactory;
+        this.annots = annots;
         this.vizStyle = vizStyle;
         this.input = input;
         this.fileName = fileName;
@@ -109,7 +104,7 @@ public class GpmlReaderTask extends AbstractTask implements CyNetworkReader {
         final String name = pathway.getMappInfo().getMapInfoName();
         final CyNetworkView view = newNetwork(name);
         if(importMethod.getSelectedValue().equals(PATHWAY_DESC)) {
-        	(new GpmlToPathway(eventHelper, annotMgr, annotFactory, pathway, view)).convert();
+        	(new GpmlToPathway(eventHelper, annots, pathway, view)).convert();
         } else {
         	(new GpmlToNetwork(eventHelper, pathway, view)).convert();
         	CyLayoutAlgorithm layout = layoutMgr.getLayout("force-directed");

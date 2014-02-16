@@ -1,5 +1,7 @@
 package org.wikipathways.cytoscapeapp.internal.io;
 
+import java.awt.Color;
+
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Set;
@@ -30,14 +32,14 @@ import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.View;
 import org.cytoscape.view.model.VisualProperty;
 import org.cytoscape.view.model.DiscreteRange;
-import org.cytoscape.view.presentation.annotations.AnnotationFactory;
-import org.cytoscape.view.presentation.annotations.AnnotationManager;
 import org.cytoscape.view.presentation.property.BasicVisualLexicon;
 import org.cytoscape.view.presentation.property.NodeShapeVisualProperty;
 import org.cytoscape.view.presentation.property.values.NodeShape;
 import org.cytoscape.view.presentation.property.values.LineType;
 import org.cytoscape.view.presentation.property.values.ArrowShape;
 import org.cytoscape.view.presentation.property.ArrowShapeVisualProperty;
+import org.cytoscape.view.presentation.annotations.Annotation;
+
 
 import java.awt.Color;
 import java.awt.Font;
@@ -48,6 +50,8 @@ public class GpmlToPathway {
    * Maps a GPML pathway element to its representative CyNode in the network.
    */
   final Map<GraphLink.GraphIdContainer,CyNode> nodes = new HashMap<GraphLink.GraphIdContainer,CyNode>();
+
+  //final Map<GraphLink.GraphIdContainer,Annotation> annots = new HashMap<GraphLink.GraphIdContainer,Annotation>();
 
   /**
    * In Cytoscape, first the network topology is created (via CyNetwork.add{Node|Edge}),
@@ -68,8 +72,7 @@ public class GpmlToPathway {
   final List<DelayedVizProp> delayedVizProps = new ArrayList<DelayedVizProp>();
 
   final CyEventHelper     eventHelper;
-  final AnnotationManager annotMgr;
-  final AnnotationFactory annotFactory;
+  final Annots            annots;
 	final Pathway           pathway;
   final CyNetworkView     networkView;
 	final CyNetwork         network;
@@ -87,13 +90,11 @@ public class GpmlToPathway {
    */
 	public GpmlToPathway(
       final CyEventHelper     eventHelper,
-      final AnnotationManager annotMgr,
-      final AnnotationFactory annotFactory,
+      final Annots            annots,
       final Pathway           pathway,
       final CyNetworkView     networkView) {
     this.eventHelper = eventHelper;
-    this.annotMgr = annotMgr;
-    this.annotFactory = annotFactory;
+    this.annots = annots;
 		this.pathway = pathway;
     this.networkView = networkView;
 		this.network = networkView.getModel();
@@ -124,6 +125,8 @@ public class GpmlToPathway {
     nodes.clear();
     delayedVizProps.clear();
 	}
+
+
 
   /*
    ========================================================
@@ -501,6 +504,7 @@ public class GpmlToPathway {
   }
 
   private void convertLabel(final PathwayElement label) {
+    /*
     // TODO: refactor this as an annotation
 	// comment Tina: not sure if they can all be replaced by annotations because they are often connected with data nodes
     final CyNode node = network.addNode();
@@ -509,6 +513,18 @@ public class GpmlToPathway {
     delayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_TRANSPARENCY, 0, true)); // labels are always transparent
     convertShapeTypeNone(node, label);
     nodes.put(label, node);
+    */
+    annots.newText(networkView,
+        "canvas",     Annotation.BACKGROUND,
+        "x",          label.getStaticProperty(StaticProperty.CENTERX),
+        "y",          label.getStaticProperty(StaticProperty.CENTERY),
+        "zoom",       networkView.getVisualProperty(BasicVisualLexicon.NETWORK_SCALE_FACTOR),
+        "text",       label.getStaticProperty(StaticProperty.TEXTLABEL),
+        "color",      ((Color) label.getStaticProperty(StaticProperty.COLOR)).getRGB(),
+        "fontFamily", "Helvetica",
+        "fontSize",   ((Number) label.getStaticProperty(StaticProperty.FONTSIZE)).intValue(),
+        "fontStyle",  Font.PLAIN
+      );
   }
   
   /*

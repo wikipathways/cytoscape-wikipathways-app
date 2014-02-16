@@ -53,6 +53,7 @@ import org.pathvisio.core.model.Pathway;
 import org.wikipathways.cytoscapeapp.ResultTask;
 import org.wikipathways.cytoscapeapp.WPClient;
 import org.wikipathways.cytoscapeapp.WPPathway;
+import org.wikipathways.cytoscapeapp.internal.io.Annots;
 import org.wikipathways.cytoscapeapp.internal.io.GpmlToNetwork;
 import org.wikipathways.cytoscapeapp.internal.io.GpmlToPathway;
 import org.wikipathways.cytoscapeapp.internal.io.GpmlVizStyle;
@@ -68,8 +69,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
   final CyNetworkViewFactory netViewFactory;
   final CyNetworkViewManager netViewMgr;
   final CyLayoutAlgorithmManager layoutMgr;
-  final AnnotationManager annotMgr;
-  final AnnotationFactory annotFactory;
+  final Annots annots;
   final GpmlVizStyle vizStyle;
   final WPClient client;
 
@@ -90,8 +90,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
       final CyNetworkViewFactory netViewFactory,
       final CyNetworkViewManager netViewMgr,
       final CyLayoutAlgorithmManager layoutMgr,
-      final AnnotationManager annotMgr,
-      final AnnotationFactory annotFactory,
+      final Annots annots,
       final GpmlVizStyle vizStyle,
       final WPClient client) {
     super("http://www.wikipathways.org", "WikiPathways", "WikiPathways");
@@ -102,8 +101,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
     this.netMgr = netMgr;
     this.netViewFactory = netViewFactory;
     this.netViewMgr = netViewMgr;
-    this.annotMgr = annotMgr;
-    this.annotFactory = annotFactory;
+    this.annots = annots;
     this.vizStyle = vizStyle;
     this.layoutMgr = layoutMgr;
 
@@ -229,7 +227,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
       final CyNetworkView view = newNetwork(name);
 
       if (pathwayButton.isSelected()) {
-        (new GpmlToPathway(eventHelper, annotMgr, annotFactory, pathway, view)).convert();
+        (new GpmlToPathway(eventHelper, annots, pathway, view)).convert();
       } else {
        (new GpmlToNetwork(eventHelper, pathway, view)).convert();
         CyLayoutAlgorithm layout = layoutMgr.getLayout("force-directed");
