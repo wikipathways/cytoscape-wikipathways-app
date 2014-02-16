@@ -73,6 +73,7 @@ public class GpmlToPathway {
 	final Pathway           pathway;
   final CyNetworkView     networkView;
 	final CyNetwork         network;
+  final CyTable           nodeTbl;
 
   /**
    * Create a converter from the given pathway and store it in the given network.
@@ -96,15 +97,16 @@ public class GpmlToPathway {
 		this.pathway = pathway;
     this.networkView = networkView;
 		this.network = networkView.getModel();
+    this.nodeTbl = network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS);
 	}
 
   /**
    * Convert the pathway given in the constructor.
    */
 	public void convert() {
-    network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS).createColumn("GraphID", String.class, false);
-    network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS).createColumn("GeneID", String.class, false);
-    network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS).createColumn("Datasource", String.class, false);
+    nodeTbl.createColumn("GraphID", String.class, false);
+    nodeTbl.createColumn("GeneID", String.class, false);
+    nodeTbl.createColumn("Datasource", String.class, false);
 
     // convert by each pathway element type
     convertDataNodes();
@@ -354,9 +356,9 @@ public class GpmlToPathway {
     final CyNode node = network.addNode();
     
     if(dataNode.getDataSource() != null && dataNode.getDataSource().getFullName() != null) {
-    	network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS).getRow(node.getSUID()).set("Datasource", dataNode.getDataSource().getFullName());
+    	nodeTbl.getRow(node.getSUID()).set("Datasource", dataNode.getDataSource().getFullName());
     }
-    convertStaticProps(dataNode, dataNodeStaticProps, network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS), node.getSUID());
+    convertStaticProps(dataNode, dataNodeStaticProps, nodeTbl, node.getSUID());
     convertViewStaticProps(dataNode, dataNodeViewStaticProps, node);
     convertShapeTypeNone(node, dataNode);
     nodes.put(dataNode, node);
@@ -426,7 +428,7 @@ public class GpmlToPathway {
 
     // TODO: refactor this as an annotation
     final CyNode node = network.addNode();
-    convertStaticProps(state, stateStaticProps, network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS), node.getSUID());
+    convertStaticProps(state, stateStaticProps, nodeTbl, node.getSUID());
     convertViewStaticProps(state, stateViewStaticProps, node);
     convertShapeTypeNone(node, state);
 
@@ -502,7 +504,7 @@ public class GpmlToPathway {
     // TODO: refactor this as an annotation
 	// comment Tina: not sure if they can all be replaced by annotations because they are often connected with data nodes
     final CyNode node = network.addNode();
-    convertStaticProps(label, labelStaticProps, network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS), node.getSUID());
+    convertStaticProps(label, labelStaticProps, nodeTbl, node.getSUID());
     convertViewStaticProps(label, labelViewStaticProps, node);
     delayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_TRANSPARENCY, 0, true)); // labels are always transparent
     convertShapeTypeNone(node, label);
