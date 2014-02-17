@@ -20,6 +20,7 @@ public class GpmlVizStyle {
     final VisualStyle vizStyle = vizStyleFactory.createVisualStyle(vizMapMgr.getDefaultVisualStyle());
     vizStyle.setTitle("WikiPathways");
     vizStyle.setDefaultValue(BasicVisualLexicon.NODE_FILL_COLOR, Color.WHITE);
+    vizStyle.setDefaultValue(BasicVisualLexicon.NODE_LABEL_COLOR, Color.BLACK);
     vizMapMgr.addVisualStyle(vizStyle);
     return vizStyle;
   }
