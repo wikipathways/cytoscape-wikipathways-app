@@ -105,9 +105,7 @@ public class GpmlToPathway {
    * Convert the pathway given in the constructor.
    */
 	public void convert() {
-    nodeTbl.createColumn("GraphID", String.class, false);
-    nodeTbl.createColumn("GeneID", String.class, false);
-    nodeTbl.createColumn("Datasource", String.class, false);
+    setupTables();
 
     // convert by each pathway element type
     convertDataNodes();
@@ -126,7 +124,14 @@ public class GpmlToPathway {
     delayedVizProps.clear();
 	}
 
-
+  /**
+   * Ensure that the network's tables have the right columns.
+   */
+  private void setupTables() {
+    nodeTbl.createColumn("GraphID", String.class, false);
+    nodeTbl.createColumn("GeneID", String.class, false);
+    nodeTbl.createColumn("Datasource", String.class, false);
+  }
 
   /*
    ========================================================
