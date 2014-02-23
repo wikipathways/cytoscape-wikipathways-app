@@ -552,10 +552,6 @@ public class GpmlToPathway {
    ========================================================
   */
 
-  static enum AnchorExtracter implements Extracter {
-    
-  }
-
   private void convertAnchors() {
     for (final PathwayElement pvElem : pvPathway.getDataObjects()) {
       if (!pvElem.getObjectType().equals(ObjectType.LINE))
