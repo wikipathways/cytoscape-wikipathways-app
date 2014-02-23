@@ -120,17 +120,19 @@ public class GpmlToPathway {
   private void setupCyTables() {
     for (final TableStore tableStore : Arrays.asList(
         BasicTableStore.GRAPH_ID,
-        BasicTableStore.WIDTH,
-        BasicTableStore.HEIGHT)) {
+        BasicVizTableStore.NODE_WIDTH,
+        BasicVizTableStore.NODE_HEIGHT)) {
       tableStore.setup(cyNodeTbl);
     }
 
+    /*
     for (final TableStore tableStore : Arrays.asList(
         BasicTableStore.COLOR,
         BasicTableStore.LINE_STYLE,
         BasicTableStore.LINE_THICKNESS)) {
       tableStore.setup(cyEdgeTbl);
     }
+    */
   }
 
   /*
@@ -277,18 +279,13 @@ public class GpmlToPathway {
    * Describes how PathVisio PathwayElement's static property values
    * are stored in a Cytoscape table.
    */
-  static interface TableStore {
+  public static interface TableStore {
     void setup(final CyTable cyTable);
     void store(final CyTable cyTable, final CyIdentifiable cyNetObj, final PathwayElement pvElem);
   }
 
   static class BasicTableStore implements TableStore {
     public static final TableStore GRAPH_ID = new BasicTableStore("GraphID", BasicExtracter.GRAPH_ID);
-    public static final TableStore WIDTH = new BasicTableStore("Width", Double.class, BasicExtracter.WIDTH);
-    public static final TableStore HEIGHT = new BasicTableStore("Height", Double.class, BasicExtracter.HEIGHT);
-    public static final TableStore COLOR = new BasicTableStore("Color", BasicExtracter.COLOR);
-    public static final TableStore LINE_STYLE = new BasicTableStore("LineStyle", BasicExtracter.LINE_STYLE);
-    public static final TableStore LINE_THICKNESS = new BasicTableStore("LineThickness", BasicExtracter.LINE_THICKNESS);
 
     final String cyColName;
     final Class<?> cyColType;
@@ -319,6 +316,52 @@ public class GpmlToPathway {
       final Object cyValue = extracter.extract(pvElem);
       cyTable.getRow(cyNetObj.getSUID()).set(cyColName, cyValue);
     }
+  }
+
+  public static interface VizTableStore extends TableStore {
+    String getCyColumnName();
+    Class<?> getCyColumnType();
+    VisualProperty<?> getCyVizProp();
+  }
+
+  static class BasicVizTableStore extends BasicTableStore implements VizTableStore {
+    public static final VizTableStore NODE_WIDTH = new BasicVizTableStore("Width", Double.class, BasicExtracter.WIDTH, BasicVisualLexicon.NODE_WIDTH);
+    public static final VizTableStore NODE_HEIGHT = new BasicVizTableStore("Height", Double.class, BasicExtracter.HEIGHT, BasicVisualLexicon.NODE_HEIGHT);
+    /*
+    public static final VizTableStore COLOR = new BasicVizTableStore("Color", BasicExtracter.COLOR);
+    public static final VizTableStore LINE_STYLE = new BasicVizTableStore("LineStyle", BasicExtracter.LINE_STYLE);
+    public static final VizTableStore LINE_THICKNESS = new BasicVizTableStore("LineThickness", BasicExtracter.LINE_THICKNESS);
+    */
+
+    final VisualProperty<?> vizProp;
+
+    BasicVizTableStore(final String cyColName, final Extracter extracter, final VisualProperty<?> vizProp) {
+      this(cyColName, String.class, extracter, vizProp);
+    }
+
+    BasicVizTableStore(final String cyColName, final Class<?> cyColType, final Extracter extracter, final VisualProperty<?> vizProp) {
+      super(cyColName, cyColType, extracter);
+      this.vizProp = vizProp;
+    }
+
+    public String getCyColumnName() {
+      return super.cyColName;
+    }
+
+    public Class<?> getCyColumnType() {
+      return super.cyColType;
+    }
+
+    public VisualProperty<?> getCyVizProp() {
+      return vizProp;
+    }
+  }
+
+  public static List<VizTableStore> getAllVizTableStores() {
+    return Arrays.asList(
+      BasicVizTableStore.NODE_WIDTH,
+      BasicVizTableStore.NODE_HEIGHT
+      );
   }
 
   void store(final CyTable cyTable, final CyIdentifiable cyNetObj, final PathwayElement pvElem, final TableStore ... tableStores) {
@@ -377,8 +420,8 @@ public class GpmlToPathway {
     final CyNode cyNode = cyNet.addNode();
     store(cyNodeTbl, cyNode, pvDataNode,
       BasicTableStore.GRAPH_ID,
-      BasicTableStore.WIDTH,
-      BasicTableStore.HEIGHT);
+      BasicVizTableStore.NODE_WIDTH,
+      BasicVizTableStore.NODE_HEIGHT);
     store(cyNode, pvDataNode,
       BasicVizPropStore.NODE_X,
       BasicVizPropStore.NODE_Y);

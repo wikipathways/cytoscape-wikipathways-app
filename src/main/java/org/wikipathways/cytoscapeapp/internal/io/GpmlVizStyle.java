@@ -41,8 +41,12 @@ public class GpmlVizStyle {
     vizStyle.setTitle("WikiPathways");
     vizStyle.setDefaultValue(BasicVisualLexicon.NODE_FILL_COLOR, Color.WHITE);
     vizStyle.setDefaultValue(BasicVisualLexicon.NODE_LABEL_COLOR, Color.BLACK);
-    vizStyle.addVisualMappingFunction(passFnFactory.createVisualMappingFunction("Width", Double.class, BasicVisualLexicon.NODE_WIDTH));
-    vizStyle.addVisualMappingFunction(passFnFactory.createVisualMappingFunction("Height", Double.class, BasicVisualLexicon.NODE_HEIGHT));
+    for (final GpmlToPathway.VizTableStore vizTableStore : GpmlToPathway.getAllVizTableStores()) {
+      vizStyle.addVisualMappingFunction(passFnFactory.createVisualMappingFunction(
+        vizTableStore.getCyColumnName(),
+        vizTableStore.getCyColumnType(),
+        vizTableStore.getCyVizProp()));
+    }
     vizMapMgr.addVisualStyle(vizStyle);
     for (final VisualPropertyDependency<?> dep : vizStyle.getAllVisualPropertyDependencies()) {
       if ("nodeSizeLocked".equals(dep.getIdString())) {
