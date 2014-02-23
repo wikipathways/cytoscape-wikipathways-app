@@ -237,20 +237,20 @@ public class GpmlToPathway {
     Object extract(final PathwayElement pvElem);
   }
 
-  static enum BasicExtracter implements Extracter {
-    GRAPH_ID(StaticProperty.GRAPHID),
-    TEXT_LABEL(StaticProperty.TEXTLABEL),
-    X(StaticProperty.CENTERX),
-    Y(StaticProperty.CENTERY),
-    WIDTH(StaticProperty.WIDTH),
-    HEIGHT(StaticProperty.HEIGHT),
-    COLOR(PV_COLOR_CONVERTER, StaticProperty.COLOR),
-    FILL_COLOR(PV_COLOR_CONVERTER, StaticProperty.FILLCOLOR),
-    FONT_SIZE(StaticProperty.FONTSIZE),
-    TRANSPARENT(StaticProperty.TRANSPARENT),
-    LINE_THICKNESS(PV_LINE_THICKNESS_CONVERTER, StaticProperty.SHAPETYPE, StaticProperty.LINETHICKNESS),
-    SHAPE(PV_SHAPE_CONVERTER, StaticProperty.SHAPETYPE),
-    LINE_STYLE(PV_LINE_STYLE_CONVERTER, StaticProperty.LINESTYLE);
+  static class BasicExtracter implements Extracter {
+    public static final Extracter GRAPH_ID = new BasicExtracter(StaticProperty.GRAPHID);
+    public static final Extracter TEXT_LABEL = new BasicExtracter(StaticProperty.TEXTLABEL);
+    public static final Extracter X = new BasicExtracter(StaticProperty.CENTERX);
+    public static final Extracter Y = new BasicExtracter(StaticProperty.CENTERY);
+    public static final Extracter WIDTH = new BasicExtracter(StaticProperty.WIDTH);
+    public static final Extracter HEIGHT = new BasicExtracter(StaticProperty.HEIGHT);
+    public static final Extracter COLOR = new BasicExtracter(PV_COLOR_CONVERTER, StaticProperty.COLOR);
+    public static final Extracter FILL_COLOR = new BasicExtracter(PV_COLOR_CONVERTER, StaticProperty.FILLCOLOR);
+    public static final Extracter FONT_SIZE = new BasicExtracter(StaticProperty.FONTSIZE);
+    public static final Extracter TRANSPARENT = new BasicExtracter(StaticProperty.TRANSPARENT);
+    public static final Extracter LINE_THICKNESS = new BasicExtracter(PV_LINE_THICKNESS_CONVERTER, StaticProperty.SHAPETYPE, StaticProperty.LINETHICKNESS);
+    public static final Extracter SHAPE = new BasicExtracter(PV_SHAPE_CONVERTER, StaticProperty.SHAPETYPE);
+    public static final Extracter LINE_STYLE = new BasicExtracter(PV_LINE_STYLE_CONVERTER, StaticProperty.LINESTYLE);
 
     final Converter converter;
     final StaticProperty[] pvProps;
@@ -283,14 +283,13 @@ public class GpmlToPathway {
     void store(final CyTable cyTable, final CyIdentifiable cyNetObj, final PathwayElement pvElem);
   }
 
-  static enum BasicTableStore implements TableStore {
-    GRAPH_ID("GraphID", BasicExtracter.GRAPH_ID),
-    WIDTH("Width", Double.class, BasicExtracter.WIDTH),
-    HEIGHT("Height", Double.class, BasicExtracter.HEIGHT),
-
-    COLOR("Color", BasicExtracter.COLOR),
-    LINE_STYLE("LineStyle", BasicExtracter.LINE_STYLE),
-    LINE_THICKNESS("LineThickness", BasicExtracter.LINE_THICKNESS);
+  static class BasicTableStore implements TableStore {
+    public static final TableStore GRAPH_ID = new BasicTableStore("GraphID", BasicExtracter.GRAPH_ID);
+    public static final TableStore WIDTH = new BasicTableStore("Width", Double.class, BasicExtracter.WIDTH);
+    public static final TableStore HEIGHT = new BasicTableStore("Height", Double.class, BasicExtracter.HEIGHT);
+    public static final TableStore COLOR = new BasicTableStore("Color", BasicExtracter.COLOR);
+    public static final TableStore LINE_STYLE = new BasicTableStore("LineStyle", BasicExtracter.LINE_STYLE);
+    public static final TableStore LINE_THICKNESS = new BasicTableStore("LineThickness", BasicExtracter.LINE_THICKNESS);
 
     final String cyColName;
     final Class<?> cyColType;
@@ -331,9 +330,9 @@ public class GpmlToPathway {
     DelayedVizProp store(final CyIdentifiable cyNetObj, final PathwayElement pvElem);
   }
 
-  static enum BasicVizPropStore implements VizPropStore {
-    NODE_X(BasicVisualLexicon.NODE_X_LOCATION, BasicExtracter.X),
-    NODE_Y(BasicVisualLexicon.NODE_Y_LOCATION, BasicExtracter.Y);
+  static class BasicVizPropStore implements VizPropStore {
+    public static final VizPropStore NODE_X = new BasicVizPropStore(BasicVisualLexicon.NODE_X_LOCATION, BasicExtracter.X);
+    public static final VizPropStore NODE_Y = new BasicVizPropStore(BasicVisualLexicon.NODE_Y_LOCATION, BasicExtracter.Y);
 
     final VisualProperty<?> cyVizProp;
     final Extracter extracter;
