@@ -122,14 +122,14 @@ public class GpmlToPathway {
         BasicTableStore.GRAPH_ID,
         BasicTableStore.WIDTH,
         BasicTableStore.HEIGHT)) {
-      tableStore.setup(cyNodeTbl);
+      setupTableStore(tableStore, cyNodeTbl);
     }
 
     for (final TableStore tableStore : Arrays.asList(
         BasicTableStore.COLOR,
         BasicTableStore.LINE_STYLE,
         BasicTableStore.LINE_THICKNESS)) {
-      tableStore.setup(cyEdgeTbl);
+      setupTableStore(tableStore, cyEdgeTbl);
     }
   }
 
@@ -228,13 +228,12 @@ public class GpmlToPathway {
   };
 
   /**
-   * Extracts static property values from a PathVisio
-   * pathway element and returns a Cytoscape value.
-   * This converts the PathVisio static property values
-   * using a converter if one is supplied.
+   * Understands how to extract static property values from a PathVisio
+   * pathway element and return a Cytoscape value.
    */
   static interface Extracter {
-    Object extract(final PathwayElement pvElem);
+    StaticProperty[] getPVProps();
+    Converter getConverter();
   }
 
   static enum BasicExtracter implements Extracter {
@@ -254,7 +253,6 @@ public class GpmlToPathway {
 
     final Converter converter;
     final StaticProperty[] pvProps;
-    final Object[] pvValues;
 
     BasicExtracter(StaticProperty ... pvProps) {
       this(NO_CONVERT, pvProps);
@@ -263,24 +261,34 @@ public class GpmlToPathway {
     BasicExtracter(final Converter converter, StaticProperty ... pvProps) {
       this.converter = converter;
       this.pvProps = pvProps;
-      this.pvValues = new Object[pvProps.length];
     }
 
-    public Object extract(final PathwayElement pvElem) {
-     for (int i = 0; i < pvValues.length; i++) {
-        pvValues[i] = pvElem.getStaticProperty(pvProps[i]);
-      }     
-      return converter.toCyValue(pvValues);
+    public StaticProperty[] getPVProps() {
+      return pvProps;
+    }
+
+    public Converter getConverter() {
+      return converter;
     }
   }
 
+  static Object extract(final Extracter extracter, final PathwayElement pvElem) {
+    final StaticProperty[] pvProps = extracter.getPVProps();
+    final Object[] pvValues = new Object[pvProps.length];
+    for (int i = 0; i < pvValues.length; i++) {
+      pvValues[i] = pvElem.getStaticProperty(pvProps[i]);
+    }
+    return extracter.getConverter().toCyValue(pvValues);
+  }
+
   /**
-   * Takes a PathVisio PathwayElement's static property values and stores
-   * them in the given Cytoscape table.
+   * Describes how PathVisio PathwayElement's static property values
+   * are stored in a Cytoscape table.
    */
   static interface TableStore {
-    void setup(final CyTable cyTable);
-    void store(final CyTable cyTable, final CyIdentifiable cyNetObj, final PathwayElement pvElem);
+    String getCyColumnName();
+    Class<?> getCyColumnType();
+    Extracter getExtracter();
   }
 
   static enum BasicTableStore implements TableStore {
@@ -306,20 +314,36 @@ public class GpmlToPathway {
       this.extracter = extracter;
     }
 
-    public void setup(final CyTable cyTable) {
-      final CyColumn cyCol = cyTable.getColumn(cyColName);
-      if (cyCol == null) {
-        cyTable.createColumn(cyColName, cyColType, false);
-      } else {
-        if (!cyCol.getType().equals(cyColType)) {
-          System.out.println(String.format("Wrong column type. Column %s is type %s but expected %s", cyColName, cyCol.getType().toString(), cyColType.toString()));
-        }
-      }
+    public String getCyColumnName() {
+      return cyColName;
     }
 
-    public void store(final CyTable cyTable, final CyIdentifiable cyNetObj, final PathwayElement pvElem) {
-      final Object value = extracter.extract(pvElem);
-      cyTable.getRow(cyNetObj.getSUID()).set(cyColName, value);
+    public Class<?> getCyColumnType() {
+      return cyColType;
+    }
+
+    public Extracter getExtracter() {
+      return extracter;
+    }
+  }
+
+  void store(final CyTable cyTable, final CyIdentifiable cyNetObj, final PathwayElement pvElem, final TableStore ... tableStores) {
+    for (final TableStore tableStore : tableStores) {
+      final Object cyValue = extract(tableStore.getExtracter(), pvElem);
+      cyTable.getRow(cyNetObj.getSUID()).set(tableStore.getCyColumnName(), cyValue);
+    }
+  }
+
+  static void setupTableStore(final TableStore tableStore, final CyTable cyTable) {
+    final String cyColName = tableStore.getCyColumnName();
+    final Class<?> cyColType = tableStore.getCyColumnType();
+    final CyColumn cyCol = cyTable.getColumn(cyColName);
+    if (cyCol == null) {
+      cyTable.createColumn(cyColName, cyColType, false);
+    } else {
+      if (!cyCol.getType().equals(cyColType)) {
+        System.out.println(String.format("Wrong column type. Column %s is type %s but expected %s", cyColName, cyCol.getType().toString(), cyColType.toString()));
+      }
     }
   }
 
@@ -328,7 +352,8 @@ public class GpmlToPathway {
    * the equivalent Cytoscape visual property value in a {@code DelayedVizProp}.
    */
   static interface VizPropStore {
-    DelayedVizProp store(final CyIdentifiable cyNetObj, final PathwayElement pvElem);
+    VisualProperty<?> getCyVizProp();
+    Extracter getExtracter();
   }
 
   static enum BasicVizPropStore implements VizPropStore {
@@ -343,21 +368,19 @@ public class GpmlToPathway {
       this.extracter = extracter;
     }
 
-    public DelayedVizProp store(final CyIdentifiable cyNetObj, final PathwayElement pvElem) {
-      final Object cyValue = extracter.extract(pvElem);
-      return new DelayedVizProp(cyNetObj, cyVizProp, cyValue, false);
+    public VisualProperty<?> getCyVizProp() {
+      return cyVizProp;
+    }
+
+    public Extracter getExtracter() {
+      return extracter;
     }
   }
 
-  void apply(final CyTable cyTable, final CyIdentifiable cyNetObj, final PathwayElement pvElem, final TableStore ... tableStores) {
-    for (int i = 0; i < tableStores.length; i++) {
-      tableStores[i].store(cyTable, cyNetObj, pvElem);
-    }
-  }
-
-  void apply(final CyIdentifiable cyNetObj, final PathwayElement pvElem, final VizPropStore ... vizPropStores) {
-    for (int i = 0; i < vizPropStores.length; i++) {
-      cyDelayedVizProps.add(vizPropStores[i].store(cyNetObj, pvElem));
+  void store(final CyIdentifiable cyNetObj, final PathwayElement pvElem, final VizPropStore ... vizPropStores) {
+    for (final VizPropStore vizPropStore : vizPropStores) {
+      final Object cyValue = extract(vizPropStore.getExtracter(), pvElem);
+      cyDelayedVizProps.add(new DelayedVizProp(cyNetObj, vizPropStore.getCyVizProp(), cyValue, false));
     }
   }
 
@@ -377,11 +400,11 @@ public class GpmlToPathway {
 
   private void convertDataNode(final PathwayElement pvDataNode) {
     final CyNode cyNode = cyNet.addNode();
-    apply(cyNodeTbl, cyNode, pvDataNode,
+    store(cyNodeTbl, cyNode, pvDataNode,
       BasicTableStore.GRAPH_ID,
       BasicTableStore.WIDTH,
       BasicTableStore.HEIGHT);
-    apply(cyNode, pvDataNode,
+    store(cyNode, pvDataNode,
       BasicVizPropStore.NODE_X,
       BasicVizPropStore.NODE_Y);
     
@@ -426,6 +449,7 @@ public class GpmlToPathway {
    ========================================================
   */
 
+   /*
   final Extracter STATE_X_EXTRACTER = new Extracter() {
     public Object extract(final PathwayElement pvState) {
       final PathwayElement pvParent = (PathwayElement) pvPathway.getGraphIdContainer(pvState.getGraphRef());
@@ -439,6 +463,7 @@ public class GpmlToPathway {
       return pvParent.getMCenterY() + pvState.getRelY() * pvParent.getMWidth() / 2.0;
     }
   };
+  */
 
   private static Map<StaticProperty,String> stateStaticProps = new HashMap<StaticProperty,String>();
   static {
