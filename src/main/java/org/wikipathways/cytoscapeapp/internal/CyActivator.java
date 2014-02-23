@@ -42,6 +42,7 @@ import org.cytoscape.io.webservice.SearchWebServiceClient;
 import org.cytoscape.io.webservice.WebServiceClient;
 import org.cytoscape.view.vizmap.VisualStyleFactory;
 import org.cytoscape.view.vizmap.VisualMappingManager;
+import org.cytoscape.view.vizmap.VisualMappingFunctionFactory;
 import org.cytoscape.work.TaskManager;
 import org.cytoscape.work.swing.DialogTaskManager;
 
@@ -73,11 +74,17 @@ public class CyActivator extends AbstractCyActivator {
        final CyTableManager tableMgr = getService(context,CyTableManager.class);
        final CyTableFactory tableFactory = getService(context,CyTableFactory.class);
        final CyEventHelper eventHelper = getService(context,CyEventHelper.class);
-       final VisualMappingManager vizMapMgr = getService(context,VisualMappingManager.class);
-       final VisualStyleFactory vizStyleFactory = getService(context,VisualStyleFactory.class);
        final CyNetworkReaderManager netReaderMgr = getService(context, CyNetworkReaderManager.class);
        final TaskManager taskMgr = getService(context, DialogTaskManager.class);
        final CyLayoutAlgorithmManager layoutMgr = getService(context, CyLayoutAlgorithmManager.class);
+
+       final GpmlVizStyle gpmlStyle = new GpmlVizStyle(
+              getService(context, VisualStyleFactory.class),
+              getService(context, VisualMappingManager.class),
+              getService(context, VisualMappingFunctionFactory.class, "(mapping.type=continuous)"),
+              getService(context, VisualMappingFunctionFactory.class, "(mapping.type=discrete)"),
+              getService(context, VisualMappingFunctionFactory.class, "(mapping.type=passthrough)"));
+
        final Annots annots = new Annots(
               getService(context, AnnotationManager.class),
               getService(context, AnnotationFactory.class,"(type=ArrowAnnotation.class)"),
@@ -88,7 +95,6 @@ public class CyActivator extends AbstractCyActivator {
        registerService(context, clientFactory, WPClientFactory.class, new Properties());
 
        final WPClient client = clientFactory.create();
-       final GpmlVizStyle gpmlStyle = new GpmlVizStyle(vizStyleFactory, vizMapMgr);
 
        final GpmlReaderTaskFactory gpmlReaderTaskFactory = new GpmlReaderTaskFactory(eventHelper, netFactory, netMgr, netViewFactory, netViewMgr, layoutMgr, streamUtil, annots, gpmlStyle);
        registerService(context, gpmlReaderTaskFactory, InputStreamTaskFactory.class, new Properties());

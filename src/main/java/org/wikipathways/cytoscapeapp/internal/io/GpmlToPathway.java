@@ -65,6 +65,7 @@ public class GpmlToPathway {
   final CyNetworkView     cyNetView;
 	final CyNetwork         cyNet;
   final CyTable           cyNodeTbl;
+  final CyTable           cyEdgeTbl;
 
   /**
    * Create a converter from the given pathway and store it in the given network.
@@ -87,6 +88,7 @@ public class GpmlToPathway {
     this.cyNetView = cyNetView;
 		this.cyNet = cyNetView.getModel();
     this.cyNodeTbl = cyNet.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS);
+    this.cyEdgeTbl = cyNet.getTable(CyEdge.class, CyNetwork.DEFAULT_ATTRS);
 	}
 
   /**
@@ -121,6 +123,13 @@ public class GpmlToPathway {
         BasicTableStore.WIDTH,
         BasicTableStore.HEIGHT)) {
       tableStore.setup(cyNodeTbl);
+    }
+
+    for (final TableStore tableStore : Arrays.asList(
+        BasicTableStore.COLOR,
+        BasicTableStore.LINE_STYLE,
+        BasicTableStore.LINE_THICKNESS)) {
+      tableStore.setup(cyEdgeTbl);
     }
   }
 
@@ -277,7 +286,11 @@ public class GpmlToPathway {
   static enum BasicTableStore implements TableStore {
     GRAPH_ID("GraphID", BasicExtracter.GRAPH_ID),
     WIDTH("Width", Double.class, BasicExtracter.WIDTH),
-    HEIGHT("Height", Double.class, BasicExtracter.HEIGHT);
+    HEIGHT("Height", Double.class, BasicExtracter.HEIGHT),
+
+    COLOR("Color", BasicExtracter.COLOR),
+    LINE_STYLE("LineStyle", BasicExtracter.LINE_STYLE),
+    LINE_THICKNESS("LineThickness", BasicExtracter.LINE_THICKNESS);
 
     final String cyColName;
     final Class<?> cyColType;
@@ -310,6 +323,10 @@ public class GpmlToPathway {
     }
   }
 
+  /**
+   * Takes a PathVisio PathwayElement's static property values and stores
+   * the equivalent Cytoscape visual property value in a {@code DelayedVizProp}.
+   */
   static interface VizPropStore {
     DelayedVizProp store(final CyIdentifiable cyNetObj, final PathwayElement pvElem);
   }
@@ -599,38 +616,37 @@ public class GpmlToPathway {
     }
   }
 
-  private void convertLine(final PathwayElement elem) {
-    /*
-    final MLine line = (MLine) elem;
-    final String startRef = line.getMStart().getGraphRef();
-    final String endRef = line.getMEnd().getGraphRef();
-    CyNode startNode = nodes.get(pathway.getGraphIdContainer(startRef));
-    if (startNode == null) {
-      startNode = network.addNode();
-      assignAnchorVizStyle(startNode, line.getStartPoint());
+  private void convertLine(final PathwayElement pvElem) {
+    final MLine pvLine = (MLine) pvElem;
+    final String pvStartRef = pvLine.getMStart().getGraphRef();
+    final String pvEndRef = pvLine.getMEnd().getGraphRef();
+
+    CyNode cyStartNode = pvToCyNodes.get(pvPathway.getGraphIdContainer(pvStartRef));
+    if (cyStartNode == null) {
+      cyStartNode = cyNet.addNode();
+      assignAnchorVizStyle(cyStartNode, pvLine.getStartPoint());
     }
-    CyNode endNode = nodes.get(pathway.getGraphIdContainer(endRef));
-    if (endNode == null) {
-      endNode = network.addNode();
-      assignAnchorVizStyle(endNode, line.getEndPoint());
+    CyNode cyEndNode = pvToCyNodes.get(pvPathway.getGraphIdContainer(pvEndRef));
+    if (cyEndNode == null) {
+      cyEndNode = cyNet.addNode();
+      assignAnchorVizStyle(cyEndNode, pvLine.getEndPoint());
     }
 
-    final MAnchor[] anchors = elem.getMAnchors().toArray(new MAnchor[0]);
-    if (anchors.length > 0) {
-      final CyEdge firstEdge = network.addEdge(startNode, nodes.get(anchors[0]), true);
-      assignEdgeVizStyle(firstEdge, line, true, false);
-      for (int i = 1; i < anchors.length; i++) {
-        final CyEdge edge = network.addEdge(nodes.get(anchors[i - 1]), nodes.get(anchors[i]), true);
-        assignEdgeVizStyle(edge, line, false, false);
+    final MAnchor[] pvAnchors = pvElem.getMAnchors().toArray(new MAnchor[0]);
+    if (pvAnchors.length > 0) {
+      newEdge(pvLine, cyStartNode, pvToCyNodes.get(pvAnchors[0]), true, false);
+      for (int i = 1; i < pvAnchors.length; i++) {
+        newEdge(pvLine, pvToCyNodes.get(pvAnchors[i - 1]), pvToCyNodes.get(pvAnchors[i]), false, false);
       }
-      final CyEdge lastEdge = network.addEdge(nodes.get(anchors[anchors.length - 1]), endNode, true);
-      assignEdgeVizStyle(lastEdge, line, false, true);
+      newEdge(pvLine, pvToCyNodes.get(pvAnchors[pvAnchors.length - 1]), cyEndNode, false, true);
+    } else {
+      newEdge(pvLine, cyStartNode, cyEndNode, true, true);
     }
-    else {
-      final CyEdge edge = network.addEdge(startNode, endNode, true);
-      assignEdgeVizStyle(edge, line, true, true);
-    }
-    */
+  }
+
+  private void newEdge(final PathwayElement pvLine, final CyNode cySourceNode, final CyNode cyTargetNode, final boolean isStart, final boolean isEnd) {
+    final CyEdge cyEdge = cyNet.addEdge(cySourceNode, cyTargetNode, true);
+    assignEdgeVizStyle(cyEdge, pvLine, isStart, isEnd);
   }
 
   private static Map<StaticProperty,VisualProperty<?>> lineViewStaticProps = new HashMap<StaticProperty,VisualProperty<?>>();
