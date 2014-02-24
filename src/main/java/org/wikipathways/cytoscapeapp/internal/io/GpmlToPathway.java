@@ -120,19 +120,20 @@ public class GpmlToPathway {
   private void setupCyTables() {
     for (final TableStore tableStore : Arrays.asList(
         BasicTableStore.GRAPH_ID,
+        DATA_SOURCE_STORE,
         BasicVizTableStore.NODE_WIDTH,
         BasicVizTableStore.NODE_HEIGHT)) {
       tableStore.setup(cyNodeTbl);
     }
 
-    /*
     for (final TableStore tableStore : Arrays.asList(
-        BasicTableStore.COLOR,
-        BasicTableStore.LINE_STYLE,
-        BasicTableStore.LINE_THICKNESS)) {
+        BasicVizTableStore.EDGE_COLOR,
+        BasicVizTableStore.EDGE_LINE_STYLE,
+        BasicVizTableStore.EDGE_LINE_THICKNESS,
+        BasicVizTableStore.EDGE_START_ARROW,
+        BasicVizTableStore.EDGE_END_ARROW)) {
       tableStore.setup(cyEdgeTbl);
     }
-    */
   }
 
   /*
@@ -225,7 +226,7 @@ public class GpmlToPathway {
   static final Converter PV_COLOR_CONVERTER = new Converter() {
     public Object toCyValue(Object[] pvValues) {
       final int rgb = ((Color) pvValues[0]).getRGB();
-      return String.format("#06x", rgb);
+      return String.format("#%06x", rgb);
     }
   };
 
@@ -248,9 +249,12 @@ public class GpmlToPathway {
     public static final Extracter FILL_COLOR = new BasicExtracter(PV_COLOR_CONVERTER, StaticProperty.FILLCOLOR);
     public static final Extracter FONT_SIZE = new BasicExtracter(StaticProperty.FONTSIZE);
     public static final Extracter TRANSPARENT = new BasicExtracter(StaticProperty.TRANSPARENT);
-    public static final Extracter LINE_THICKNESS = new BasicExtracter(PV_LINE_THICKNESS_CONVERTER, StaticProperty.SHAPETYPE, StaticProperty.LINETHICKNESS);
+    public static final Extracter NODE_LINE_THICKNESS = new BasicExtracter(PV_LINE_THICKNESS_CONVERTER, StaticProperty.SHAPETYPE, StaticProperty.LINETHICKNESS);
+    public static final Extracter EDGE_LINE_THICKNESS = new BasicExtracter(StaticProperty.LINETHICKNESS);
     public static final Extracter SHAPE = new BasicExtracter(PV_SHAPE_CONVERTER, StaticProperty.SHAPETYPE);
     public static final Extracter LINE_STYLE = new BasicExtracter(PV_LINE_STYLE_CONVERTER, StaticProperty.LINESTYLE);
+    public static final Extracter START_ARROW_STYLE = new BasicExtracter(PV_ARROW_CONVERTER, StaticProperty.STARTLINETYPE);
+    public static final Extracter END_ARROW_STYLE = new BasicExtracter(PV_ARROW_CONVERTER, StaticProperty.ENDLINETYPE);
 
     final Converter converter;
     final StaticProperty[] pvProps;
@@ -286,6 +290,7 @@ public class GpmlToPathway {
 
   static class BasicTableStore implements TableStore {
     public static final TableStore GRAPH_ID = new BasicTableStore("GraphID", BasicExtracter.GRAPH_ID);
+    public static final TableStore TEXT_LABEL = new BasicTableStore(CyNetwork.NAME, BasicExtracter.TEXT_LABEL);
 
     final String cyColName;
     final Class<?> cyColType;
@@ -322,26 +327,51 @@ public class GpmlToPathway {
     String getCyColumnName();
     Class<?> getCyColumnType();
     VisualProperty<?> getCyVizProp();
+    Map<?,?> getMapping();
+  }
+
+  static Map<String,ArrowShape> PV_ARROW_TYPES = new HashMap<String,ArrowShape>();
+  static {
+    PV_ARROW_TYPES.put("Arrow",              ArrowShapeVisualProperty.DELTA);
+    PV_ARROW_TYPES.put("TBar",               ArrowShapeVisualProperty.T);
+    PV_ARROW_TYPES.put("mim-binding",        ArrowShapeVisualProperty.ARROW);
+    PV_ARROW_TYPES.put("mim-conversion",     ArrowShapeVisualProperty.ARROW);
+    PV_ARROW_TYPES.put("mim-modification",   ArrowShapeVisualProperty.ARROW);
+    PV_ARROW_TYPES.put("mim-catalysis",      ArrowShapeVisualProperty.CIRCLE);
+    PV_ARROW_TYPES.put("mim-inhibition",     ArrowShapeVisualProperty.T);
+    PV_ARROW_TYPES.put("mim-covalent-bond",  ArrowShapeVisualProperty.T);
   }
 
   static class BasicVizTableStore extends BasicTableStore implements VizTableStore {
     public static final VizTableStore NODE_WIDTH = new BasicVizTableStore("Width", Double.class, BasicExtracter.WIDTH, BasicVisualLexicon.NODE_WIDTH);
     public static final VizTableStore NODE_HEIGHT = new BasicVizTableStore("Height", Double.class, BasicExtracter.HEIGHT, BasicVisualLexicon.NODE_HEIGHT);
-    /*
-    public static final VizTableStore COLOR = new BasicVizTableStore("Color", BasicExtracter.COLOR);
-    public static final VizTableStore LINE_STYLE = new BasicVizTableStore("LineStyle", BasicExtracter.LINE_STYLE);
-    public static final VizTableStore LINE_THICKNESS = new BasicVizTableStore("LineThickness", BasicExtracter.LINE_THICKNESS);
-    */
+    public static final VizTableStore NODE_COLOR = new BasicVizTableStore("Color", BasicExtracter.FILL_COLOR, BasicVisualLexicon.NODE_PAINT);
+    
+    public static final VizTableStore EDGE_COLOR = new BasicVizTableStore("Color", BasicExtracter.COLOR, BasicVisualLexicon.EDGE_PAINT);
+    public static final VizTableStore EDGE_LINE_STYLE = new BasicVizTableStore("LineStyle", BasicExtracter.LINE_STYLE, BasicVisualLexicon.EDGE_LINE_TYPE);
+    public static final VizTableStore EDGE_LINE_THICKNESS = new BasicVizTableStore("LineThickness", Double.class, BasicExtracter.EDGE_LINE_THICKNESS, BasicVisualLexicon.EDGE_WIDTH);
+    public static final VizTableStore EDGE_START_ARROW = new BasicVizTableStore("StartArrow", BasicExtracter.START_ARROW_STYLE, BasicVisualLexicon.EDGE_SOURCE_ARROW_SHAPE, PV_ARROW_TYPES);
+    public static final VizTableStore EDGE_END_ARROW = new BasicVizTableStore("EndArrow", BasicExtracter.END_ARROW_STYLE, BasicVisualLexicon.EDGE_TARGET_ARROW_SHAPE, PV_ARROW_TYPES);
 
     final VisualProperty<?> vizProp;
+    final Map<?,?> mapping;
 
     BasicVizTableStore(final String cyColName, final Extracter extracter, final VisualProperty<?> vizProp) {
       this(cyColName, String.class, extracter, vizProp);
     }
 
     BasicVizTableStore(final String cyColName, final Class<?> cyColType, final Extracter extracter, final VisualProperty<?> vizProp) {
+      this(cyColName, cyColType, extracter, vizProp, null);
+    }
+
+    BasicVizTableStore(final String cyColName, final Extracter extracter, final VisualProperty<?> vizProp, final Map<?,?> mapping) {
+      this(cyColName, String.class, extracter, vizProp, mapping);
+    }
+
+    BasicVizTableStore(final String cyColName, final Class<?> cyColType, final Extracter extracter, final VisualProperty<?> vizProp, final Map<?,?> mapping) {
       super(cyColName, cyColType, extracter);
       this.vizProp = vizProp;
+      this.mapping = mapping;
     }
 
     public String getCyColumnName() {
@@ -355,12 +385,21 @@ public class GpmlToPathway {
     public VisualProperty<?> getCyVizProp() {
       return vizProp;
     }
+
+    public Map<?,?> getMapping() {
+      return mapping;
+    }
   }
 
   public static List<VizTableStore> getAllVizTableStores() {
     return Arrays.asList(
       BasicVizTableStore.NODE_WIDTH,
-      BasicVizTableStore.NODE_HEIGHT
+      BasicVizTableStore.NODE_HEIGHT,
+      BasicVizTableStore.EDGE_COLOR,
+      BasicVizTableStore.EDGE_LINE_STYLE,
+      BasicVizTableStore.EDGE_LINE_THICKNESS,
+      BasicVizTableStore.EDGE_START_ARROW,
+      BasicVizTableStore.EDGE_END_ARROW
       );
   }
 
@@ -408,6 +447,17 @@ public class GpmlToPathway {
    ========================================================
   */
 
+  static final Extracter DATA_SOURCE_EXTRACTER = new Extracter() {
+    public Object extract(final PathwayElement pvElem) {
+      if(pvElem.getDataSource() == null)
+        return null;
+      else
+        return pvElem.getDataSource().getFullName();
+    }
+  };
+
+  static final TableStore DATA_SOURCE_STORE = new BasicTableStore("Datasource", DATA_SOURCE_EXTRACTER);
+
   private void convertDataNodes() {
     for (final PathwayElement pvElem : pvPathway.getDataObjects()) {
       if (!pvElem.getObjectType().equals(ObjectType.DATANODE))
@@ -418,8 +468,11 @@ public class GpmlToPathway {
 
   private void convertDataNode(final PathwayElement pvDataNode) {
     final CyNode cyNode = cyNet.addNode();
+    pvToCyNodes.put(pvDataNode, cyNode);
     store(cyNodeTbl, cyNode, pvDataNode,
       BasicTableStore.GRAPH_ID,
+      DATA_SOURCE_STORE,
+      BasicTableStore.TEXT_LABEL,
       BasicVizTableStore.NODE_WIDTH,
       BasicVizTableStore.NODE_HEIGHT);
     store(cyNode, pvDataNode,
@@ -687,25 +740,16 @@ public class GpmlToPathway {
 
   private void newEdge(final PathwayElement pvLine, final CyNode cySourceNode, final CyNode cyTargetNode, final boolean isStart, final boolean isEnd) {
     final CyEdge cyEdge = cyNet.addEdge(cySourceNode, cyTargetNode, true);
-    assignEdgeVizStyle(cyEdge, pvLine, isStart, isEnd);
-  }
-
-  private static Map<StaticProperty,VisualProperty<?>> lineViewStaticProps = new HashMap<StaticProperty,VisualProperty<?>>();
-  static {
-    lineViewStaticProps.put(StaticProperty.COLOR,         BasicVisualLexicon.EDGE_UNSELECTED_PAINT);
-    lineViewStaticProps.put(StaticProperty.LINESTYLE,     BasicVisualLexicon.EDGE_LINE_TYPE);
-    lineViewStaticProps.put(StaticProperty.LINETHICKNESS, BasicVisualLexicon.EDGE_WIDTH);
-  }
-
-  private void assignEdgeVizStyle(final CyEdge edge, final PathwayElement line, final boolean isFirst, final boolean isLast) {
-    /*
-    if (edge == null) return;
-    convertViewStaticProps(line, lineViewStaticProps, edge);
-
-    if (isFirst)
-      convertViewStaticProp(line, edge, StaticProperty.STARTLINETYPE, BasicVisualLexicon.EDGE_SOURCE_ARROW_SHAPE);
-    if (isLast)
-      convertViewStaticProp(line, edge, StaticProperty.ENDLINETYPE, BasicVisualLexicon.EDGE_TARGET_ARROW_SHAPE);   
-*/
+    store(cyEdgeTbl, cyEdge, pvLine, 
+      BasicVizTableStore.EDGE_COLOR,
+      BasicVizTableStore.EDGE_LINE_STYLE,
+      BasicVizTableStore.EDGE_LINE_THICKNESS
+      );
+    if (isStart) {
+      store(cyEdgeTbl, cyEdge, pvLine, BasicVizTableStore.EDGE_START_ARROW);
+    }
+    if (isEnd) {
+      store(cyEdgeTbl, cyEdge, pvLine, BasicVizTableStore.EDGE_END_ARROW);
+    }
   }
 }

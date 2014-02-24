@@ -1,5 +1,7 @@
 package org.wikipathways.cytoscapeapp.internal.io;
 
+import java.util.Map;
+
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.vizmap.VisualStyleFactory;
 import org.cytoscape.view.vizmap.VisualMappingManager;
@@ -8,9 +10,9 @@ import org.cytoscape.view.presentation.property.BasicVisualLexicon;
 import org.cytoscape.view.vizmap.VisualMappingFunctionFactory;
 import org.cytoscape.view.vizmap.VisualMappingFunction;
 import org.cytoscape.view.vizmap.VisualPropertyDependency;
+import org.cytoscape.view.vizmap.mappings.DiscreteMapping;
 /*
 import org.cytoscape.view.vizmap.mappings.ContinuousMapping;
-import org.cytoscape.view.vizmap.mappings.DiscreteMapping;
 import org.cytoscape.view.vizmap.mappings.PassthroughMapping;
 */
 import java.awt.Color;
@@ -42,10 +44,17 @@ public class GpmlVizStyle {
     vizStyle.setDefaultValue(BasicVisualLexicon.NODE_FILL_COLOR, Color.WHITE);
     vizStyle.setDefaultValue(BasicVisualLexicon.NODE_LABEL_COLOR, Color.BLACK);
     for (final GpmlToPathway.VizTableStore vizTableStore : GpmlToPathway.getAllVizTableStores()) {
-      vizStyle.addVisualMappingFunction(passFnFactory.createVisualMappingFunction(
-        vizTableStore.getCyColumnName(),
-        vizTableStore.getCyColumnType(),
-        vizTableStore.getCyVizProp()));
+      final Map<?,?> mapping = vizTableStore.getMapping();
+      final VisualMappingFunctionFactory fnFactory = (mapping == null) ? passFnFactory : discFnFactory;
+      final VisualMappingFunction fn = fnFactory.createVisualMappingFunction(
+          vizTableStore.getCyColumnName(),
+          vizTableStore.getCyColumnType(),
+          vizTableStore.getCyVizProp());
+      if (mapping != null) {
+        final DiscreteMapping discreteFn = (DiscreteMapping) fn;
+        discreteFn.putAll(mapping);
+      }
+      vizStyle.addVisualMappingFunction(fn);
     }
     vizMapMgr.addVisualStyle(vizStyle);
     for (final VisualPropertyDependency<?> dep : vizStyle.getAllVisualPropertyDependencies()) {
