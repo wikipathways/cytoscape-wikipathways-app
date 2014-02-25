@@ -312,6 +312,10 @@ public class GpmlToPathway {
     }
   }
 
+  /**
+   * An extracter that always returns the same Cytoscape value
+   * regardless of the PathVisio element.
+   */
   static class DefaultExtracter implements Extracter {
     final Object cyValue;
     public DefaultExtracter(final Object cyValue) {
@@ -319,7 +323,6 @@ public class GpmlToPathway {
     }
 
     public Object extract(final PathwayElement pvElem) {
-      System.out.println("DefaultExtracter: " + pvElem + " => " + cyValue);
       return cyValue;
     }
   }
@@ -736,24 +739,7 @@ public class GpmlToPathway {
    ========================================================
   */
 
-  private static Map<StaticProperty,String> labelStaticProps = new HashMap<StaticProperty,String>();
-  static {
-    labelStaticProps.put(StaticProperty.TEXTLABEL, CyNetwork.NAME);
-  }
-
-  private static Map<StaticProperty,VisualProperty<?>> labelViewStaticProps = new HashMap<StaticProperty,VisualProperty<?>>();
-  static {
-    labelViewStaticProps.put(StaticProperty.CENTERX,       BasicVisualLexicon.NODE_X_LOCATION);
-    labelViewStaticProps.put(StaticProperty.CENTERY,       BasicVisualLexicon.NODE_Y_LOCATION);
-    labelViewStaticProps.put(StaticProperty.WIDTH,         BasicVisualLexicon.NODE_WIDTH);
-    labelViewStaticProps.put(StaticProperty.HEIGHT,        BasicVisualLexicon.NODE_HEIGHT);
-    labelViewStaticProps.put(StaticProperty.COLOR,         BasicVisualLexicon.NODE_LABEL_COLOR);
-    labelViewStaticProps.put(StaticProperty.FILLCOLOR,     BasicVisualLexicon.NODE_FILL_COLOR);
-    labelViewStaticProps.put(StaticProperty.FONTSIZE,      BasicVisualLexicon.NODE_LABEL_FONT_SIZE);
-    labelViewStaticProps.put(StaticProperty.SHAPETYPE,     BasicVisualLexicon.NODE_SHAPE);
-    labelViewStaticProps.put(StaticProperty.LINETHICKNESS, BasicVisualLexicon.NODE_BORDER_WIDTH);
-
-  }
+  static final VizTableStore LABEL_BORDER_THICKNESS = new OverrideVizTableStore(BasicVizTableStore.NODE_BORDER_THICKNESS, new DefaultExtracter(0.0));
 
   private void convertLabels() {
     for (final PathwayElement pvElem : pvPathway.getDataObjects()) {
@@ -766,14 +752,22 @@ public class GpmlToPathway {
   private void convertLabel(final PathwayElement pvLabel) {
     // TODO: refactor this as an annotation
 	// comment Tina: not sure if they can all be replaced by annotations because they are often connected with data nodes
-    /*
-    final CyNode node = network.addNode();
-    convertStaticProps(label, labelStaticProps, nodeTbl, node.getSUID());
-    convertViewStaticProps(label, labelViewStaticProps, node);
-    delayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_TRANSPARENCY, 0, true)); // labels are always transparent
-    convertShapeTypeNone(node, label);
-    nodes.put(label, node);
-    */
+
+    final CyNode cyNode = cyNet.addNode();
+    pvToCyNodes.put(pvLabel, cyNode);
+    store(cyNodeTbl, cyNode, pvLabel,
+      BasicTableStore.TEXT_LABEL,
+      BasicVizTableStore.NODE_WIDTH,
+      BasicVizTableStore.NODE_HEIGHT,
+      BasicVizTableStore.NODE_COLOR,
+      BasicVizTableStore.NODE_BORDER_COLOR,
+      BasicVizTableStore.NODE_LABEL_SIZE,
+      LABEL_BORDER_THICKNESS
+    );
+    store(cyNode, pvLabel,
+      BasicVizPropStore.NODE_X,
+      BasicVizPropStore.NODE_Y
+    );
   }
   
   /*
