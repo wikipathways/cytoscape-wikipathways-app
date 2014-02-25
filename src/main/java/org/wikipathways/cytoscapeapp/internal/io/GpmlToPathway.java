@@ -122,7 +122,14 @@ public class GpmlToPathway {
         BasicTableStore.GRAPH_ID,
         DATA_SOURCE_STORE,
         BasicVizTableStore.NODE_WIDTH,
-        BasicVizTableStore.NODE_HEIGHT)) {
+        BasicVizTableStore.NODE_HEIGHT,
+        BasicVizTableStore.NODE_COLOR,
+        BasicVizTableStore.NODE_BORDER_COLOR,
+        BasicVizTableStore.NODE_LABEL_SIZE,
+        BasicVizTableStore.NODE_TRANSPARENT,
+        BasicVizTableStore.NODE_BORDER_THICKNESS,
+        BasicVizTableStore.NODE_SHAPE
+        )) {
       tableStore.setup(cyNodeTbl);
     }
 
@@ -225,19 +232,35 @@ public class GpmlToPathway {
 
   static final Converter PV_COLOR_CONVERTER = new Converter() {
     public Object toCyValue(Object[] pvValues) {
-      final int rgb = ((Color) pvValues[0]).getRGB();
-      return String.format("#%06x", rgb);
+      final Color c = (Color) pvValues[0];
+      final int r = c.getRed();
+      final int g = c.getGreen();
+      final int b = c.getBlue();
+      return String.format("#%02x%02x%02x", r, g, b);
     }
   };
 
   /**
-   * Understands how to extract static property values from a PathVisio
-   * pathway element and return a Cytoscape value.
+   * Extracts values from a PathVisio pathway element
+   * and returns a Cytoscape value.
+   *
+   * Most of the time
+   * {@code Extracter} pulls static property values
+   * from a pathway element. Some non-static property
+   * values include data source values and X, Y coordinates
+   * for PathVisio State elements.
+   *
+   * {@code Extracter}s can
+   * use a {@code Converter} to convert the
+   * static property value to a value Cytoscape can use.
    */
   static interface Extracter {
     Object extract(PathwayElement pvElem);
   }
 
+  /**
+   * Extracts static property values from a PathVisio element.
+   */
   static class BasicExtracter implements Extracter {
     public static final Extracter GRAPH_ID = new BasicExtracter(StaticProperty.GRAPHID);
     public static final Extracter TEXT_LABEL = new BasicExtracter(StaticProperty.TEXTLABEL);
@@ -271,20 +294,32 @@ public class GpmlToPathway {
     }
 
     public Object extract(final PathwayElement pvElem) {
+      System.out.println("Extracting...");
       for (int i = 0; i < pvValues.length; i++) {
+        System.out.println(pvProps[i]);
         pvValues[i] = pvElem.getStaticProperty(pvProps[i]);
       }
+      if (pvValues.length == 1 && pvValues[0] == null)
+        return null;
       return converter.toCyValue(pvValues);
     }
   }
 
 
   /**
-   * Describes how PathVisio PathwayElement's static property values
-   * are stored in a Cytoscape table.
+   * Stores PathVisio values produced by an {@code Extractor}
+   * into a Cytoscape table.
    */
   public static interface TableStore {
+    /**
+     * Ensures the columns of {@code cyTable} are created.
+     */
     void setup(final CyTable cyTable);
+
+    /**
+     * Pulls a value from a {@code pvElem} and stores it in {@code cyTable} under the row
+     * whose key is {@code cyNetObj}.
+     */
     void store(final CyTable cyTable, final CyIdentifiable cyNetObj, final PathwayElement pvElem);
   }
 
@@ -323,10 +358,31 @@ public class GpmlToPathway {
     }
   }
 
+  /**
+   * A specific kind of {@code TableStore} that stores
+   * visual property information in a table.
+   */
   public static interface VizTableStore extends TableStore {
+    /**
+     * Return the name of the column that contains the visual property value.
+     */
     String getCyColumnName();
+
+    /**
+     * Return the type of the column that contains the visual property value.
+     */
     Class<?> getCyColumnType();
+
+    /**
+     * Return the Cytoscape visual property that should read from the column
+     * returned by {@getCyColumnName()}.
+     */
     VisualProperty<?> getCyVizProp();
+
+    /**
+     * For discrete mappings, return a map containing the key-value pairs for
+     * the discrete mapping; return null for a passthrough mapping.
+     */
     Map<?,?> getMapping();
   }
 
@@ -346,6 +402,11 @@ public class GpmlToPathway {
     public static final VizTableStore NODE_WIDTH = new BasicVizTableStore("Width", Double.class, BasicExtracter.WIDTH, BasicVisualLexicon.NODE_WIDTH);
     public static final VizTableStore NODE_HEIGHT = new BasicVizTableStore("Height", Double.class, BasicExtracter.HEIGHT, BasicVisualLexicon.NODE_HEIGHT);
     public static final VizTableStore NODE_COLOR = new BasicVizTableStore("Color", BasicExtracter.FILL_COLOR, BasicVisualLexicon.NODE_PAINT);
+    public static final VizTableStore NODE_BORDER_COLOR = new BasicVizTableStore("BorderColor", BasicExtracter.COLOR, BasicVisualLexicon.NODE_BORDER_PAINT);
+    public static final VizTableStore NODE_LABEL_SIZE = new BasicVizTableStore("LabelSize", Double.class, BasicExtracter.FONT_SIZE, BasicVisualLexicon.NODE_LABEL_FONT_SIZE);
+    public static final VizTableStore NODE_TRANSPARENT = new BasicVizTableStore("Transparent", Boolean.class, BasicExtracter.TRANSPARENT, BasicVisualLexicon.NODE_TRANSPARENCY);
+    public static final VizTableStore NODE_BORDER_THICKNESS = new BasicVizTableStore("BorderThickness", Double.class, BasicExtracter.NODE_LINE_THICKNESS, BasicVisualLexicon.NODE_BORDER_WIDTH);
+    public static final VizTableStore NODE_SHAPE = new BasicVizTableStore("Shape", BasicExtracter.SHAPE, BasicVisualLexicon.NODE_SHAPE);
     
     public static final VizTableStore EDGE_COLOR = new BasicVizTableStore("Color", BasicExtracter.COLOR, BasicVisualLexicon.EDGE_PAINT);
     public static final VizTableStore EDGE_LINE_STYLE = new BasicVizTableStore("LineStyle", BasicExtracter.LINE_STYLE, BasicVisualLexicon.EDGE_LINE_TYPE);
@@ -410,7 +471,7 @@ public class GpmlToPathway {
   }
 
   /**
-   * Takes a PathVisio PathwayElement's static property values and stores
+   * Takes a PathVisio element value and stores
    * the equivalent Cytoscape visual property value in a {@code DelayedVizProp}.
    */
   static interface VizPropStore {
@@ -474,7 +535,14 @@ public class GpmlToPathway {
       DATA_SOURCE_STORE,
       BasicTableStore.TEXT_LABEL,
       BasicVizTableStore.NODE_WIDTH,
-      BasicVizTableStore.NODE_HEIGHT);
+      BasicVizTableStore.NODE_HEIGHT,
+      BasicVizTableStore.NODE_COLOR,
+      BasicVizTableStore.NODE_BORDER_COLOR,
+      BasicVizTableStore.NODE_LABEL_SIZE,
+      BasicVizTableStore.NODE_TRANSPARENT,
+      BasicVizTableStore.NODE_BORDER_THICKNESS,
+      BasicVizTableStore.NODE_SHAPE
+      );
     store(cyNode, pvDataNode,
       BasicVizPropStore.NODE_X,
       BasicVizPropStore.NODE_Y);
