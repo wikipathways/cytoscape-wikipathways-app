@@ -128,6 +128,7 @@ public class GpmlToPathway {
         BasicVizTableStore.NODE_LABEL_SIZE,
         BasicVizTableStore.NODE_TRANSPARENT,
         BasicVizTableStore.NODE_BORDER_THICKNESS,
+        BasicVizTableStore.NODE_BORDER_STYLE,
         BasicVizTableStore.NODE_SHAPE
         )) {
       tableStore.setup(cyNodeTbl);
@@ -311,6 +312,18 @@ public class GpmlToPathway {
     }
   }
 
+  static class DefaultExtracter implements Extracter {
+    final Object cyValue;
+    public DefaultExtracter(final Object cyValue) {
+      this.cyValue = cyValue;
+    }
+
+    public Object extract(final PathwayElement pvElem) {
+      System.out.println("DefaultExtracter: " + pvElem + " => " + cyValue);
+      return cyValue;
+    }
+  }
+
 
   /**
    * Stores PathVisio values produced by an {@code Extractor}
@@ -424,6 +437,7 @@ public class GpmlToPathway {
     public static final VizTableStore NODE_HEIGHT = new BasicVizTableStore("Height", Double.class, BasicExtracter.HEIGHT, BasicVisualLexicon.NODE_HEIGHT);
     public static final VizTableStore NODE_COLOR = new BasicVizTableStore("Color", BasicExtracter.FILL_COLOR, BasicVisualLexicon.NODE_FILL_COLOR);
     public static final VizTableStore NODE_BORDER_COLOR = new BasicVizTableStore("BorderColor", BasicExtracter.COLOR, BasicVisualLexicon.NODE_BORDER_PAINT);
+    public static final VizTableStore NODE_BORDER_STYLE = new BasicVizTableStore("BorderStyle", BasicExtracter.LINE_STYLE, BasicVisualLexicon.NODE_BORDER_LINE_TYPE);
     public static final VizTableStore NODE_LABEL_SIZE = new BasicVizTableStore("LabelSize", Double.class, BasicExtracter.FONT_SIZE, BasicVisualLexicon.NODE_LABEL_FONT_SIZE);
     public static final VizTableStore NODE_TRANSPARENT = new BasicVizTableStore("Transparent", BasicExtracter.TRANSPARENT, BasicVisualLexicon.NODE_TRANSPARENCY, PV_TRANSPARENT_MAP);
     public static final VizTableStore NODE_BORDER_THICKNESS = new BasicVizTableStore("BorderThickness", Double.class, BasicExtracter.NODE_LINE_THICKNESS, BasicVisualLexicon.NODE_BORDER_WIDTH);
@@ -473,6 +487,12 @@ public class GpmlToPathway {
     }
   }
 
+  static class OverrideVizTableStore extends BasicVizTableStore {
+    public OverrideVizTableStore(final VizTableStore store, final Extracter extracter) {
+      super(store.getCyColumnName(), store.getCyColumnType(), extracter, store.getCyVizProp(), store.getMapping());
+    }
+  }
+
   public static List<VizTableStore> getAllVizTableStores() {
     return Arrays.asList(
       BasicVizTableStore.NODE_WIDTH,
@@ -519,7 +539,7 @@ public class GpmlToPathway {
 
     public DelayedVizProp store(final CyIdentifiable cyNetObj, final PathwayElement pvElem) {
       final Object cyValue = extracter.extract(pvElem);
-      return new DelayedVizProp(cyNetObj, cyVizProp, cyValue, false);
+      return new DelayedVizProp(cyNetObj, cyVizProp, cyValue, true);
     }
   }
 
@@ -675,10 +695,14 @@ public class GpmlToPathway {
     }
   };
 
-  static final VizPropStore GROUP_X_STORE = new BasicVizPropStore(BasicVisualLexicon.NODE_X_LOCATION, GROUP_X_EXTRACTER);
-  static final VizPropStore GROUP_Y_STORE = new BasicVizPropStore(BasicVisualLexicon.NODE_Y_LOCATION, GROUP_Y_EXTRACTER);
-  static final VizTableStore GROUP_W_STORE = new BasicVizTableStore("Width", Double.class, GROUP_W_EXTRACTER, BasicVisualLexicon.NODE_WIDTH);
-  static final VizTableStore GROUP_H_STORE = new BasicVizTableStore("Height", Double.class, GROUP_H_EXTRACTER, BasicVisualLexicon.NODE_HEIGHT);
+  static final VizPropStore GROUP_X = new BasicVizPropStore(BasicVisualLexicon.NODE_X_LOCATION, GROUP_X_EXTRACTER);
+  static final VizPropStore GROUP_Y = new BasicVizPropStore(BasicVisualLexicon.NODE_Y_LOCATION, GROUP_Y_EXTRACTER);
+  static final VizPropStore GROUP_SELECTED_COLOR = new BasicVizPropStore(BasicVisualLexicon.NODE_SELECTED_PAINT, new DefaultExtracter(new Color(255, 255, 204, 127)));
+  static final VizTableStore GROUP_WIDTH = new OverrideVizTableStore(BasicVizTableStore.NODE_WIDTH, GROUP_W_EXTRACTER);
+  static final VizTableStore GROUP_HEIGHT = new OverrideVizTableStore(BasicVizTableStore.NODE_HEIGHT, GROUP_H_EXTRACTER);
+  static final VizTableStore GROUP_BORDER_THICKNESS = new OverrideVizTableStore(BasicVizTableStore.NODE_BORDER_THICKNESS, new DefaultExtracter(1.0));
+  static final VizTableStore GROUP_BORDER_STYLE = new OverrideVizTableStore(BasicVizTableStore.NODE_BORDER_STYLE, new DefaultExtracter("dot"));
+  static final VizTableStore GROUP_TRANSPARENT = new OverrideVizTableStore(BasicVizTableStore.NODE_TRANSPARENT, new DefaultExtracter("true"));
 
   private void convertGroups() {
     for (final PathwayElement pvElem : pvPathway.getDataObjects()) {
@@ -693,24 +717,17 @@ public class GpmlToPathway {
     pvToCyNodes.put(pvGroup, cyGroupNode);
 
     store(cyNodeTbl, cyGroupNode, pvGroup,
-      GROUP_W_STORE,
-      GROUP_H_STORE
+      GROUP_WIDTH,
+      GROUP_HEIGHT,
+      GROUP_BORDER_THICKNESS,
+      GROUP_BORDER_STYLE,
+      GROUP_TRANSPARENT
     );
     store(cyGroupNode, pvGroup,
-      GROUP_X_STORE,
-      GROUP_Y_STORE
+      GROUP_X,
+      GROUP_Y,
+      GROUP_SELECTED_COLOR 
     );
-
-    /*
-    delayedVizProps.add(new DelayedVizProp(groupNode, BasicVisualLexicon.NODE_X_LOCATION, group.getMCenterX(), false));
-    delayedVizProps.add(new DelayedVizProp(groupNode, BasicVisualLexicon.NODE_Y_LOCATION, group.getMCenterY(), false));
-    delayedVizProps.add(new DelayedVizProp(groupNode, BasicVisualLexicon.NODE_WIDTH, group.getMWidth(), true));
-    delayedVizProps.add(new DelayedVizProp(groupNode, BasicVisualLexicon.NODE_HEIGHT, group.getMHeight(), true));
-    delayedVizProps.add(new DelayedVizProp(groupNode, BasicVisualLexicon.NODE_BORDER_WIDTH, 1.0, true));
-    delayedVizProps.add(new DelayedVizProp(groupNode, BasicVisualLexicon.NODE_BORDER_LINE_TYPE, LINE_TYPES.get("Dots"), true));
-    delayedVizProps.add(new DelayedVizProp(groupNode, BasicVisualLexicon.NODE_TRANSPARENCY, 0, true));
-    delayedVizProps.add(new DelayedVizProp(groupNode, BasicVisualLexicon.NODE_SELECTED_PAINT, DEFAULT_SELECTED_NODE_COLOR, true));
-    */
   }
 
   /*
