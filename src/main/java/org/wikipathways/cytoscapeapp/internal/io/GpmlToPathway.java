@@ -650,7 +650,36 @@ public class GpmlToPathway {
      Groups
    ========================================================
   */
- 
+
+  static final Extracter GROUP_X_EXTRACTER = new Extracter() {
+    public Object extract(final PathwayElement pvGroup) {
+      return pvGroup.getMCenterX();
+    }
+  };
+
+  static final Extracter GROUP_Y_EXTRACTER = new Extracter() {
+    public Object extract(final PathwayElement pvGroup) {
+      return pvGroup.getMCenterY();
+    }
+  };
+  
+  static final Extracter GROUP_W_EXTRACTER = new Extracter() {
+    public Object extract(final PathwayElement pvGroup) {
+      return pvGroup.getMWidth();
+    }
+  };
+
+  static final Extracter GROUP_H_EXTRACTER = new Extracter() {
+    public Object extract(final PathwayElement pvGroup) {
+      return pvGroup.getMHeight();
+    }
+  };
+
+  static final VizPropStore GROUP_X_STORE = new BasicVizPropStore(BasicVisualLexicon.NODE_X_LOCATION, GROUP_X_EXTRACTER);
+  static final VizPropStore GROUP_Y_STORE = new BasicVizPropStore(BasicVisualLexicon.NODE_Y_LOCATION, GROUP_Y_EXTRACTER);
+  static final VizTableStore GROUP_W_STORE = new BasicVizTableStore("Width", Double.class, GROUP_W_EXTRACTER, BasicVisualLexicon.NODE_WIDTH);
+  static final VizTableStore GROUP_H_STORE = new BasicVizTableStore("Height", Double.class, GROUP_H_EXTRACTER, BasicVisualLexicon.NODE_HEIGHT);
+
   private void convertGroups() {
     for (final PathwayElement pvElem : pvPathway.getDataObjects()) {
       if (!pvElem.getObjectType().equals(ObjectType.GROUP))
@@ -660,10 +689,19 @@ public class GpmlToPathway {
   }
 
   private void convertGroup(final PathwayElement pvGroup) {
-    /*
-    final CyNode groupNode = network.addNode();
-    nodes.put(group, groupNode);
+    final CyNode cyGroupNode = cyNet.addNode();
+    pvToCyNodes.put(pvGroup, cyGroupNode);
 
+    store(cyNodeTbl, cyGroupNode, pvGroup,
+      GROUP_W_STORE,
+      GROUP_H_STORE
+    );
+    store(cyGroupNode, pvGroup,
+      GROUP_X_STORE,
+      GROUP_Y_STORE
+    );
+
+    /*
     delayedVizProps.add(new DelayedVizProp(groupNode, BasicVisualLexicon.NODE_X_LOCATION, group.getMCenterX(), false));
     delayedVizProps.add(new DelayedVizProp(groupNode, BasicVisualLexicon.NODE_Y_LOCATION, group.getMCenterY(), false));
     delayedVizProps.add(new DelayedVizProp(groupNode, BasicVisualLexicon.NODE_WIDTH, group.getMWidth(), true));
