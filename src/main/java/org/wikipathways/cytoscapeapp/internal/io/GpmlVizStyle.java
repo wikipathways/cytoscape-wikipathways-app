@@ -58,8 +58,12 @@ public class GpmlVizStyle {
     }
     vizMapMgr.addVisualStyle(vizStyle);
     for (final VisualPropertyDependency<?> dep : vizStyle.getAllVisualPropertyDependencies()) {
-      if ("nodeSizeLocked".equals(dep.getIdString())) {
+      System.out.println(dep.getIdString());
+      final String id = dep.getIdString();
+      if ("nodeSizeLocked".equals(id)) {
         dep.setDependency(false);
+      } else if ("arrowColorMatchesEdge".equals(id)) {
+        dep.setDependency(true);
       }
     }
     return vizStyle;

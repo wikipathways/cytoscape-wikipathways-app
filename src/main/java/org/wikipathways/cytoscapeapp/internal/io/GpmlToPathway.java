@@ -240,6 +240,12 @@ public class GpmlToPathway {
     }
   };
 
+  static final Converter PV_TRANSPARENT_CONVERTER = new Converter() {
+    public Object toCyValue(Object[] pvValues) {
+      return ((Boolean) pvValues[0]).toString();
+    }
+  };
+
   /**
    * Extracts values from a PathVisio pathway element
    * and returns a Cytoscape value.
@@ -271,7 +277,7 @@ public class GpmlToPathway {
     public static final Extracter COLOR = new BasicExtracter(PV_COLOR_CONVERTER, StaticProperty.COLOR);
     public static final Extracter FILL_COLOR = new BasicExtracter(PV_COLOR_CONVERTER, StaticProperty.FILLCOLOR);
     public static final Extracter FONT_SIZE = new BasicExtracter(StaticProperty.FONTSIZE);
-    public static final Extracter TRANSPARENT = new BasicExtracter(StaticProperty.TRANSPARENT);
+    public static final Extracter TRANSPARENT = new BasicExtracter(PV_TRANSPARENT_CONVERTER, StaticProperty.TRANSPARENT);
     public static final Extracter NODE_LINE_THICKNESS = new BasicExtracter(PV_LINE_THICKNESS_CONVERTER, StaticProperty.SHAPETYPE, StaticProperty.LINETHICKNESS);
     public static final Extracter EDGE_LINE_THICKNESS = new BasicExtracter(StaticProperty.LINETHICKNESS);
     public static final Extracter SHAPE = new BasicExtracter(PV_SHAPE_CONVERTER, StaticProperty.SHAPETYPE);
@@ -386,16 +392,31 @@ public class GpmlToPathway {
     Map<?,?> getMapping();
   }
 
-  static Map<String,ArrowShape> PV_ARROW_TYPES = new HashMap<String,ArrowShape>();
+  static Map<String,Integer> PV_TRANSPARENT_MAP = new HashMap<String,Integer>();
   static {
-    PV_ARROW_TYPES.put("Arrow",              ArrowShapeVisualProperty.DELTA);
-    PV_ARROW_TYPES.put("TBar",               ArrowShapeVisualProperty.T);
-    PV_ARROW_TYPES.put("mim-binding",        ArrowShapeVisualProperty.ARROW);
-    PV_ARROW_TYPES.put("mim-conversion",     ArrowShapeVisualProperty.ARROW);
-    PV_ARROW_TYPES.put("mim-modification",   ArrowShapeVisualProperty.ARROW);
-    PV_ARROW_TYPES.put("mim-catalysis",      ArrowShapeVisualProperty.CIRCLE);
-    PV_ARROW_TYPES.put("mim-inhibition",     ArrowShapeVisualProperty.T);
-    PV_ARROW_TYPES.put("mim-covalent-bond",  ArrowShapeVisualProperty.T);
+    PV_TRANSPARENT_MAP.put("true", 0);
+    PV_TRANSPARENT_MAP.put("false", 255);
+  }
+
+  static Map<String,ArrowShape> PV_ARROW_MAP = new HashMap<String,ArrowShape>();
+  static {
+    PV_ARROW_MAP.put("Arrow",              ArrowShapeVisualProperty.DELTA);
+    PV_ARROW_MAP.put("TBar",               ArrowShapeVisualProperty.T);
+    PV_ARROW_MAP.put("mim-binding",        ArrowShapeVisualProperty.ARROW);
+    PV_ARROW_MAP.put("mim-conversion",     ArrowShapeVisualProperty.ARROW);
+    PV_ARROW_MAP.put("mim-modification",   ArrowShapeVisualProperty.ARROW);
+    PV_ARROW_MAP.put("mim-catalysis",      ArrowShapeVisualProperty.CIRCLE);
+    PV_ARROW_MAP.put("mim-inhibition",     ArrowShapeVisualProperty.T);
+    PV_ARROW_MAP.put("mim-covalent-bond",  ArrowShapeVisualProperty.T);
+  }
+
+  static Map<String,NodeShape> PV_SHAPE_MAP = new HashMap<String,NodeShape>();
+  static {
+    PV_SHAPE_MAP.put("Rectangle", NodeShapeVisualProperty.RECTANGLE);
+    PV_SHAPE_MAP.put("Triangle", NodeShapeVisualProperty.TRIANGLE);
+    PV_SHAPE_MAP.put("RoundedRectangle", NodeShapeVisualProperty.ROUND_RECTANGLE);
+    PV_SHAPE_MAP.put("Hexagon", NodeShapeVisualProperty.HEXAGON);
+    PV_SHAPE_MAP.put("Oval", NodeShapeVisualProperty.ELLIPSE);
   }
 
   static class BasicVizTableStore extends BasicTableStore implements VizTableStore {
@@ -404,15 +425,15 @@ public class GpmlToPathway {
     public static final VizTableStore NODE_COLOR = new BasicVizTableStore("Color", BasicExtracter.FILL_COLOR, BasicVisualLexicon.NODE_PAINT);
     public static final VizTableStore NODE_BORDER_COLOR = new BasicVizTableStore("BorderColor", BasicExtracter.COLOR, BasicVisualLexicon.NODE_BORDER_PAINT);
     public static final VizTableStore NODE_LABEL_SIZE = new BasicVizTableStore("LabelSize", Double.class, BasicExtracter.FONT_SIZE, BasicVisualLexicon.NODE_LABEL_FONT_SIZE);
-    public static final VizTableStore NODE_TRANSPARENT = new BasicVizTableStore("Transparent", Boolean.class, BasicExtracter.TRANSPARENT, BasicVisualLexicon.NODE_TRANSPARENCY);
+    public static final VizTableStore NODE_TRANSPARENT = new BasicVizTableStore("Transparent", BasicExtracter.TRANSPARENT, BasicVisualLexicon.NODE_TRANSPARENCY, PV_TRANSPARENT_MAP);
     public static final VizTableStore NODE_BORDER_THICKNESS = new BasicVizTableStore("BorderThickness", Double.class, BasicExtracter.NODE_LINE_THICKNESS, BasicVisualLexicon.NODE_BORDER_WIDTH);
-    public static final VizTableStore NODE_SHAPE = new BasicVizTableStore("Shape", BasicExtracter.SHAPE, BasicVisualLexicon.NODE_SHAPE);
+    public static final VizTableStore NODE_SHAPE = new BasicVizTableStore("Shape", BasicExtracter.SHAPE, BasicVisualLexicon.NODE_SHAPE, PV_SHAPE_MAP);
     
-    public static final VizTableStore EDGE_COLOR = new BasicVizTableStore("Color", BasicExtracter.COLOR, BasicVisualLexicon.EDGE_PAINT);
+    public static final VizTableStore EDGE_COLOR = new BasicVizTableStore("Color", BasicExtracter.COLOR, BasicVisualLexicon.EDGE_UNSELECTED_PAINT);
     public static final VizTableStore EDGE_LINE_STYLE = new BasicVizTableStore("LineStyle", BasicExtracter.LINE_STYLE, BasicVisualLexicon.EDGE_LINE_TYPE);
     public static final VizTableStore EDGE_LINE_THICKNESS = new BasicVizTableStore("LineThickness", Double.class, BasicExtracter.EDGE_LINE_THICKNESS, BasicVisualLexicon.EDGE_WIDTH);
-    public static final VizTableStore EDGE_START_ARROW = new BasicVizTableStore("StartArrow", BasicExtracter.START_ARROW_STYLE, BasicVisualLexicon.EDGE_SOURCE_ARROW_SHAPE, PV_ARROW_TYPES);
-    public static final VizTableStore EDGE_END_ARROW = new BasicVizTableStore("EndArrow", BasicExtracter.END_ARROW_STYLE, BasicVisualLexicon.EDGE_TARGET_ARROW_SHAPE, PV_ARROW_TYPES);
+    public static final VizTableStore EDGE_START_ARROW = new BasicVizTableStore("StartArrow", BasicExtracter.START_ARROW_STYLE, BasicVisualLexicon.EDGE_SOURCE_ARROW_SHAPE, PV_ARROW_MAP);
+    public static final VizTableStore EDGE_END_ARROW = new BasicVizTableStore("EndArrow", BasicExtracter.END_ARROW_STYLE, BasicVisualLexicon.EDGE_TARGET_ARROW_SHAPE, PV_ARROW_MAP);
 
     final VisualProperty<?> vizProp;
     final Map<?,?> mapping;
@@ -456,6 +477,12 @@ public class GpmlToPathway {
     return Arrays.asList(
       BasicVizTableStore.NODE_WIDTH,
       BasicVizTableStore.NODE_HEIGHT,
+      BasicVizTableStore.NODE_COLOR,
+      BasicVizTableStore.NODE_BORDER_COLOR,
+      BasicVizTableStore.NODE_LABEL_SIZE,
+      BasicVizTableStore.NODE_TRANSPARENT,
+      BasicVizTableStore.NODE_BORDER_THICKNESS,
+      BasicVizTableStore.NODE_SHAPE,
       BasicVizTableStore.EDGE_COLOR,
       BasicVizTableStore.EDGE_LINE_STYLE,
       BasicVizTableStore.EDGE_LINE_THICKNESS,
