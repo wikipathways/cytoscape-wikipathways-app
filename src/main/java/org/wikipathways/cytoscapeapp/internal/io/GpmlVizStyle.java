@@ -1,6 +1,8 @@
 package org.wikipathways.cytoscapeapp.internal.io;
 
 import java.util.Map;
+import java.util.Set;
+import java.util.HashSet;
 
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.vizmap.VisualStyleFactory;
@@ -18,6 +20,8 @@ import org.cytoscape.view.vizmap.mappings.PassthroughMapping;
 import java.awt.Color;
 
 public class GpmlVizStyle {
+  static final String VIZ_STYLE_NAME = "WikiPathways";
+
   final VisualStyleFactory vizStyleFactory;
   final VisualMappingManager vizMapMgr;
   final VisualMappingFunctionFactory contFnFactory;
@@ -38,11 +42,37 @@ public class GpmlVizStyle {
     this.passFnFactory = passFnFactory;
   }
 
+  private void removeOldVizStyle() {
+    final Set<VisualStyle> styles = new HashSet<VisualStyle>(vizMapMgr.getAllVisualStyles()); // prevent concurrent modification exception
+    for (final VisualStyle style : styles) {
+      if (VIZ_STYLE_NAME.equals(style.getTitle())) {
+        vizMapMgr.removeVisualStyle(style);
+      }
+    }
+  }
+
   private VisualStyle create() {
+    removeOldVizStyle();
+
     final VisualStyle vizStyle = vizStyleFactory.createVisualStyle(vizMapMgr.getDefaultVisualStyle());
-    vizStyle.setTitle("WikiPathways");
+
+    // set up viz style dependencies
+    for (final VisualPropertyDependency<?> dep : vizStyle.getAllVisualPropertyDependencies()) {
+      final String id = dep.getIdString();
+      if ("nodeSizeLocked".equals(id)) {
+        dep.setDependency(false);
+      } else if ("arrowColorMatchesEdge".equals(id)) {
+        dep.setDependency(true);
+      }
+    }
+
+    vizStyle.setTitle(VIZ_STYLE_NAME);
+
+    // set default visual properties
     vizStyle.setDefaultValue(BasicVisualLexicon.NODE_FILL_COLOR, Color.WHITE);
     vizStyle.setDefaultValue(BasicVisualLexicon.NODE_LABEL_COLOR, Color.BLACK);
+
+    // create viz mappings
     for (final GpmlToPathway.VizTableStore vizTableStore : GpmlToPathway.getAllVizTableStores()) {
       final Map<?,?> mapping = vizTableStore.getMapping();
       final VisualMappingFunctionFactory fnFactory = (mapping == null) ? passFnFactory : discFnFactory;
@@ -56,21 +86,13 @@ public class GpmlVizStyle {
       }
       vizStyle.addVisualMappingFunction(fn);
     }
+
     vizMapMgr.addVisualStyle(vizStyle);
-    for (final VisualPropertyDependency<?> dep : vizStyle.getAllVisualPropertyDependencies()) {
-      System.out.println(dep.getIdString());
-      final String id = dep.getIdString();
-      if ("nodeSizeLocked".equals(id)) {
-        dep.setDependency(false);
-      } else if ("arrowColorMatchesEdge".equals(id)) {
-        dep.setDependency(true);
-      }
-    }
     return vizStyle;
   }
 
   public void apply(final CyNetworkView view) {
-    if (vizStyle == null) {
+    if (vizStyle == null || !vizMapMgr.getAllVisualStyles().contains(vizStyle)) {
       vizStyle = create();
     }
     vizMapMgr.setVisualStyle(vizStyle, view);

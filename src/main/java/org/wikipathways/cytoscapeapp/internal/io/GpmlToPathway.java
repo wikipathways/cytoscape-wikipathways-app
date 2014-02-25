@@ -188,9 +188,9 @@ public class GpmlToPathway {
       final int lineStyle = (Integer) pvValues[0];
       switch (lineStyle) {
       case LineStyle.DOUBLE:
-        return "double";
+        return "parallel_lines";
       case LineStyle.DASHED:
-        return "dashed";
+        return "equal_dash";
       default:
         return "solid";
       }
@@ -300,9 +300,9 @@ public class GpmlToPathway {
     }
 
     public Object extract(final PathwayElement pvElem) {
-      System.out.println("Extracting...");
+      //System.out.println("Extracting...");
       for (int i = 0; i < pvValues.length; i++) {
-        System.out.println(pvProps[i]);
+        //System.out.println(pvProps[i]);
         pvValues[i] = pvElem.getStaticProperty(pvProps[i]);
       }
       if (pvValues.length == 1 && pvValues[0] == null)
