@@ -422,7 +422,7 @@ public class GpmlToPathway {
   static class BasicVizTableStore extends BasicTableStore implements VizTableStore {
     public static final VizTableStore NODE_WIDTH = new BasicVizTableStore("Width", Double.class, BasicExtracter.WIDTH, BasicVisualLexicon.NODE_WIDTH);
     public static final VizTableStore NODE_HEIGHT = new BasicVizTableStore("Height", Double.class, BasicExtracter.HEIGHT, BasicVisualLexicon.NODE_HEIGHT);
-    public static final VizTableStore NODE_COLOR = new BasicVizTableStore("Color", BasicExtracter.FILL_COLOR, BasicVisualLexicon.NODE_PAINT);
+    public static final VizTableStore NODE_COLOR = new BasicVizTableStore("Color", BasicExtracter.FILL_COLOR, BasicVisualLexicon.NODE_FILL_COLOR);
     public static final VizTableStore NODE_BORDER_COLOR = new BasicVizTableStore("BorderColor", BasicExtracter.COLOR, BasicVisualLexicon.NODE_BORDER_PAINT);
     public static final VizTableStore NODE_LABEL_SIZE = new BasicVizTableStore("LabelSize", Double.class, BasicExtracter.FONT_SIZE, BasicVisualLexicon.NODE_LABEL_FONT_SIZE);
     public static final VizTableStore NODE_TRANSPARENT = new BasicVizTableStore("Transparent", BasicExtracter.TRANSPARENT, BasicVisualLexicon.NODE_TRANSPARENCY, PV_TRANSPARENT_MAP);
@@ -569,20 +569,11 @@ public class GpmlToPathway {
       BasicVizTableStore.NODE_TRANSPARENT,
       BasicVizTableStore.NODE_BORDER_THICKNESS,
       BasicVizTableStore.NODE_SHAPE
-      );
+    );
     store(cyNode, pvDataNode,
       BasicVizPropStore.NODE_X,
-      BasicVizPropStore.NODE_Y);
-    
-    /*
-    if(dataNode.getDataSource() != null && dataNode.getDataSource().getFullName() != null) {
-    	nodeTbl.getRow(node.getSUID()).set("Datasource", dataNode.getDataSource().getFullName());
-    }
-    convertStaticProps(dataNode, dataNodeStaticProps, nodeTbl, node.getSUID());
-    convertViewStaticProps(dataNode, dataNodeViewStaticProps, node);
-    convertShapeTypeNone(node, dataNode);
-    nodes.put(dataNode, node);
-    */
+      BasicVizPropStore.NODE_Y
+    );
   }
 
   /*
@@ -599,15 +590,6 @@ public class GpmlToPathway {
     }
   }
 
-  /*
-  private void convertShape(final PathwayElement shape) {
-    final CyNode node = network.addNode();
-    convertStaticProps(shape, dataNodeStaticProps, network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS), node.getSUID());
-    convertViewStaticProps(shape, dataNodeViewStaticProps, node);
-    convertShapeTypeNone(node, shape);
-    nodes.put(shape, node);
-  }
-  */
   
   /*
    ========================================================
@@ -625,27 +607,12 @@ public class GpmlToPathway {
   final Extracter STATE_Y_EXTRACTER = new Extracter() {
     public Object extract(final PathwayElement pvState) {
       final PathwayElement pvParent = (PathwayElement) pvPathway.getGraphIdContainer(pvState.getGraphRef());
-      return pvParent.getMCenterY() + pvState.getRelY() * pvParent.getMWidth() / 2.0;
+      return pvParent.getMCenterY() + pvState.getRelY() * pvParent.getMHeight() / 2.0;
     }
   };
 
-  private static Map<StaticProperty,String> stateStaticProps = new HashMap<StaticProperty,String>();
-  static {
-    stateStaticProps.put(StaticProperty.TEXTLABEL, CyNetwork.NAME);
-  }
-
-  private static Map<StaticProperty,VisualProperty<?>> stateViewStaticProps = new HashMap<StaticProperty,VisualProperty<?>>();
-  static {
-    stateViewStaticProps.put(StaticProperty.WIDTH,         BasicVisualLexicon.NODE_WIDTH);
-    stateViewStaticProps.put(StaticProperty.HEIGHT,        BasicVisualLexicon.NODE_HEIGHT);
-    stateViewStaticProps.put(StaticProperty.COLOR,         BasicVisualLexicon.NODE_BORDER_PAINT);
-    stateViewStaticProps.put(StaticProperty.FILLCOLOR,     BasicVisualLexicon.NODE_FILL_COLOR);
-    stateViewStaticProps.put(StaticProperty.FONTSIZE,      BasicVisualLexicon.NODE_LABEL_FONT_SIZE);
-    stateViewStaticProps.put(StaticProperty.TRANSPARENT,   BasicVisualLexicon.NODE_TRANSPARENCY);
-    stateViewStaticProps.put(StaticProperty.SHAPETYPE,     BasicVisualLexicon.NODE_SHAPE);
-    stateViewStaticProps.put(StaticProperty.LINETHICKNESS, BasicVisualLexicon.NODE_BORDER_WIDTH);
-  }
-
+  final VizPropStore STATE_X_STORE = new BasicVizPropStore(BasicVisualLexicon.NODE_X_LOCATION, STATE_X_EXTRACTER);
+  final VizPropStore STATE_Y_STORE = new BasicVizPropStore(BasicVisualLexicon.NODE_Y_LOCATION, STATE_Y_EXTRACTER);
 
   private void convertStates() {
     for (final PathwayElement pvElem : pvPathway.getDataObjects()) {
@@ -656,24 +623,26 @@ public class GpmlToPathway {
   }
 
   private void convertState(final PathwayElement pvState) {
-    /*
-    final GraphLink.GraphIdContainer parentGIdC = pathway.getGraphIdContainer(state.getGraphRef());
-    if (!(parentGIdC instanceof PathwayElement))
-      return; // this should not happen
-    final PathwayElement parentElem = (PathwayElement) parentGIdC;
-
     // TODO: refactor this as an annotation
-    final CyNode node = network.addNode();
-    convertStaticProps(state, stateStaticProps, nodeTbl, node.getSUID());
-    convertViewStaticProps(state, stateViewStaticProps, node);
-    convertShapeTypeNone(node, state);
 
-    final double x = parentElem.getMCenterX() + state.getRelX() * parentElem.getMWidth() / 2.0;
-    final double y = parentElem.getMCenterY() + state.getRelY() * parentElem.getMHeight() / 2.0;
+    final CyNode cyNode = cyNet.addNode();
+    pvToCyNodes.put(pvState, cyNode);
 
-    delayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_X_LOCATION, x, true));
-    delayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_Y_LOCATION, y, true));
-    */
+    store(cyNodeTbl, cyNode, pvState,
+      BasicTableStore.TEXT_LABEL,
+      BasicVizTableStore.NODE_WIDTH,
+      BasicVizTableStore.NODE_HEIGHT,
+      BasicVizTableStore.NODE_COLOR,
+      BasicVizTableStore.NODE_BORDER_COLOR,
+      BasicVizTableStore.NODE_LABEL_SIZE,
+      BasicVizTableStore.NODE_TRANSPARENT,
+      BasicVizTableStore.NODE_BORDER_THICKNESS,
+      BasicVizTableStore.NODE_SHAPE
+    );
+    store(cyNode, pvState,
+      STATE_X_STORE,
+      STATE_Y_STORE
+    );
   }
   
   /*
