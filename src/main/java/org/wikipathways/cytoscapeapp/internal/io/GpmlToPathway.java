@@ -125,6 +125,7 @@ public class GpmlToPathway {
         BasicVizTableStore.NODE_HEIGHT,
         BasicVizTableStore.NODE_COLOR,
         BasicVizTableStore.NODE_BORDER_COLOR,
+        BasicVizTableStore.NODE_LABEL_FONT,
         BasicVizTableStore.NODE_LABEL_SIZE,
         BasicVizTableStore.NODE_TRANSPARENT,
         BasicVizTableStore.NODE_BORDER_THICKNESS,
@@ -278,6 +279,7 @@ public class GpmlToPathway {
     public static final Extracter COLOR = new BasicExtracter(PV_COLOR_CONVERTER, StaticProperty.COLOR);
     public static final Extracter FILL_COLOR = new BasicExtracter(PV_COLOR_CONVERTER, StaticProperty.FILLCOLOR);
     public static final Extracter FONT_SIZE = new BasicExtracter(StaticProperty.FONTSIZE);
+    public static final Extracter FONT_NAME = new BasicExtracter(PV_FONT_CONVERTER, StaticProperty.FONTNAME, StaticProperty.FONTWEIGHT, StaticProperty.FONTSTYLE);
     public static final Extracter TRANSPARENT = new BasicExtracter(PV_TRANSPARENT_CONVERTER, StaticProperty.TRANSPARENT);
     public static final Extracter NODE_LINE_THICKNESS = new BasicExtracter(PV_LINE_THICKNESS_CONVERTER, StaticProperty.SHAPETYPE, StaticProperty.LINETHICKNESS);
     public static final Extracter EDGE_LINE_THICKNESS = new BasicExtracter(StaticProperty.LINETHICKNESS);
@@ -441,6 +443,7 @@ public class GpmlToPathway {
     public static final VizTableStore NODE_COLOR = new BasicVizTableStore("Color", BasicExtracter.FILL_COLOR, BasicVisualLexicon.NODE_FILL_COLOR);
     public static final VizTableStore NODE_BORDER_COLOR = new BasicVizTableStore("BorderColor", BasicExtracter.COLOR, BasicVisualLexicon.NODE_BORDER_PAINT);
     public static final VizTableStore NODE_BORDER_STYLE = new BasicVizTableStore("BorderStyle", BasicExtracter.LINE_STYLE, BasicVisualLexicon.NODE_BORDER_LINE_TYPE);
+    public static final VizTableStore NODE_LABEL_FONT = new BasicVizTableStore("LabelFont", BasicExtracter.FONT_NAME, BasicVisualLexicon.NODE_LABEL_FONT_FACE);
     public static final VizTableStore NODE_LABEL_SIZE = new BasicVizTableStore("LabelSize", Double.class, BasicExtracter.FONT_SIZE, BasicVisualLexicon.NODE_LABEL_FONT_SIZE);
     public static final VizTableStore NODE_TRANSPARENT = new BasicVizTableStore("Transparent", BasicExtracter.TRANSPARENT, BasicVisualLexicon.NODE_TRANSPARENCY, PV_TRANSPARENT_MAP);
     public static final VizTableStore NODE_BORDER_THICKNESS = new BasicVizTableStore("BorderThickness", Double.class, BasicExtracter.NODE_LINE_THICKNESS, BasicVisualLexicon.NODE_BORDER_WIDTH);
@@ -502,6 +505,7 @@ public class GpmlToPathway {
       BasicVizTableStore.NODE_HEIGHT,
       BasicVizTableStore.NODE_COLOR,
       BasicVizTableStore.NODE_BORDER_COLOR,
+      BasicVizTableStore.NODE_LABEL_FONT,
       BasicVizTableStore.NODE_LABEL_SIZE,
       BasicVizTableStore.NODE_TRANSPARENT,
       BasicVizTableStore.NODE_BORDER_THICKNESS,
@@ -588,6 +592,7 @@ public class GpmlToPathway {
       BasicVizTableStore.NODE_HEIGHT,
       BasicVizTableStore.NODE_COLOR,
       BasicVizTableStore.NODE_BORDER_COLOR,
+      BasicVizTableStore.NODE_LABEL_FONT,
       BasicVizTableStore.NODE_LABEL_SIZE,
       BasicVizTableStore.NODE_TRANSPARENT,
       BasicVizTableStore.NODE_BORDER_THICKNESS,
@@ -657,6 +662,7 @@ public class GpmlToPathway {
       BasicVizTableStore.NODE_HEIGHT,
       BasicVizTableStore.NODE_COLOR,
       BasicVizTableStore.NODE_BORDER_COLOR,
+      BasicVizTableStore.NODE_LABEL_FONT,
       BasicVizTableStore.NODE_LABEL_SIZE,
       BasicVizTableStore.NODE_TRANSPARENT,
       BasicVizTableStore.NODE_BORDER_THICKNESS,
@@ -760,6 +766,7 @@ public class GpmlToPathway {
       BasicVizTableStore.NODE_WIDTH,
       BasicVizTableStore.NODE_HEIGHT,
       LABEL_BORDER_COLOR,
+      BasicVizTableStore.NODE_LABEL_FONT,
       BasicVizTableStore.NODE_LABEL_SIZE
     );
     store(cyNode, pvLabel,
