@@ -46,6 +46,11 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.geom.Point2D;
 
+/**
+ * Converts a PathVisio Pathway object to a
+ * Cytoscape network view that tries to reproduce
+ * the visual representation of the PathVisio Pathway.
+ */
 public class GpmlToPathway {
   // NOMENCLATURE:
   // In order to help distinguish PathVisio data structures from
@@ -145,12 +150,6 @@ public class GpmlToPathway {
     }
   }
 
-  /*
-   ========================================================
-     Static property conversion
-   ========================================================
-  */
-
   /**
    * Converts a PathVisio static property value (or values) to a value
    * that Cytoscape can use. The Cytoscape value can then be stored
@@ -158,8 +157,8 @@ public class GpmlToPathway {
    *
    * A converter isn't aware
    * of the underlying pathway element nor of the static properties
-   * it is converting. It is only aware of static property values.
-   * Thus a single converter can be used 
+   * it is converting. It is only aware of static property <em>values</em>.
+   * This allows a single converter to be used 
    * for several static properties. For example,
    * {@code PV_COLOR_CONVERTER} can be used for
    * {@code StaticProperty.COLOR} and 
@@ -504,10 +503,11 @@ public class GpmlToPathway {
       BasicVizTableStore.NODE_WIDTH,
       BasicVizTableStore.NODE_HEIGHT,
       BasicVizTableStore.NODE_COLOR,
-      BasicVizTableStore.NODE_BORDER_COLOR,
       BasicVizTableStore.NODE_LABEL_FONT,
       BasicVizTableStore.NODE_LABEL_SIZE,
       BasicVizTableStore.NODE_TRANSPARENT,
+      BasicVizTableStore.NODE_BORDER_COLOR,
+      BasicVizTableStore.NODE_BORDER_STYLE,
       BasicVizTableStore.NODE_BORDER_THICKNESS,
       BasicVizTableStore.NODE_SHAPE,
       BasicVizTableStore.EDGE_COLOR,
@@ -709,6 +709,7 @@ public class GpmlToPathway {
   static final VizPropStore GROUP_SELECTED_COLOR = new BasicVizPropStore(BasicVisualLexicon.NODE_SELECTED_PAINT, new DefaultExtracter(new Color(255, 255, 204, 127)));
   static final VizTableStore GROUP_WIDTH = new OverrideVizTableStore(BasicVizTableStore.NODE_WIDTH, GROUP_W_EXTRACTER);
   static final VizTableStore GROUP_HEIGHT = new OverrideVizTableStore(BasicVizTableStore.NODE_HEIGHT, GROUP_H_EXTRACTER);
+  static final VizTableStore GROUP_BORDER_COLOR = new OverrideVizTableStore(BasicVizTableStore.NODE_BORDER_COLOR, new DefaultExtracter("#aaaaaa"));
   static final VizTableStore GROUP_BORDER_THICKNESS = new OverrideVizTableStore(BasicVizTableStore.NODE_BORDER_THICKNESS, new DefaultExtracter(1.0));
   static final VizTableStore GROUP_BORDER_STYLE = new OverrideVizTableStore(BasicVizTableStore.NODE_BORDER_STYLE, new DefaultExtracter("dot"));
   static final VizTableStore GROUP_TRANSPARENT = new OverrideVizTableStore(BasicVizTableStore.NODE_TRANSPARENT, new DefaultExtracter("true"));
@@ -728,6 +729,7 @@ public class GpmlToPathway {
     store(cyNodeTbl, cyGroupNode, pvGroup,
       GROUP_WIDTH,
       GROUP_HEIGHT,
+      GROUP_BORDER_COLOR,
       GROUP_BORDER_THICKNESS,
       GROUP_BORDER_STYLE,
       GROUP_TRANSPARENT

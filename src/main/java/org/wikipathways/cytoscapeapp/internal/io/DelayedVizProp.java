@@ -42,6 +42,10 @@ class DelayedVizProp {
 
   public static void applyAll(final CyNetworkView netView, final Iterable<DelayedVizProp> delayedProps) {
     for (final DelayedVizProp delayedProp : delayedProps) {
+      final Object value = delayedProp.value;
+      if (value == null)
+        continue;
+      
       View<?> view = null;
       if (delayedProp.netObj instanceof CyNode) {
         final CyNode node = (CyNode) delayedProp.netObj;
@@ -52,9 +56,9 @@ class DelayedVizProp {
       }
 
       if (delayedProp.isLocked) {
-        view.setLockedValue(delayedProp.prop, delayedProp.value);
+        view.setLockedValue(delayedProp.prop, value);
       } else {
-        view.setVisualProperty(delayedProp.prop, delayedProp.value);
+        view.setVisualProperty(delayedProp.prop, value);
       }
     }
   }
