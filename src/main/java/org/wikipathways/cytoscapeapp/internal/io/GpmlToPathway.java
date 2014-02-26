@@ -739,7 +739,7 @@ public class GpmlToPathway {
    ========================================================
   */
 
-  static final VizTableStore LABEL_BORDER_THICKNESS = new OverrideVizTableStore(BasicVizTableStore.NODE_BORDER_THICKNESS, new DefaultExtracter(0.0));
+  static final VizTableStore LABEL_BORDER_COLOR = new OverrideVizTableStore(BasicVizTableStore.NODE_BORDER_COLOR, new DefaultExtracter("#ffffff"));
 
   private void convertLabels() {
     for (final PathwayElement pvElem : pvPathway.getDataObjects()) {
@@ -759,10 +759,8 @@ public class GpmlToPathway {
       BasicTableStore.TEXT_LABEL,
       BasicVizTableStore.NODE_WIDTH,
       BasicVizTableStore.NODE_HEIGHT,
-      BasicVizTableStore.NODE_COLOR,
-      BasicVizTableStore.NODE_BORDER_COLOR,
-      BasicVizTableStore.NODE_LABEL_SIZE,
-      LABEL_BORDER_THICKNESS
+      LABEL_BORDER_COLOR,
+      BasicVizTableStore.NODE_LABEL_SIZE
     );
     store(cyNode, pvLabel,
       BasicVizPropStore.NODE_X,
