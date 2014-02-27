@@ -10,7 +10,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.wikipathways</groupId>
 	<artifactId>cytoscapeapp</artifactId>
-	<version>1.1</version>
+	<version>2.0</version>
 
 	<name>WikiPathways Cytoscape App</name>
 	
@@ -22,6 +22,7 @@
 				<directory>src/main/resources</directory>
 			</resource>
 		</resources>
+      <finalName>WikiPathways-${project.version}</finalName>
 		<!-- Cytoscape requires Java 1.6 -->
 		<plugins>
 			<plugin>
@@ -64,7 +65,27 @@
 					<redirectTestOutputToFile>true</redirectTestOutputToFile>
 				</configuration>
 			</plugin>
-			<!-- Generates the OSGi metadata based on the osgi.bnd file. -->
+      <!-- Change artifact name -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-install-plugin</artifactId>
+        <version>2.3.1</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>install-file</goal>
+            </goals>
+            <phase>install</phase>
+            <configuration>
+              <file>${build.directory}/${project.build.finalName}.jar</file>
+              <generatePom>false</generatePom>
+              <pomFile>pom.xml</pomFile>
+              <version>${my.version}</version>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- Generates the OSGi metadata based on the osgi.bnd file. -->
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
