@@ -47,9 +47,9 @@ import java.awt.Font;
 import java.awt.geom.Point2D;
 
 /**
- * Converts a PathVisio Pathway object to a
+ * Converts a GPML file contained in a PathVisio Pathway object to a
  * Cytoscape network view that tries to reproduce
- * the visual representation of the PathVisio Pathway.
+ * the pathway's visual representation.
  */
 public class GpmlToPathway {
   // NOMENCLATURE:
@@ -411,8 +411,8 @@ public class GpmlToPathway {
 
   static Map<String,Integer> PV_TRANSPARENT_MAP = new HashMap<String,Integer>();
   static {
-    PV_TRANSPARENT_MAP.put("true", 0);
-    PV_TRANSPARENT_MAP.put("false", 255);
+    PV_TRANSPARENT_MAP.put("true", 25);
+    PV_TRANSPARENT_MAP.put("false", 175);
   }
 
   static Map<String,ArrowShape> PV_ARROW_MAP = new HashMap<String,ArrowShape>();
