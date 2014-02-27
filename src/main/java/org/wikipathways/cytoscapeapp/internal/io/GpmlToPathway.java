@@ -125,7 +125,8 @@ public class GpmlToPathway {
   private void setupCyTables() {
     for (final TableStore tableStore : Arrays.asList(
         BasicTableStore.GRAPH_ID,
-        DATA_SOURCE_STORE,
+        XREF_ID_STORE,
+        XREF_DATA_SOURCE_STORE,
         BasicVizTableStore.NODE_WIDTH,
         BasicVizTableStore.NODE_HEIGHT,
         BasicVizTableStore.NODE_COLOR,
@@ -562,7 +563,7 @@ public class GpmlToPathway {
    ========================================================
   */
 
-  static final Extracter DATA_SOURCE_EXTRACTER = new Extracter() {
+  static final Extracter XREF_DATA_SOURCE_EXTRACTER = new Extracter() {
     public Object extract(final PathwayElement pvElem) {
       if(pvElem.getDataSource() == null)
         return null;
@@ -571,7 +572,18 @@ public class GpmlToPathway {
     }
   };
 
-  static final TableStore DATA_SOURCE_STORE = new BasicTableStore("Datasource", DATA_SOURCE_EXTRACTER);
+  static final Extracter XREF_ID_EXTRACTER = new Extracter() {
+    public Object extract(final PathwayElement pvElem) {
+      if(pvElem.getXref() == null)
+        return null;
+      else
+        return pvElem.getXref().getId();
+    }
+  };
+
+
+  static final TableStore XREF_ID_STORE = new BasicTableStore("XrefId", XREF_ID_EXTRACTER);
+  static final TableStore XREF_DATA_SOURCE_STORE = new BasicTableStore("XrefDatasource", XREF_DATA_SOURCE_EXTRACTER);
 
   private void convertDataNodes() {
     for (final PathwayElement pvElem : pvPathway.getDataObjects()) {
@@ -586,7 +598,8 @@ public class GpmlToPathway {
     pvToCyNodes.put(pvDataNode, cyNode);
     store(cyNodeTbl, cyNode, pvDataNode,
       BasicTableStore.GRAPH_ID,
-      DATA_SOURCE_STORE,
+      XREF_ID_STORE,
+      XREF_DATA_SOURCE_STORE,
       BasicTableStore.TEXT_LABEL,
       BasicVizTableStore.NODE_WIDTH,
       BasicVizTableStore.NODE_HEIGHT,
