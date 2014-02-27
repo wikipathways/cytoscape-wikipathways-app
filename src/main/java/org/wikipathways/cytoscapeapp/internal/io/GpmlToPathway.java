@@ -738,6 +738,7 @@ public class GpmlToPathway {
   static final VizPropStore GROUP_SELECTED_COLOR = new BasicVizPropStore(BasicVisualLexicon.NODE_SELECTED_PAINT, new DefaultExtracter(new Color(255, 255, 204, 127)));
   static final VizTableStore GROUP_WIDTH = new OverrideVizTableStore(BasicVizTableStore.NODE_WIDTH, GROUP_W_EXTRACTER);
   static final VizTableStore GROUP_HEIGHT = new OverrideVizTableStore(BasicVizTableStore.NODE_HEIGHT, GROUP_H_EXTRACTER);
+  static final VizTableStore GROUP_FILL_COLOR = new OverrideVizTableStore(BasicVizTableStore.NODE_FILL_COLOR, new DefaultExtracter("#efefef"));
   static final VizTableStore GROUP_COLOR = new OverrideVizTableStore(BasicVizTableStore.NODE_COLOR, new DefaultExtracter("#aaaaaa"));
   static final VizTableStore GROUP_BORDER_THICKNESS = new OverrideVizTableStore(BasicVizTableStore.NODE_BORDER_THICKNESS, new DefaultExtracter(1.0));
   static final VizTableStore GROUP_BORDER_STYLE = new OverrideVizTableStore(BasicVizTableStore.NODE_BORDER_STYLE, new DefaultExtracter("dot"));
@@ -760,6 +761,7 @@ public class GpmlToPathway {
       GROUP_WIDTH,
       GROUP_HEIGHT,
       GROUP_COLOR,
+      GROUP_FILL_COLOR,
       GROUP_BORDER_THICKNESS,
       GROUP_BORDER_STYLE,
       GROUP_TRANSPARENT,
