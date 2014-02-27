@@ -263,7 +263,11 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
 
       monitor.setStatusMessage("Parsing pathways file");
       final Pathway pathway = new Pathway();
-      pathway.readFromXml(gpmlStream, true);
+      try {
+        pathway.readFromXml(gpmlStream, true);
+      } catch (Exception e) {
+        throw new Exception("Pathway not available -- invalid GPML", e);
+      }
       gpmlStream = null;
 
       monitor.setStatusMessage("Constructing network");

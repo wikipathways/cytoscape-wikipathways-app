@@ -14,6 +14,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
@@ -64,6 +65,7 @@ public class WPClientRESTImpl implements WPClient {
     protected InputStream stream = null;
 
     protected Document xmlGet(final String url, final String ... args) throws IOException, SAXException {
+      System.out.println("xmlGet: " + url + " " + java.util.Arrays.toString(args));
       // build our get request
       req = new GetMethod(url);
       req.setQueryString(makeNameValuePairs(args));
@@ -158,8 +160,13 @@ public class WPClientRESTImpl implements WPClient {
   public ResultTask<InputStream> newLoadPathwayTask(final WPPathway pathway) {
     return new ReqTask<InputStream>() {
       protected InputStream checkedRun(final TaskMonitor monitor) throws Exception {
-        monitor.setTitle("Download pathway \'" + pathway.getName() + "\' from WikiPathways");
-        final Document doc = xmlGet(BASE_URL + "getPathway", "pwId", pathway.getId(), "revision", pathway.getRevision());
+        monitor.setTitle("Get \'" + pathway.getName() + "\' from WikiPathways");
+        Document doc = null;
+        try {
+          doc = xmlGet(BASE_URL + "getPathway", "pwId", pathway.getId(), "revision", pathway.getRevision());
+        } catch (SAXParseException e) {
+          throw new Exception(String.format("'%s' is not available -- invalid GPML", pathway.getName()), e);
+        }
         final Node responseNode = doc.getFirstChild();
         final Node pathwayNode = responseNode.getFirstChild(); 
         final Node gpmlNode = findChildNode(pathwayNode, "ns2:gpml");
