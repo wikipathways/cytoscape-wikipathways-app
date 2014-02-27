@@ -4,7 +4,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.HashSet;
 
+import java.awt.Color;
+
 import org.cytoscape.view.model.CyNetworkView;
+import org.cytoscape.view.model.VisualProperty;
 import org.cytoscape.view.vizmap.VisualStyleFactory;
 import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.view.vizmap.VisualStyle;
@@ -13,11 +16,6 @@ import org.cytoscape.view.vizmap.VisualMappingFunctionFactory;
 import org.cytoscape.view.vizmap.VisualMappingFunction;
 import org.cytoscape.view.vizmap.VisualPropertyDependency;
 import org.cytoscape.view.vizmap.mappings.DiscreteMapping;
-/*
-import org.cytoscape.view.vizmap.mappings.ContinuousMapping;
-import org.cytoscape.view.vizmap.mappings.PassthroughMapping;
-*/
-import java.awt.Color;
 
 public class GpmlVizStyle {
   static final String VIZ_STYLE_NAME = "WikiPathways";
@@ -76,15 +74,17 @@ public class GpmlVizStyle {
     for (final GpmlToPathway.VizTableStore vizTableStore : GpmlToPathway.getAllVizTableStores()) {
       final Map<?,?> mapping = vizTableStore.getMapping();
       final VisualMappingFunctionFactory fnFactory = (mapping == null) ? passFnFactory : discFnFactory;
-      final VisualMappingFunction fn = fnFactory.createVisualMappingFunction(
-          vizTableStore.getCyColumnName(),
-          vizTableStore.getCyColumnType(),
-          vizTableStore.getCyVizProp());
-      if (mapping != null) {
-        final DiscreteMapping discreteFn = (DiscreteMapping) fn;
-        discreteFn.putAll(mapping);
+      for (final VisualProperty<?> vizProp : vizTableStore.getCyVizProps()) {
+        final VisualMappingFunction fn = fnFactory.createVisualMappingFunction(
+            vizTableStore.getCyColumnName(),
+            vizTableStore.getCyColumnType(),
+            vizProp);
+        if (mapping != null) {
+          final DiscreteMapping discreteFn = (DiscreteMapping) fn;
+          discreteFn.putAll(mapping);
+        }
+        vizStyle.addVisualMappingFunction(fn);
       }
-      vizStyle.addVisualMappingFunction(fn);
     }
 
     vizMapMgr.addVisualStyle(vizStyle);

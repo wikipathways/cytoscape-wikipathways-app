@@ -130,8 +130,8 @@ public class GpmlToPathway {
         XREF_DATA_SOURCE_STORE,
         BasicVizTableStore.NODE_WIDTH,
         BasicVizTableStore.NODE_HEIGHT,
+        BasicVizTableStore.NODE_FILL_COLOR,
         BasicVizTableStore.NODE_COLOR,
-        BasicVizTableStore.NODE_BORDER_COLOR,
         BasicVizTableStore.NODE_LABEL_FONT,
         BasicVizTableStore.NODE_LABEL_SIZE,
         BasicVizTableStore.NODE_TRANSPARENT,
@@ -226,7 +226,7 @@ public class GpmlToPathway {
       final ShapeType pvShapeType = (ShapeType) pvValues[0];
       final Double pvLineThickness = (Double) pvValues[1];
       if (ShapeType.NONE.equals(pvShapeType)) {
-        return 0.0;
+        return 1.0E-9; // TODO: change this to 0.0 when VizMapper bug #2542 is fixed 
       } else {
         return pvLineThickness;
       }
@@ -402,7 +402,7 @@ public class GpmlToPathway {
      * Return the Cytoscape visual property that should read from the column
      * returned by {@getCyColumnName()}.
      */
-    VisualProperty<?> getCyVizProp();
+    VisualProperty<?>[] getCyVizProps();
 
     /**
      * For discrete mappings, return a map containing the key-value pairs for
@@ -442,39 +442,39 @@ public class GpmlToPathway {
   static class BasicVizTableStore extends BasicTableStore implements VizTableStore {
     public static final VizTableStore NODE_WIDTH = new BasicVizTableStore("Width", Double.class, BasicExtracter.WIDTH, BasicVisualLexicon.NODE_WIDTH);
     public static final VizTableStore NODE_HEIGHT = new BasicVizTableStore("Height", Double.class, BasicExtracter.HEIGHT, BasicVisualLexicon.NODE_HEIGHT);
-    public static final VizTableStore NODE_COLOR = new BasicVizTableStore("Color", BasicExtracter.FILL_COLOR, BasicVisualLexicon.NODE_FILL_COLOR);
-    public static final VizTableStore NODE_BORDER_COLOR = new BasicVizTableStore("BorderColor", BasicExtracter.COLOR, BasicVisualLexicon.NODE_BORDER_PAINT);
+    public static final VizTableStore NODE_FILL_COLOR = new BasicVizTableStore("FillColor", BasicExtracter.FILL_COLOR, BasicVisualLexicon.NODE_FILL_COLOR);
+    public static final VizTableStore NODE_COLOR = new BasicVizTableStore("Color", BasicExtracter.COLOR, BasicVisualLexicon.NODE_LABEL_COLOR, BasicVisualLexicon.NODE_BORDER_PAINT);
     public static final VizTableStore NODE_BORDER_STYLE = new BasicVizTableStore("BorderStyle", BasicExtracter.LINE_STYLE, BasicVisualLexicon.NODE_BORDER_LINE_TYPE);
     public static final VizTableStore NODE_LABEL_FONT = new BasicVizTableStore("LabelFont", BasicExtracter.FONT_NAME, BasicVisualLexicon.NODE_LABEL_FONT_FACE);
     public static final VizTableStore NODE_LABEL_SIZE = new BasicVizTableStore("LabelSize", Double.class, BasicExtracter.FONT_SIZE, BasicVisualLexicon.NODE_LABEL_FONT_SIZE);
-    public static final VizTableStore NODE_TRANSPARENT = new BasicVizTableStore("Transparent", BasicExtracter.TRANSPARENT, BasicVisualLexicon.NODE_TRANSPARENCY, PV_TRANSPARENT_MAP);
+    public static final VizTableStore NODE_TRANSPARENT = new BasicVizTableStore("Transparent", BasicExtracter.TRANSPARENT, PV_TRANSPARENT_MAP, BasicVisualLexicon.NODE_TRANSPARENCY);
     public static final VizTableStore NODE_BORDER_THICKNESS = new BasicVizTableStore("BorderThickness", Double.class, BasicExtracter.NODE_LINE_THICKNESS, BasicVisualLexicon.NODE_BORDER_WIDTH);
-    public static final VizTableStore NODE_SHAPE = new BasicVizTableStore("Shape", BasicExtracter.SHAPE, BasicVisualLexicon.NODE_SHAPE, PV_SHAPE_MAP);
+    public static final VizTableStore NODE_SHAPE = new BasicVizTableStore("Shape", BasicExtracter.SHAPE, PV_SHAPE_MAP, BasicVisualLexicon.NODE_SHAPE);
     
     public static final VizTableStore EDGE_COLOR = new BasicVizTableStore("Color", BasicExtracter.COLOR, BasicVisualLexicon.EDGE_UNSELECTED_PAINT);
     public static final VizTableStore EDGE_LINE_STYLE = new BasicVizTableStore("LineStyle", BasicExtracter.LINE_STYLE, BasicVisualLexicon.EDGE_LINE_TYPE);
     public static final VizTableStore EDGE_LINE_THICKNESS = new BasicVizTableStore("LineThickness", Double.class, BasicExtracter.EDGE_LINE_THICKNESS, BasicVisualLexicon.EDGE_WIDTH);
-    public static final VizTableStore EDGE_START_ARROW = new BasicVizTableStore("StartArrow", BasicExtracter.START_ARROW_STYLE, BasicVisualLexicon.EDGE_SOURCE_ARROW_SHAPE, PV_ARROW_MAP);
-    public static final VizTableStore EDGE_END_ARROW = new BasicVizTableStore("EndArrow", BasicExtracter.END_ARROW_STYLE, BasicVisualLexicon.EDGE_TARGET_ARROW_SHAPE, PV_ARROW_MAP);
+    public static final VizTableStore EDGE_START_ARROW = new BasicVizTableStore("StartArrow", BasicExtracter.START_ARROW_STYLE, PV_ARROW_MAP, BasicVisualLexicon.EDGE_SOURCE_ARROW_SHAPE);
+    public static final VizTableStore EDGE_END_ARROW = new BasicVizTableStore("EndArrow", BasicExtracter.END_ARROW_STYLE, PV_ARROW_MAP, BasicVisualLexicon.EDGE_TARGET_ARROW_SHAPE);
 
-    final VisualProperty<?> vizProp;
+    final VisualProperty<?>[] vizProps;
     final Map<?,?> mapping;
 
-    BasicVizTableStore(final String cyColName, final Extracter extracter, final VisualProperty<?> vizProp) {
-      this(cyColName, String.class, extracter, vizProp);
+    BasicVizTableStore(final String cyColName, final Extracter extracter, final VisualProperty<?> ... vizProps) {
+      this(cyColName, String.class, extracter, vizProps);
     }
 
-    BasicVizTableStore(final String cyColName, final Class<?> cyColType, final Extracter extracter, final VisualProperty<?> vizProp) {
-      this(cyColName, cyColType, extracter, vizProp, null);
+    BasicVizTableStore(final String cyColName, final Class<?> cyColType, final Extracter extracter, final VisualProperty<?> ... vizProps) {
+      this(cyColName, cyColType, extracter, null, vizProps);
     }
 
-    BasicVizTableStore(final String cyColName, final Extracter extracter, final VisualProperty<?> vizProp, final Map<?,?> mapping) {
-      this(cyColName, String.class, extracter, vizProp, mapping);
+    BasicVizTableStore(final String cyColName, final Extracter extracter, final Map<?,?> mapping, final VisualProperty<?> ... vizProps) {
+      this(cyColName, String.class, extracter, mapping, vizProps);
     }
 
-    BasicVizTableStore(final String cyColName, final Class<?> cyColType, final Extracter extracter, final VisualProperty<?> vizProp, final Map<?,?> mapping) {
+    BasicVizTableStore(final String cyColName, final Class<?> cyColType, final Extracter extracter, final Map<?,?> mapping, final VisualProperty<?> ... vizProps) {
       super(cyColName, cyColType, extracter);
-      this.vizProp = vizProp;
+      this.vizProps = vizProps;
       this.mapping = mapping;
     }
 
@@ -486,8 +486,8 @@ public class GpmlToPathway {
       return super.cyColType;
     }
 
-    public VisualProperty<?> getCyVizProp() {
-      return vizProp;
+    public VisualProperty<?>[] getCyVizProps() {
+      return vizProps;
     }
 
     public Map<?,?> getMapping() {
@@ -497,7 +497,7 @@ public class GpmlToPathway {
 
   static class OverrideVizTableStore extends BasicVizTableStore {
     public OverrideVizTableStore(final VizTableStore store, final Extracter extracter) {
-      super(store.getCyColumnName(), store.getCyColumnType(), extracter, store.getCyVizProp(), store.getMapping());
+      super(store.getCyColumnName(), store.getCyColumnType(), extracter, store.getMapping(), store.getCyVizProps());
     }
   }
 
@@ -505,11 +505,11 @@ public class GpmlToPathway {
     return Arrays.asList(
       BasicVizTableStore.NODE_WIDTH,
       BasicVizTableStore.NODE_HEIGHT,
-      BasicVizTableStore.NODE_COLOR,
+      BasicVizTableStore.NODE_FILL_COLOR,
       BasicVizTableStore.NODE_LABEL_FONT,
       BasicVizTableStore.NODE_LABEL_SIZE,
       BasicVizTableStore.NODE_TRANSPARENT,
-      BasicVizTableStore.NODE_BORDER_COLOR,
+      BasicVizTableStore.NODE_COLOR,
       BasicVizTableStore.NODE_BORDER_STYLE,
       BasicVizTableStore.NODE_BORDER_THICKNESS,
       BasicVizTableStore.NODE_SHAPE,
@@ -605,8 +605,8 @@ public class GpmlToPathway {
       BasicTableStore.TEXT_LABEL,
       BasicVizTableStore.NODE_WIDTH,
       BasicVizTableStore.NODE_HEIGHT,
+      BasicVizTableStore.NODE_FILL_COLOR,
       BasicVizTableStore.NODE_COLOR,
-      BasicVizTableStore.NODE_BORDER_COLOR,
       BasicVizTableStore.NODE_LABEL_FONT,
       BasicVizTableStore.NODE_LABEL_SIZE,
       BasicVizTableStore.NODE_TRANSPARENT,
@@ -675,8 +675,8 @@ public class GpmlToPathway {
       BasicTableStore.TEXT_LABEL,
       BasicVizTableStore.NODE_WIDTH,
       BasicVizTableStore.NODE_HEIGHT,
+      BasicVizTableStore.NODE_FILL_COLOR,
       BasicVizTableStore.NODE_COLOR,
-      BasicVizTableStore.NODE_BORDER_COLOR,
       BasicVizTableStore.NODE_LABEL_FONT,
       BasicVizTableStore.NODE_LABEL_SIZE,
       BasicVizTableStore.NODE_TRANSPARENT,
@@ -738,7 +738,7 @@ public class GpmlToPathway {
   static final VizPropStore GROUP_SELECTED_COLOR = new BasicVizPropStore(BasicVisualLexicon.NODE_SELECTED_PAINT, new DefaultExtracter(new Color(255, 255, 204, 127)));
   static final VizTableStore GROUP_WIDTH = new OverrideVizTableStore(BasicVizTableStore.NODE_WIDTH, GROUP_W_EXTRACTER);
   static final VizTableStore GROUP_HEIGHT = new OverrideVizTableStore(BasicVizTableStore.NODE_HEIGHT, GROUP_H_EXTRACTER);
-  static final VizTableStore GROUP_BORDER_COLOR = new OverrideVizTableStore(BasicVizTableStore.NODE_BORDER_COLOR, new DefaultExtracter("#aaaaaa"));
+  static final VizTableStore GROUP_COLOR = new OverrideVizTableStore(BasicVizTableStore.NODE_COLOR, new DefaultExtracter("#aaaaaa"));
   static final VizTableStore GROUP_BORDER_THICKNESS = new OverrideVizTableStore(BasicVizTableStore.NODE_BORDER_THICKNESS, new DefaultExtracter(1.0));
   static final VizTableStore GROUP_BORDER_STYLE = new OverrideVizTableStore(BasicVizTableStore.NODE_BORDER_STYLE, new DefaultExtracter("dot"));
   static final VizTableStore GROUP_TRANSPARENT = new OverrideVizTableStore(BasicVizTableStore.NODE_TRANSPARENT, new DefaultExtracter("true"));
@@ -759,7 +759,7 @@ public class GpmlToPathway {
     store(cyNodeTbl, cyGroupNode, pvGroup,
       GROUP_WIDTH,
       GROUP_HEIGHT,
-      GROUP_BORDER_COLOR,
+      GROUP_COLOR,
       GROUP_BORDER_THICKNESS,
       GROUP_BORDER_STYLE,
       GROUP_TRANSPARENT,
@@ -777,8 +777,6 @@ public class GpmlToPathway {
      Labels
    ========================================================
   */
-
-  static final VizTableStore LABEL_BORDER_COLOR = new OverrideVizTableStore(BasicVizTableStore.NODE_BORDER_COLOR, new DefaultExtracter("#ffffff"));
 
   private void convertLabels() {
     for (final PathwayElement pvElem : pvPathway.getDataObjects()) {
@@ -798,7 +796,8 @@ public class GpmlToPathway {
       BasicTableStore.TEXT_LABEL,
       BasicVizTableStore.NODE_WIDTH,
       BasicVizTableStore.NODE_HEIGHT,
-      LABEL_BORDER_COLOR,
+      BasicVizTableStore.NODE_BORDER_THICKNESS,
+      BasicVizTableStore.NODE_SHAPE,
       BasicVizTableStore.NODE_LABEL_FONT,
       BasicVizTableStore.NODE_LABEL_SIZE
     );
