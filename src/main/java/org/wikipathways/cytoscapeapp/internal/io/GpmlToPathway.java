@@ -681,6 +681,7 @@ public class GpmlToPathway {
       BasicVizTableStore.NODE_LABEL_FONT,
       BasicVizTableStore.NODE_LABEL_SIZE,
       BasicVizTableStore.NODE_TRANSPARENT,
+      BasicVizTableStore.NODE_BORDER_STYLE,
       BasicVizTableStore.NODE_BORDER_THICKNESS,
       BasicVizTableStore.NODE_SHAPE
     );
