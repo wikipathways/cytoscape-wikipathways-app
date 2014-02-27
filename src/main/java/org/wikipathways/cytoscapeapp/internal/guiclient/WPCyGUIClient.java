@@ -28,6 +28,7 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.SwingUtilities;
 
 import org.cytoscape.io.webservice.NetworkImportWebServiceClient;
 import org.cytoscape.io.webservice.SearchWebServiceClient;
@@ -47,6 +48,9 @@ import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.TaskManager;
+import org.cytoscape.work.TaskObserver;
+import org.cytoscape.work.ObservableTask;
+import org.cytoscape.work.FinishStatus;
 
 import org.pathvisio.core.model.Pathway;
 
@@ -112,6 +116,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
     });
 
     speciesCheckBox.setSelected(false);
+    speciesCheckBox.setEnabled(false);
     speciesComboBox.setEnabled(false);
 
     final ActionListener performSearch = new SearchForPathways();
@@ -159,6 +164,24 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
     return new TaskIterator();
   }
 
+  private void searchButtonEnable() {
+    searchButton.setText("Search");
+    searchButton.setEnabled(true);
+  }
+
+  private void searchButtonDisable() {
+    searchButton.setText("Searching...");
+    searchButton.setEnabled(false);
+  }
+
+  private void executeLater(final TaskIterator iterator, final TaskObserver observer) {
+    SwingUtilities.invokeLater(new Runnable() {
+      public void run() {
+        taskMgr.execute(iterator, observer);
+      }
+    });
+  }
+
   class PopulateSpecies extends AbstractTask {
     final ResultTask<List<String>> speciesTask;
     public PopulateSpecies(final ResultTask<List<String>> speciesTask) {
@@ -166,22 +189,30 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
     }
     public void run(TaskMonitor monitor) throws Exception {
       final List<String> allSpecies = speciesTask.get();
-      monitor.setTitle("Obtain list of species from WikiPathways");
       for (final String species : allSpecies)
         speciesComboBox.addItem(species);
+      speciesCheckBox.setEnabled(true);
     }
   }
 
   class SearchForPathways implements ActionListener {
     public void actionPerformed(ActionEvent e) {
+      searchButtonDisable();
       final String query = searchField.getText();
       final String species = speciesCheckBox.isSelected() ? speciesComboBox.getSelectedItem().toString() : null;
       final ResultTask<List<WPPathway>> searchTask = client.newFreeTextSearchTask(query, species);
-      taskMgr.execute(new TaskIterator(searchTask, new AbstractTask() {
+      executeLater(new TaskIterator(searchTask, new AbstractTask() {
         public void run(final TaskMonitor monitor) {
           tableModel.setPathwayRefs(searchTask.get());
         }
-      }));
+      }),
+      new TaskObserver() {
+        public void allFinished(final FinishStatus status) {
+          searchButtonEnable();
+        }
+
+        public void taskFinished(final ObservableTask task) {}
+      });
     }
   }
 
