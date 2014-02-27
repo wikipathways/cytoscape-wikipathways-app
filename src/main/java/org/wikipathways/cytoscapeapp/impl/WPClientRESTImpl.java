@@ -65,7 +65,6 @@ public class WPClientRESTImpl implements WPClient {
     protected InputStream stream = null;
 
     protected Document xmlGet(final String url, final String ... args) throws IOException, SAXException {
-      System.out.println("xmlGet: " + url + " " + java.util.Arrays.toString(args));
       // build our get request
       req = new GetMethod(url);
       req.setQueryString(makeNameValuePairs(args));

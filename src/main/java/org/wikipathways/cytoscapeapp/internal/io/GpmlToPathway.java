@@ -798,9 +798,9 @@ public class GpmlToPathway {
 
   private void convertAnchors() {
     for (final PathwayElement pvElem : pvPathway.getDataObjects()) {
-      if (!pvElem.getObjectType().equals(ObjectType.LINE))
+      if (!(pvElem.getObjectType().equals(ObjectType.LINE) || pvElem.getObjectType().equals(ObjectType.GRAPHLINE)))
         continue;
-      if (pvElem.getMAnchors().size() == 0)
+      if (pvElem.getMAnchors().isEmpty())
         continue;
       convertAnchorsInLine(pvElem);
     }
@@ -859,15 +859,15 @@ public class GpmlToPathway {
       assignAnchorVizStyle(cyEndNode, pvLine.getEndPoint());
     }
 
-    final MAnchor[] pvAnchors = pvElem.getMAnchors().toArray(new MAnchor[0]);
-    if (pvAnchors.length > 0) {
-      newEdge(pvLine, cyStartNode, pvToCyNodes.get(pvAnchors[0]), true, false);
-      for (int i = 1; i < pvAnchors.length; i++) {
-        newEdge(pvLine, pvToCyNodes.get(pvAnchors[i - 1]), pvToCyNodes.get(pvAnchors[i]), false, false);
-      }
-      newEdge(pvLine, pvToCyNodes.get(pvAnchors[pvAnchors.length - 1]), cyEndNode, false, true);
-    } else {
+    final List<MAnchor> pvAnchors = pvElem.getMAnchors();
+    if (pvAnchors.isEmpty()) {
       newEdge(pvLine, cyStartNode, cyEndNode, true, true);
+    } else {
+      newEdge(pvLine, cyStartNode, pvToCyNodes.get(pvAnchors.get(0)), true, false);
+      for (int i = 1; i < pvAnchors.size(); i++) {
+        newEdge(pvLine, pvToCyNodes.get(pvAnchors.get(i - 1)), pvToCyNodes.get(pvAnchors.get(i)), false, false);
+      }
+      newEdge(pvLine, pvToCyNodes.get(pvAnchors.get(pvAnchors.size() - 1)), cyEndNode, false, true);
     }
   }
 
