@@ -1,6 +1,7 @@
 package org.wikipathways.cytoscapeapp.internal.guiclient;
 
 import java.awt.CardLayout;
+import java.awt.Color;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -85,6 +86,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
   final JTable resultsTable = new JTable(tableModel);
   final JRadioButton pathwayButton = new JRadioButton("<html>Pathway<br><br><img src=\"" + PATHWAY_IMG + "\"></html>", true);
   final JRadioButton networkButton = new JRadioButton("<html>Network<br><br><img src=\"" + NETWORK_IMG + "\"></html>", false);
+  final JLabel noResultsLabel = new JLabel();
 
   public WPCyGUIClient(
       final CyEventHelper eventHelper,
@@ -123,6 +125,9 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
     searchButton.addActionListener(performSearch);
     searchField.addActionListener(performSearch);
 
+    noResultsLabel.setVisible(false);
+    noResultsLabel.setForeground(new Color(0x802020));
+
     resultsTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION); 
     resultsTable.addMouseListener(new LoadPathway());
 
@@ -155,7 +160,8 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
     importPanel.add(networkButton, c.right().noInsets());
 
     final JPanel resultsPanel = new JPanel(new GridBagLayout());
-    resultsPanel.add(new JScrollPane(resultsTable), c.reset().expandBoth());
+    resultsPanel.add(noResultsLabel, c.reset().expandHoriz());
+    resultsPanel.add(new JScrollPane(resultsTable), c.down().expandBoth());
     resultsPanel.add(importPanel, c.anchor("west").noExpand().down());
     return resultsPanel;
   }
@@ -203,7 +209,14 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
       final ResultTask<List<WPPathway>> searchTask = client.newFreeTextSearchTask(query, species);
       executeLater(new TaskIterator(searchTask, new AbstractTask() {
         public void run(final TaskMonitor monitor) {
-          tableModel.setPathwayRefs(searchTask.get());
+          final List<WPPathway> results = searchTask.get();
+          if (results.isEmpty()) {
+            noResultsLabel.setText(String.format("<html><b>No results for \'%s\'.</b></html>", query));
+            noResultsLabel.setVisible(true);
+          } else {
+            noResultsLabel.setVisible(false);
+          }
+          tableModel.setPathwayRefs(results);
         }
       }),
       new TaskObserver() {
