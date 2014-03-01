@@ -782,19 +782,6 @@ public class GpmlToPathway {
     }
   };
 
-  static final Converter PV_GROUP_SHAPE_CONVERTER = new Converter() {
-    public Object toCyValue(Object[] pvValues) {
-      final String style = (String) pvValues[0];
-      if (GroupStyle.COMPLEX.getName().equals(style)) {
-        return "Octagon";
-      } else {
-        return "Rectangle";
-      }
-    }
-  };
-
-  static final Extracter GROUP_SHAPE_EXTRACTER = new BasicExtracter(PV_GROUP_SHAPE_CONVERTER, StaticProperty.GROUPSTYLE);
-
   static final VizPropStore GROUP_X = new BasicVizPropStore(BasicVisualLexicon.NODE_X_LOCATION, GROUP_X_EXTRACTER);
   static final VizPropStore GROUP_Y = new BasicVizPropStore(BasicVisualLexicon.NODE_Y_LOCATION, GROUP_Y_EXTRACTER);
   static final VizPropStore GROUP_SELECTED_COLOR = new BasicVizPropStore(BasicVisualLexicon.NODE_SELECTED_PAINT, new DefaultExtracter(new Color(255, 255, 204, 127)));
@@ -805,7 +792,7 @@ public class GpmlToPathway {
   static final VizTableStore GROUP_BORDER_THICKNESS = new OverrideVizTableStore(BasicVizTableStore.NODE_BORDER_THICKNESS, new DefaultExtracter(1.0));
   static final VizTableStore GROUP_BORDER_STYLE = new OverrideVizTableStore(BasicVizTableStore.NODE_BORDER_STYLE, new DefaultExtracter("dot"));
   static final VizTableStore GROUP_TRANSPARENT = new OverrideVizTableStore(BasicVizTableStore.NODE_TRANSPARENT, new DefaultExtracter("true"));
-  static final VizTableStore GROUP_SHAPE = new OverrideVizTableStore(BasicVizTableStore.NODE_SHAPE, GROUP_SHAPE_EXTRACTER);
+  static final VizTableStore GROUP_SHAPE = new OverrideVizTableStore(BasicVizTableStore.NODE_SHAPE, new DefaultExtracter("Rectangle"));
 
   private void convertGroups() {
     for (final PathwayElement pvElem : pvPathway.getDataObjects()) {
