@@ -49,14 +49,16 @@ import java.awt.geom.Point2D;
 
 /**
  * Converts a GPML file contained in a PathVisio Pathway object to a
- * Cytoscape network view that tries to reproduce
+ * Cytoscape network view, and it tries to reproduce
  * the pathway's visual representation.
  */
 public class GpmlToPathway {
-  // NOMENCLATURE:
-  // In order to help distinguish PathVisio data structures from
-  // Cytoscape ones, I've prefixed all variables with either
-  // "cy" or "pv".
+  /*
+    NOMENCLATURE:
+    In order to help distinguish PathVisio data structures from
+    Cytoscape ones, I've prefixed all variables with either
+    "cy" or "pv".
+   */
 
   /**
    * Maps a GPML pathway element to its representative CyNode in the network.
@@ -122,6 +124,7 @@ public class GpmlToPathway {
 
   /**
    * Ensure that the network's tables have the right columns.
+   * All {@code TableStore}s that are used in this class must be listed here.
    */
   private void setupCyTables() {
     for (final TableStore tableStore : Arrays.asList(
@@ -157,14 +160,11 @@ public class GpmlToPathway {
    * that Cytoscape can use. The Cytoscape value can then be stored
    * in a table or as a visual property.
    *
-   * A converter isn't aware
-   * of the underlying pathway element nor of the static properties
-   * it is converting. It is only aware of static property <em>values</em>.
-   * This allows a single converter to be used 
-   * for several static properties. For example,
-   * {@code PV_COLOR_CONVERTER} can be used for
-   * {@code StaticProperty.COLOR} and 
-   * {@code StaticProperty.FILLCOLOR}.
+   * A converter isn't aware of the underlying pathway element nor of
+   * the static properties it is converting. It is only aware of static
+   * property <em>values</em>. This allows a single converter to be used
+   * for several static properties. For example, {@code PV_COLOR_CONVERTER}
+   * can be used for {@code StaticProperty.COLOR} and {@code StaticProperty.FILLCOLOR}.
    */
   static interface Converter {
     Object toCyValue(Object[] pvValues);
@@ -186,6 +186,10 @@ public class GpmlToPathway {
     }
   };
 
+  /**
+   * Uses PathVisio's {@code StaticProperty.LINESTYLE} to the name of
+   * a Cytoscape Border Line Type.
+   */
   static final Converter PV_LINE_STYLE_CONVERTER = new Converter() {
     public Object toCyValue(Object[] pvValues) {
       final int lineStyle = (Integer) pvValues[0];
@@ -200,6 +204,9 @@ public class GpmlToPathway {
     }
   };
 
+  /**
+   * Uses PathVisio's {@code StaticProperty.SHAPETYPE} and returns its name.
+   */
   static final Converter PV_SHAPE_CONVERTER = new Converter() {
     public Object toCyValue(Object[] pvValues) {
       final ShapeType pvShapeType = (ShapeType) pvValues[0];
@@ -207,6 +214,10 @@ public class GpmlToPathway {
     }
   };
 
+  /**
+   * Uses PathVisio's {@code StaticProperty.FONTNAME}, {@code StaticProperty.FONTWEIGHT},
+   * and {@code StaticProperty.FONTSTYLE} to return the font name. 
+   */
   static final Converter PV_FONT_CONVERTER = new Converter() {
     public Object toCyValue(Object[] pvValues) {
       final String fontFace = (String) pvValues[0];
@@ -221,6 +232,12 @@ public class GpmlToPathway {
     }
   };
 
+  /**
+   * Uses PathVisio's {@code StaticProperty.SHAPETYPE} and 
+   * {@code StaticProperty.LINETHICKNESS}. Cytoscape has no equivalent
+   * of PathVisio's ShapeType.NONE. ShapeType.NONE is reproduced by
+   * setting the line thickness to 0.
+   */
   static final Converter PV_LINE_THICKNESS_CONVERTER = new Converter() {
     public Object toCyValue(Object[] pvValues) {
       final ShapeType pvShapeType = (ShapeType) pvValues[0];
@@ -233,6 +250,10 @@ public class GpmlToPathway {
     }
   };
 
+  /**
+   * Uses PathVisio's {@code StaticProperty.COLOR} or {@code StaticProperty.FILLCOLOR}
+   * and returns a hex string of the color.
+   */
   static final Converter PV_COLOR_CONVERTER = new Converter() {
     public Object toCyValue(Object[] pvValues) {
       final Color c = (Color) pvValues[0];
@@ -243,6 +264,9 @@ public class GpmlToPathway {
     }
   };
 
+  /**
+   * Uses PathVisio's {@code StaticProperty.TRANSPARENT} to a String.
+   */
   static final Converter PV_TRANSPARENT_CONVERTER = new Converter() {
     public Object toCyValue(Object[] pvValues) {
       return ((Boolean) pvValues[0]).toString();
@@ -253,15 +277,14 @@ public class GpmlToPathway {
    * Extracts values from a PathVisio pathway element
    * and returns a Cytoscape value.
    *
-   * Most of the time
-   * {@code Extracter} pulls static property values
-   * from a pathway element. Some non-static property
-   * values include data source values and X, Y coordinates
-   * for PathVisio State elements.
+   * Most of the time, an {@code Extracter} pulls static property values
+   * from a pathway element. It rarely doesn't use static property values.
+   * Some non-static property values include data source values and X, Y
+   * coordinates for PathVisio State elements.
    *
-   * {@code Extracter}s can
-   * use a {@code Converter} to convert the
-   * static property value to a value Cytoscape can use.
+   * If an {@code Extracter} uses a static property value, it 
+   * calls a {@code Converter} to convert the static property value
+   * to a value Cytoscape can use.
    */
   static interface Extracter {
     Object extract(PathwayElement pvElem);
@@ -293,10 +316,20 @@ public class GpmlToPathway {
     final StaticProperty[] pvProps;
     final Object[] pvValues;
 
+    /**
+     * Create an extracter that extracts the value of the first
+     * provided static property; it performs no conversion from
+     * the PathVisio value to Cytoscape.
+     */
     BasicExtracter(StaticProperty ... pvProps) {
       this(NO_CONVERT, pvProps);
     }
 
+    /**
+     * Create an extracter that extracts the values of the given static
+     * properties, but use the given {@code converter} before passing
+     * the value on to Cytoscape.
+     */
     BasicExtracter(final Converter converter, StaticProperty ... pvProps) {
       this.converter = converter;
       this.pvProps = pvProps;
@@ -317,7 +350,9 @@ public class GpmlToPathway {
 
   /**
    * An extracter that always returns the same Cytoscape value
-   * regardless of the PathVisio element.
+   * regardless of the PathVisio element. This is useful
+   * for things like group nodes whose visual style is
+   * consistent and is not derived from PathVisio static property values.
    */
   static class DefaultExtracter implements Extracter {
     final Object cyValue;
@@ -330,14 +365,13 @@ public class GpmlToPathway {
     }
   }
 
-
   /**
-   * Stores PathVisio values produced by an {@code Extractor}
-   * into a Cytoscape table.
+   * Stores values produced by an {@code Extractor}
+   * into a Cytoscape table column.
    */
   public static interface TableStore {
     /**
-     * Ensures the columns of {@code cyTable} are created.
+     * Set up the {@code cyTable} so that the column is created.
      */
     void setup(final CyTable cyTable);
 
@@ -348,6 +382,10 @@ public class GpmlToPathway {
     void store(final CyTable cyTable, final CyIdentifiable cyNetObj, final PathwayElement pvElem);
   }
 
+  /**
+   * A {@code TableStore} that pulls values from PathVisio elements
+   * using a given {@code Extracter}.
+   */
   static class BasicTableStore implements TableStore {
     public static final TableStore GRAPH_ID = new BasicTableStore("GraphID", BasicExtracter.GRAPH_ID);
     public static final TableStore TEXT_LABEL = new BasicTableStore(CyNetwork.NAME, BasicExtracter.TEXT_LABEL);
@@ -356,6 +394,10 @@ public class GpmlToPathway {
     final Class<?> cyColType;
     final Extracter extracter;
 
+    /**
+     * Create a {@code TableStore} for the given column of type String
+     * using the given {@code extracter}
+     */
     BasicTableStore(final String cyColName, final Extracter extracter) {
       this(cyColName, String.class, extracter);
     }
@@ -372,7 +414,9 @@ public class GpmlToPathway {
         cyTable.createColumn(cyColName, cyColType, false);
       } else {
         if (!cyCol.getType().equals(cyColType)) {
-          System.out.println(String.format("Wrong column type. Column %s is type %s but expected %s", cyColName, cyCol.getType().toString(), cyColType.toString()));
+          // This should never happen, because the network we are given should be new
+          // without any conflicting columns.
+          throw new IllegalStateException(String.format("Wrong column type. Column %s is type %s but expected %s", cyColName, cyCol.getType().toString(), cyColType.toString()));
         }
       }
     }
@@ -384,8 +428,12 @@ public class GpmlToPathway {
   }
 
   /**
-   * A specific kind of {@code TableStore} that stores
-   * visual property information in a table.
+   * A specific kind of {@code TableStore} whose column stores
+   * visual property values. The WikiPathways visual style,
+   * specified in {@code GpmlVizStyle}, looks at known {@code VizTableStore}s
+   * (as returned by {@code getAllVizPropStores()})
+   * to create a series of discrete and passthrough mappings for all 
+   * {@code VizTableStore} columns.
    */
   public static interface VizTableStore extends TableStore {
     /**
@@ -399,13 +447,13 @@ public class GpmlToPathway {
     Class<?> getCyColumnType();
 
     /**
-     * Return the Cytoscape visual property that should read from the column
+     * Return the Cytoscape visual properties that should read from the column
      * returned by {@getCyColumnName()}.
      */
     VisualProperty<?>[] getCyVizProps();
 
     /**
-     * For discrete mappings, return a map containing the key-value pairs for
+     * Return a map containing the key-value pairs for
      * the discrete mapping; return null for a passthrough mapping.
      */
     Map<?,?> getMapping();
@@ -458,7 +506,7 @@ public class GpmlToPathway {
     public static final VizTableStore EDGE_END_ARROW = new BasicVizTableStore("EndArrow", BasicExtracter.END_ARROW_STYLE, PV_ARROW_MAP, BasicVisualLexicon.EDGE_TARGET_ARROW_SHAPE);
 
     final VisualProperty<?>[] vizProps;
-    final Map<?,?> mapping;
+    final Map<?,?> mapping; // null means passthru
 
     BasicVizTableStore(final String cyColName, final Extracter extracter, final VisualProperty<?> ... vizProps) {
       this(cyColName, String.class, extracter, vizProps);
@@ -495,7 +543,14 @@ public class GpmlToPathway {
     }
   }
 
+  /**
+   * Overrides the extractor of an existing {@code VizTableStore}.
+   */
   static class OverrideVizTableStore extends BasicVizTableStore {
+    /**
+     * @param store Use this {@code store}'s Cytoscape column, visual property, and mapping.
+     * @param extracter Use this {@code Extracter} instead of the one provided by {@code store}.
+     */
     public OverrideVizTableStore(final VizTableStore store, final Extracter extracter) {
       super(store.getCyColumnName(), store.getCyColumnType(), extracter, store.getMapping(), store.getCyVizProps());
     }
@@ -529,7 +584,7 @@ public class GpmlToPathway {
 
   /**
    * Takes a PathVisio element value and stores
-   * the equivalent Cytoscape visual property value in a {@code DelayedVizProp}.
+   * the equivalent Cytoscape visual bypass value in a {@code DelayedVizProp}.
    */
   static interface VizPropStore {
     DelayedVizProp store(final CyIdentifiable cyNetObj, final PathwayElement pvElem);
@@ -723,7 +778,6 @@ public class GpmlToPathway {
 
   static final Converter PV_GROUP_SHAPE_CONVERTER = new Converter() {
     public Object toCyValue(Object[] pvValues) {
-      System.out.println(pvValues[0]);
       final String style = (String) pvValues[0];
       if (GroupStyle.COMPLEX.getName().equals(style)) {
         return "Octagon";
@@ -781,6 +835,7 @@ public class GpmlToPathway {
      Labels
    ========================================================
   */
+  
 
   private void convertLabels() {
     for (final PathwayElement pvElem : pvPathway.getDataObjects()) {
@@ -886,6 +941,7 @@ public class GpmlToPathway {
     if (pvAnchors.isEmpty()) {
       newEdge(pvLine, cyStartNode, cyEndNode, true, true);
     } else {
+      // this is for multiple segmented lines
       newEdge(pvLine, cyStartNode, pvToCyNodes.get(pvAnchors.get(0)), true, false);
       for (int i = 1; i < pvAnchors.size(); i++) {
         newEdge(pvLine, pvToCyNodes.get(pvAnchors.get(i - 1)), pvToCyNodes.get(pvAnchors.get(i)), false, false);
