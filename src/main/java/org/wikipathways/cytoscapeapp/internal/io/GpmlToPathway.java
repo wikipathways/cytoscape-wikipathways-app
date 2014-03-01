@@ -269,7 +269,13 @@ public class GpmlToPathway {
    */
   static final Converter PV_TRANSPARENT_CONVERTER = new Converter() {
     public Object toCyValue(Object[] pvValues) {
-      return ((Boolean) pvValues[0]).toString();
+      final ShapeType pvShapeType = (ShapeType) pvValues[0];
+      final Boolean pvTransparent = (Boolean) pvValues[1];
+      if (ShapeType.NONE.equals(pvShapeType)) {
+        return "true";
+      } else {
+        return pvTransparent.toString();
+      }
     }
   };
 
@@ -304,7 +310,7 @@ public class GpmlToPathway {
     public static final Extracter FILL_COLOR = new BasicExtracter(PV_COLOR_CONVERTER, StaticProperty.FILLCOLOR);
     public static final Extracter FONT_SIZE = new BasicExtracter(StaticProperty.FONTSIZE);
     public static final Extracter FONT_NAME = new BasicExtracter(PV_FONT_CONVERTER, StaticProperty.FONTNAME, StaticProperty.FONTWEIGHT, StaticProperty.FONTSTYLE);
-    public static final Extracter TRANSPARENT = new BasicExtracter(PV_TRANSPARENT_CONVERTER, StaticProperty.TRANSPARENT);
+    public static final Extracter TRANSPARENT = new BasicExtracter(PV_TRANSPARENT_CONVERTER, StaticProperty.SHAPETYPE, StaticProperty.TRANSPARENT);
     public static final Extracter NODE_LINE_THICKNESS = new BasicExtracter(PV_LINE_THICKNESS_CONVERTER, StaticProperty.SHAPETYPE, StaticProperty.LINETHICKNESS);
     public static final Extracter EDGE_LINE_THICKNESS = new BasicExtracter(StaticProperty.LINETHICKNESS);
     public static final Extracter SHAPE = new BasicExtracter(PV_SHAPE_CONVERTER, StaticProperty.SHAPETYPE);
@@ -835,7 +841,7 @@ public class GpmlToPathway {
      Labels
    ========================================================
   */
-  
+
 
   private void convertLabels() {
     for (final PathwayElement pvElem : pvPathway.getDataObjects()) {
@@ -860,7 +866,8 @@ public class GpmlToPathway {
       BasicVizTableStore.NODE_COLOR,
       BasicVizTableStore.NODE_SHAPE,
       BasicVizTableStore.NODE_LABEL_FONT,
-      BasicVizTableStore.NODE_LABEL_SIZE
+      BasicVizTableStore.NODE_LABEL_SIZE,
+      BasicVizTableStore.NODE_TRANSPARENT
     );
     store(cyNode, pvLabel,
       BasicVizPropStore.NODE_X,
