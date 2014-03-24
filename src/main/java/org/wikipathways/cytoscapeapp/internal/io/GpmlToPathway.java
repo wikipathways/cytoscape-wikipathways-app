@@ -4,8 +4,6 @@ import java.awt.Color;
 
 import java.util.Map;
 import java.util.HashMap;
-import java.util.Set;
-import java.util.HashSet;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,7 +17,6 @@ import org.pathvisio.core.model.StaticProperty;
 import org.pathvisio.core.model.GraphLink;
 import org.pathvisio.core.model.ShapeType;
 import org.pathvisio.core.model.LineStyle;
-import org.pathvisio.core.model.GroupStyle;
 
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
@@ -31,19 +28,14 @@ import org.cytoscape.model.CyIdentifiable;
 import org.cytoscape.event.CyEventHelper;
 
 import org.cytoscape.view.model.CyNetworkView;
-import org.cytoscape.view.model.View;
 import org.cytoscape.view.model.VisualProperty;
-import org.cytoscape.view.model.DiscreteRange;
 import org.cytoscape.view.presentation.property.BasicVisualLexicon;
 import org.cytoscape.view.presentation.property.NodeShapeVisualProperty;
 import org.cytoscape.view.presentation.property.values.NodeShape;
-import org.cytoscape.view.presentation.property.values.LineType;
 import org.cytoscape.view.presentation.property.values.ArrowShape;
 import org.cytoscape.view.presentation.property.ArrowShapeVisualProperty;
-import org.cytoscape.view.presentation.annotations.Annotation;
 
 
-import java.awt.Color;
 import java.awt.Font;
 import java.awt.geom.Point2D;
 

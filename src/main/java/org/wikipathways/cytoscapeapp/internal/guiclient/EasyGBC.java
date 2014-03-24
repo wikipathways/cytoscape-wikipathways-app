@@ -8,14 +8,16 @@ import java.util.HashMap;
  * Uses the  builder pattern for filling fields of a {@link GridBagConstraints}.
  */
 class EasyGBC extends GridBagConstraints {
-	final Map<String,Integer> anchors = new HashMap<String,Integer>(); // this should be populated staticly, but the GBC's constants are not available at compile-time
+	static final Map<String,Integer> anchors = new HashMap<String,Integer>();
+	static {
+		anchors.put("north",     NORTH);
+		anchors.put("northwest", NORTHWEST);
+		anchors.put("west",      WEST);
+		anchors.put("south",     SOUTH);
+		anchors.put("east",      EAST);
+	}
 	
 	public EasyGBC() {
-		anchors.put("north", super.NORTH);
-		anchors.put("northwest", super.NORTHWEST);
-		anchors.put("west", super.WEST);
-		anchors.put("south", super.SOUTH);
-		anchors.put("east", super.EAST);
 		reset();
 	}
 

@@ -27,7 +27,6 @@ import org.pathvisio.core.model.PathwayElement;
 import org.pathvisio.core.model.PathwayElement.MAnchor;
 import org.pathvisio.core.model.ShapeType;
 import org.pathvisio.core.model.StaticProperty;
-import org.wikipathways.cytoscapeapp.internal.CyActivator;
 
 public class GpmlToNetwork {
 	/**

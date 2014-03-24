@@ -75,7 +75,7 @@ public class GpmlVizStyle {
       final Map<?,?> mapping = vizTableStore.getMapping();
       final VisualMappingFunctionFactory fnFactory = (mapping == null) ? passFnFactory : discFnFactory;
       for (final VisualProperty<?> vizProp : vizTableStore.getCyVizProps()) {
-        final VisualMappingFunction fn = fnFactory.createVisualMappingFunction(
+        final VisualMappingFunction<?,?> fn = fnFactory.createVisualMappingFunction(
             vizTableStore.getCyColumnName(),
             vizTableStore.getCyColumnType(),
             vizProp);
