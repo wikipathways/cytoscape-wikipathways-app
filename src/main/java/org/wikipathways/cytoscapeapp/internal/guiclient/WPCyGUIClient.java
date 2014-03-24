@@ -8,7 +8,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.InputStream;
+import java.io.Reader;
 import java.util.List;
 
 import javax.swing.ButtonGroup;
@@ -227,7 +227,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
       if (e.getClickCount() != 2)
         return;
       final WPPathway pathway = tableModel.getSelectedPathwayRef();
-      final ResultTask<InputStream> loadPathwayTask = client.newLoadPathwayTask(pathway);
+      final ResultTask<Reader> loadPathwayTask = client.newLoadPathwayTask(pathway);
       final LoadPathwayFromStreamTask fromStreamTask = new LoadPathwayFromStreamTask(loadPathwayTask);
       final TaskIterator taskIterator = new TaskIterator(loadPathwayTask, fromStreamTask);
       taskMgr.execute(taskIterator);
@@ -235,15 +235,15 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
   }
 
   class LoadPathwayFromStreamTask extends AbstractTask {
-    final ResultTask<InputStream> streamTask;
-    InputStream gpmlStream = null;
+    final ResultTask<Reader> streamTask;
+    Reader gpmlStream = null;
 
-    public LoadPathwayFromStreamTask(final ResultTask<InputStream> streamTask) {
+    public LoadPathwayFromStreamTask(final ResultTask<Reader> streamTask) {
       this.streamTask = streamTask;
     }
 
     public void cancel() {
-      final InputStream gpmlStream2 = gpmlStream;
+      final Reader gpmlStream2 = gpmlStream;
       if (gpmlStream2 != null) {
         try {
           gpmlStream2.close();

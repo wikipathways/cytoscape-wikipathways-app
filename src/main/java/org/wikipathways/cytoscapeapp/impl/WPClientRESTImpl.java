@@ -3,8 +3,9 @@ package org.wikipathways.cytoscapeapp.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import java.io.ByteArrayInputStream;
+import java.io.Reader;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.io.IOException;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -13,11 +14,12 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
 import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpMethod;
+import org.apache.commons.httpclient.HttpMethodBase;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.NameValuePair;
 
@@ -61,7 +63,7 @@ public class WPClientRESTImpl implements WPClient {
       return nvPairs;
     }
 
-    protected HttpMethod req = null;
+    protected HttpMethodBase req = null;
     protected InputStream stream = null;
 
     protected Document xmlGet(final String url, final String ... args) throws IOException, SAXException {
@@ -71,8 +73,11 @@ public class WPClientRESTImpl implements WPClient {
 
       try {
         client.executeMethod(req);
+        final String encoding = req.getResponseCharSet();
         stream = req.getResponseBodyAsStream();
-        return xmlParser.parse(stream);
+        final InputSource inputSource = new InputSource(stream);
+        inputSource.setEncoding(encoding);
+        return xmlParser.parse(inputSource);
       } finally {
         req.releaseConnection();
         req = null;
@@ -81,7 +86,7 @@ public class WPClientRESTImpl implements WPClient {
     }
 
     public void cancel() {
-      final HttpMethod req2 = req; // copy the ref to req so that it doesn't become null when trying to abort it
+      final HttpMethodBase req2 = req; // copy the ref to req so that it doesn't become null when trying to abort it
       if (req2 != null) {
         req2.abort();
       }
@@ -156,9 +161,9 @@ public class WPClientRESTImpl implements WPClient {
     return null;
   }
 
-  public ResultTask<InputStream> newLoadPathwayTask(final WPPathway pathway) {
-    return new ReqTask<InputStream>() {
-      protected InputStream checkedRun(final TaskMonitor monitor) throws Exception {
+  public ResultTask<Reader> newLoadPathwayTask(final WPPathway pathway) {
+    return new ReqTask<Reader>() {
+      protected Reader checkedRun(final TaskMonitor monitor) throws Exception {
         monitor.setTitle("Get \'" + pathway.getName() + "\' from WikiPathways");
         Document doc = null;
         try {
@@ -170,7 +175,7 @@ public class WPClientRESTImpl implements WPClient {
         final Node pathwayNode = responseNode.getFirstChild(); 
         final Node gpmlNode = findChildNode(pathwayNode, "ns2:gpml");
         final String gpmlContents = gpmlNode.getTextContent();
-        return new ByteArrayInputStream(gpmlContents.getBytes());
+        return new StringReader(gpmlContents);
       }
     };
   }

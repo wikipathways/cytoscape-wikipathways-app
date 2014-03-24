@@ -1,6 +1,6 @@
 package org.wikipathways.cytoscapeapp;
 
-import java.io.InputStream;
+import java.io.Reader;
 import java.util.List;
 
 /**
@@ -23,7 +23,7 @@ public interface WPClient {
   ResultTask<List<WPPathway>> newFreeTextSearchTask(final String query, final String species);
 
   /**
-   * Return a task that provides the {@code InputStream} containing the GPML contents of {@code pathway}.
+   * Return a task that provides the {@code Reader} containing the GPML contents of {@code pathway}.
    */
-  ResultTask<InputStream> newLoadPathwayTask(final WPPathway pathway);
+  ResultTask<Reader> newLoadPathwayTask(final WPPathway pathway);
 }
