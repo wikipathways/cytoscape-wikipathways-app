@@ -288,13 +288,9 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
   }
 
   private void updateNetworkView(final CyNetworkView netView) {
-    SwingUtilities.invokeLater(new Runnable() {
-      public void run() {
-        vizStyle.apply(netView);
-        netView.fitContent();
-        netView.updateView();
-      }
-    });
+    vizStyle.apply(netView);
+    netView.fitContent();
+    netView.updateView();
   }
 
   class PathwayRefsTableModel extends AbstractTableModel {
