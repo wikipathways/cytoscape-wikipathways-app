@@ -235,7 +235,7 @@ public class GpmlToPathway {
       final ShapeType pvShapeType = (ShapeType) pvValues[0];
       final Double pvLineThickness = (Double) pvValues[1];
       if (ShapeType.NONE.equals(pvShapeType)) {
-        return 1.0E-9; // TODO: change this to 0.0 when VizMapper bug #2542 is fixed 
+        return 0.0; // TODO: change this to 0.0 when VizMapper bug #2542 is fixed 
       } else {
         return pvLineThickness;
       }
@@ -591,6 +591,7 @@ public class GpmlToPathway {
   static class BasicVizPropStore implements VizPropStore {
     public static final VizPropStore NODE_X = new BasicVizPropStore(BasicVisualLexicon.NODE_X_LOCATION, BasicExtracter.X);
     public static final VizPropStore NODE_Y = new BasicVizPropStore(BasicVisualLexicon.NODE_Y_LOCATION, BasicExtracter.Y);
+    public static final VizPropStore NODE_BORDER_THICKNESS = new BasicVizPropStore(BasicVisualLexicon.NODE_BORDER_WIDTH, BasicExtracter.NODE_LINE_THICKNESS);
 
     final VisualProperty<?> cyVizProp;
     final Extracter extracter;
@@ -648,6 +649,8 @@ public class GpmlToPathway {
     }
   }
 
+  static final Double ZERO = new Double(0.0);
+
   private void convertDataNode(final PathwayElement pvDataNode) {
     final CyNode cyNode = cyNet.addNode();
     pvToCyNodes.put(pvDataNode, cyNode);
@@ -667,6 +670,11 @@ public class GpmlToPathway {
       BasicVizTableStore.NODE_BORDER_THICKNESS,
       BasicVizTableStore.NODE_SHAPE
     );
+    if (ZERO.equals(BasicExtracter.NODE_LINE_THICKNESS.extract(pvDataNode))) {
+      store(cyNode, pvDataNode,
+        BasicVizPropStore.NODE_BORDER_THICKNESS
+        );
+    }
     store(cyNode, pvDataNode,
       BasicVizPropStore.NODE_X,
       BasicVizPropStore.NODE_Y
@@ -683,7 +691,7 @@ public class GpmlToPathway {
     for (final PathwayElement pvElem : pvPathway.getDataObjects()) {
       if (!pvElem.getObjectType().equals(ObjectType.SHAPE))
         continue;
-      convertDataNode(pvElem); // shapes are treated just like data nodes, but this will change in the future with annotations
+      convertDataNode(pvElem);
     }
   }
 
