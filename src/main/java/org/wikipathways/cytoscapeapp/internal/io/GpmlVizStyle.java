@@ -69,6 +69,7 @@ public class GpmlVizStyle {
     // set default visual properties
     vizStyle.setDefaultValue(BasicVisualLexicon.NODE_FILL_COLOR, Color.WHITE);
     vizStyle.setDefaultValue(BasicVisualLexicon.NODE_LABEL_COLOR, Color.BLACK);
+    vizStyle.setDefaultValue(BasicVisualLexicon.NODE_BORDER_WIDTH, new Double(1.0));
 
     // create viz mappings
     for (final GpmlToPathway.VizTableStore vizTableStore : GpmlToPathway.getAllVizTableStores()) {

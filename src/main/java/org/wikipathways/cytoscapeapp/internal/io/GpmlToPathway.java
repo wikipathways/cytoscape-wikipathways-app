@@ -29,6 +29,7 @@ import org.cytoscape.event.CyEventHelper;
 
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.VisualProperty;
+import org.pathvisio.core.model.GroupStyle;
 import org.cytoscape.view.presentation.property.BasicVisualLexicon;
 import org.cytoscape.view.presentation.property.NodeShapeVisualProperty;
 import org.cytoscape.view.presentation.property.values.NodeShape;
@@ -670,15 +671,15 @@ public class GpmlToPathway {
       BasicVizTableStore.NODE_BORDER_THICKNESS,
       BasicVizTableStore.NODE_SHAPE
     );
-    if (ZERO.equals(BasicExtracter.NODE_LINE_THICKNESS.extract(pvDataNode))) {
-      store(cyNode, pvDataNode,
-        BasicVizPropStore.NODE_BORDER_THICKNESS
-        );
-    }
     store(cyNode, pvDataNode,
       BasicVizPropStore.NODE_X,
       BasicVizPropStore.NODE_Y
     );
+    if (ZERO.equals(BasicExtracter.NODE_LINE_THICKNESS.extract(pvDataNode))) {
+      store(cyNode, pvDataNode,
+        BasicVizPropStore.NODE_BORDER_THICKNESS
+      );
+    }
   }
 
   /*
@@ -750,6 +751,11 @@ public class GpmlToPathway {
       STATE_X_STORE,
       STATE_Y_STORE
     );
+    if (ZERO.equals(BasicExtracter.NODE_LINE_THICKNESS.extract(pvState))) {
+      store(cyNode, pvState,
+        BasicVizPropStore.NODE_BORDER_THICKNESS
+      );
+    }
   }
   
   /*
@@ -782,17 +788,45 @@ public class GpmlToPathway {
     }
   };
 
+  static final Converter GROUP_FILL_COLOR_CONVERTER = new Converter() {
+    public Object toCyValue(Object[] pvValues) {
+      final String styleName = (String) pvValues[0];
+      final GroupStyle style = styleName != null ? GroupStyle.fromName(styleName) : null;
+      if (GroupStyle.GROUP.equals(style))
+        return null;
+      else
+        return "#efefef";
+    }
+  };
+
+  static final Extracter GROUP_FILL_COLOR_EXTRACTER = new BasicExtracter(GROUP_FILL_COLOR_CONVERTER, StaticProperty.GROUPSTYLE);
+
+  static final Converter GROUP_BORDER_THICKNESS_CONVERTER = new Converter() {
+    public Object toCyValue(Object[] pvValues) {
+      final String styleName = (String) pvValues[0];
+      final GroupStyle style = styleName != null ? GroupStyle.fromName(styleName) : null;
+      if (GroupStyle.GROUP.equals(style))
+        return 0.0;
+      else
+        return 1.0;
+    }
+  };
+
+  static final Extracter GROUP_BORDER_THICKNESS_EXTRACTER = new BasicExtracter(GROUP_BORDER_THICKNESS_CONVERTER, StaticProperty.GROUPSTYLE);
+
   static final VizPropStore GROUP_X = new BasicVizPropStore(BasicVisualLexicon.NODE_X_LOCATION, GROUP_X_EXTRACTER);
   static final VizPropStore GROUP_Y = new BasicVizPropStore(BasicVisualLexicon.NODE_Y_LOCATION, GROUP_Y_EXTRACTER);
   static final VizPropStore GROUP_SELECTED_COLOR = new BasicVizPropStore(BasicVisualLexicon.NODE_SELECTED_PAINT, new DefaultExtracter(new Color(255, 255, 204, 127)));
   static final VizTableStore GROUP_WIDTH = new OverrideVizTableStore(BasicVizTableStore.NODE_WIDTH, GROUP_W_EXTRACTER);
   static final VizTableStore GROUP_HEIGHT = new OverrideVizTableStore(BasicVizTableStore.NODE_HEIGHT, GROUP_H_EXTRACTER);
-  static final VizTableStore GROUP_FILL_COLOR = new OverrideVizTableStore(BasicVizTableStore.NODE_FILL_COLOR, new DefaultExtracter("#efefef"));
+  static final VizTableStore GROUP_FILL_COLOR = new OverrideVizTableStore(BasicVizTableStore.NODE_FILL_COLOR, GROUP_FILL_COLOR_EXTRACTER);
   static final VizTableStore GROUP_COLOR = new OverrideVizTableStore(BasicVizTableStore.NODE_COLOR, new DefaultExtracter("#aaaaaa"));
-  static final VizTableStore GROUP_BORDER_THICKNESS = new OverrideVizTableStore(BasicVizTableStore.NODE_BORDER_THICKNESS, new DefaultExtracter(1.0));
+  static final VizTableStore GROUP_BORDER_THICKNESS = new OverrideVizTableStore(BasicVizTableStore.NODE_BORDER_THICKNESS, GROUP_BORDER_THICKNESS_EXTRACTER);
   static final VizTableStore GROUP_BORDER_STYLE = new OverrideVizTableStore(BasicVizTableStore.NODE_BORDER_STYLE, new DefaultExtracter("dot"));
   static final VizTableStore GROUP_TRANSPARENT = new OverrideVizTableStore(BasicVizTableStore.NODE_TRANSPARENT, new DefaultExtracter("true"));
   static final VizTableStore GROUP_SHAPE = new OverrideVizTableStore(BasicVizTableStore.NODE_SHAPE, new DefaultExtracter("Rectangle"));
+
+  static final VizPropStore GROUP_BORDER_THICKNESS_2 = new BasicVizPropStore(BasicVisualLexicon.NODE_BORDER_WIDTH, GROUP_BORDER_THICKNESS_EXTRACTER);
 
   private void convertGroups() {
     for (final PathwayElement pvElem : pvPathway.getDataObjects()) {
@@ -821,6 +855,9 @@ public class GpmlToPathway {
       GROUP_Y,
       GROUP_SELECTED_COLOR 
     );
+    if (ZERO.equals(GROUP_BORDER_THICKNESS_EXTRACTER.extract(pvGroup))) {
+      store(cyGroupNode, pvGroup, GROUP_BORDER_THICKNESS_2);
+    }
   }
 
   /*
@@ -860,6 +897,11 @@ public class GpmlToPathway {
       BasicVizPropStore.NODE_X,
       BasicVizPropStore.NODE_Y
     );
+    if (ZERO.equals(BasicExtracter.NODE_LINE_THICKNESS.extract(pvLabel))) {
+      store(cyNode, pvLabel,
+        BasicVizPropStore.NODE_BORDER_THICKNESS
+      );
+    }
   }
   
   /*
