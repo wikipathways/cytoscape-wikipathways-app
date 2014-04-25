@@ -586,31 +586,38 @@ public class GpmlToPathway {
    * the equivalent Cytoscape visual bypass value in a {@code DelayedVizProp}.
    */
   static interface VizPropStore {
-    DelayedVizProp store(final CyIdentifiable cyNetObj, final PathwayElement pvElem);
+    DelayedVizProp[] store(final CyIdentifiable cyNetObj, final PathwayElement pvElem);
   }
 
   static class BasicVizPropStore implements VizPropStore {
-    public static final VizPropStore NODE_X = new BasicVizPropStore(BasicVisualLexicon.NODE_X_LOCATION, BasicExtracter.X);
-    public static final VizPropStore NODE_Y = new BasicVizPropStore(BasicVisualLexicon.NODE_Y_LOCATION, BasicExtracter.Y);
-    public static final VizPropStore NODE_BORDER_THICKNESS = new BasicVizPropStore(BasicVisualLexicon.NODE_BORDER_WIDTH, BasicExtracter.NODE_LINE_THICKNESS);
+    public static final VizPropStore NODE_X = new BasicVizPropStore(BasicExtracter.X, BasicVisualLexicon.NODE_X_LOCATION);
+    public static final VizPropStore NODE_Y = new BasicVizPropStore(BasicExtracter.Y, BasicVisualLexicon.NODE_Y_LOCATION);
+    public static final VizPropStore NODE_BORDER_THICKNESS = new BasicVizPropStore(BasicExtracter.NODE_LINE_THICKNESS, BasicVisualLexicon.NODE_BORDER_WIDTH);
 
-    final VisualProperty<?> cyVizProp;
+    final VisualProperty<?>[] cyVizProps;
     final Extracter extracter;
 
-    BasicVizPropStore(final VisualProperty<?> cyVizProp, final Extracter extracter) {
-      this.cyVizProp = cyVizProp;
+    BasicVizPropStore(final Extracter extracter, final VisualProperty<?> ... cyVizProps) {
       this.extracter = extracter;
+      this.cyVizProps = cyVizProps;
     }
 
-    public DelayedVizProp store(final CyIdentifiable cyNetObj, final PathwayElement pvElem) {
+    public DelayedVizProp[] store(final CyIdentifiable cyNetObj, final PathwayElement pvElem) {
       final Object cyValue = extracter.extract(pvElem);
-      return new DelayedVizProp(cyNetObj, cyVizProp, cyValue, true);
+      final DelayedVizProp[] props = new DelayedVizProp[cyVizProps.length];
+      for (int i = 0; i < cyVizProps.length; i++) {
+        props[i] = new DelayedVizProp(cyNetObj, cyVizProps[i], cyValue, true);
+      }
+      return props;
     }
   }
 
   void store(final CyIdentifiable cyNetObj, final PathwayElement pvElem, final VizPropStore ... vizPropStores) {
     for (final VizPropStore vizPropStore : vizPropStores) {
-      cyDelayedVizProps.add(vizPropStore.store(cyNetObj, pvElem));
+      final DelayedVizProp[] props = vizPropStore.store(cyNetObj, pvElem);
+      for (int i = 0; i < props.length; i++) {
+        cyDelayedVizProps.add(props[i]);
+      }
     }
   }
 
@@ -717,8 +724,8 @@ public class GpmlToPathway {
     }
   };
 
-  final VizPropStore STATE_X_STORE = new BasicVizPropStore(BasicVisualLexicon.NODE_X_LOCATION, STATE_X_EXTRACTER);
-  final VizPropStore STATE_Y_STORE = new BasicVizPropStore(BasicVisualLexicon.NODE_Y_LOCATION, STATE_Y_EXTRACTER);
+  final VizPropStore STATE_X_STORE = new BasicVizPropStore(STATE_X_EXTRACTER, BasicVisualLexicon.NODE_X_LOCATION);
+  final VizPropStore STATE_Y_STORE = new BasicVizPropStore(STATE_Y_EXTRACTER, BasicVisualLexicon.NODE_Y_LOCATION);
 
   private void convertStates() {
     for (final PathwayElement pvElem : pvPathway.getDataObjects()) {
@@ -814,9 +821,9 @@ public class GpmlToPathway {
 
   static final Extracter GROUP_BORDER_THICKNESS_EXTRACTER = new BasicExtracter(GROUP_BORDER_THICKNESS_CONVERTER, StaticProperty.GROUPSTYLE);
 
-  static final VizPropStore GROUP_X = new BasicVizPropStore(BasicVisualLexicon.NODE_X_LOCATION, GROUP_X_EXTRACTER);
-  static final VizPropStore GROUP_Y = new BasicVizPropStore(BasicVisualLexicon.NODE_Y_LOCATION, GROUP_Y_EXTRACTER);
-  static final VizPropStore GROUP_SELECTED_COLOR = new BasicVizPropStore(BasicVisualLexicon.NODE_SELECTED_PAINT, new DefaultExtracter(new Color(255, 255, 204, 127)));
+  static final VizPropStore GROUP_X = new BasicVizPropStore(GROUP_X_EXTRACTER, BasicVisualLexicon.NODE_X_LOCATION);
+  static final VizPropStore GROUP_Y = new BasicVizPropStore(GROUP_Y_EXTRACTER, BasicVisualLexicon.NODE_Y_LOCATION);
+  static final VizPropStore GROUP_SELECTED_COLOR = new BasicVizPropStore(new DefaultExtracter(new Color(255, 255, 204, 127)), BasicVisualLexicon.NODE_SELECTED_PAINT);
   static final VizTableStore GROUP_WIDTH = new OverrideVizTableStore(BasicVizTableStore.NODE_WIDTH, GROUP_W_EXTRACTER);
   static final VizTableStore GROUP_HEIGHT = new OverrideVizTableStore(BasicVizTableStore.NODE_HEIGHT, GROUP_H_EXTRACTER);
   static final VizTableStore GROUP_FILL_COLOR = new OverrideVizTableStore(BasicVizTableStore.NODE_FILL_COLOR, GROUP_FILL_COLOR_EXTRACTER);
@@ -826,7 +833,7 @@ public class GpmlToPathway {
   static final VizTableStore GROUP_TRANSPARENT = new OverrideVizTableStore(BasicVizTableStore.NODE_TRANSPARENT, new DefaultExtracter("true"));
   static final VizTableStore GROUP_SHAPE = new OverrideVizTableStore(BasicVizTableStore.NODE_SHAPE, new DefaultExtracter("Rectangle"));
 
-  static final VizPropStore GROUP_BORDER_THICKNESS_2 = new BasicVizPropStore(BasicVisualLexicon.NODE_BORDER_WIDTH, GROUP_BORDER_THICKNESS_EXTRACTER);
+  static final VizPropStore GROUP_BORDER_THICKNESS_2 = new BasicVizPropStore(GROUP_BORDER_THICKNESS_EXTRACTER, BasicVisualLexicon.NODE_BORDER_WIDTH);
 
   private void convertGroups() {
     for (final PathwayElement pvElem : pvPathway.getDataObjects()) {
