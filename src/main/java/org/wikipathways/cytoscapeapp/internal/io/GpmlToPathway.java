@@ -467,8 +467,8 @@ public class GpmlToPathway {
 
   static Map<String,Integer> PV_TRANSPARENT_MAP = new HashMap<String,Integer>();
   static {
-    PV_TRANSPARENT_MAP.put("true", 25);
-    PV_TRANSPARENT_MAP.put("false", 175);
+    PV_TRANSPARENT_MAP.put("true",  0);
+    PV_TRANSPARENT_MAP.put("false", 255);
   }
 
   static Map<String,ArrowShape> PV_ARROW_MAP = new HashMap<String,ArrowShape>();
@@ -624,6 +624,7 @@ public class GpmlToPathway {
     public static final VizPropStore NODE_LABEL_FONT        = new BasicVizPropStore(BasicExtracter.FONT,                            BasicVisualLexicon.NODE_LABEL_FONT_FACE);
     public static final VizPropStore NODE_LABEL_SIZE        = new BasicVizPropStore(BasicExtracter.FONT_SIZE,                       BasicVisualLexicon.NODE_LABEL_FONT_SIZE);
     public static final VizPropStore NODE_TRANSPARENT       = new BasicVizPropStore(BasicExtracter.TRANSPARENT, PV_TRANSPARENT_MAP, BasicVisualLexicon.NODE_TRANSPARENCY);
+    public static final VizPropStore NODE_ALWAYS_TRANSPARENT = new BasicVizPropStore(new DefaultExtracter(0),                       BasicVisualLexicon.NODE_TRANSPARENCY);
     public static final VizPropStore NODE_BORDER_STYLE      = new BasicVizPropStore(BasicExtracter.LINE_STYLE_NAME, PV_LINE_STYLE_MAP, BasicVisualLexicon.NODE_BORDER_LINE_TYPE);
     public static final VizPropStore NODE_BORDER_THICKNESS  = new BasicVizPropStore(BasicExtracter.NODE_LINE_THICKNESS,             BasicVisualLexicon.NODE_BORDER_WIDTH);
     public static final VizPropStore NODE_SHAPE             = new BasicVizPropStore(BasicExtracter.SHAPE, PV_SHAPE_MAP,             BasicVisualLexicon.NODE_SHAPE);
@@ -742,7 +743,6 @@ public class GpmlToPathway {
     for (final PathwayElement pvElem : pvPathway.getDataObjects()) {
       if (!pvElem.getObjectType().equals(ObjectType.SHAPE))
         continue;
-      //convertDataNode(pvElem);
       convertShape(pvElem);
     }
   }
@@ -763,10 +763,11 @@ public class GpmlToPathway {
       BasicVizPropStore.NODE_COLOR,
       BasicVizPropStore.NODE_LABEL_FONT,
       BasicVizPropStore.NODE_LABEL_SIZE,
-      BasicVizPropStore.NODE_TRANSPARENT,
+      BasicVizPropStore.NODE_ALWAYS_TRANSPARENT,
       BasicVizPropStore.NODE_BORDER_STYLE,
       BasicVizPropStore.NODE_BORDER_THICKNESS,
-      BasicVizPropStore.NODE_SHAPE
+      BasicVizPropStore.NODE_SHAPE,
+      SELECTED_COLOR
     );
   }
 
@@ -810,18 +811,6 @@ public class GpmlToPathway {
 
     store(cyNodeTbl, cyNode, pvState,
       BasicTableStore.TEXT_LABEL
-      /*
-      BasicVizTableStore.NODE_WIDTH,
-      BasicVizTableStore.NODE_HEIGHT,
-      BasicVizTableStore.NODE_FILL_COLOR,
-      BasicVizTableStore.NODE_COLOR,
-      BasicVizTableStore.NODE_LABEL_FONT,
-      BasicVizTableStore.NODE_LABEL_SIZE,
-      BasicVizTableStore.NODE_TRANSPARENT,
-      BasicVizTableStore.NODE_BORDER_STYLE,
-      BasicVizTableStore.NODE_BORDER_THICKNESS,
-      BasicVizTableStore.NODE_SHAPE
-      */
     );
     store(cyNode, pvState,
       STATE_X_STORE,
@@ -897,14 +886,13 @@ public class GpmlToPathway {
 
   static final VizPropStore GROUP_X                 = new BasicVizPropStore(GROUP_X_EXTRACTER,                                    BasicVisualLexicon.NODE_X_LOCATION);
   static final VizPropStore GROUP_Y                 = new BasicVizPropStore(GROUP_Y_EXTRACTER,                                    BasicVisualLexicon.NODE_Y_LOCATION);
-  static final VizPropStore GROUP_SELECTED_COLOR    = new BasicVizPropStore(new DefaultExtracter(new Color(255, 255, 204, 127)),  BasicVisualLexicon.NODE_SELECTED_PAINT);
+  static final VizPropStore SELECTED_COLOR          = new BasicVizPropStore(new DefaultExtracter(new Color(255, 255, 204, 127)),  BasicVisualLexicon.NODE_SELECTED_PAINT);
   static final VizPropStore GROUP_WIDTH             = new BasicVizPropStore(GROUP_W_EXTRACTER,                                    BasicVisualLexicon.NODE_WIDTH);
   static final VizPropStore GROUP_HEIGHT            = new BasicVizPropStore(GROUP_H_EXTRACTER,                                    BasicVisualLexicon.NODE_HEIGHT);
   static final VizPropStore GROUP_FILL_COLOR        = new BasicVizPropStore(GROUP_FILL_COLOR_EXTRACTER,                           BasicVisualLexicon.NODE_FILL_COLOR);
   static final VizPropStore GROUP_COLOR             = new BasicVizPropStore(new DefaultExtracter(new Color(0xaaaaaa)),            BasicVisualLexicon.NODE_LABEL_COLOR, BasicVisualLexicon.NODE_BORDER_PAINT);
   static final VizPropStore GROUP_BORDER_THICKNESS  = new BasicVizPropStore(GROUP_BORDER_THICKNESS_EXTRACTER,                     BasicVisualLexicon.NODE_BORDER_WIDTH);
   static final VizPropStore GROUP_BORDER_STYLE      = new BasicVizPropStore(new DefaultExtracter("Dots"), PV_LINE_STYLE_MAP,      BasicVisualLexicon.NODE_BORDER_LINE_TYPE);
-  static final VizPropStore GROUP_TRANSPARENT       = new BasicVizPropStore(new DefaultExtracter("true"), PV_TRANSPARENT_MAP,     BasicVisualLexicon.NODE_TRANSPARENCY);
   static final VizPropStore GROUP_SHAPE             = new BasicVizPropStore(new DefaultExtracter("Rectangle"), PV_SHAPE_MAP,      BasicVisualLexicon.NODE_SHAPE);
 
   private void convertGroups() {
@@ -922,14 +910,14 @@ public class GpmlToPathway {
     store(cyGroupNode, pvGroup,
       GROUP_X,
       GROUP_Y,
-      GROUP_SELECTED_COLOR,
+      SELECTED_COLOR,
       GROUP_WIDTH,
       GROUP_HEIGHT,
       GROUP_COLOR,
       GROUP_FILL_COLOR,
       GROUP_BORDER_THICKNESS,
       GROUP_BORDER_STYLE,
-      GROUP_TRANSPARENT,
+      BasicVizPropStore.NODE_ALWAYS_TRANSPARENT,
       GROUP_SHAPE 
     );
   }
@@ -969,7 +957,8 @@ public class GpmlToPathway {
       BasicVizPropStore.NODE_SHAPE,
       BasicVizPropStore.NODE_LABEL_FONT,
       BasicVizPropStore.NODE_LABEL_SIZE,
-      BasicVizPropStore.NODE_TRANSPARENT
+      BasicVizPropStore.NODE_TRANSPARENT,
+      SELECTED_COLOR
     );
   }
   
