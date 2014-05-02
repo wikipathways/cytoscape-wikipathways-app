@@ -124,6 +124,7 @@ public class GpmlToPathway {
         BasicTableStore.GRAPH_ID,
         XREF_ID_STORE,
         XREF_DATA_SOURCE_STORE,
+        IS_GPML_SHAPE,
         BasicVizTableStore.NODE_WIDTH,
         BasicVizTableStore.NODE_HEIGHT,
         BasicVizTableStore.NODE_FILL_COLOR,
@@ -738,6 +739,7 @@ public class GpmlToPathway {
      Shapes
    ========================================================
   */
+  static final TableStore IS_GPML_SHAPE = new BasicTableStore("IsGPMLShape", Boolean.class, new DefaultExtracter(true));
 
   private void convertShapes() {
     for (final PathwayElement pvElem : pvPathway.getDataObjects()) {
@@ -752,7 +754,8 @@ public class GpmlToPathway {
     pvToCyNodes.put(pvShape, cyNode);
     store(cyNodeTbl, cyNode, pvShape,
       BasicTableStore.GRAPH_ID,
-      BasicTableStore.TEXT_LABEL
+      BasicTableStore.TEXT_LABEL,
+      IS_GPML_SHAPE
     );
     store(cyNode, pvShape,
       BasicVizPropStore.NODE_X,

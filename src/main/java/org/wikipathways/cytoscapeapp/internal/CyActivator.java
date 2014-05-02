@@ -41,6 +41,7 @@ import org.cytoscape.work.TaskManager;
 import org.cytoscape.work.swing.DialogTaskManager;
 import org.cytoscape.work.ServiceProperties;
 import org.cytoscape.task.NetworkTaskFactory;
+import org.cytoscape.task.NetworkViewTaskFactory;
 import org.wikipathways.cytoscapeapp.WPClient;
 import org.wikipathways.cytoscapeapp.WPClientFactory;
 import org.wikipathways.cytoscapeapp.impl.WPClientRESTFactoryImpl;
@@ -92,5 +93,18 @@ public class CyActivator extends AbstractCyActivator {
 
     final WPCyGUIClient guiClient = new WPCyGUIClient(eventHelper, taskMgr, netFactory, netMgr, netViewFactory, netViewMgr, layoutMgr, annots, gpmlStyle, showLODTF, client);
     registerAllServices(context, guiClient, new Properties());
+
+    final ToggleShapesTaskFactory toggleShapesTF = new ToggleShapesTaskFactory();
+    registerService(context, toggleShapesTF, NetworkViewTaskFactory.class, ezProps(
+      ServiceProperties.TITLE, "Toggle GPML Shapes",
+      ServiceProperties.PREFERRED_MENU, "View"
+      ));
+  }
+
+  private static Properties ezProps(String... vals) {
+    final Properties props = new Properties();
+    for (int i = 0; i < vals.length; i += 2)
+       props.put(vals[i], vals[i + 1]);
+    return props;
   }
 }
