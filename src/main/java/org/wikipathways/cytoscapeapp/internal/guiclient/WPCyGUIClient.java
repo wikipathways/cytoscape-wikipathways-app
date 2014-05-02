@@ -46,6 +46,8 @@ import org.cytoscape.work.TaskObserver;
 import org.cytoscape.work.ObservableTask;
 import org.cytoscape.work.FinishStatus;
 
+import org.cytoscape.task.NetworkTaskFactory;
+
 import org.pathvisio.core.model.Pathway;
 
 import org.wikipathways.cytoscapeapp.ResultTask;
@@ -69,6 +71,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
   final CyLayoutAlgorithmManager layoutMgr;
   final Annots annots;
   final GpmlVizStyle vizStyle;
+  final NetworkTaskFactory showLODTF;
   final WPClient client;
 
   final JTextField searchField = new JTextField();
@@ -91,6 +94,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
       final CyLayoutAlgorithmManager layoutMgr,
       final Annots annots,
       final GpmlVizStyle vizStyle,
+      final NetworkTaskFactory showLODTF,
       final WPClient client) {
     super("http://www.wikipathways.org", "WikiPathways", "WikiPathways");
     this.eventHelper = eventHelper;
@@ -102,6 +106,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
     this.netViewMgr = netViewMgr;
     this.annots = annots;
     this.vizStyle = vizStyle;
+    this.showLODTF = showLODTF;
     this.layoutMgr = layoutMgr;
 
     speciesCheckBox.addItemListener(new ItemListener() {
@@ -274,7 +279,14 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
         CyLayoutAlgorithm layout = layoutMgr.getLayout("force-directed");
         insertTasksAfterCurrentTask(layout.createTaskIterator(view, layout.createLayoutContext(), CyLayoutAlgorithm.ALL_NODE_VIEWS, null));
       }
-      updateNetworkView(view);
+      insertTasksAfterCurrentTask(showLODTF.createTaskIterator(view.getModel()));
+      insertTasksAfterCurrentTask(new AbstractTask() {
+        public void run(TaskMonitor monitor) {
+          updateNetworkView(view);
+        }
+
+        public void cancel() {}
+      });
     }
   }
 

@@ -31,6 +31,7 @@ import org.cytoscape.io.read.AbstractInputStreamTaskFactory;
 import org.cytoscape.io.BasicCyFileFilter;
 import org.cytoscape.io.DataCategory;
 import org.cytoscape.io.util.StreamUtil;
+import org.cytoscape.task.NetworkTaskFactory;
 
 /**
  * 
@@ -47,6 +48,7 @@ public class GpmlReaderTaskFactory extends AbstractInputStreamTaskFactory {
   final CyLayoutAlgorithmManager  layoutMgr;
   final Annots                    annots;
   final GpmlVizStyle              vizStyle;
+  final NetworkTaskFactory        showLODTF;
 
   public GpmlReaderTaskFactory(
       final CyEventHelper             eventHelper,
@@ -57,7 +59,8 @@ public class GpmlReaderTaskFactory extends AbstractInputStreamTaskFactory {
       final CyLayoutAlgorithmManager  layoutMgr,
       final StreamUtil                streamUtil,
       final Annots                    annots,
-      final GpmlVizStyle              vizStyle) {
+      final GpmlVizStyle              vizStyle,
+      final NetworkTaskFactory        showLODTF) {
     super(new BasicCyFileFilter(new String[]{"gpml"}, new String[]{"text/xml"}, "GPML files", DataCategory.NETWORK, streamUtil));
     this.eventHelper = eventHelper;
     this.netFactory = netFactory;
@@ -67,10 +70,11 @@ public class GpmlReaderTaskFactory extends AbstractInputStreamTaskFactory {
     this.layoutMgr = layoutMgr;
     this.annots = annots;
     this.vizStyle = vizStyle;
+    this.showLODTF = showLODTF;
   }
 	
 	
 	public TaskIterator createTaskIterator(InputStream inputStream, String fileName) {
-		return new TaskIterator(new GpmlReaderTask(eventHelper, netFactory, netMgr, netViewFactory, netViewMgr, layoutMgr, annots, vizStyle, inputStream, fileName));
+		return new TaskIterator(new GpmlReaderTask(eventHelper, netFactory, netMgr, netViewFactory, netViewMgr, layoutMgr, annots, vizStyle, showLODTF, inputStream, fileName));
 	}
 }

@@ -34,6 +34,7 @@ import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.Tunable;
 import org.cytoscape.work.util.ListSingleSelection;
+import org.cytoscape.task.NetworkTaskFactory;
 import org.pathvisio.core.model.Pathway;
 
 /**
@@ -54,6 +55,7 @@ public class GpmlReaderTask extends AbstractTask implements CyNetworkReader {
     final CyLayoutAlgorithmManager layoutMgr;
     final Annots annots;
     final GpmlVizStyle vizStyle;
+    final NetworkTaskFactory showLODTF;
 
 	InputStream input = null;
     final String fileName;
@@ -70,6 +72,7 @@ public class GpmlReaderTask extends AbstractTask implements CyNetworkReader {
             final CyLayoutAlgorithmManager layoutMgr,
             final Annots annots,
             final GpmlVizStyle vizStyle,
+            final NetworkTaskFactory showLODTF,
             final InputStream input,
             final String fileName) {
         this.eventHelper = eventHelper;
@@ -80,6 +83,7 @@ public class GpmlReaderTask extends AbstractTask implements CyNetworkReader {
         this.layoutMgr = layoutMgr;
         this.annots = annots;
         this.vizStyle = vizStyle;
+        this.showLODTF = showLODTF;
         this.input = input;
         this.fileName = fileName;
 	}
@@ -104,8 +108,15 @@ public class GpmlReaderTask extends AbstractTask implements CyNetworkReader {
         	CyLayoutAlgorithm layout = layoutMgr.getLayout("force-directed");
         	insertTasksAfterCurrentTask(layout.createTaskIterator(view, layout.createLayoutContext(), CyLayoutAlgorithm.ALL_NODE_VIEWS, null));
         }
-        updateNetworkView(view);
-	}
+        insertTasksAfterCurrentTask(showLODTF.createTaskIterator(view.getModel()));
+        insertTasksAfterCurrentTask(new AbstractTask() {
+            public void run(TaskMonitor monitor) {
+              updateNetworkView(view);
+          }
+
+          public void cancel() {}
+      });
+    }
 
     public void cancel() {
         if (input != null) {
