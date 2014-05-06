@@ -12,6 +12,7 @@ class EasyGBC extends GridBagConstraints {
 	static {
 		anchors.put("north",     NORTH);
 		anchors.put("northwest", NORTHWEST);
+		anchors.put("northeast", NORTHEAST);
 		anchors.put("west",      WEST);
 		anchors.put("south",     SOUTH);
 		anchors.put("east",      EAST);
