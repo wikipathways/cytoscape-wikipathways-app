@@ -127,7 +127,7 @@ public class WPClientRESTImpl implements WPClient {
         final NodeList resultNodes = responseNode.getChildNodes(); 
         final List<WPPathway> result = new ArrayList<WPPathway>();
         for (int i = 0; i < resultNodes.getLength(); i++) {
-          String id = "", revision = "", name = "", species = "";
+          String id = "", revision = "", name = "", species = "", url = "";
           final Node resultNode = resultNodes.item(i);
           final NodeList argNodes = resultNode.getChildNodes();
           for (int j = 0; j < argNodes.getLength(); j++) {
@@ -142,9 +142,11 @@ public class WPClientRESTImpl implements WPClient {
               name = argVal;
             } else if (argName.equals("ns2:species")) {
               species = argVal;
+            } else if (argName.equals("ns2:url")) {
+              url = argVal;
             }
           }
-          result.add(new WPPathway(id, revision, name, species));
+          result.add(new WPPathway(id, revision, name, species, url));
         }
         return result;
       }

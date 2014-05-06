@@ -8,13 +8,15 @@ public final class WPPathway {
   final String revision;
   final String name;
   final String species;
+  final String url;
 
   public WPPathway(final String id, final String revision,
-      final String name, final String species) {
+      final String name, final String species, final String url) {
     this.id = id;
     this.revision = revision;
     this.name = name;
     this.species = species;
+    this.url = url;
   }
 
   public String getId() {
@@ -31,6 +33,10 @@ public final class WPPathway {
 
   public String getSpecies() {
     return species;
+  }
+
+  public String getUrl() {
+    return url;
   }
 
   public String toString() {

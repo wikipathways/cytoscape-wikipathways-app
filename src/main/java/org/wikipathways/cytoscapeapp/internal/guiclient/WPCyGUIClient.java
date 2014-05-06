@@ -258,6 +258,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
             importButton.setEnabled(true);
           }
           tableModel.setPathwayRefs(results);
+          resultsTable.getColumnModel().getColumn(2).setMaxWidth(180);
         }
       }));
     }
@@ -350,7 +351,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
     }
 
     public int getColumnCount() {
-      return 2;
+      return 3;
     }
 
     public Object getValueAt(int row, int col) {
@@ -358,6 +359,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
       switch(col) {
         case 0: return pathwayRef.getName();
         case 1: return pathwayRef.getSpecies();
+        case 2: return pathwayRef.getId();
         default: return null;
       }
     }
@@ -366,6 +368,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
       switch(col) {
         case 0: return "Pathway";
         case 1: return "Species";
+        case 2: return "ID";
         default: return null;
       }
     }
