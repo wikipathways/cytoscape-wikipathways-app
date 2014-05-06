@@ -23,6 +23,13 @@ public interface WPClient {
   ResultTask<List<WPPathway>> newFreeTextSearchTask(final String query, final String species);
 
   /**
+   * Return a task that retrieves pathway info for a given pathway ID.
+   * The result of the task is null if {@code id} is invalid.
+   * @param id Pathway IDs have this regular form: {@code WP\d+}.
+   */
+  ResultTask<WPPathway> newPathwayInfoTask(final String id);
+
+  /**
    * Return a task that provides the {@code Reader} containing the GPML contents of {@code pathway}.
    */
   ResultTask<Reader> newLoadPathwayTask(final WPPathway pathway);

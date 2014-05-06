@@ -118,6 +118,32 @@ public class WPClientRESTImpl implements WPClient {
     };
   }
 
+  private static WPPathway parsePathwayInfo(final Node node) {
+    final NodeList argNodes = node.getChildNodes();
+    String id = "", revision = "", name = "", species = "", url = "";
+    for (int j = 0; j < argNodes.getLength(); j++) {
+      final Node argNode = argNodes.item(j);
+      final String argName = argNode.getNodeName();
+      final String argVal = argNode.getTextContent();
+      if (argName.equals("ns2:id")) {
+        id = argVal;
+      } else if (argName.equals("ns2:revision")) {
+        revision = argVal;
+      } else if (argName.equals("ns2:name")) {
+        name = argVal;
+      } else if (argName.equals("ns2:species")) {
+        species = argVal;
+      } else if (argName.equals("ns2:url")) {
+        url = argVal;
+      }
+    }
+    if ("".equals(name)) {
+      return null;
+    } else {
+      return new WPPathway(id, revision, name, species, url);
+    }
+  }
+
   public ResultTask<List<WPPathway>> newFreeTextSearchTask(final String query, final String species) {
     return new ReqTask<List<WPPathway>>() {
       protected List<WPPathway> checkedRun(final TaskMonitor monitor) throws Exception {
@@ -129,26 +155,24 @@ public class WPClientRESTImpl implements WPClient {
         for (int i = 0; i < resultNodes.getLength(); i++) {
           String id = "", revision = "", name = "", species = "", url = "";
           final Node resultNode = resultNodes.item(i);
-          final NodeList argNodes = resultNode.getChildNodes();
-          for (int j = 0; j < argNodes.getLength(); j++) {
-            final Node argNode = argNodes.item(j);
-            final String argName = argNode.getNodeName();
-            final String argVal = argNode.getTextContent();
-            if (argName.equals("ns2:id")) {
-              id = argVal;
-            } else if (argName.equals("ns2:revision")) {
-              revision = argVal;
-            } else if (argName.equals("ns2:name")) {
-              name = argVal;
-            } else if (argName.equals("ns2:species")) {
-              species = argVal;
-            } else if (argName.equals("ns2:url")) {
-              url = argVal;
-            }
+          final WPPathway pathway = parsePathwayInfo(resultNode);
+          if (pathway != null) {
+            result.add(pathway);
           }
-          result.add(new WPPathway(id, revision, name, species, url));
         }
         return result;
+      }
+    };
+  }
+
+  public ResultTask<WPPathway> newPathwayInfoTask(final String id) {
+    return new ReqTask<WPPathway>() {
+      protected WPPathway checkedRun(final TaskMonitor monitor) throws Exception {
+        monitor.setTitle("Retrieve info for \'" + id + "\'");
+        final Document doc = xmlGet(BASE_URL + "getPathwayInfo", "pwId", id);
+        final Node responseNode = doc.getFirstChild();
+        final Node resultNode = responseNode.getFirstChild(); 
+        return parsePathwayInfo(resultNode);
       }
     };
   }

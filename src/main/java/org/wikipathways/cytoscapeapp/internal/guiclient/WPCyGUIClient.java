@@ -18,8 +18,12 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+
 import java.io.Reader;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import javax.swing.ButtonGroup;
 import javax.swing.Box;
@@ -78,6 +82,8 @@ import org.wikipathways.cytoscapeapp.internal.io.GpmlToPathway;
 import org.wikipathways.cytoscapeapp.internal.io.GpmlVizStyle;
 
 public class WPCyGUIClient extends AbstractWebServiceGUIClient implements NetworkImportWebServiceClient, SearchWebServiceClient {
+  static final Pattern WP_ID_REGEX = Pattern.compile("WP\\d+");
+
   final String PATHWAY_IMG = getClass().getResource("/pathway.png").toString();
   final String NETWORK_IMG = getClass().getResource("/network.png").toString();
 
@@ -244,24 +250,55 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
   class SearchForPathways implements ActionListener {
     public void actionPerformed(ActionEvent e) {
       final String query = searchField.getText();
-      final String species = speciesCheckBox.isSelected() ? speciesComboBox.getSelectedItem().toString() : null;
-      final ResultTask<List<WPPathway>> searchTask = client.newFreeTextSearchTask(query, species);
-      taskMgr.execute(new TaskIterator(searchTask, new AbstractTask() {
-        public void run(final TaskMonitor monitor) {
-          final List<WPPathway> results = searchTask.get();
-          if (results.isEmpty()) {
-            noResultsLabel.setText(String.format("<html><b>No results for \'%s\'.</b></html>", query));
-            noResultsLabel.setVisible(true);
-            importButton.setEnabled(false);
-          } else {
-            noResultsLabel.setVisible(false);
-            importButton.setEnabled(true);
-          }
-          tableModel.setPathwayRefs(results);
-          resultsTable.getColumnModel().getColumn(2).setMaxWidth(180);
-        }
-      }));
+      if (WP_ID_REGEX.matcher(query).matches()) {
+        getPathwayFromId(query);
+      } else {
+        final String species = speciesCheckBox.isSelected() ? speciesComboBox.getSelectedItem().toString() : null;
+        performSearch(query, species);
+      }
     }
+  }
+
+  void setPathwaysInResultsTable(final List<WPPathway> pathways) {
+    tableModel.setPathwayRefs(pathways);
+    resultsTable.getColumnModel().getColumn(2).setMaxWidth(180);
+  }
+
+  void performSearch(final String query, final String species) {
+    final ResultTask<List<WPPathway>> searchTask = client.newFreeTextSearchTask(query, species);
+    taskMgr.execute(new TaskIterator(searchTask, new AbstractTask() {
+      public void run(final TaskMonitor monitor) {
+        final List<WPPathway> results = searchTask.get();
+        if (results.isEmpty()) {
+          noResultsLabel.setText(String.format("<html><b>No results for \'%s\'.</b></html>", query));
+          noResultsLabel.setVisible(true);
+          importButton.setEnabled(false);
+        } else {
+          noResultsLabel.setVisible(false);
+          importButton.setEnabled(true);
+        }
+        setPathwaysInResultsTable(results);
+      }
+    }));
+  }
+
+  void getPathwayFromId(final String id) {
+    final ResultTask<WPPathway> infoTask = client.newPathwayInfoTask(id);
+    taskMgr.execute(new TaskIterator(infoTask, new AbstractTask() {
+      public void run(final TaskMonitor monitor) {
+        final WPPathway pathway = infoTask.get();
+        if (pathway == null) {
+          noResultsLabel.setText(String.format("<html><b>No such pathway \'%s\'.</b></html>", id));
+          noResultsLabel.setVisible(true);
+          importButton.setEnabled(false);
+          setPathwaysInResultsTable(null);
+        } else {
+          noResultsLabel.setVisible(false);
+          importButton.setEnabled(true);
+          setPathwaysInResultsTable(Arrays.asList(pathway));
+        }
+      }
+    }));
   }
 
   void loadSelectedPathway() {
