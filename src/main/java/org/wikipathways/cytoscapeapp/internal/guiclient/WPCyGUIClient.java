@@ -326,7 +326,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
 
   void loadSelectedPathway() {
     final WPPathway pathway = tableModel.getSelectedPathwayRef();
-    final ResultTask<Reader> loadPathwayTask = client.newLoadPathwayTask(pathway);
+    final ResultTask<Reader> loadPathwayTask = client.newGPMLContentsTask(pathway);
     final LoadPathwayFromStreamTask fromStreamTask = new LoadPathwayFromStreamTask(loadPathwayTask);
     final TaskIterator taskIterator = new TaskIterator(loadPathwayTask, fromStreamTask);
     taskMgr.execute(taskIterator);

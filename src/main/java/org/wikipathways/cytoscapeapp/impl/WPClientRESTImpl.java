@@ -187,7 +187,7 @@ public class WPClientRESTImpl implements WPClient {
     return null;
   }
 
-  public ResultTask<Reader> newLoadPathwayTask(final WPPathway pathway) {
+  public ResultTask<Reader> newGPMLContentsTask(final WPPathway pathway) {
     return new ReqTask<Reader>() {
       protected Reader checkedRun(final TaskMonitor monitor) throws Exception {
         monitor.setTitle("Get \'" + pathway.getName() + "\' from WikiPathways");

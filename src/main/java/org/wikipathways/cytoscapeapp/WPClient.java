@@ -32,5 +32,5 @@ public interface WPClient {
   /**
    * Return a task that provides the {@code Reader} containing the GPML contents of {@code pathway}.
    */
-  ResultTask<Reader> newLoadPathwayTask(final WPPathway pathway);
+  ResultTask<Reader> newGPMLContentsTask(final WPPathway pathway);
 }
