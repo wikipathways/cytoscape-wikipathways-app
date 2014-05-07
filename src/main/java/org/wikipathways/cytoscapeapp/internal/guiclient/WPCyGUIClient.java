@@ -149,6 +149,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
 
     speciesCheckBox.setSelected(false);
     speciesCheckBox.setVisible(false);
+    speciesComboBox.setEnabled(false);
     speciesComboBox.setVisible(false);
 
     final JPanel searchPanel = newSearchPanel();
