@@ -42,6 +42,8 @@ import org.cytoscape.work.swing.DialogTaskManager;
 import org.cytoscape.work.ServiceProperties;
 import org.cytoscape.task.NetworkTaskFactory;
 import org.cytoscape.task.NetworkViewTaskFactory;
+import org.cytoscape.util.swing.OpenBrowser;
+
 import org.wikipathways.cytoscapeapp.WPClient;
 import org.wikipathways.cytoscapeapp.WPClientFactory;
 import org.wikipathways.cytoscapeapp.impl.WPClientRESTFactoryImpl;
@@ -69,6 +71,7 @@ public class CyActivator extends AbstractCyActivator {
     final TaskManager taskMgr = getService(context, DialogTaskManager.class);
     final CyLayoutAlgorithmManager layoutMgr = getService(context, CyLayoutAlgorithmManager.class);
     final NetworkTaskFactory showLODTF = getService(context, NetworkTaskFactory.class, String.format("(%s=Show\\/Hide Graphics Details)", ServiceProperties.TITLE));
+    final OpenBrowser openBrowser = getService(context, OpenBrowser.class);
 
     final GpmlVizStyle gpmlStyle = new GpmlVizStyle(
               getService(context, VisualStyleFactory.class),
@@ -91,7 +94,7 @@ public class CyActivator extends AbstractCyActivator {
     final GpmlReaderTaskFactory gpmlReaderTaskFactory = new GpmlReaderTaskFactory(eventHelper, netFactory, netMgr, netViewFactory, netViewMgr, layoutMgr, streamUtil, annots, gpmlStyle, showLODTF);
     registerService(context, gpmlReaderTaskFactory, InputStreamTaskFactory.class, new Properties());
 
-    final WPCyGUIClient guiClient = new WPCyGUIClient(eventHelper, taskMgr, netFactory, netMgr, netViewFactory, netViewMgr, layoutMgr, annots, gpmlStyle, showLODTF, client);
+    final WPCyGUIClient guiClient = new WPCyGUIClient(eventHelper, taskMgr, netFactory, netMgr, netViewFactory, netViewMgr, layoutMgr, annots, gpmlStyle, showLODTF, client, openBrowser);
     registerAllServices(context, guiClient, new Properties());
 
     final ToggleShapesTaskFactory toggleShapesTF = new ToggleShapesTaskFactory();

@@ -3,6 +3,7 @@ package org.wikipathways.cytoscapeapp.internal.guiclient;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.GridBagLayout;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -69,6 +70,8 @@ import org.cytoscape.work.TaskObserver;
 import org.cytoscape.work.ObservableTask;
 import org.cytoscape.work.FinishStatus;
 
+import org.cytoscape.util.swing.OpenBrowser;
+
 import org.cytoscape.task.NetworkTaskFactory;
 
 import org.pathvisio.core.model.Pathway;
@@ -98,6 +101,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
   final GpmlVizStyle vizStyle;
   final NetworkTaskFactory showLODTF;
   final WPClient client;
+  final OpenBrowser openBrowser;
 
   final JTextField searchField = new JTextField();
   final JCheckBox speciesCheckBox = new JCheckBox("Only: ");
@@ -106,6 +110,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
   final JTable resultsTable = new JTable(tableModel);
   final JLabel noResultsLabel = new JLabel();
   final SplitButton importButton = new SplitButton("Import");
+  final JButton openUrlButton = new JButton("Open in Web Browser");
   final CheckMarkMenuItem pathwayMenuItem = new CheckMarkMenuItem("Pathway", PATHWAY_IMG, true);
   final CheckMarkMenuItem networkMenuItem = new CheckMarkMenuItem("Network", NETWORK_IMG);
 
@@ -120,7 +125,8 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
       final Annots annots,
       final GpmlVizStyle vizStyle,
       final NetworkTaskFactory showLODTF,
-      final WPClient client) {
+      final WPClient client,
+      final OpenBrowser openBrowser) {
     super("http://www.wikipathways.org", "WikiPathways", "WikiPathways");
     this.eventHelper = eventHelper;
     this.taskMgr = taskMgr;
@@ -133,6 +139,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
     this.vizStyle = vizStyle;
     this.showLODTF = showLODTF;
     this.layoutMgr = layoutMgr;
+    this.openBrowser = openBrowser;
 
     speciesCheckBox.addItemListener(new ItemListener() {
       public void itemStateChanged(ItemEvent e) {
@@ -201,10 +208,22 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
     });
     importButton.setEnabled(false);
 
+    openUrlButton.setEnabled(false);
+    openUrlButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        final WPPathway pathway = tableModel.getSelectedPathwayRef();
+        openBrowser.openURL(pathway.getUrl());
+      }
+    });
+
+    final JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+    buttonsPanel.add(openUrlButton);
+    buttonsPanel.add(importButton);
+
     final JPanel resultsPanel = new JPanel(new GridBagLayout());
     resultsPanel.add(noResultsLabel, c.reset().expandHoriz());
     resultsPanel.add(new JScrollPane(resultsTable), c.down().expandBoth());
-    resultsPanel.add(importButton, c.anchor("northeast").noExpand().down());
+    resultsPanel.add(buttonsPanel, c.anchor("northeast").noExpand().down());
     return resultsPanel;
   }
 
@@ -262,6 +281,14 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
   void setPathwaysInResultsTable(final List<WPPathway> pathways) {
     tableModel.setPathwayRefs(pathways);
     resultsTable.getColumnModel().getColumn(2).setMaxWidth(180);
+    if (pathways == null || pathways.size() == 0) {
+      importButton.setEnabled(false);
+      openUrlButton.setEnabled(false);
+    } else {
+      importButton.setEnabled(true);
+      openUrlButton.setEnabled(true);
+      resultsTable.setRowSelectionInterval(0, 0);
+    }
   }
 
   void performSearch(final String query, final String species) {
@@ -272,10 +299,8 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
         if (results.isEmpty()) {
           noResultsLabel.setText(String.format("<html><b>No results for \'%s\'.</b></html>", query));
           noResultsLabel.setVisible(true);
-          importButton.setEnabled(false);
         } else {
           noResultsLabel.setVisible(false);
-          importButton.setEnabled(true);
         }
         setPathwaysInResultsTable(results);
       }
@@ -290,11 +315,9 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
         if (pathway == null) {
           noResultsLabel.setText(String.format("<html><b>No such pathway \'%s\'.</b></html>", id));
           noResultsLabel.setVisible(true);
-          importButton.setEnabled(false);
           setPathwaysInResultsTable(null);
         } else {
           noResultsLabel.setVisible(false);
-          importButton.setEnabled(true);
           setPathwaysInResultsTable(Arrays.asList(pathway));
         }
       }
