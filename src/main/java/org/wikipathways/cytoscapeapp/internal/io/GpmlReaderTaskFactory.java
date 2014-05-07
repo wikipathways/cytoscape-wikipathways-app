@@ -24,6 +24,7 @@ import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.work.TaskIterator;
 import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.model.CyNetworkFactory;
+import org.cytoscape.session.CyNetworkNaming;
 import org.cytoscape.view.model.CyNetworkViewManager;
 import org.cytoscape.view.model.CyNetworkViewFactory;
 import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
@@ -49,6 +50,7 @@ public class GpmlReaderTaskFactory extends AbstractInputStreamTaskFactory {
   final Annots                    annots;
   final GpmlVizStyle              vizStyle;
   final NetworkTaskFactory        showLODTF;
+  final CyNetworkNaming           netNaming;
 
   public GpmlReaderTaskFactory(
       final CyEventHelper             eventHelper,
@@ -60,7 +62,8 @@ public class GpmlReaderTaskFactory extends AbstractInputStreamTaskFactory {
       final StreamUtil                streamUtil,
       final Annots                    annots,
       final GpmlVizStyle              vizStyle,
-      final NetworkTaskFactory        showLODTF) {
+      final NetworkTaskFactory        showLODTF,
+      final CyNetworkNaming           netNaming) {
     super(new BasicCyFileFilter(new String[]{"gpml"}, new String[]{"text/xml"}, "GPML files", DataCategory.NETWORK, streamUtil));
     this.eventHelper = eventHelper;
     this.netFactory = netFactory;
@@ -71,10 +74,23 @@ public class GpmlReaderTaskFactory extends AbstractInputStreamTaskFactory {
     this.annots = annots;
     this.vizStyle = vizStyle;
     this.showLODTF = showLODTF;
+    this.netNaming = netNaming;
   }
 	
 	
 	public TaskIterator createTaskIterator(InputStream inputStream, String fileName) {
-		return new TaskIterator(new GpmlReaderTask(eventHelper, netFactory, netMgr, netViewFactory, netViewMgr, layoutMgr, annots, vizStyle, showLODTF, inputStream, fileName));
+		return new TaskIterator(new GpmlReaderTask(
+      eventHelper,
+      netFactory,
+      netMgr,
+      netViewFactory,
+      netViewMgr,
+      layoutMgr,
+      annots,
+      vizStyle,
+      showLODTF,
+      netNaming,
+      inputStream,
+      fileName));
 	}
 }

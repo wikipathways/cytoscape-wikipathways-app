@@ -25,6 +25,7 @@ import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.model.CyNetworkFactory;
+import org.cytoscape.session.CyNetworkNaming;
 import org.cytoscape.view.layout.CyLayoutAlgorithm;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.CyNetworkViewManager;
@@ -56,6 +57,7 @@ public class GpmlReaderTask extends AbstractTask implements CyNetworkReader {
     final Annots annots;
     final GpmlVizStyle vizStyle;
     final NetworkTaskFactory showLODTF;
+    final CyNetworkNaming netNaming;
 
 	InputStream input = null;
     final String fileName;
@@ -73,6 +75,7 @@ public class GpmlReaderTask extends AbstractTask implements CyNetworkReader {
             final Annots annots,
             final GpmlVizStyle vizStyle,
             final NetworkTaskFactory showLODTF,
+            final CyNetworkNaming netNaming,
             final InputStream input,
             final String fileName) {
         this.eventHelper = eventHelper;
@@ -84,6 +87,7 @@ public class GpmlReaderTask extends AbstractTask implements CyNetworkReader {
         this.annots = annots;
         this.vizStyle = vizStyle;
         this.showLODTF = showLODTF;
+        this.netNaming = netNaming;
         this.input = input;
         this.fileName = fileName;
 	}
@@ -136,7 +140,7 @@ public class GpmlReaderTask extends AbstractTask implements CyNetworkReader {
 
     private CyNetworkView newNetwork(final String name) {
         final CyNetwork net = netFactory.createNetwork();
-        net.getRow(net).set(CyNetwork.NAME, name);
+        net.getRow(net).set(CyNetwork.NAME, netNaming.getSuggestedNetworkTitle(name));
         netMgr.addNetwork(net);
         final CyNetworkView view = netViewFactory.createNetworkView(net);
         netViewMgr.addNetworkView(view);

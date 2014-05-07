@@ -56,6 +56,7 @@ import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.model.CyNetworkFactory;
+import org.cytoscape.session.CyNetworkNaming;
 import org.cytoscape.view.model.CyNetworkViewManager;
 import org.cytoscape.view.model.CyNetworkViewFactory;
 import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
@@ -102,6 +103,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
   final NetworkTaskFactory showLODTF;
   final WPClient client;
   final OpenBrowser openBrowser;
+  final CyNetworkNaming netNaming;
 
   final JTextField searchField = new JTextField();
   final JCheckBox speciesCheckBox = new JCheckBox("Only: ");
@@ -126,7 +128,8 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
       final GpmlVizStyle vizStyle,
       final NetworkTaskFactory showLODTF,
       final WPClient client,
-      final OpenBrowser openBrowser) {
+      final OpenBrowser openBrowser,
+      final CyNetworkNaming netNaming) {
     super("http://www.wikipathways.org", "WikiPathways", "WikiPathways");
     this.eventHelper = eventHelper;
     this.taskMgr = taskMgr;
@@ -140,6 +143,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
     this.showLODTF = showLODTF;
     this.layoutMgr = layoutMgr;
     this.openBrowser = openBrowser;
+    this.netNaming = netNaming;
 
     speciesCheckBox.addItemListener(new ItemListener() {
       public void itemStateChanged(ItemEvent e) {
@@ -386,7 +390,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
 
   private CyNetworkView newNetwork(final String name) {
     final CyNetwork net = netFactory.createNetwork();
-    net.getRow(net).set(CyNetwork.NAME, name);
+    net.getRow(net).set(CyNetwork.NAME, netNaming.getSuggestedNetworkTitle(name));
     netMgr.addNetwork(net);
     final CyNetworkView view = netViewFactory.createNetworkView(net);
     netViewMgr.addNetworkView(view);
