@@ -111,7 +111,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
   final PathwayRefsTableModel tableModel = new PathwayRefsTableModel();
   final JTable resultsTable = new JTable(tableModel);
   final JLabel noResultsLabel = new JLabel();
-  final SplitButton importButton = new SplitButton("Import");
+  final SplitButton importButton = new SplitButton("Import as Pathway");
   final JButton openUrlButton = new JButton("Open in Web Browser");
   final CheckMarkMenuItem pathwayMenuItem = new CheckMarkMenuItem("Pathway", PATHWAY_IMG, true);
   final CheckMarkMenuItem networkMenuItem = new CheckMarkMenuItem("Network", NETWORK_IMG);
@@ -190,6 +190,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
       public void actionPerformed(ActionEvent e) {
         pathwayMenuItem.setSelected(true);
         networkMenuItem.setSelected(false);
+        importButton.setLabel("Import as Pathway");
       }
     });
 
@@ -197,6 +198,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
       public void actionPerformed(ActionEvent e) {
         pathwayMenuItem.setSelected(false);
         networkMenuItem.setSelected(true);
+        importButton.setLabel("Import as Network");
       }
     });
 
@@ -483,11 +485,12 @@ class SearchPanelBorder extends AbstractBorder {
 
 class SplitButton extends JButton {
   static final int GAP = 5;
+  final JLabel mainText;
   volatile boolean actionListenersEnabled = true;
   JPopupMenu menu = null;
 
   public SplitButton(final String text) {
-    final JLabel mainText = new JLabel(text);
+    mainText = new JLabel(text);
     final JLabel menuIcon = new JLabel("\u25be");
     super.setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
     super.add(mainText);
@@ -512,6 +515,10 @@ class SplitButton extends JButton {
         }
       }
     });
+  }
+
+  public void setLabel(final String label) {
+    mainText.setText(label);
   }
 
   protected void fireActionPerformed(final ActionEvent e) {
