@@ -28,7 +28,7 @@ import org.pathvisio.core.model.PathwayElement.MAnchor;
 import org.pathvisio.core.model.ShapeType;
 import org.pathvisio.core.model.StaticProperty;
 
-public class GpmlToNetwork {
+public class GpmlToNetwork implements Converter {
 	/**
 	 * Maps a GPML pathway element to its representative CyNode in the network.
 	 */
@@ -56,7 +56,6 @@ public class GpmlToNetwork {
 
   final CyEventHelper eventHelper;
 	final Pathway pathway;
-	final CyNetworkView networkView;
 	final CyNetwork network;
 	
 	private List<PathwayElement> edges;
@@ -67,11 +66,10 @@ public class GpmlToNetwork {
 	 * network. Constructing this object will not start the conversion and will
 	 * not modify the given network in any way.
 	 */
-	public GpmlToNetwork(final CyEventHelper eventHelper, final Pathway pathway, final CyNetworkView networkView) {
+	public GpmlToNetwork(final CyEventHelper eventHelper, final Pathway pathway, final CyNetwork network) {
 		this.eventHelper = eventHelper;
 		this.pathway = pathway;
-		this.networkView = networkView;
-		this.network = networkView.getModel();
+		this.network = network;
 	}
 	
 	private Boolean unconnectedLines = false;
@@ -79,7 +77,7 @@ public class GpmlToNetwork {
 	/**
 	 * Convert the pathway given in the constructor.
 	 */
-	public Boolean convert() {
+	public ViewBuilder convert() {
 		network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS).createColumn("GraphID", String.class, false);
 		network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS).createColumn("GeneID", String.class, false);
 		network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS).createColumn("Datasource", String.class, false);
@@ -101,16 +99,17 @@ public class GpmlToNetwork {
 		System.out.println("convert lines");
 		convertLines();
 
-		eventHelper.flushPayloadEvents(); // guarantee that all node
-														// and edge views have
-														// been created
-		DelayedVizProp.applyAll(networkView, delayedVizProps); // apply our
-																// visual style
 
 		// clear our data structures just to be nice to the GC
 		nodes.clear();
-		delayedVizProps.clear();
-		return unconnectedLines;
+
+		return new ViewBuilder() {
+			public void build(final CyNetworkView cyNetView) {
+				eventHelper.flushPayloadEvents(); // guarantee that all node and edge views have been created
+				DelayedVizProp.applyAll(cyNetView, delayedVizProps); // apply our visual style
+				delayedVizProps.clear();
+			}
+		};
 	}
 
 	/**

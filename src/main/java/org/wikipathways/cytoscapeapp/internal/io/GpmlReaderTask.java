@@ -58,9 +58,13 @@ public class GpmlReaderTask extends AbstractTask implements CyNetworkReader {
     final GpmlVizStyle vizStyle;
     final NetworkTaskFactory showLODTF;
     final CyNetworkNaming netNaming;
+    final ConverterFactory          gpmlToPathwayFactory;
+    final ConverterFactory          gpmlToNetworkFactory;
 
 	InputStream input = null;
     final String fileName;
+    CyNetwork network;
+    ViewBuilder viewBuilder;
 
     @Tunable(description="Import as:", groups={"WikiPathways"})
     public ListSingleSelection<String> importMethod = new ListSingleSelection<String>(PATHWAY_DESC, NETWORK_DESC);
@@ -76,6 +80,8 @@ public class GpmlReaderTask extends AbstractTask implements CyNetworkReader {
             final GpmlVizStyle vizStyle,
             final NetworkTaskFactory showLODTF,
             final CyNetworkNaming netNaming,
+            final ConverterFactory gpmlToPathwayFactory,
+            final ConverterFactory gpmlToNetworkFactory,
             final InputStream input,
             final String fileName) {
         this.eventHelper = eventHelper;
@@ -88,6 +94,8 @@ public class GpmlReaderTask extends AbstractTask implements CyNetworkReader {
         this.vizStyle = vizStyle;
         this.showLODTF = showLODTF;
         this.netNaming = netNaming;
+        this.gpmlToPathwayFactory = gpmlToPathwayFactory;
+        this.gpmlToNetworkFactory = gpmlToNetworkFactory;
         this.input = input;
         this.fileName = fileName;
 	}
@@ -104,8 +112,10 @@ public class GpmlReaderTask extends AbstractTask implements CyNetworkReader {
      
         monitor.setStatusMessage("Constructing network");
         final String name = pathway.getMappInfo().getMapInfoName();
-        final CyNetworkView view = newNetwork(name);
-        if(importMethod.getSelectedValue().equals(PATHWAY_DESC)) {
+        network = newNetwork(name);
+        final ConverterFactory converterFactory = importMethod.getSelectedValue().equals(PATHWAY_DESC) ? gpmlToPathwayFactory : gpmlToNetworkFactory;
+        viewBuilder = converterFactory.create(pathway, network).convert();
+        if() {
         	(new GpmlToPathway(eventHelper, annots, pathway, view)).convert();
         } else {
         	(new GpmlToNetwork(eventHelper, pathway, view)).convert();
@@ -138,10 +148,14 @@ public class GpmlReaderTask extends AbstractTask implements CyNetworkReader {
         return new CyNetwork[0];
     }
 
-    private CyNetworkView newNetwork(final String name) {
+    private CyNetwork newNetwork(final String name) {
         final CyNetwork net = netFactory.createNetwork();
         net.getRow(net).set(CyNetwork.NAME, netNaming.getSuggestedNetworkTitle(name));
         netMgr.addNetwork(net);
+        return net;
+    }
+
+    private CyNetworkView newNetworkView(final CyNetwork net) {
         final CyNetworkView view = netViewFactory.createNetworkView(net);
         netViewMgr.addNetworkView(view);
         return view;

@@ -45,7 +45,7 @@ import org.cytoscape.view.presentation.property.values.LineType;
  * Cytoscape network view, and it tries to reproduce
  * the pathway's visual representation.
  */
-public class GpmlToPathway {
+public class GpmlToPathway implements Converter {
   /*
     NOMENCLATURE:
     In order to help distinguish PathVisio data structures from
@@ -63,7 +63,6 @@ public class GpmlToPathway {
   final CyEventHelper     cyEventHelper;
   final Annots            cyAnnots;
 	final Pathway           pvPathway;
-  final CyNetworkView     cyNetView;
 	final CyNetwork         cyNet;
   final CyTable           cyNodeTbl;
   final CyTable           cyEdgeTbl;
@@ -82,12 +81,11 @@ public class GpmlToPathway {
       final CyEventHelper     cyEventHelper,
       final Annots            cyAnnots,
       final Pathway           pvPathway,
-      final CyNetworkView     cyNetView) {
+      final CyNetwork         cyNet) {
     this.cyEventHelper = cyEventHelper;
     this.cyAnnots = cyAnnots;
 		this.pvPathway = pvPathway;
-    this.cyNetView = cyNetView;
-		this.cyNet = cyNetView.getModel();
+		this.cyNet = cyNet;
     this.cyNodeTbl = cyNet.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS);
     this.cyEdgeTbl = cyNet.getTable(CyEdge.class, CyNetwork.DEFAULT_ATTRS);
 	}
@@ -95,7 +93,7 @@ public class GpmlToPathway {
   /**
    * Convert the pathway given in the constructor.
    */
-	public void convert() {
+	public ViewBuilder convert() {
     setupCyTables();
 
     // convert by each pathway element type
@@ -107,12 +105,16 @@ public class GpmlToPathway {
     convertAnchors();
     convertLines();
 
-    cyEventHelper.flushPayloadEvents(); // guarantee that all node and edge views have been created
-    DelayedVizProp.applyAll(cyNetView, cyDelayedVizProps); // apply our visual style
-
     // clear our data structures just to be nice to the GC
     pvToCyNodes.clear();
-    cyDelayedVizProps.clear();
+
+    return new ViewBuilder() {
+      public void build(final CyNetworkView cyNetView) {
+        cyEventHelper.flushPayloadEvents(); // guarantee that all node and edge views have been created
+        DelayedVizProp.applyAll(cyNetView, cyDelayedVizProps); // apply our visual style
+        cyDelayedVizProps.clear();
+      }
+    };
 	}
 
   /**

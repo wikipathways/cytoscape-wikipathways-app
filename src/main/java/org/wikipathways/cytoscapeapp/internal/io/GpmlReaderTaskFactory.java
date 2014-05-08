@@ -51,6 +51,8 @@ public class GpmlReaderTaskFactory extends AbstractInputStreamTaskFactory {
   final GpmlVizStyle              vizStyle;
   final NetworkTaskFactory        showLODTF;
   final CyNetworkNaming           netNaming;
+  final ConverterFactory          gpmlToPathwayFactory;
+  final ConverterFactory          gpmlToNetworkFactory;
 
   public GpmlReaderTaskFactory(
       final CyEventHelper             eventHelper,
@@ -63,7 +65,9 @@ public class GpmlReaderTaskFactory extends AbstractInputStreamTaskFactory {
       final Annots                    annots,
       final GpmlVizStyle              vizStyle,
       final NetworkTaskFactory        showLODTF,
-      final CyNetworkNaming           netNaming) {
+      final CyNetworkNaming           netNaming,
+      final ConverterFactory          gpmlToPathwayFactory,
+      final ConverterFactory          gpmlToNetworkFactory) {
     super(new BasicCyFileFilter(new String[]{"gpml"}, new String[]{"text/xml"}, "GPML files", DataCategory.NETWORK, streamUtil));
     this.eventHelper = eventHelper;
     this.netFactory = netFactory;
@@ -75,6 +79,8 @@ public class GpmlReaderTaskFactory extends AbstractInputStreamTaskFactory {
     this.vizStyle = vizStyle;
     this.showLODTF = showLODTF;
     this.netNaming = netNaming;
+    this.gpmlToPathwayFactory = gpmlToPathwayFactory;
+    this.gpmlToNetworkFactory = gpmlToNetworkFactory;
   }
 	
 	
@@ -90,6 +96,8 @@ public class GpmlReaderTaskFactory extends AbstractInputStreamTaskFactory {
       vizStyle,
       showLODTF,
       netNaming,
+      gpmlToPathwayFactory,
+      gpmlToNetworkFactory,
       inputStream,
       fileName));
 	}
