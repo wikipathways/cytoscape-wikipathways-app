@@ -230,7 +230,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
     final JPanel resultsPanel = new JPanel(new GridBagLayout());
     resultsPanel.add(noResultsLabel, c.reset().expandHoriz());
     resultsPanel.add(new JScrollPane(resultsTable), c.down().expandBoth());
-    resultsPanel.add(buttonsPanel, c.anchor("northeast").noExpand().down());
+    resultsPanel.add(buttonsPanel, c.anchor("northeast").expandHoriz().down());
     return resultsPanel;
   }
 
