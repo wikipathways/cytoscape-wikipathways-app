@@ -120,6 +120,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
   final CyNetworkNaming netNaming;
 
   final JTextField searchField = new JTextField();
+  final JButton searchButton = new JButton(new ImageIcon(getClass().getResource("/search-icon.png")));
   final JCheckBox speciesCheckBox = new JCheckBox("Only: ");
   final JComboBox speciesComboBox = new JComboBox();
   final PathwayRefsTableModel tableModel = new PathwayRefsTableModel();
@@ -251,7 +252,6 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
   private JPanel newSearchPanel() {
     final ActionListener performSearch = new SearchForPathways();
 
-    final JButton searchButton = new JButton(new ImageIcon(getClass().getResource("/search-icon.png")));
     searchButton.setBorder(BorderFactory.createEmptyBorder());
     searchButton.setContentAreaFilled(false);
     searchButton.addActionListener(performSearch);
@@ -313,6 +313,9 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
   }
 
   void performSearch(final String query, final String species) {
+    searchField.setEnabled(false);
+    searchButton.setEnabled(false);
+
     final ResultTask<List<WPPathway>> searchTask = client.newFreeTextSearchTask(query, species);
     taskMgr.execute(new TaskIterator(searchTask, new AbstractTask() {
       public void run(final TaskMonitor monitor) {
@@ -325,7 +328,13 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
         }
         setPathwaysInResultsTable(results);
       }
-    }));
+    }), new TaskObserver() {
+      public void taskFinished(ObservableTask t) {}
+      public void allFinished(FinishStatus status) {
+        searchField.setEnabled(true);
+        searchButton.setEnabled(true);
+      }
+    });
   }
 
   void getPathwayFromId(final String id) {
@@ -342,7 +351,13 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
           setPathwaysInResultsTable(Arrays.asList(pathway));
         }
       }
-    }));
+    }), new TaskObserver() {
+      public void taskFinished(ObservableTask t) {}
+      public void allFinished(FinishStatus status) {
+        searchField.setEnabled(true);
+        searchButton.setEnabled(true);
+      }
+    });
   }
 
   void loadSelectedPathway() {
