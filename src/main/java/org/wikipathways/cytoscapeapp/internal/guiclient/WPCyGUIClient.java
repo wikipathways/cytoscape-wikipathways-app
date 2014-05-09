@@ -316,23 +316,27 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
     searchField.setEnabled(false);
     searchButton.setEnabled(false);
 
-    final ResultTask<List<WPPathway>> searchTask = client.newFreeTextSearchTask(query, species);
-    taskMgr.execute(new TaskIterator(searchTask, new AbstractTask() {
-      public void run(final TaskMonitor monitor) {
-        final List<WPPathway> results = searchTask.get();
-        if (results.isEmpty()) {
-          noResultsLabel.setText(String.format("<html><b>No results for \'%s\'.</b></html>", query));
-          noResultsLabel.setVisible(true);
-        } else {
-          noResultsLabel.setVisible(false);
-        }
-        setPathwaysInResultsTable(results);
-      }
-    }), new TaskObserver() {
-      public void taskFinished(ObservableTask t) {}
-      public void allFinished(FinishStatus status) {
-        searchField.setEnabled(true);
-        searchButton.setEnabled(true);
+    SwingUtilities.invokeLater(new Runnable() {
+      public void run() {
+        final ResultTask<List<WPPathway>> searchTask = client.newFreeTextSearchTask(query, species);
+        taskMgr.execute(new TaskIterator(searchTask, new AbstractTask() {
+          public void run(final TaskMonitor monitor) {
+            final List<WPPathway> results = searchTask.get();
+            if (results.isEmpty()) {
+              noResultsLabel.setText(String.format("<html><b>No results for \'%s\'.</b></html>", query));
+              noResultsLabel.setVisible(true);
+            } else {
+              noResultsLabel.setVisible(false);
+            }
+            setPathwaysInResultsTable(results);
+          }
+        }), new TaskObserver() {
+          public void taskFinished(ObservableTask t) {}
+          public void allFinished(FinishStatus status) {
+            searchField.setEnabled(true);
+            searchButton.setEnabled(true);
+          }
+        });
       }
     });
   }
@@ -361,11 +365,23 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
   }
 
   void loadSelectedPathway() {
-    final WPPathway pathway = tableModel.getSelectedPathwayRef();
-    final ResultTask<Reader> loadPathwayTask = client.newGPMLContentsTask(pathway);
-    final LoadPathwayFromStreamTask fromStreamTask = new LoadPathwayFromStreamTask(loadPathwayTask);
-    final TaskIterator taskIterator = new TaskIterator(loadPathwayTask, fromStreamTask);
-    taskMgr.execute(taskIterator);
+    importButton.setEnabled(false);
+    resultsTable.setEnabled(false);
+    SwingUtilities.invokeLater(new Runnable() { // wrap in a invokeLater() to let the setEnabled calls above take effect
+      public void run() {
+        final WPPathway pathway = tableModel.getSelectedPathwayRef();
+        final ResultTask<Reader> loadPathwayTask = client.newGPMLContentsTask(pathway);
+        final LoadPathwayFromStreamTask fromStreamTask = new LoadPathwayFromStreamTask(loadPathwayTask);
+        final TaskIterator taskIterator = new TaskIterator(loadPathwayTask, fromStreamTask);
+        taskMgr.execute(taskIterator, new TaskObserver() {
+          public void taskFinished(ObservableTask t) {}
+          public void allFinished(FinishStatus status) {
+            importButton.setEnabled(true);
+            resultsTable.setEnabled(true);
+          }
+        });
+      }
+    });
   }
 
   class LoadPathwayFromStreamTask extends AbstractTask {
