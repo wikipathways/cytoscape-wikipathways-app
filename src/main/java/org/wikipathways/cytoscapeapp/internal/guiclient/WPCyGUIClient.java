@@ -87,6 +87,20 @@ import org.wikipathways.cytoscapeapp.internal.io.GpmlVizStyle;
 
 public class WPCyGUIClient extends AbstractWebServiceGUIClient implements NetworkImportWebServiceClient, SearchWebServiceClient {
   static final Pattern WP_ID_REGEX = Pattern.compile("WP\\d+");
+  static final String APP_DESCRIPTION
+    = "<html>"
+    + "This app imports community-curated pathways from "
+    + "the <a href=\"http://wikipathways.org\">WikiPathways</a> website. "
+    + "Pathways can be imported in two ways: "
+    + "<ul>"
+    + "<li><i>Pathway mode</i>: Complete graphical annotations; "
+    + "ideal for custom visualizations of pathways.</li>"
+    + "<li><i>Network mode</i>: Simple network without graphical annotations; "
+    + "ideal for algorithmic analysis."
+    + "</ul>"
+    + "This app also supports importing GPML files from "
+    + "WikiPathways or PathVisio into Cytoscape."
+    + "</html>";
 
   final String PATHWAY_IMG = getClass().getResource("/pathway.png").toString();
   final String NETWORK_IMG = getClass().getResource("/network.png").toString();
@@ -130,7 +144,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
       final WPClient client,
       final OpenBrowser openBrowser,
       final CyNetworkNaming netNaming) {
-    super("http://www.wikipathways.org", "WikiPathways", "WikiPathways");
+    super("http://www.wikipathways.org", "WikiPathways", APP_DESCRIPTION);
     this.eventHelper = eventHelper;
     this.taskMgr = taskMgr;
     this.client = client;
