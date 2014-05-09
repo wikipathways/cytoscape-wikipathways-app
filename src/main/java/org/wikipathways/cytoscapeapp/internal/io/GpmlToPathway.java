@@ -902,6 +902,9 @@ public class GpmlToPathway {
     for (final PathwayElement pvElem : pvPathway.getDataObjects()) {
       if (!pvElem.getObjectType().equals(ObjectType.GROUP))
         continue;
+      final int numChildren = pvPathway.getGroupElements(pvElem.getGroupId()).size();
+      if (numChildren == 0) // ignore groups with 0 children
+        continue;
       convertGroup(pvElem);
     }
   }
