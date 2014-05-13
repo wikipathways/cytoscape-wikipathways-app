@@ -45,7 +45,7 @@ import org.cytoscape.view.presentation.property.values.LineType;
  * Cytoscape network view, and it tries to reproduce
  * the pathway's visual representation.
  */
-public class GpmlToPathway implements Converter {
+public class GpmlToPathway {
   /*
     NOMENCLATURE:
     In order to help distinguish PathVisio data structures from
@@ -93,7 +93,7 @@ public class GpmlToPathway implements Converter {
   /**
    * Convert the pathway given in the constructor.
    */
-	public ViewBuilder convert() {
+	public void convert() {
     setupCyTables();
 
     // convert by each pathway element type
@@ -108,13 +108,9 @@ public class GpmlToPathway implements Converter {
     // clear our data structures just to be nice to the GC
     pvToCyNodes.clear();
 
-    return new ViewBuilder() {
-      public void build(final CyNetworkView cyNetView) {
-        cyEventHelper.flushPayloadEvents(); // guarantee that all node and edge views have been created
-        DelayedVizProp.applyAll(cyNetView, cyDelayedVizProps); // apply our visual style
-        cyDelayedVizProps.clear();
-      }
-    };
+    cyEventHelper.flushPayloadEvents(); // guarantee that all node and edge views have been created
+    //DelayedVizProp.applyAll(cyNetView, cyDelayedVizProps); // apply our visual style
+    cyDelayedVizProps.clear();
 	}
 
   /**

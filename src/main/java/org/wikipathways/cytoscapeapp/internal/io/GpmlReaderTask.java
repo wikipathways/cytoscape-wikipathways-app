@@ -58,13 +58,10 @@ public class GpmlReaderTask extends AbstractTask implements CyNetworkReader {
     final GpmlVizStyle vizStyle;
     final NetworkTaskFactory showLODTF;
     final CyNetworkNaming netNaming;
-    final ConverterFactory          gpmlToPathwayFactory;
-    final ConverterFactory          gpmlToNetworkFactory;
 
 	InputStream input = null;
     final String fileName;
     CyNetwork network;
-    ViewBuilder viewBuilder;
 
     @Tunable(description="Import as:", groups={"WikiPathways"})
     public ListSingleSelection<String> importMethod = new ListSingleSelection<String>(PATHWAY_DESC, NETWORK_DESC);
@@ -80,8 +77,6 @@ public class GpmlReaderTask extends AbstractTask implements CyNetworkReader {
             final GpmlVizStyle vizStyle,
             final NetworkTaskFactory showLODTF,
             final CyNetworkNaming netNaming,
-            final ConverterFactory gpmlToPathwayFactory,
-            final ConverterFactory gpmlToNetworkFactory,
             final InputStream input,
             final String fileName) {
         this.eventHelper = eventHelper;
@@ -94,8 +89,6 @@ public class GpmlReaderTask extends AbstractTask implements CyNetworkReader {
         this.vizStyle = vizStyle;
         this.showLODTF = showLODTF;
         this.netNaming = netNaming;
-        this.gpmlToPathwayFactory = gpmlToPathwayFactory;
-        this.gpmlToNetworkFactory = gpmlToNetworkFactory;
         this.input = input;
         this.fileName = fileName;
 	}
@@ -113,12 +106,11 @@ public class GpmlReaderTask extends AbstractTask implements CyNetworkReader {
         monitor.setStatusMessage("Constructing network");
         final String name = pathway.getMappInfo().getMapInfoName();
         network = newNetwork(name);
-        final ConverterFactory converterFactory = importMethod.getSelectedValue().equals(PATHWAY_DESC) ? gpmlToPathwayFactory : gpmlToNetworkFactory;
-        viewBuilder = converterFactory.create(pathway, network).convert();
-        if() {
-        	(new GpmlToPathway(eventHelper, annots, pathway, view)).convert();
+        final CyNetworkView view = newNetworkView(network);
+        if(importMethod.getSelectedValue().equals(PATHWAY_DESC)) {
+        	(new GpmlToPathway(eventHelper, annots, pathway, network)).convert();
         } else {
-        	(new GpmlToNetwork(eventHelper, pathway, view)).convert();
+        	(new GpmlToNetwork(eventHelper, pathway, network)).convert();
         	CyLayoutAlgorithm layout = layoutMgr.getLayout("force-directed");
         	insertTasksAfterCurrentTask(layout.createTaskIterator(view, layout.createLayoutContext(), CyLayoutAlgorithm.ALL_NODE_VIEWS, null));
         }

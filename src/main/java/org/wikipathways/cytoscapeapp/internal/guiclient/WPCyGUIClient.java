@@ -418,9 +418,9 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
       final CyNetworkView view = newNetwork(name);
 
       if (pathwayMenuItem.isSelected()) {
-        (new GpmlToPathway(eventHelper, annots, pathway, view)).convert();
+        (new GpmlToPathway(eventHelper, annots, pathway, view.getModel())).convert();
       } else {
-       (new GpmlToNetwork(eventHelper, pathway, view)).convert();
+       (new GpmlToNetwork(eventHelper, pathway, view.getModel())).convert();
         CyLayoutAlgorithm layout = layoutMgr.getLayout("force-directed");
         insertTasksAfterCurrentTask(layout.createTaskIterator(view, layout.createLayoutContext(), CyLayoutAlgorithm.ALL_NODE_VIEWS, null));
       }

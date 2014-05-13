@@ -28,7 +28,7 @@ import org.pathvisio.core.model.PathwayElement.MAnchor;
 import org.pathvisio.core.model.ShapeType;
 import org.pathvisio.core.model.StaticProperty;
 
-public class GpmlToNetwork implements Converter {
+public class GpmlToNetwork {
 	/**
 	 * Maps a GPML pathway element to its representative CyNode in the network.
 	 */
@@ -77,7 +77,7 @@ public class GpmlToNetwork implements Converter {
 	/**
 	 * Convert the pathway given in the constructor.
 	 */
-	public ViewBuilder convert() {
+	public void convert() {
 		network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS).createColumn("GraphID", String.class, false);
 		network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS).createColumn("GeneID", String.class, false);
 		network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS).createColumn("Datasource", String.class, false);
@@ -103,13 +103,9 @@ public class GpmlToNetwork implements Converter {
 		// clear our data structures just to be nice to the GC
 		nodes.clear();
 
-		return new ViewBuilder() {
-			public void build(final CyNetworkView cyNetView) {
-				eventHelper.flushPayloadEvents(); // guarantee that all node and edge views have been created
-				DelayedVizProp.applyAll(cyNetView, delayedVizProps); // apply our visual style
-				delayedVizProps.clear();
-			}
-		};
+		eventHelper.flushPayloadEvents(); // guarantee that all node and edge views have been created
+		//DelayedVizProp.applyAll(cyNetView, delayedVizProps); // apply our visual style
+		delayedVizProps.clear();
 	}
 
 	/**
