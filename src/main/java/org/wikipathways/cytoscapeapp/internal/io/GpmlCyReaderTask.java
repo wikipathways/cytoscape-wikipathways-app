@@ -44,7 +44,7 @@ import org.pathvisio.core.model.Pathway;
  * Reads the GPML file and creates a GPMLNetwork 
  * TODO: currently network and pathway view are initialized --> setting!
  */
-public class GpmlReaderTask extends AbstractTask implements CyNetworkReader {
+public class GpmlCyReaderTask extends AbstractTask implements CyNetworkReader {
     public static final String PATHWAY_DESC = "Pathway";
     public static final String NETWORK_DESC = "Network";
 
@@ -66,7 +66,7 @@ public class GpmlReaderTask extends AbstractTask implements CyNetworkReader {
     @Tunable(description="Import as:", groups={"WikiPathways"})
     public ListSingleSelection<String> importMethod = new ListSingleSelection<String>(PATHWAY_DESC, NETWORK_DESC);
 
-	public GpmlReaderTask(
+	public GpmlCyReaderTask(
             final CyEventHelper eventHelper,
             final CyNetworkFactory netFactory,
             final CyNetworkManager netMgr,

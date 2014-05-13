@@ -40,7 +40,7 @@ import org.cytoscape.task.NetworkTaskFactory;
  * this class creates a TaskIterator to load a GPML file
  *
  */
-public class GpmlReaderTaskFactory extends AbstractInputStreamTaskFactory {
+public class GpmlCyReaderTaskFactory extends AbstractInputStreamTaskFactory {
   final CyEventHelper             eventHelper;
   final CyNetworkFactory          netFactory;
   final CyNetworkManager          netMgr;
@@ -52,7 +52,7 @@ public class GpmlReaderTaskFactory extends AbstractInputStreamTaskFactory {
   final NetworkTaskFactory        showLODTF;
   final CyNetworkNaming           netNaming;
 
-  public GpmlReaderTaskFactory(
+  public GpmlCyReaderTaskFactory(
       final CyEventHelper             eventHelper,
       final CyNetworkFactory          netFactory,
       final CyNetworkManager          netMgr,
@@ -79,7 +79,7 @@ public class GpmlReaderTaskFactory extends AbstractInputStreamTaskFactory {
 	
 	
 	public TaskIterator createTaskIterator(InputStream inputStream, String fileName) {
-		return new TaskIterator(new GpmlReaderTask(
+		return new TaskIterator(new GpmlCyReaderTask(
       eventHelper,
       netFactory,
       netMgr,

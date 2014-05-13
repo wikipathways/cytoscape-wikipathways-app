@@ -50,7 +50,7 @@ import org.wikipathways.cytoscapeapp.WPClientFactory;
 import org.wikipathways.cytoscapeapp.impl.WPClientRESTFactoryImpl;
 import org.wikipathways.cytoscapeapp.internal.io.Annots;
 import org.wikipathways.cytoscapeapp.internal.io.GpmlVizStyle;
-import org.wikipathways.cytoscapeapp.internal.io.GpmlReaderTaskFactory;
+import org.wikipathways.cytoscapeapp.internal.io.GpmlCyReaderTaskFactory;
 import org.wikipathways.cytoscapeapp.internal.guiclient.WPCyGUIClient;
 /**
  * 
@@ -93,7 +93,7 @@ public class CyActivator extends AbstractCyActivator {
 
     final WPClient client = clientFactory.create();
 
-    final GpmlReaderTaskFactory gpmlReaderTaskFactory = new GpmlReaderTaskFactory(
+    final GpmlCyReaderTaskFactory gpmlCyReaderTaskFactory = new GpmlCyReaderTaskFactory(
       eventHelper,
       netFactory,
       netMgr,
@@ -105,7 +105,7 @@ public class CyActivator extends AbstractCyActivator {
       gpmlStyle,
       showLODTF,
       netNaming);
-    registerService(context, gpmlReaderTaskFactory, InputStreamTaskFactory.class, new Properties());
+    registerService(context, gpmlCyReaderTaskFactory, InputStreamTaskFactory.class, new Properties());
 
     final WPCyGUIClient guiClient = new WPCyGUIClient(
       eventHelper,
