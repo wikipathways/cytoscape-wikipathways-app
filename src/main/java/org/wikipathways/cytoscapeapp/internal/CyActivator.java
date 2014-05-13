@@ -133,7 +133,7 @@ public class CyActivator extends AbstractCyActivator {
 
     final ToggleShapesTaskFactory toggleShapesTF = new ToggleShapesTaskFactory();
     registerService(context, toggleShapesTF, NetworkViewTaskFactory.class, ezProps(
-      ServiceProperties.TITLE, "Toggle GPML Shapes",
+      ServiceProperties.TITLE, "Toggle Pathway Shapes",
       ServiceProperties.PREFERRED_MENU, "View"
       ));
   }

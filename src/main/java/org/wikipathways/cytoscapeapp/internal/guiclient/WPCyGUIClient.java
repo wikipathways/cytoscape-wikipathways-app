@@ -87,6 +87,20 @@ import org.wikipathways.cytoscapeapp.internal.io.GpmlVizStyle;
 
 public class WPCyGUIClient extends AbstractWebServiceGUIClient implements NetworkImportWebServiceClient, SearchWebServiceClient {
   static final Pattern WP_ID_REGEX = Pattern.compile("WP\\d+");
+  static final String APP_DESCRIPTION
+    = "<html>"
+    + "This app imports community-curated pathways from "
+    + "the <a href=\"http://wikipathways.org\">WikiPathways</a> website. "
+    + "Pathways can be imported in two ways: "
+    + "<ul>"
+    + "<li><i>Pathway mode</i>: Complete graphical annotations; "
+    + "ideal for custom visualizations of pathways.</li>"
+    + "<li><i>Network mode</i>: Simple network without graphical annotations; "
+    + "ideal for algorithmic analysis."
+    + "</ul>"
+    + "This app also supports importing GPML files from "
+    + "WikiPathways or PathVisio into Cytoscape."
+    + "</html>";
 
   final String PATHWAY_IMG = getClass().getResource("/pathway.png").toString();
   final String NETWORK_IMG = getClass().getResource("/network.png").toString();
@@ -106,12 +120,13 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
   final CyNetworkNaming netNaming;
 
   final JTextField searchField = new JTextField();
+  final JButton searchButton = new JButton(new ImageIcon(getClass().getResource("/search-icon.png")));
   final JCheckBox speciesCheckBox = new JCheckBox("Only: ");
   final JComboBox speciesComboBox = new JComboBox();
   final PathwayRefsTableModel tableModel = new PathwayRefsTableModel();
   final JTable resultsTable = new JTable(tableModel);
   final JLabel noResultsLabel = new JLabel();
-  final SplitButton importButton = new SplitButton("Import");
+  final SplitButton importButton = new SplitButton("Import as Pathway");
   final JButton openUrlButton = new JButton("Open in Web Browser");
   final CheckMarkMenuItem pathwayMenuItem = new CheckMarkMenuItem("Pathway", PATHWAY_IMG, true);
   final CheckMarkMenuItem networkMenuItem = new CheckMarkMenuItem("Network", NETWORK_IMG);
@@ -130,7 +145,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
       final WPClient client,
       final OpenBrowser openBrowser,
       final CyNetworkNaming netNaming) {
-    super("http://www.wikipathways.org", "WikiPathways", "WikiPathways");
+    super("http://www.wikipathways.org", "WikiPathways", APP_DESCRIPTION);
     this.eventHelper = eventHelper;
     this.taskMgr = taskMgr;
     this.client = client;
@@ -190,6 +205,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
       public void actionPerformed(ActionEvent e) {
         pathwayMenuItem.setSelected(true);
         networkMenuItem.setSelected(false);
+        importButton.setLabel("Import as Pathway");
       }
     });
 
@@ -197,6 +213,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
       public void actionPerformed(ActionEvent e) {
         pathwayMenuItem.setSelected(false);
         networkMenuItem.setSelected(true);
+        importButton.setLabel("Import as Network");
       }
     });
 
@@ -228,14 +245,13 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
     final JPanel resultsPanel = new JPanel(new GridBagLayout());
     resultsPanel.add(noResultsLabel, c.reset().expandHoriz());
     resultsPanel.add(new JScrollPane(resultsTable), c.down().expandBoth());
-    resultsPanel.add(buttonsPanel, c.anchor("northeast").noExpand().down());
+    resultsPanel.add(buttonsPanel, c.anchor("northeast").expandHoriz().down());
     return resultsPanel;
   }
 
   private JPanel newSearchPanel() {
     final ActionListener performSearch = new SearchForPathways();
 
-    final JButton searchButton = new JButton(new ImageIcon(getClass().getResource("/search-icon.png")));
     searchButton.setBorder(BorderFactory.createEmptyBorder());
     searchButton.setContentAreaFilled(false);
     searchButton.addActionListener(performSearch);
@@ -297,19 +313,32 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
   }
 
   void performSearch(final String query, final String species) {
-    final ResultTask<List<WPPathway>> searchTask = client.newFreeTextSearchTask(query, species);
-    taskMgr.execute(new TaskIterator(searchTask, new AbstractTask() {
-      public void run(final TaskMonitor monitor) {
-        final List<WPPathway> results = searchTask.get();
-        if (results.isEmpty()) {
-          noResultsLabel.setText(String.format("<html><b>No results for \'%s\'.</b></html>", query));
-          noResultsLabel.setVisible(true);
-        } else {
-          noResultsLabel.setVisible(false);
-        }
-        setPathwaysInResultsTable(results);
+    searchField.setEnabled(false);
+    searchButton.setEnabled(false);
+
+    SwingUtilities.invokeLater(new Runnable() {
+      public void run() {
+        final ResultTask<List<WPPathway>> searchTask = client.newFreeTextSearchTask(query, species);
+        taskMgr.execute(new TaskIterator(searchTask, new AbstractTask() {
+          public void run(final TaskMonitor monitor) {
+            final List<WPPathway> results = searchTask.get();
+            if (results.isEmpty()) {
+              noResultsLabel.setText(String.format("<html><b>No results for \'%s\'.</b></html>", query));
+              noResultsLabel.setVisible(true);
+            } else {
+              noResultsLabel.setVisible(false);
+            }
+            setPathwaysInResultsTable(results);
+          }
+        }), new TaskObserver() {
+          public void taskFinished(ObservableTask t) {}
+          public void allFinished(FinishStatus status) {
+            searchField.setEnabled(true);
+            searchButton.setEnabled(true);
+          }
+        });
       }
-    }));
+    });
   }
 
   void getPathwayFromId(final String id) {
@@ -326,15 +355,33 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
           setPathwaysInResultsTable(Arrays.asList(pathway));
         }
       }
-    }));
+    }), new TaskObserver() {
+      public void taskFinished(ObservableTask t) {}
+      public void allFinished(FinishStatus status) {
+        searchField.setEnabled(true);
+        searchButton.setEnabled(true);
+      }
+    });
   }
 
   void loadSelectedPathway() {
-    final WPPathway pathway = tableModel.getSelectedPathwayRef();
-    final ResultTask<Reader> loadPathwayTask = client.newGPMLContentsTask(pathway);
-    final LoadPathwayFromStreamTask fromStreamTask = new LoadPathwayFromStreamTask(loadPathwayTask);
-    final TaskIterator taskIterator = new TaskIterator(loadPathwayTask, fromStreamTask);
-    taskMgr.execute(taskIterator);
+    importButton.setEnabled(false);
+    resultsTable.setEnabled(false);
+    SwingUtilities.invokeLater(new Runnable() { // wrap in a invokeLater() to let the setEnabled calls above take effect
+      public void run() {
+        final WPPathway pathway = tableModel.getSelectedPathwayRef();
+        final ResultTask<Reader> loadPathwayTask = client.newGPMLContentsTask(pathway);
+        final LoadPathwayFromStreamTask fromStreamTask = new LoadPathwayFromStreamTask(loadPathwayTask);
+        final TaskIterator taskIterator = new TaskIterator(loadPathwayTask, fromStreamTask);
+        taskMgr.execute(taskIterator, new TaskObserver() {
+          public void taskFinished(ObservableTask t) {}
+          public void allFinished(FinishStatus status) {
+            importButton.setEnabled(true);
+            resultsTable.setEnabled(true);
+          }
+        });
+      }
+    });
   }
 
   class LoadPathwayFromStreamTask extends AbstractTask {
@@ -483,11 +530,12 @@ class SearchPanelBorder extends AbstractBorder {
 
 class SplitButton extends JButton {
   static final int GAP = 5;
+  final JLabel mainText;
   volatile boolean actionListenersEnabled = true;
   JPopupMenu menu = null;
 
   public SplitButton(final String text) {
-    final JLabel mainText = new JLabel(text);
+    mainText = new JLabel(text);
     final JLabel menuIcon = new JLabel("\u25be");
     super.setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
     super.add(mainText);
@@ -512,6 +560,10 @@ class SplitButton extends JButton {
         }
       }
     });
+  }
+
+  public void setLabel(final String label) {
+    mainText.setText(label);
   }
 
   protected void fireActionPerformed(final ActionEvent e) {
