@@ -52,16 +52,6 @@ import javax.swing.border.AbstractBorder;
 import org.cytoscape.io.webservice.NetworkImportWebServiceClient;
 import org.cytoscape.io.webservice.SearchWebServiceClient;
 import org.cytoscape.io.webservice.swing.AbstractWebServiceGUIClient;
-import org.cytoscape.event.CyEventHelper;
-import org.cytoscape.model.CyNetwork;
-import org.cytoscape.model.CyNetworkManager;
-import org.cytoscape.model.CyNetworkFactory;
-import org.cytoscape.session.CyNetworkNaming;
-import org.cytoscape.view.model.CyNetworkViewManager;
-import org.cytoscape.view.model.CyNetworkViewFactory;
-import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
-import org.cytoscape.view.layout.CyLayoutAlgorithm;
-import org.cytoscape.view.model.CyNetworkView;
 
 import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.TaskIterator;
@@ -72,8 +62,6 @@ import org.cytoscape.work.ObservableTask;
 import org.cytoscape.work.FinishStatus;
 
 import org.cytoscape.util.swing.OpenBrowser;
-
-import org.cytoscape.task.NetworkTaskFactory;
 
 import org.pathvisio.core.model.Pathway;
 
@@ -107,19 +95,9 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
   final String PATHWAY_IMG = getClass().getResource("/pathway.png").toString();
   final String NETWORK_IMG = getClass().getResource("/network.png").toString();
 
-  final CyEventHelper eventHelper;
   final TaskManager taskMgr;
-  final CyNetworkFactory netFactory;
-  final CyNetworkManager netMgr;
-  final CyNetworkViewFactory netViewFactory;
-  final CyNetworkViewManager netViewMgr;
-  final CyLayoutAlgorithmManager layoutMgr;
-  final Annots annots;
-  final GpmlVizStyle vizStyle;
-  final NetworkTaskFactory showLODTF;
   final WPClient client;
   final OpenBrowser openBrowser;
-  final CyNetworkNaming netNaming;
   final GpmlReaderFactory gpmlReaderFactory;
 
   final JTextField searchField = new JTextField();
@@ -135,34 +113,14 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
   final CheckMarkMenuItem networkMenuItem = new CheckMarkMenuItem("Network", NETWORK_IMG);
 
   public WPCyGUIClient(
-      final CyEventHelper eventHelper,
       final TaskManager taskMgr,
-      final CyNetworkFactory netFactory,
-      final CyNetworkManager netMgr,
-      final CyNetworkViewFactory netViewFactory,
-      final CyNetworkViewManager netViewMgr,
-      final CyLayoutAlgorithmManager layoutMgr,
-      final Annots annots,
-      final GpmlVizStyle vizStyle,
-      final NetworkTaskFactory showLODTF,
       final WPClient client,
       final OpenBrowser openBrowser,
-      final CyNetworkNaming netNaming,
       final GpmlReaderFactory gpmlReaderFactory) {
     super("http://www.wikipathways.org", "WikiPathways", APP_DESCRIPTION);
-    this.eventHelper = eventHelper;
     this.taskMgr = taskMgr;
     this.client = client;
-    this.netFactory = netFactory;
-    this.netMgr = netMgr;
-    this.netViewFactory = netViewFactory;
-    this.netViewMgr = netViewMgr;
-    this.annots = annots;
-    this.vizStyle = vizStyle;
-    this.showLODTF = showLODTF;
-    this.layoutMgr = layoutMgr;
     this.openBrowser = openBrowser;
-    this.netNaming = netNaming;
     this.gpmlReaderFactory = gpmlReaderFactory;
 
     speciesCheckBox.addItemListener(new ItemListener() {

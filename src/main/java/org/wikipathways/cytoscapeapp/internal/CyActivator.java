@@ -124,19 +124,9 @@ public class CyActivator extends AbstractCyActivator {
     registerService(context, gpmlCyReaderTaskFactory, InputStreamTaskFactory.class, new Properties());
 
     final WPCyGUIClient guiClient = new WPCyGUIClient(
-      eventHelper,
       taskMgr,
-      netFactory,
-      netMgr,
-      netViewFactory,
-      netViewMgr,
-      layoutMgr,
-      annots,
-      gpmlStyle,
-      showLODTF,
       client,
       openBrowser,
-      netNaming,
       gpmlReaderFactory);
     registerAllServices(context, guiClient, new Properties());
 
