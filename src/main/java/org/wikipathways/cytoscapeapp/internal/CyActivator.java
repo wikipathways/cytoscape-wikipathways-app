@@ -110,17 +110,8 @@ public class CyActivator extends AbstractCyActivator {
     registerService(context, gpmlReaderFactory, GpmlReaderFactory.class, new Properties());
 
     final GpmlCyReaderTaskFactory gpmlCyReaderTaskFactory = new GpmlCyReaderTaskFactory(
-      eventHelper,
-      netFactory,
-      netMgr,
-      netViewFactory,
-      netViewMgr,
-      layoutMgr,
-      streamUtil,
-      annots,
-      gpmlStyle,
-      showLODTF,
-      netNaming);
+      gpmlReaderFactory,
+      streamUtil);
     registerService(context, gpmlCyReaderTaskFactory, InputStreamTaskFactory.class, new Properties());
 
     final WPCyGUIClient guiClient = new WPCyGUIClient(

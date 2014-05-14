@@ -93,7 +93,8 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
     if (GpmlConversionMethod.NETWORK.equals(method)) {
       final CyLayoutAlgorithm layout = layoutMgr.getLayout("force-directed");
       // CyLayoutAlgorithm.createTaskIterator() must be run inside its own AbstractTask
-      // because the tasks that make up the task iterator are not known at construction time
+      // because the tasks that make up the task iterator are not known at
+      // the time when createTaskIterator() is invoked
       iterator.append(new AbstractTask() {
         public void run(TaskMonitor monitor) {
           final TaskIterator layoutIterator = layout.createTaskIterator(networkView, layout.createLayoutContext(), CyLayoutAlgorithm.ALL_NODE_VIEWS, null);

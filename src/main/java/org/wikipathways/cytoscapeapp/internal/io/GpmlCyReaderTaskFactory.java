@@ -20,19 +20,12 @@ package org.wikipathways.cytoscapeapp.internal.io;
 
 import java.io.InputStream;
 
-import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.work.TaskIterator;
-import org.cytoscape.model.CyNetworkManager;
-import org.cytoscape.model.CyNetworkFactory;
-import org.cytoscape.session.CyNetworkNaming;
-import org.cytoscape.view.model.CyNetworkViewManager;
-import org.cytoscape.view.model.CyNetworkViewFactory;
-import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
 import org.cytoscape.io.read.AbstractInputStreamTaskFactory;
 import org.cytoscape.io.BasicCyFileFilter;
 import org.cytoscape.io.DataCategory;
 import org.cytoscape.io.util.StreamUtil;
-import org.cytoscape.task.NetworkTaskFactory;
+import org.wikipathways.cytoscapeapp.GpmlReaderFactory;
 
 /**
  * 
@@ -41,55 +34,18 @@ import org.cytoscape.task.NetworkTaskFactory;
  *
  */
 public class GpmlCyReaderTaskFactory extends AbstractInputStreamTaskFactory {
-  final CyEventHelper             eventHelper;
-  final CyNetworkFactory          netFactory;
-  final CyNetworkManager          netMgr;
-  final CyNetworkViewFactory      netViewFactory;
-  final CyNetworkViewManager      netViewMgr;
-  final CyLayoutAlgorithmManager  layoutMgr;
-  final Annots                    annots;
-  final GpmlVizStyle              vizStyle;
-  final NetworkTaskFactory        showLODTF;
-  final CyNetworkNaming           netNaming;
+  final GpmlReaderFactory gpmlReaderFactory;
 
   public GpmlCyReaderTaskFactory(
-      final CyEventHelper             eventHelper,
-      final CyNetworkFactory          netFactory,
-      final CyNetworkManager          netMgr,
-      final CyNetworkViewFactory      netViewFactory,
-      final CyNetworkViewManager      netViewMgr,
-      final CyLayoutAlgorithmManager  layoutMgr,
-      final StreamUtil                streamUtil,
-      final Annots                    annots,
-      final GpmlVizStyle              vizStyle,
-      final NetworkTaskFactory        showLODTF,
-      final CyNetworkNaming           netNaming) {
+      final GpmlReaderFactory gpmlReaderFactory,
+      final StreamUtil streamUtil) {
     super(new BasicCyFileFilter(new String[]{"gpml"}, new String[]{"text/xml"}, "GPML files", DataCategory.NETWORK, streamUtil));
-    this.eventHelper = eventHelper;
-    this.netFactory = netFactory;
-    this.netMgr = netMgr;
-    this.netViewFactory = netViewFactory;
-    this.netViewMgr = netViewMgr;
-    this.layoutMgr = layoutMgr;
-    this.annots = annots;
-    this.vizStyle = vizStyle;
-    this.showLODTF = showLODTF;
-    this.netNaming = netNaming;
+    this.gpmlReaderFactory = gpmlReaderFactory;
   }
-	
 	
 	public TaskIterator createTaskIterator(InputStream inputStream, String fileName) {
 		return new TaskIterator(new GpmlCyReaderTask(
-      eventHelper,
-      netFactory,
-      netMgr,
-      netViewFactory,
-      netViewMgr,
-      layoutMgr,
-      annots,
-      vizStyle,
-      showLODTF,
-      netNaming,
+      gpmlReaderFactory,
       inputStream,
       fileName));
 	}
