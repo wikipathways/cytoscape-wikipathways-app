@@ -47,10 +47,12 @@ import org.cytoscape.util.swing.OpenBrowser;
 
 import org.wikipathways.cytoscapeapp.WPClient;
 import org.wikipathways.cytoscapeapp.WPClientFactory;
+import org.wikipathways.cytoscapeapp.GpmlReaderFactory;
 import org.wikipathways.cytoscapeapp.impl.WPClientRESTFactoryImpl;
 import org.wikipathways.cytoscapeapp.internal.io.Annots;
 import org.wikipathways.cytoscapeapp.internal.io.GpmlVizStyle;
 import org.wikipathways.cytoscapeapp.internal.io.GpmlCyReaderTaskFactory;
+import org.wikipathways.cytoscapeapp.internal.io.GpmlReaderFactoryImpl;
 import org.wikipathways.cytoscapeapp.internal.guiclient.WPCyGUIClient;
 /**
  * 
@@ -93,6 +95,20 @@ public class CyActivator extends AbstractCyActivator {
 
     final WPClient client = clientFactory.create();
 
+    final GpmlReaderFactory gpmlReaderFactory = new GpmlReaderFactoryImpl(
+      eventHelper,
+      netFactory,
+      netMgr,
+      netNaming,
+      netViewFactory,
+      netViewMgr,
+      layoutMgr,
+      showLODTF,
+      annots,
+      gpmlStyle
+      );
+    registerService(context, gpmlReaderFactory, GpmlReaderFactory.class, new Properties());
+
     final GpmlCyReaderTaskFactory gpmlCyReaderTaskFactory = new GpmlCyReaderTaskFactory(
       eventHelper,
       netFactory,
@@ -120,7 +136,8 @@ public class CyActivator extends AbstractCyActivator {
       showLODTF,
       client,
       openBrowser,
-      netNaming);
+      netNaming,
+      gpmlReaderFactory);
     registerAllServices(context, guiClient, new Properties());
 
     final ToggleShapesTaskFactory toggleShapesTF = new ToggleShapesTaskFactory();

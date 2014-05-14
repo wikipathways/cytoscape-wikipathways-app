@@ -77,8 +77,14 @@ public interface GpmlReaderFactory {
    * @param network The {@link org.cytoscape.model.CyNetwork} instance that will store the converted GPML pathway.
    *
    * @param conversionMethod The method by which the GPML pathway is converted to a Cytoscape network.
+   *
+   * @param setNetworkName If true, this method will update the {@code network}'s name to the pathway's name specified in {@code gpmlContents}.
    */
-  public TaskIterator createReader(final Reader gpmlContents, final CyNetwork network, final GpmlConversionMethod conversionMethod);
+  public TaskIterator createReader(
+    final Reader gpmlContents,
+    final CyNetwork network,
+    final GpmlConversionMethod conversionMethod,
+    final boolean setNetworkName);
 
   /**
    * Creates a task iterator that builds the network view for a network that contains a GPML pathway.
@@ -93,7 +99,9 @@ public interface GpmlReaderFactory {
    *
    * @throws IllegalArgumentException if {@code gpmlNetwork} is a {@code CyNetwork} that doesn't have a GPML pathway.
    */
-  public TaskIterator createViewBuilder(final CyNetwork gpmlNetwork, final CyNetworkView networkView);
+  public TaskIterator createViewBuilder(
+    final CyNetwork gpmlNetwork,
+    final CyNetworkView networkView);
 
   /**
    * Creates a task iterator that reads the GPML pathway from {@code gpmlContents}, builds the converted
@@ -114,8 +122,14 @@ public interface GpmlReaderFactory {
    * {@link java.io.FileReader} instance for GPML files on disk or the result of {@link WPClient#newGPMLContentsTask}.
    *
    * @param conversionMethod The method by which the GPML pathway is converted to a Cytoscape network.
+   *
+   * @param setNetworkName If true, this method will update the {@code networkView}'s name to the pathway's name specified in {@code gpmlContents}.
    */
-  public TaskIterator createReaderAndViewBuilder(final Reader gpmlContents, final CyNetworkView networkView, final GpmlConversionMethod conversionMethod);
+  public TaskIterator createReaderAndViewBuilder(
+    final Reader gpmlContents,
+    final CyNetworkView networkView,
+    final GpmlConversionMethod conversionMethod,
+    final boolean setNetworkName);
 
   /**
    * Creates a task iterator that reads the GPML pathway from {@code gpmlContents}, builds the converted
@@ -132,5 +146,7 @@ public interface GpmlReaderFactory {
    *
    * @param conversionMethod The method by which the GPML pathway is converted to a Cytoscape network.
    */
-  public TaskIterator createReaderAndViewBuilder(final Reader gpmlContents, final GpmlConversionMethod conversionMethod);
+  public TaskIterator createReaderAndViewBuilder(
+    final Reader gpmlContents,
+    final GpmlConversionMethod conversionMethod);
 }

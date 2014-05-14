@@ -80,6 +80,8 @@ import org.pathvisio.core.model.Pathway;
 import org.wikipathways.cytoscapeapp.ResultTask;
 import org.wikipathways.cytoscapeapp.WPClient;
 import org.wikipathways.cytoscapeapp.WPPathway;
+import org.wikipathways.cytoscapeapp.GpmlConversionMethod;
+import org.wikipathways.cytoscapeapp.GpmlReaderFactory;
 import org.wikipathways.cytoscapeapp.internal.io.Annots;
 import org.wikipathways.cytoscapeapp.internal.io.GpmlToNetwork;
 import org.wikipathways.cytoscapeapp.internal.io.GpmlToPathway;
@@ -118,6 +120,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
   final WPClient client;
   final OpenBrowser openBrowser;
   final CyNetworkNaming netNaming;
+  final GpmlReaderFactory gpmlReaderFactory;
 
   final JTextField searchField = new JTextField();
   final JButton searchButton = new JButton(new ImageIcon(getClass().getResource("/search-icon.png")));
@@ -144,7 +147,8 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
       final NetworkTaskFactory showLODTF,
       final WPClient client,
       final OpenBrowser openBrowser,
-      final CyNetworkNaming netNaming) {
+      final CyNetworkNaming netNaming,
+      final GpmlReaderFactory gpmlReaderFactory) {
     super("http://www.wikipathways.org", "WikiPathways", APP_DESCRIPTION);
     this.eventHelper = eventHelper;
     this.taskMgr = taskMgr;
@@ -159,6 +163,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
     this.layoutMgr = layoutMgr;
     this.openBrowser = openBrowser;
     this.netNaming = netNaming;
+    this.gpmlReaderFactory = gpmlReaderFactory;
 
     speciesCheckBox.addItemListener(new ItemListener() {
       public void itemStateChanged(ItemEvent e) {
@@ -205,7 +210,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
       public void actionPerformed(ActionEvent e) {
         pathwayMenuItem.setSelected(true);
         networkMenuItem.setSelected(false);
-        importButton.setLabel("Import as Pathway");
+        importButton.setText("Import as Pathway");
       }
     });
 
@@ -213,7 +218,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
       public void actionPerformed(ActionEvent e) {
         pathwayMenuItem.setSelected(false);
         networkMenuItem.setSelected(true);
-        importButton.setLabel("Import as Network");
+        importButton.setText("Import as Network");
       }
     });
 
@@ -371,8 +376,13 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
       public void run() {
         final WPPathway pathway = tableModel.getSelectedPathwayRef();
         final ResultTask<Reader> loadPathwayTask = client.newGPMLContentsTask(pathway);
-        final LoadPathwayFromStreamTask fromStreamTask = new LoadPathwayFromStreamTask(loadPathwayTask);
-        final TaskIterator taskIterator = new TaskIterator(loadPathwayTask, fromStreamTask);
+        final GpmlConversionMethod method = pathwayMenuItem.isSelected() ? GpmlConversionMethod.PATHWAY : GpmlConversionMethod.NETWORK;
+        final TaskIterator taskIterator = new TaskIterator(loadPathwayTask);
+        taskIterator.append(new AbstractTask() {
+          public void run(TaskMonitor monitor) {
+            super.insertTasksAfterCurrentTask(gpmlReaderFactory.createReaderAndViewBuilder(loadPathwayTask.get(), method));
+          }
+        });
         taskMgr.execute(taskIterator, new TaskObserver() {
           public void taskFinished(ObservableTask t) {}
           public void allFinished(FinishStatus status) {
@@ -382,72 +392,6 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
         });
       }
     });
-  }
-
-  class LoadPathwayFromStreamTask extends AbstractTask {
-    final ResultTask<Reader> streamTask;
-    Reader gpmlStream = null;
-
-    public LoadPathwayFromStreamTask(final ResultTask<Reader> streamTask) {
-      this.streamTask = streamTask;
-    }
-
-    public void cancel() {
-      final Reader gpmlStream2 = gpmlStream;
-      if (gpmlStream2 != null) {
-        try {
-          gpmlStream2.close();
-        } catch (Exception e) {}
-      }
-    }
-
-    public void run(final TaskMonitor monitor) throws Exception {
-      gpmlStream = streamTask.get();
-
-      monitor.setStatusMessage("Parsing pathways file");
-      final Pathway pathway = new Pathway();
-      try {
-        pathway.readFromXml(gpmlStream, true);
-      } catch (Exception e) {
-        throw new Exception("Pathway not available -- invalid GPML", e);
-      }
-      gpmlStream = null;
-
-      monitor.setStatusMessage("Constructing network");
-      final String name = pathway.getMappInfo().getMapInfoName();
-      final CyNetworkView view = newNetwork(name);
-
-      if (pathwayMenuItem.isSelected()) {
-        (new GpmlToPathway(eventHelper, annots, pathway, view.getModel())).convert();
-      } else {
-       (new GpmlToNetwork(eventHelper, pathway, view.getModel())).convert();
-        CyLayoutAlgorithm layout = layoutMgr.getLayout("force-directed");
-        insertTasksAfterCurrentTask(layout.createTaskIterator(view, layout.createLayoutContext(), CyLayoutAlgorithm.ALL_NODE_VIEWS, null));
-      }
-      insertTasksAfterCurrentTask(showLODTF.createTaskIterator(view.getModel()));
-      insertTasksAfterCurrentTask(new AbstractTask() {
-        public void run(TaskMonitor monitor) {
-          updateNetworkView(view);
-        }
-
-        public void cancel() {}
-      });
-    }
-  }
-
-  private CyNetworkView newNetwork(final String name) {
-    final CyNetwork net = netFactory.createNetwork();
-    net.getRow(net).set(CyNetwork.NAME, netNaming.getSuggestedNetworkTitle(name));
-    netMgr.addNetwork(net);
-    final CyNetworkView view = netViewFactory.createNetworkView(net);
-    netViewMgr.addNetworkView(view);
-    return view;
-  }
-
-  private void updateNetworkView(final CyNetworkView netView) {
-    vizStyle.apply(netView);
-    netView.fitContent();
-    netView.updateView();
   }
 
   class PathwayRefsTableModel extends AbstractTableModel {
@@ -562,7 +506,7 @@ class SplitButton extends JButton {
     });
   }
 
-  public void setLabel(final String label) {
+  public void setText(final String label) {
     mainText.setText(label);
   }
 
@@ -578,7 +522,7 @@ class SplitButton extends JButton {
 }
 
 class CheckMarkMenuItem extends JMenuItem {
-  static final String CHECKED_STATE_TEXT_FMT = "<html><font size=\"+1\"><b>\u2714</b></font> %s<br><img src=\"%s\"></html>";
+  static final String CHECKED_STATE_TEXT_FMT = "<html><font size=\"+1\">\u2714</font> %s<br><img src=\"%s\"></html>";
   static final String NORMAL_STATE_TEXT_FMT = "<html>%s<br><img src=\"%s\"></html>";
   final String text;
   final String imgUrl;
