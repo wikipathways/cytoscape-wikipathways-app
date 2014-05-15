@@ -203,7 +203,7 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
       eventHelper.flushPayloadEvents(); // guarantee that all node and edge views have been created
       DelayedVizProp.applyAll(view, vizProps); // apply our visual style
       vizProps.clear(); // be nice to the GC
-      pendingVizProps.remove(vizProps);
+      pendingVizProps.remove(network);
     }
   }
 

@@ -38,6 +38,7 @@ import org.cytoscape.view.vizmap.VisualStyleFactory;
 import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.view.vizmap.VisualMappingFunctionFactory;
 import org.cytoscape.session.CyNetworkNaming;
+import org.cytoscape.work.TaskFactory;
 import org.cytoscape.work.TaskManager;
 import org.cytoscape.work.swing.DialogTaskManager;
 import org.cytoscape.work.ServiceProperties;
@@ -48,7 +49,9 @@ import org.cytoscape.util.swing.OpenBrowser;
 import org.wikipathways.cytoscapeapp.WPClient;
 import org.wikipathways.cytoscapeapp.WPClientFactory;
 import org.wikipathways.cytoscapeapp.GpmlReaderFactory;
+import org.wikipathways.cytoscapeapp.GpmlConversionMethod;
 import org.wikipathways.cytoscapeapp.impl.WPClientRESTFactoryImpl;
+import org.wikipathways.cytoscapeapp.internal.cmd.GpmlImportCmdTaskFactory;
 import org.wikipathways.cytoscapeapp.internal.io.Annots;
 import org.wikipathways.cytoscapeapp.internal.io.GpmlVizStyle;
 import org.wikipathways.cytoscapeapp.internal.io.GpmlCyReaderTaskFactory;
@@ -125,6 +128,20 @@ public class CyActivator extends AbstractCyActivator {
     registerService(context, toggleShapesTF, NetworkViewTaskFactory.class, ezProps(
       ServiceProperties.TITLE, "Toggle Pathway Shapes",
       ServiceProperties.PREFERRED_MENU, "View"
+      ));
+
+    registerService(context,
+      new GpmlImportCmdTaskFactory(gpmlReaderFactory, GpmlConversionMethod.PATHWAY),
+      TaskFactory.class, ezProps(
+        ServiceProperties.COMMAND, "import-as-pathway",
+        ServiceProperties.COMMAND_NAMESPACE, "gpml"
+      ));
+
+    registerService(context,
+      new GpmlImportCmdTaskFactory(gpmlReaderFactory, GpmlConversionMethod.NETWORK),
+      TaskFactory.class, ezProps(
+        ServiceProperties.COMMAND, "import-as-network",
+        ServiceProperties.COMMAND_NAMESPACE, "gpml"
       ));
   }
 
