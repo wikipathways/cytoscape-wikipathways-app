@@ -40,6 +40,6 @@ public final class WPPathway {
   }
 
   public String toString() {
-    return String.format("%s (%s) [%s %s]", name, species, id, revision);
+    return String.format("%s (%s) [ID: %s]", name, species, id);
   }
 }
