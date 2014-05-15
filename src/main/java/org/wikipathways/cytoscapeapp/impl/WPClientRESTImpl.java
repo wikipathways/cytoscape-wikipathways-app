@@ -63,6 +63,7 @@ public class WPClientRESTImpl implements WPClient {
       return nvPairs;
     }
 
+    protected volatile boolean cancelled = false;
     protected volatile HttpMethodBase req = null;
     protected volatile InputStream stream = null;
 
@@ -78,14 +79,20 @@ public class WPClientRESTImpl implements WPClient {
         final InputSource inputSource = new InputSource(stream);
         inputSource.setEncoding(encoding);
         return xmlParser.parse(inputSource);
+      } catch (IOException e) {
+        if (!cancelled) {
+          throw e; // ignore exceptions thrown during cancellation
+        }
       } finally {
         req.releaseConnection();
         req = null;
         stream = null;
       }  
+      return null;
     }
 
     public void cancel() {
+      cancelled = true; // this must be set before calling abort() or close()
       final HttpMethodBase req2 = req; // copy the ref to req so that it doesn't become null when trying to abort it
       if (req2 != null) {
         req2.abort();
@@ -106,6 +113,8 @@ public class WPClientRESTImpl implements WPClient {
       protected List<String> checkedRun(final TaskMonitor monitor) throws Exception {
         monitor.setTitle("Retrieve list of organisms from WikiPathways");
         final Document doc = xmlGet(BASE_URL + "listOrganisms");
+        if (super.cancelled)
+          return null;
         final Node responseNode = doc.getFirstChild();
         final NodeList organismNodes = responseNode.getChildNodes(); 
         final List<String> result = new ArrayList<String>();
@@ -149,6 +158,8 @@ public class WPClientRESTImpl implements WPClient {
       protected List<WPPathway> checkedRun(final TaskMonitor monitor) throws Exception {
         monitor.setTitle("Search WikiPathways for \'" + query + "\'");
         final Document doc = xmlGet(BASE_URL + "findPathwaysByText", "query", query, "species", species == null ? "" : species);
+        if (super.cancelled)
+          return null;
         final Node responseNode = doc.getFirstChild();
         final NodeList resultNodes = responseNode.getChildNodes(); 
         final List<WPPathway> result = new ArrayList<WPPathway>();
@@ -170,6 +181,8 @@ public class WPClientRESTImpl implements WPClient {
       protected WPPathway checkedRun(final TaskMonitor monitor) throws Exception {
         monitor.setTitle("Retrieve info for \'" + id + "\'");
         final Document doc = xmlGet(BASE_URL + "getPathwayInfo", "pwId", id);
+        if (super.cancelled)
+          return null;
         final Node responseNode = doc.getFirstChild();
         final Node resultNode = responseNode.getFirstChild(); 
         return parsePathwayInfo(resultNode);
@@ -197,6 +210,8 @@ public class WPClientRESTImpl implements WPClient {
         } catch (SAXParseException e) {
           throw new Exception(String.format("'%s' is not available -- invalid GPML", pathway.getName()), e);
         }
+        if (super.cancelled)
+          return null;
         final Node responseNode = doc.getFirstChild();
         final Node pathwayNode = responseNode.getFirstChild(); 
         final Node gpmlNode = findChildNode(pathwayNode, "ns2:gpml");
