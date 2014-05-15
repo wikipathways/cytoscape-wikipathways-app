@@ -22,6 +22,7 @@ import org.cytoscape.task.NetworkTaskFactory;
 import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.AbstractTask;
+import org.cytoscape.work.ObservableTask;
 
 import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
 import org.cytoscape.view.layout.CyLayoutAlgorithm;
@@ -207,7 +208,7 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
     }
   }
 
-  class UpdateViewTask extends AbstractTask {
+  class UpdateViewTask extends AbstractTask implements ObservableTask {
     final CyNetworkView view;
     public UpdateViewTask(final CyNetworkView view) {
       this.view = view;
@@ -219,6 +220,21 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
       vizStyle.apply(view);
       view.fitContent();
       view.updateView();
+    }
+
+    public <R> R getResults(Class<? extends R> type) {
+      final CyNetwork network = view.getModel();
+      if (String.class.equals(type)) {
+        return (R) network.getRow(network).get(CyNetwork.NAME, String.class);
+      } else if (Long.class.equals(type)) {
+        return (R) network.getSUID();
+      } else if (CyNetwork.class.equals(type)) {
+        return (R) network;
+      } else if (CyNetworkView.class.equals(type)) {
+        return (R) view;
+      } else {
+        return null;
+      }
     }
   }
 }
