@@ -54,6 +54,7 @@ import org.wikipathways.cytoscapeapp.impl.WPClientRESTFactoryImpl;
 import org.wikipathways.cytoscapeapp.internal.cmd.GpmlImportCmdTaskFactory;
 import org.wikipathways.cytoscapeapp.internal.cmd.WPSearchCmdTaskFactory;
 import org.wikipathways.cytoscapeapp.internal.cmd.WPSpeciesCmdTaskFactory;
+import org.wikipathways.cytoscapeapp.internal.cmd.WPImportCmdTaskFactory;
 import org.wikipathways.cytoscapeapp.internal.io.Annots;
 import org.wikipathways.cytoscapeapp.internal.io.GpmlVizStyle;
 import org.wikipathways.cytoscapeapp.internal.io.GpmlCyReaderTaskFactory;
@@ -157,6 +158,20 @@ public class CyActivator extends AbstractCyActivator {
       new WPSearchCmdTaskFactory(client),
       TaskFactory.class, ezProps(
         ServiceProperties.COMMAND, "search",
+        ServiceProperties.COMMAND_NAMESPACE, "wikipathways"
+      ));
+
+    registerService(context,
+      new WPImportCmdTaskFactory(client, gpmlReaderFactory, GpmlConversionMethod.PATHWAY),
+      TaskFactory.class, ezProps(
+        ServiceProperties.COMMAND, "import-as-pathway",
+        ServiceProperties.COMMAND_NAMESPACE, "wikipathways"
+      ));
+
+    registerService(context,
+      new WPImportCmdTaskFactory(client, gpmlReaderFactory, GpmlConversionMethod.NETWORK),
+      TaskFactory.class, ezProps(
+        ServiceProperties.COMMAND, "import-as-network",
         ServiceProperties.COMMAND_NAMESPACE, "wikipathways"
       ));
   }
