@@ -63,8 +63,8 @@ public class WPClientRESTImpl implements WPClient {
       return nvPairs;
     }
 
-    protected HttpMethodBase req = null;
-    protected InputStream stream = null;
+    protected volatile HttpMethodBase req = null;
+    protected volatile InputStream stream = null;
 
     protected Document xmlGet(final String url, final String ... args) throws IOException, SAXException {
       // build our get request
