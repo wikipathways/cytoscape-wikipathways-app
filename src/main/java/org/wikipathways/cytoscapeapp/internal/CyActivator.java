@@ -52,6 +52,7 @@ import org.wikipathways.cytoscapeapp.GpmlReaderFactory;
 import org.wikipathways.cytoscapeapp.GpmlConversionMethod;
 import org.wikipathways.cytoscapeapp.impl.WPClientRESTFactoryImpl;
 import org.wikipathways.cytoscapeapp.internal.cmd.GpmlImportCmdTaskFactory;
+import org.wikipathways.cytoscapeapp.internal.cmd.WPSpeciesCmdTaskFactory;
 import org.wikipathways.cytoscapeapp.internal.io.Annots;
 import org.wikipathways.cytoscapeapp.internal.io.GpmlVizStyle;
 import org.wikipathways.cytoscapeapp.internal.io.GpmlCyReaderTaskFactory;
@@ -142,6 +143,13 @@ public class CyActivator extends AbstractCyActivator {
       TaskFactory.class, ezProps(
         ServiceProperties.COMMAND, "import-as-network",
         ServiceProperties.COMMAND_NAMESPACE, "gpml"
+      ));
+
+    registerService(context,
+      new WPSpeciesCmdTaskFactory(client),
+      TaskFactory.class, ezProps(
+        ServiceProperties.COMMAND, "get-species",
+        ServiceProperties.COMMAND_NAMESPACE, "wikipathways"
       ));
   }
 
