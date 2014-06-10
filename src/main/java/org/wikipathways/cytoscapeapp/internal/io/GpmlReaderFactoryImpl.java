@@ -11,6 +11,8 @@ import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyTable;
 import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.model.CyNetworkFactory;
+import org.cytoscape.model.subnetwork.CySubNetwork;
+import org.cytoscape.model.subnetwork.CyRootNetwork;
 import org.cytoscape.session.CyNetworkNaming;
 import org.cytoscape.view.model.CyNetworkViewManager;
 import org.cytoscape.view.model.CyNetworkViewFactory;
@@ -125,6 +127,7 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
 
   public TaskIterator createReaderAndViewBuilder(final Reader gpmlContents, final GpmlConversionMethod conversionMethod) {
     final CyNetwork network = netFactory.createNetwork();
+    network.getRow(network).set(CyNetwork.NAME, "Pathway");
     netMgr.addNetwork(network);
     final CyNetworkView view = netViewFactory.createNetworkView(network);
     netViewMgr.addNetworkView(view);
@@ -163,7 +166,12 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
 
       if (setNetworkName) {
         final String name = pathway.getMappInfo().getMapInfoName();
-        network.getRow(network).set(CyNetwork.NAME, netNaming.getSuggestedNetworkTitle(name));
+        final String nonConflictingName = netNaming.getSuggestedNetworkTitle(name);
+        network.getRow(network).set(CyNetwork.NAME, nonConflictingName);
+        if (network instanceof CySubNetwork) {
+          final CyRootNetwork root = ((CySubNetwork) network).getRootNetwork();
+          root.getRow(root).set(CyNetwork.NAME, nonConflictingName);
+        }
       }
 
       List<DelayedVizProp> vizProps = null;
