@@ -1,82 +1,83 @@
+// WikiPathways App for Cytoscape
+//
+// Copyright 2013-2014 WikiPathways
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package org.wikipathways.cytoscapeapp.internal.guiclient;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.GridBagLayout;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridBagLayout;
 import java.awt.Paint;
-import java.awt.BasicStroke;
-import java.awt.Stroke;
 import java.awt.RenderingHints;
-import java.awt.geom.RoundRectangle2D;
+import java.awt.Stroke;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-
+import java.awt.geom.RoundRectangle2D;
 import java.io.Reader;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import javax.swing.ButtonGroup;
+import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
-import javax.swing.JMenuItem;
-import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.ImageIcon;
 import javax.swing.ListSelectionModel;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.SwingUtilities;
-
 import javax.swing.border.AbstractBorder;
+import javax.swing.table.AbstractTableModel;
 
+import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.io.webservice.NetworkImportWebServiceClient;
 import org.cytoscape.io.webservice.SearchWebServiceClient;
 import org.cytoscape.io.webservice.swing.AbstractWebServiceGUIClient;
-import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.model.CyNetwork;
-import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.model.CyNetworkFactory;
+import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.session.CyNetworkNaming;
-import org.cytoscape.view.model.CyNetworkViewManager;
-import org.cytoscape.view.model.CyNetworkViewFactory;
-import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
+import org.cytoscape.task.NetworkTaskFactory;
+import org.cytoscape.util.swing.OpenBrowser;
 import org.cytoscape.view.layout.CyLayoutAlgorithm;
+import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
 import org.cytoscape.view.model.CyNetworkView;
-
+import org.cytoscape.view.model.CyNetworkViewFactory;
+import org.cytoscape.view.model.CyNetworkViewManager;
 import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.TaskIterator;
-import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.TaskManager;
-import org.cytoscape.work.TaskObserver;
-import org.cytoscape.work.ObservableTask;
-import org.cytoscape.work.FinishStatus;
-
-import org.cytoscape.util.swing.OpenBrowser;
-
-import org.cytoscape.task.NetworkTaskFactory;
-
+import org.cytoscape.work.TaskMonitor;
 import org.pathvisio.core.model.Pathway;
-
 import org.wikipathways.cytoscapeapp.ResultTask;
 import org.wikipathways.cytoscapeapp.WPClient;
 import org.wikipathways.cytoscapeapp.WPPathway;
