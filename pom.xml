@@ -10,7 +10,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.wikipathways</groupId>
 	<artifactId>cytoscapeapp</artifactId>
-	<version>3.1.1</version>
+	<version>3.1.2</version>
 
 	<name>WikiPathways Cytoscape App</name>
 	
@@ -98,38 +98,13 @@
 						<Private-Package>${bundle.namespace}.internal.*,${bundle.namespace}.impl.*</Private-Package>
             <Export-Package>${bundle.namespace}</Export-Package>
 						<Bundle-Activator>${bundle.namespace}.internal.CyActivator</Bundle-Activator>
-						<Import-Package>org.xml.sax;resolution:=optional,javax.xml.transform;resolution:=optional,
-							javax.xml.transform.stream;resolution:=optional,
-							javax.xml.parsers;resolution:=optional,org.xml.sax.helpers;resolution:=optional,
-							org.xml.sax.ext;resolution:=optional,javax.xml.validation;resolution:=optional,*</Import-Package>
+						<Embed-Dependency>*;scope=!provided</Embed-Dependency>
+						<Embed-Transitive>true</Embed-Transitive>
+						<Import-Package>*;resolution:=optional</Import-Package>
               <Bundle-Name>WikiPathways</Bundle-Name>
 					</instructions>
 				</configuration>
 			</plugin>
-			<plugin>
-        		<groupId>org.apache.maven.plugins</groupId>
-        		<artifactId>maven-shade-plugin</artifactId>
-        		<version>2.1</version>
-        		<executions>
-        			<execution>
-        		    	<phase>package</phase>
-        		   		<goals>
-        		    		<goal>shade</goal>
-        		    	</goals>
-        	    		<configuration>
-        	    			<artifactSet>
-        	    				<includes>
-        	    					<include>org.pathvisio:pathvisio-core</include>
-        	    					<include>com.springsource:org.jdom</include>
-        	    					<include>org.bridgedb:bridgedb</include>
-        	    					<include>org.bridgedb:bridgedb-bio</include>
-        	    					<include>derby:derby</include>
-        	    				</includes>
-        	    			</artifactSet>
-            			</configuration>
-          			</execution>
-        		</executions>
-      		</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
@@ -170,67 +145,80 @@
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.core</artifactId>
 			<version>4.2.0</version>
+			<scope>provided</scope>
 		</dependency>
 		
 		<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>service-api</artifactId>
 			<version>${cytoscape.api.version}</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>core-task-api</artifactId>
 			<version>${cytoscape.api.version}</version>
-			</dependency>
+			<scope>provided</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>swing-application-api</artifactId>
 			<version>${cytoscape.api.version}</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>session-api</artifactId>
 			<version>${cytoscape.api.version}</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>webservice-api</artifactId>
 			<version>${cytoscape.api.version}</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
     		<groupId>org.cytoscape</groupId>
     		<artifactId>io-api</artifactId>
     		<version>${cytoscape.api.version}</version>
+		<scope>provided</scope>
 		</dependency>
 		 <dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>swing-util-api</artifactId>
 			<version>${cytoscape.api.version}</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
     		<groupId>org.cytoscape</groupId>
     		<artifactId>swing-app-api</artifactId>
     	<version>${cytoscape.api.version}</version>
+		<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>app-api</artifactId>
 			<version>${cytoscape.api.version}</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>presentation-api</artifactId>
 			<version>${cytoscape.api.version}</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>vizmap-api</artifactId>
 			<version>${cytoscape.api.version}</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
     		<groupId>org.cytoscape</groupId>
     		<artifactId>work-api</artifactId>
     		<version>${cytoscape.api.version}</version>
+		<scope>provided</scope>
 		</dependency>
 
 		<!-- Logging -->
@@ -276,7 +264,6 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>com.springsource.org.apache.commons.httpclient</artifactId>
             <version>3.1.0</version>
-            <scope>provided</scope>
         </dependency>
 	</dependencies>
 
