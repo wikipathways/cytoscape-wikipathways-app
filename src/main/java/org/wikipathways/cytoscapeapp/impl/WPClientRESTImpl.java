@@ -4,6 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import java.io.Reader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileInputStream;
+import java.io.ObjectOutputStream;
+import java.io.ObjectInputStream;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.io.IOException;
@@ -24,6 +29,7 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.NameValuePair;
 
 import org.cytoscape.work.TaskMonitor;
+import org.cytoscape.application.CyApplicationConfiguration;
 
 import org.wikipathways.cytoscapeapp.WPClient;
 import org.wikipathways.cytoscapeapp.WPPathway;
@@ -31,6 +37,8 @@ import org.wikipathways.cytoscapeapp.ResultTask;
 
 public class WPClientRESTImpl implements WPClient {
   protected static final String BASE_URL = "http://www.wikipathways.org/wpi/webservice/webservice.php/";
+
+  final CyApplicationConfiguration appConf;
 
   final DocumentBuilder xmlParser;
   final HttpClient client;
@@ -42,7 +50,8 @@ public class WPClientRESTImpl implements WPClient {
     return builder;
   }
   
-  public WPClientRESTImpl() {
+  public WPClientRESTImpl(final CyApplicationConfiguration appConf) {
+    this.appConf = appConf;
     try {
       xmlParser = newXmlParser();
     } catch (ParserConfigurationException e) {
@@ -108,21 +117,81 @@ public class WPClientRESTImpl implements WPClient {
     }
   }
 
+  private File getSpeciesCacheFile() {
+     final File confDir = appConf.getAppConfigurationDirectoryLocation(this.getClass());
+     if (!confDir.exists()) {
+       if (!confDir.mkdirs()) {
+         return null;
+       }
+     }
+     return new File(confDir, "species-cache");
+  }
+
+  private void storeSpeciesToCache(final List<String> species) {
+    final File speciesCacheFile = getSpeciesCacheFile();
+    if (speciesCacheFile == null) {
+      return;
+    }
+    try {
+      final FileOutputStream outStream = new FileOutputStream(speciesCacheFile);
+      final ObjectOutputStream output = new ObjectOutputStream(outStream);
+      output.writeObject(species);
+      outStream.close();
+    } catch (Exception e) {
+      System.out.println("Failed to write species cache");
+      e.printStackTrace();
+    }
+  }
+
+  private List<String> retrieveSpeciesFromCache() {
+    final File speciesCacheFile = getSpeciesCacheFile();
+    if (speciesCacheFile == null || !speciesCacheFile.exists()) {
+      return null;
+    }
+
+    try {
+      final FileInputStream inStream = new FileInputStream(speciesCacheFile);
+      final ObjectInputStream input = new ObjectInputStream(inStream);
+      final Object object = input.readObject();
+      inStream.close();
+      final List<String> result = (List<String>) object;
+      return result;
+    } catch (Exception e) {
+      System.out.println("Failed to read species cache");
+      e.printStackTrace();
+    }
+    return null;
+  }
+
+  List<String> species = null;
+
   public ResultTask<List<String>> newSpeciesTask() {
     return new ReqTask<List<String>>() {
       protected List<String> checkedRun(final TaskMonitor monitor) throws Exception {
         monitor.setTitle("Retrieve list of organisms from WikiPathways");
+
+        if (species == null) {
+          species = retrieveSpeciesFromCache();
+        }
+
+        if (species != null) {
+          return species;
+        }
+
         final Document doc = xmlGet(BASE_URL + "listOrganisms");
         if (super.cancelled)
           return null;
         final Node responseNode = doc.getFirstChild();
         final NodeList organismNodes = responseNode.getChildNodes(); 
-        final List<String> result = new ArrayList<String>();
+        final List<String> species = new ArrayList<String>();
         for (int i = 0; i < organismNodes.getLength(); i++) {
           final Node organismNode = organismNodes.item(i);
-          result.add(organismNode.getTextContent());
+          species.add(organismNode.getTextContent());
         }
-        return result;
+
+        storeSpeciesToCache(species);
+
+        return species;
       }
     };
   }

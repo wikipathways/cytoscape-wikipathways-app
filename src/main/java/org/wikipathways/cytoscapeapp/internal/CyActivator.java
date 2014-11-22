@@ -19,6 +19,7 @@ package org.wikipathways.cytoscapeapp.internal;
 
 import java.util.Properties;
 
+import org.cytoscape.application.CyApplicationConfiguration;
 import org.cytoscape.model.CyNetworkFactory;
 import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.event.CyEventHelper;
@@ -82,6 +83,7 @@ public class CyActivator extends AbstractCyActivator {
     final NetworkTaskFactory showLODTF = getService(context, NetworkTaskFactory.class, String.format("(%s=Show\\/Hide Graphics Details)", ServiceProperties.TITLE));
     final OpenBrowser openBrowser = getService(context, OpenBrowser.class);
     final CyNetworkNaming netNaming = getService(context, CyNetworkNaming.class);
+    final CyApplicationConfiguration appConf = getService(context, CyApplicationConfiguration.class);
 
     final GpmlVizStyle gpmlStyle = new GpmlVizStyle(
               getService(context, VisualStyleFactory.class),
@@ -96,7 +98,7 @@ public class CyActivator extends AbstractCyActivator {
               (AnnotationFactory<ShapeAnnotation>) getService(context, AnnotationFactory.class,"(type=ShapeAnnotation.class)"),
               (AnnotationFactory<TextAnnotation>) getService(context, AnnotationFactory.class,"(type=TextAnnotation.class)"));
 
-    final WPClientFactory clientFactory = new WPClientRESTFactoryImpl();
+    final WPClientFactory clientFactory = new WPClientRESTFactoryImpl(appConf);
     registerService(context, clientFactory, WPClientFactory.class, new Properties());
 
     final WPClient client = clientFactory.create();
