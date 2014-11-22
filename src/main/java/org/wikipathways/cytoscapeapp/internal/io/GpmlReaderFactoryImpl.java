@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.io.Reader;
 import java.io.IOException;
 
+import javax.swing.SwingUtilities;
+
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyTable;
 import org.cytoscape.model.CyNetworkManager;
@@ -210,6 +212,7 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
     public void run(TaskMonitor monitor) {
       final List<DelayedVizProp> vizProps = pendingVizProps.get(network);
       eventHelper.flushPayloadEvents(); // guarantee that all node and edge views have been created
+      try { Thread.sleep(1000); } catch (Exception e) {} // wait for flush payload events to take hold
       DelayedVizProp.applyAll(view, vizProps); // apply our visual style
       vizProps.clear(); // be nice to the GC
       pendingVizProps.remove(network);
@@ -222,12 +225,20 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
       this.view = view;
     }
 
-    public void run(TaskMonitor monitor) {
+    public void run(TaskMonitor monitor) throws Exception {
       monitor.setTitle("Build network view");
 
-      vizStyle.apply(view);
-      view.fitContent();
-      view.updateView();
+      try {
+        SwingUtilities.invokeAndWait(new Runnable() {
+          public void run() {
+            vizStyle.apply(view);
+            view.fitContent();
+            view.updateView();
+          }
+        });
+      } catch (Exception e) {
+        throw new Exception("Failed to build view", e);
+      }
     }
 
     public <R> R getResults(Class<? extends R> type) {
