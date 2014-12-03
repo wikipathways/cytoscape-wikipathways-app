@@ -58,6 +58,13 @@ public class WPClientRESTImpl implements WPClient {
       throw new IllegalArgumentException("Failed to build XML parser", e);
     }
     client = new HttpClient();
+
+    final String proxyHost = System.getProperty("http.proxyHost");
+    final String proxyPort = System.getProperty("http.proxyPort");
+    if (proxyHost != null && proxyHost.length() != 0 &&
+        proxyPort != null && proxyPort.matches("\\d+")) {
+      client.getHostConfiguration().setProxy(proxyHost, Integer.parseInt(proxyPort));
+    }
   }
 
   /**
