@@ -298,6 +298,7 @@ public class GpmlToPathway {
     public static final Extracter TEXT_LABEL          = new BasicExtracter(StaticProperty.TEXTLABEL);
     public static final Extracter X                   = new BasicExtracter(StaticProperty.CENTERX);
     public static final Extracter Y                   = new BasicExtracter(StaticProperty.CENTERY);
+    public static final Extracter Z                   = new BasicExtracter(StaticProperty.ZORDER);
     public static final Extracter WIDTH               = new BasicExtracter(StaticProperty.WIDTH);
     public static final Extracter HEIGHT              = new BasicExtracter(StaticProperty.HEIGHT);
     public static final Extracter COLOR_STRING        = new BasicExtracter(PV_COLOR_STRING_CONVERTER, StaticProperty.COLOR);
@@ -614,6 +615,7 @@ public class GpmlToPathway {
   static class BasicVizPropStore implements VizPropStore {
     public static final VizPropStore NODE_X                 = new BasicVizPropStore(BasicExtracter.X,                               BasicVisualLexicon.NODE_X_LOCATION);
     public static final VizPropStore NODE_Y                 = new BasicVizPropStore(BasicExtracter.Y,                               BasicVisualLexicon.NODE_Y_LOCATION);
+    public static final VizPropStore NODE_Z                 = new BasicVizPropStore(BasicExtracter.Z,                               BasicVisualLexicon.NODE_Z_LOCATION);
     public static final VizPropStore NODE_WIDTH             = new BasicVizPropStore(BasicExtracter.WIDTH,                           BasicVisualLexicon.NODE_WIDTH);
     public static final VizPropStore NODE_HEIGHT            = new BasicVizPropStore(BasicExtracter.HEIGHT,                          BasicVisualLexicon.NODE_HEIGHT);
     public static final VizPropStore NODE_FILL_COLOR        = new BasicVizPropStore(BasicExtracter.FILL_COLOR,                      BasicVisualLexicon.NODE_FILL_COLOR);
@@ -721,7 +723,8 @@ public class GpmlToPathway {
     );
     store(cyNode, pvDataNode,
       BasicVizPropStore.NODE_X,
-      BasicVizPropStore.NODE_Y
+      BasicVizPropStore.NODE_Y,
+      BasicVizPropStore.NODE_Z
     );
     if (ZERO.equals(BasicExtracter.NODE_LINE_THICKNESS.extract(pvDataNode))) {
       store(cyNode, pvDataNode,
@@ -756,6 +759,7 @@ public class GpmlToPathway {
     store(cyNode, pvShape,
       BasicVizPropStore.NODE_X,
       BasicVizPropStore.NODE_Y,
+      BasicVizPropStore.NODE_Z,
       BasicVizPropStore.NODE_WIDTH,
       BasicVizPropStore.NODE_HEIGHT,
       BasicVizPropStore.NODE_FILL_COLOR,
@@ -814,6 +818,7 @@ public class GpmlToPathway {
     store(cyNode, pvState,
       STATE_X_STORE,
       STATE_Y_STORE,
+      BasicVizPropStore.NODE_Z,
       BasicVizPropStore.NODE_WIDTH,
       BasicVizPropStore.NODE_HEIGHT,
       BasicVizPropStore.NODE_FILL_COLOR,
@@ -912,6 +917,7 @@ public class GpmlToPathway {
     store(cyGroupNode, pvGroup,
       GROUP_X,
       GROUP_Y,
+      BasicVizPropStore.NODE_Z,
       SELECTED_COLOR,
       GROUP_WIDTH,
       GROUP_HEIGHT,
@@ -951,6 +957,7 @@ public class GpmlToPathway {
     store(cyNode, pvLabel,
       BasicVizPropStore.NODE_X,
       BasicVizPropStore.NODE_Y,
+      BasicVizPropStore.NODE_Z,
       BasicVizPropStore.NODE_WIDTH,
       BasicVizPropStore.NODE_HEIGHT,
       BasicVizPropStore.NODE_BORDER_STYLE,
