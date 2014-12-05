@@ -50,8 +50,8 @@ import org.cytoscape.util.swing.OpenBrowser;
 
 import org.wikipathways.cytoscapeapp.WPClient;
 import org.wikipathways.cytoscapeapp.WPClientFactory;
-import org.wikipathways.cytoscapeapp.GpmlReaderFactory;
 import org.wikipathways.cytoscapeapp.GpmlConversionMethod;
+import org.wikipathways.cytoscapeapp.GpmlReaderFactory;
 import org.wikipathways.cytoscapeapp.impl.WPClientRESTFactoryImpl;
 import org.wikipathways.cytoscapeapp.internal.cmd.GpmlImportCmdTaskFactory;
 import org.wikipathways.cytoscapeapp.internal.cmd.WPSearchCmdTaskFactory;
@@ -136,20 +136,12 @@ public class CyActivator extends AbstractCyActivator {
       ServiceProperties.PREFERRED_MENU, "View"
       ));
 
-    final OpenLinkedPathwayAsNewTaskFactory openLinkedPathwayAsNewPathwayTF = new OpenLinkedPathwayAsNewTaskFactory(GpmlConversionMethod.PATHWAY, client, gpmlReaderFactory);
-    registerService(context, openLinkedPathwayAsNewPathwayTF, NodeViewTaskFactory.class, ezProps(
-      ServiceProperties.TITLE, "As New Pathway",
-      ServiceProperties.PREFERRED_MENU, "Apps.WikiPathways.Open Linked Pathway",
+    final OpenLinkedPathwayAsNewTaskFactory openLinkedPathwayAsNewTF = new OpenLinkedPathwayAsNewTaskFactory(client, gpmlReaderFactory);
+    registerService(context, openLinkedPathwayAsNewTF, NodeViewTaskFactory.class, ezProps(
+      ServiceProperties.TITLE, "Open Linked Pathway",
+      ServiceProperties.PREFERRED_MENU, "Apps.WikiPathways",
       ServiceProperties.IN_MENU_BAR, "false"
       ));
-
-    final OpenLinkedPathwayAsNewTaskFactory openLinkedPathwayAsNewNetworkTF = new OpenLinkedPathwayAsNewTaskFactory(GpmlConversionMethod.NETWORK, client, gpmlReaderFactory);
-    registerService(context, openLinkedPathwayAsNewNetworkTF, NodeViewTaskFactory.class, ezProps(
-      ServiceProperties.TITLE, "As New Network",
-      ServiceProperties.PREFERRED_MENU, "Apps.WikiPathways.Open Linked Pathway",
-      ServiceProperties.IN_MENU_BAR, "false"
-      ));
-
 
     registerService(context,
       new GpmlImportCmdTaskFactory(gpmlReaderFactory, GpmlConversionMethod.PATHWAY),

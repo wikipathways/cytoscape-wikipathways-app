@@ -20,22 +20,22 @@ import org.wikipathways.cytoscapeapp.WPPathway;
 import org.wikipathways.cytoscapeapp.ResultTask;
 
 public class OpenLinkedPathwayAsNewTaskFactory implements NodeViewTaskFactory {
-  final GpmlConversionMethod method;
   final WPClient client;
   final GpmlReaderFactory gpmlReaderFactory;
 
-  public OpenLinkedPathwayAsNewTaskFactory(final GpmlConversionMethod method, final WPClient client, final GpmlReaderFactory gpmlReaderFactory) {
-    this.method = method;
+  public OpenLinkedPathwayAsNewTaskFactory(final WPClient client, final GpmlReaderFactory gpmlReaderFactory) {
     this.client = client;
     this.gpmlReaderFactory = gpmlReaderFactory;
   }
 
   public TaskIterator createTaskIterator(final View<CyNode> nodeView, final CyNetworkView netView) {
     final CyNetwork net = netView.getModel();
+    final boolean isPathway = net.getDefaultNodeTable().getColumn("IsGPMLShape") != null;
     final CyNode node = nodeView.getModel();
     final Long nodeId = node.getSUID();
     final CyTable nodeTbl = net.getDefaultNodeTable();
-    final String xrefId = nodeTbl.getRow(nodeId).get("XrefId", String.class);
+    final String xrefId = nodeTbl.getRow(nodeId).get(isPathway ? "XrefId" : "GeneID", String.class);
+    final GpmlConversionMethod method = isPathway ? GpmlConversionMethod.PATHWAY : GpmlConversionMethod.NETWORK;
 
     final ResultTask<WPPathway> pathwayInfoTask = client.newPathwayInfoTask(xrefId);
     return new TaskIterator(
@@ -62,20 +62,26 @@ public class OpenLinkedPathwayAsNewTaskFactory implements NodeViewTaskFactory {
     if (node == null || net == null)
       return false;
 
-
     final CyTable nodeTbl = net.getDefaultNodeTable();
-    final CyColumn xrefIdCol = nodeTbl.getColumn("XrefId");
-    final CyColumn xrefSrcCol = nodeTbl.getColumn("XrefDatasource");
+    final Long nodeId = node.getSUID();
+
+    return checkNode(nodeTbl, nodeId, "XrefId", "XrefDatasource") ||
+           checkNode(nodeTbl, nodeId, "GeneID", "Datasource");
+  }
+
+  private boolean checkNode(final CyTable nodeTbl, final Long nodeId, final String idColName, final String dataSrcColName) {
+    final CyColumn xrefIdCol = nodeTbl.getColumn(idColName);
+    final CyColumn xrefSrcCol = nodeTbl.getColumn(dataSrcColName);
     if (!(xrefIdCol != null &&
           xrefSrcCol != null &&
           xrefIdCol.getType().equals(String.class) &&
-          xrefSrcCol.getType().equals(String.class))) {
+          xrefSrcCol.getType().equals(String.class))
+      ) {
       return false;
     }
 
-    final Long nodeId = node.getSUID();
-    final String xrefSrc = nodeTbl.getRow(nodeId).get("XrefDatasource", String.class);
-    final String xrefId = nodeTbl.getRow(nodeId).get("XrefId", String.class);
+    final String xrefSrc = nodeTbl.getRow(nodeId).get(dataSrcColName, String.class);
+    final String xrefId = nodeTbl.getRow(nodeId).get(idColName, String.class);
     
     return (xrefSrc != null &&
             xrefSrc.equals("WikiPathways") &&
