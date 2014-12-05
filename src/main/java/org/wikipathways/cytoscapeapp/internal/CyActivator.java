@@ -45,6 +45,7 @@ import org.cytoscape.work.swing.DialogTaskManager;
 import org.cytoscape.work.ServiceProperties;
 import org.cytoscape.task.NetworkTaskFactory;
 import org.cytoscape.task.NetworkViewTaskFactory;
+import org.cytoscape.task.NodeViewTaskFactory;
 import org.cytoscape.util.swing.OpenBrowser;
 
 import org.wikipathways.cytoscapeapp.WPClient;
@@ -134,6 +135,21 @@ public class CyActivator extends AbstractCyActivator {
       ServiceProperties.TITLE, "Toggle Pathway Shapes",
       ServiceProperties.PREFERRED_MENU, "View"
       ));
+
+    final OpenLinkedPathwayAsNewTaskFactory openLinkedPathwayAsNewPathwayTF = new OpenLinkedPathwayAsNewTaskFactory(GpmlConversionMethod.PATHWAY, client, gpmlReaderFactory);
+    registerService(context, openLinkedPathwayAsNewPathwayTF, NodeViewTaskFactory.class, ezProps(
+      ServiceProperties.TITLE, "As New Pathway",
+      ServiceProperties.PREFERRED_MENU, "Apps.WikiPathways.Open Linked Pathway",
+      ServiceProperties.IN_MENU_BAR, "false"
+      ));
+
+    final OpenLinkedPathwayAsNewTaskFactory openLinkedPathwayAsNewNetworkTF = new OpenLinkedPathwayAsNewTaskFactory(GpmlConversionMethod.NETWORK, client, gpmlReaderFactory);
+    registerService(context, openLinkedPathwayAsNewNetworkTF, NodeViewTaskFactory.class, ezProps(
+      ServiceProperties.TITLE, "As New Network",
+      ServiceProperties.PREFERRED_MENU, "Apps.WikiPathways.Open Linked Pathway",
+      ServiceProperties.IN_MENU_BAR, "false"
+      ));
+
 
     registerService(context,
       new GpmlImportCmdTaskFactory(gpmlReaderFactory, GpmlConversionMethod.PATHWAY),
