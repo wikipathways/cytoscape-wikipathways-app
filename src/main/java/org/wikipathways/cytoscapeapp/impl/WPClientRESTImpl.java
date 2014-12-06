@@ -13,6 +13,9 @@ import java.io.InputStream;
 import java.io.StringReader;
 import java.io.IOException;
 
+import java.net.URI;
+import java.net.ProxySelector;
+
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.ParserConfigurationException;
@@ -23,10 +26,17 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpMethodBase;
-import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.httpclient.NameValuePair;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.conn.SystemDefaultRoutePlanner;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.HttpEntity;
+
+
+
 
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.application.CyApplicationConfiguration;
@@ -41,7 +51,7 @@ public class WPClientRESTImpl implements WPClient {
   final CyApplicationConfiguration appConf;
 
   final DocumentBuilder xmlParser;
-  final HttpClient client;
+  final CloseableHttpClient client;
 
   protected static DocumentBuilder newXmlParser() throws ParserConfigurationException {
     final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -55,45 +65,46 @@ public class WPClientRESTImpl implements WPClient {
     try {
       xmlParser = newXmlParser();
     } catch (ParserConfigurationException e) {
-      throw new IllegalArgumentException("Failed to build XML parser", e);
+      throw new IllegalStateException("Failed to build XML parser", e);
     }
-    client = new HttpClient();
-
-    final String proxyHost = System.getProperty("http.proxyHost");
-    final String proxyPort = System.getProperty("http.proxyPort");
-    if (proxyHost != null && proxyHost.length() != 0 &&
-        proxyPort != null && proxyPort.matches("\\d+")) {
-      client.getHostConfiguration().setProxy(proxyHost, Integer.parseInt(proxyPort));
+    client = HttpClientBuilder.create()
+      .setRoutePlanner(new SystemDefaultRoutePlanner(ProxySelector.getDefault()))
+      .build();
     }
-  }
 
   /**
    * A convenience class for issuing cancellable REST calls.
    */
   protected abstract class ReqTask<T> extends ResultTask<T> {
-    protected NameValuePair[] makeNameValuePairs(final String[] args) {
-      final NameValuePair[] nvPairs = new NameValuePair[args.length / 2];
-      for (int i = 0; i < args.length; i += 2) {
-        nvPairs[i / 2] = new NameValuePair(args[i], args[i + 1]);
-      }
-      return nvPairs;
-    }
-
     protected volatile boolean cancelled = false;
-    protected volatile HttpMethodBase req = null;
+    protected volatile HttpRequestBase req = null;
+    protected volatile CloseableHttpResponse resp = null;
     protected volatile InputStream stream = null;
 
     protected Document xmlGet(final String url, final String ... args) throws IOException, SAXException {
-      // build our get request
-      req = new GetMethod(url);
-      req.setQueryString(makeNameValuePairs(args));
-
+      // build the request
+      URI uri = null;
       try {
-        client.executeMethod(req);
-        final String encoding = req.getResponseCharSet();
-        stream = req.getResponseBodyAsStream();
+        final URIBuilder uriBuilder = new URIBuilder(url);
+        for (int i = 0; i < args.length; i += 2) {
+          uriBuilder.addParameter(args[i], args[i+1]);
+        }
+        uri = uriBuilder.build();
+      } catch (Exception e) {
+        throw new IllegalArgumentException("Invalid URL request", e);
+      }
+      req = new HttpGet(uri);
+
+      // issue the request
+      try {
+        resp = client.execute(req);
+        final HttpEntity entity = resp.getEntity();
+        final String encoding = entity.getContentEncoding() != null ? entity.getContentEncoding().getValue() : null;
+        stream = entity.getContent();
         final InputSource inputSource = new InputSource(stream);
-        inputSource.setEncoding(encoding);
+        if (encoding != null) {
+          inputSource.setEncoding(encoding);
+        }
         return xmlParser.parse(inputSource);
       } catch (IOException e) {
         if (!cancelled) {
@@ -101,7 +112,9 @@ public class WPClientRESTImpl implements WPClient {
         }
       } finally {
         req.releaseConnection();
+        resp.close();
         req = null;
+        resp = null;
         stream = null;
       }  
       return null;
@@ -109,7 +122,7 @@ public class WPClientRESTImpl implements WPClient {
 
     public void cancel() {
       cancelled = true; // this must be set before calling abort() or close()
-      final HttpMethodBase req2 = req; // copy the ref to req so that it doesn't become null when trying to abort it
+      final HttpRequestBase req2 = req; // copy the ref to req so that it doesn't become null when trying to abort it
       if (req2 != null) {
         req2.abort();
       }
@@ -125,14 +138,14 @@ public class WPClientRESTImpl implements WPClient {
   }
 
   private File getSpeciesCacheFile() {
-     final File confDir = appConf.getAppConfigurationDirectoryLocation(this.getClass());
-     if (!confDir.exists()) {
-       if (!confDir.mkdirs()) {
-         return null;
-       }
+   final File confDir = appConf.getAppConfigurationDirectoryLocation(this.getClass());
+   if (!confDir.exists()) {
+     if (!confDir.mkdirs()) {
+       return null;
      }
-     return new File(confDir, "species-cache");
-  }
+   }
+   return new File(confDir, "species-cache");
+ }
 
   private void storeSpeciesToCache(final List<String> species) {
     final File speciesCacheFile = getSpeciesCacheFile();
