@@ -229,16 +229,32 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
       monitor.setTitle("Build network view");
 
       try {
-        SwingUtilities.invokeAndWait(new Runnable() {
-          public void run() {
-            vizStyle.apply(view);
-            view.fitContent();
-            view.updateView();
-          }
-        });
+        updateView();
       } catch (Exception e) {
         throw new Exception("Failed to build view", e);
       }
+    }
+
+    private void updateView() throws Exception {
+      if (!SwingUtilities.isEventDispatchThread()) {
+        SwingUtilities.invokeAndWait(new Runnable() {
+          public void run() {
+            try {
+              updateViewInner();
+            } catch (Exception e) {
+              e.printStackTrace();
+            }
+          }
+        });
+      } else {
+        updateViewInner();
+      }
+    }
+
+    private void updateViewInner() throws Exception {
+      vizStyle.apply(view);
+      view.fitContent();
+      view.updateView();
     }
 
     public <R> R getResults(Class<? extends R> type) {

@@ -97,5 +97,6 @@ public class GpmlVizStyle {
       vizStyle = create();
     }
     vizMapMgr.setVisualStyle(vizStyle, view);
+    vizStyle.apply(view);
   }
 }
