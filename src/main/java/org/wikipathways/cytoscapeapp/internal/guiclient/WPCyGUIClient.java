@@ -8,6 +8,7 @@ import java.awt.GridBagLayout;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridBagLayout;
+import java.awt.Image;
 import java.awt.Paint;
 import java.awt.BasicStroke;
 import java.awt.Stroke;
@@ -19,12 +20,15 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.image.ImageObserver;
 
 import java.io.Reader;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
+import java.net.URL;
+import java.net.MalformedURLException;
 
 import javax.swing.ButtonGroup;
 import javax.swing.Box;
@@ -33,6 +37,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -42,6 +47,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.JToggleButton;
 import javax.swing.ImageIcon;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.AbstractTableModel;
@@ -109,6 +115,8 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
   final JLabel noResultsLabel = new JLabel();
   final SplitButton importButton = new SplitButton("Import as Pathway");
   final JButton openUrlButton = new JButton("Open in Web Browser");
+  final JToggleButton previewButton = new JToggleButton("Preview \u2192");
+  final ImagePreview imagePreview = new ImagePreview();
   final CheckMarkMenuItem pathwayMenuItem = new CheckMarkMenuItem("Pathway", PATHWAY_IMG, true);
   final CheckMarkMenuItem networkMenuItem = new CheckMarkMenuItem("Network", NETWORK_IMG);
 
@@ -134,28 +142,28 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
     speciesComboBox.setEnabled(false);
     speciesComboBox.setVisible(false);
 
-    final JPanel searchPanel = newSearchPanel();
-
     noResultsLabel.setVisible(false);
     noResultsLabel.setForeground(new Color(0x802020));
 
     resultsTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION); 
     resultsTable.addMouseListener(new MouseAdapter() {
       public void mouseClicked(MouseEvent e) {
-        if (e.getClickCount() != 2)
-          return;
-        loadSelectedPathway();
+        if (e.getClickCount() == 1) {
+          updatePreview();
+        } else if (e.getClickCount() == 2) {
+          loadSelectedPathway();
+        }
       }
     });
 
+    final JPanel searchPanel = newSearchPanel();
     final JPanel resultsPanel = newResultsPanel();
 
     super.gui = new JPanel(new GridBagLayout());
     EasyGBC c = new EasyGBC();
-    super.gui.add(searchPanel, c.expandHoriz().insets(0, 10, 5, 10));
-    super.gui.add(speciesCheckBox, c.noExpand().right().insets(0, 0, 5, 0));
-    super.gui.add(speciesComboBox, c.right().insets(0, 0, 5, 10));
-    super.gui.add(resultsPanel, c.down().expandBoth().spanHoriz(3).insets(0, 10, 10, 10));
+    super.gui.add(searchPanel, c.expandHoriz());
+    super.gui.add(resultsPanel, c.down().expandBoth(0.01, 1.0).insets(0, 10, 10, 10));
+    super.gui.add(imagePreview, c.right().expandBoth().noInsets());
 
     final ResultTask<List<String>> speciesTask = client.newSpeciesTask();
     taskMgr.execute(new TaskIterator(speciesTask, new PopulateSpecies(speciesTask)));
@@ -201,9 +209,33 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
       }
     });
 
-    final JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-    buttonsPanel.add(openUrlButton);
-    buttonsPanel.add(importButton);
+    previewButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        if (previewButton.isSelected()) {
+          previewButton.setText("Preview \u2190");
+          imagePreview.setVisible(true);
+          updatePreview();
+        } else {
+          previewButton.setText("Preview \u2192");
+          imagePreview.clearImage();
+          imagePreview.setVisible(false);
+        }
+      }
+    });
+    previewButton.setEnabled(false);
+
+    final JPanel leftButtonsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    leftButtonsPanel.add(importButton);
+    leftButtonsPanel.add(openUrlButton);
+
+    final JPanel rightButtonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+    rightButtonsPanel.add(previewButton);
+
+    imagePreview.setVisible(false);
+
+    final JPanel buttonsPanel = new JPanel(new GridBagLayout());
+    buttonsPanel.add(leftButtonsPanel, c.reset().expandHoriz());
+    buttonsPanel.add(rightButtonsPanel, c.right());
 
     final JPanel resultsPanel = new JPanel(new GridBagLayout());
     resultsPanel.add(noResultsLabel, c.reset().expandHoriz());
@@ -212,7 +244,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
     return resultsPanel;
   }
 
-  private JPanel newSearchPanel() {
+  private JPanel newSearchBar() {
     final ActionListener performSearch = new SearchForPathways();
 
     searchButton.setBorder(BorderFactory.createEmptyBorder());
@@ -223,11 +255,23 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
     searchField.setOpaque(false);
     searchField.setBorder(BorderFactory.createEmptyBorder());
 
-    final JPanel searchPanel = new JPanel(new GridBagLayout());
-    searchPanel.setBorder(new SearchPanelBorder());
+    final JPanel searchBar = new JPanel(new GridBagLayout());
+    searchBar.setBorder(new SearchBarBorder());
     final EasyGBC e = new EasyGBC();
-    searchPanel.add(searchField, e.expandHoriz().insets(6, 12, 6, 0));
-    searchPanel.add(searchButton, e.noExpand().right().insets(6, 8, 6, 8));
+    searchBar.add(searchField, e.expandHoriz().insets(6, 12, 6, 0));
+    searchBar.add(searchButton, e.noExpand().right().insets(6, 8, 6, 8));
+
+    return searchBar;
+  }
+
+  private JPanel newSearchPanel() {
+    final JPanel searchBar = newSearchBar();
+
+    final JPanel searchPanel = new JPanel(new GridBagLayout());
+    EasyGBC c = new EasyGBC();
+    searchPanel.add(searchBar, c.expandHoriz().insets(0, 10, 5, 10));
+    searchPanel.add(speciesCheckBox, c.noExpand().right().insets(0, 0, 5, 0));
+    searchPanel.add(speciesComboBox, c.right().insets(0, 0, 5, 10));
 
     return searchPanel;
   }
@@ -268,10 +312,15 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
     if (pathways == null || pathways.size() == 0) {
       importButton.setEnabled(false);
       openUrlButton.setEnabled(false);
+      previewButton.setEnabled(false);
     } else {
       importButton.setEnabled(true);
       openUrlButton.setEnabled(true);
+      previewButton.setEnabled(true);
       resultsTable.setRowSelectionInterval(0, 0);
+      if (previewButton.isSelected()) {
+        updatePreview();
+      }
     }
   }
 
@@ -327,6 +376,15 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
     });
   }
 
+  void updatePreview() {
+    final WPPathway pathway = tableModel.getSelectedPathwayRef();
+    if (pathway == null) {
+      imagePreview.clearImage();
+    } else {
+      imagePreview.setImage("http://www.wikipathways.org//wpi/wpi.php?action=downloadFile&type=png&pwTitle=Pathway:" + pathway.getId());
+    }
+  }
+
   void loadSelectedPathway() {
     importButton.setEnabled(false);
     resultsTable.setEnabled(false);
@@ -358,6 +416,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
     public void setPathwayRefs(List<WPPathway> pathwayRefs) {
       this.pathwayRefs = pathwayRefs;
       super.fireTableDataChanged();
+      updatePreview();
     }
 
     public int getRowCount() {
@@ -400,7 +459,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
   }
 }
 
-class SearchPanelBorder extends AbstractBorder {
+class SearchBarBorder extends AbstractBorder {
   final static float ARC = 25.0f;
   final static Color BORDER_COLOR = new Color(0x909090);
   final static Color BKGND_COLOR = Color.WHITE;
@@ -502,5 +561,70 @@ class CheckMarkMenuItem extends JMenuItem {
 
   private void updateText() {
     super.setText(String.format(super.isSelected() ? CHECKED_STATE_TEXT_FMT : NORMAL_STATE_TEXT_FMT, text, imgUrl));
+  }
+}
+
+class ImagePreview extends JComponent implements ImageObserver {
+  ImageIcon img = null;
+
+  public void setImage(final String urlPath) {
+    URL url = null;
+    try {
+      url = new URL(urlPath);
+      img = new ImageIcon(new URL(urlPath));
+    } catch (MalformedURLException e) {
+      throw new IllegalArgumentException(e);
+    }
+    img.setImageObserver(this);
+    super.repaint();
+  }
+
+  public void clearImage() {
+    img = null;
+    super.repaint();
+  }
+
+  public boolean imageUpdate(Image img, int infoflags, int x, int y, int width, int height) {
+    boolean abort = (infoflags & ImageObserver.ABORT) != 0;
+    System.out.println("abort? " + abort);
+    super.repaint();
+    return false;
+  }
+
+  protected void paintComponent(final Graphics g) {
+    if (img != null && img.getImage() != null) {
+      final Graphics2D g2d = (Graphics2D) g;
+      g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+      int x1 = 0, y1 = 0, x2 = 0, y2 = 0;
+
+      int cw = super.getWidth();
+      int ch = super.getHeight();
+      double ca = (double) ch / cw;
+
+      int iw = img.getIconWidth();
+      int ih = img.getIconHeight();
+      double ia = (double) ih / iw;
+
+      if (cw > iw && ch > ih) {
+        x1 = (cw - iw) / 2;
+        y1 = (ch - ih) / 2;
+        x2 = x1 + iw;
+        y2 = y1 + ih;
+      } else if (ca > ia) {
+        y1 = ch;
+        ch = (int) (cw * ia);
+        y1 = (y1 - ch) / 2;
+        x2 = cw + x1;
+        y2 = ch + y1;
+      } else { // iw <= ih
+        x1 = cw;
+        cw = (int) (ch / ia);
+        x1 = (x1 - cw) / 2;
+        x2 = cw + x1;
+        y2 = ch + y1;
+      }
+      g2d.drawImage(img.getImage(), x1, y1, x2, y2, 0, 0, iw, ih, null);
+    }
   }
 }
