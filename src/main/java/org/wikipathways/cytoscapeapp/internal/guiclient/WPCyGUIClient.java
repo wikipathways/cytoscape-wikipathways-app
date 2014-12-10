@@ -8,11 +8,12 @@ import java.awt.GridBagLayout;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridBagLayout;
-import java.awt.Image;
+import java.awt.Insets;
 import java.awt.Paint;
 import java.awt.BasicStroke;
 import java.awt.Stroke;
 import java.awt.RenderingHints;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -45,6 +46,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
+import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
@@ -117,6 +119,8 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
   final JButton openUrlButton = new JButton("Open in Web Browser");
   final JToggleButton previewButton = new JToggleButton("Preview \u2192");
   final ImagePreview imagePreview = new ImagePreview();
+  final JSplitPane resultsPreviewPane = new JSplitPane();
+  double lastDividerPosition = 0.7;
   final CheckMarkMenuItem pathwayMenuItem = new CheckMarkMenuItem("Pathway", PATHWAY_IMG, true);
   final CheckMarkMenuItem networkMenuItem = new CheckMarkMenuItem("Network", NETWORK_IMG);
 
@@ -149,7 +153,9 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
     resultsTable.addMouseListener(new MouseAdapter() {
       public void mouseClicked(MouseEvent e) {
         if (e.getClickCount() == 1) {
-          updatePreview();
+          if (previewButton.isSelected()) {
+            updatePreview();
+          }
         } else if (e.getClickCount() == 2) {
           loadSelectedPathway();
         }
@@ -162,8 +168,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
     super.gui = new JPanel(new GridBagLayout());
     EasyGBC c = new EasyGBC();
     super.gui.add(searchPanel, c.expandHoriz());
-    super.gui.add(resultsPanel, c.down().expandBoth(0.01, 1.0).insets(0, 10, 10, 10));
-    super.gui.add(imagePreview, c.right().expandBoth().noInsets());
+    super.gui.add(resultsPanel, c.down().expandBoth().insets(0, 10, 10, 10));
 
     final ResultTask<List<String>> speciesTask = client.newSpeciesTask();
     taskMgr.execute(new TaskIterator(speciesTask, new PopulateSpecies(speciesTask)));
@@ -212,13 +217,9 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
     previewButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         if (previewButton.isSelected()) {
-          previewButton.setText("Preview \u2190");
-          imagePreview.setVisible(true);
-          updatePreview();
+          openPreview();
         } else {
-          previewButton.setText("Preview \u2192");
-          imagePreview.clearImage();
-          imagePreview.setVisible(false);
+          closePreview();
         }
       }
     });
@@ -240,8 +241,17 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
     final JPanel resultsPanel = new JPanel(new GridBagLayout());
     resultsPanel.add(noResultsLabel, c.reset().expandHoriz());
     resultsPanel.add(new JScrollPane(resultsTable), c.down().expandBoth());
-    resultsPanel.add(buttonsPanel, c.anchor("northeast").expandHoriz().down());
-    return resultsPanel;
+
+    resultsPreviewPane.setLeftComponent(resultsPanel);
+    resultsPreviewPane.setRightComponent(imagePreview);
+    resultsPreviewPane.setDividerLocation(1.0);
+    resultsPreviewPane.setResizeWeight(0.25);
+    resultsPreviewPane.setEnabled(false);
+
+    final JPanel bottomPanel = new JPanel(new GridBagLayout());
+    bottomPanel.add(resultsPreviewPane, c.reset().expandBoth());
+    bottomPanel.add(buttonsPanel, c.expandHoriz().down());
+    return bottomPanel;
   }
 
   private JPanel newSearchBar() {
@@ -312,7 +322,9 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
     if (pathways == null || pathways.size() == 0) {
       importButton.setEnabled(false);
       openUrlButton.setEnabled(false);
+      previewButton.setSelected(false);
       previewButton.setEnabled(false);
+      closePreview();
     } else {
       importButton.setEnabled(true);
       openUrlButton.setEnabled(true);
@@ -376,6 +388,23 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
     });
   }
 
+  void openPreview() {
+    resultsPreviewPane.setEnabled(true);
+    resultsPreviewPane.setDividerLocation(lastDividerPosition);
+    previewButton.setText("Preview \u2190");
+    imagePreview.setVisible(true);
+    updatePreview();
+  }
+
+  void closePreview() {
+    lastDividerPosition = ((double) resultsPreviewPane.getDividerLocation()) / (resultsPreviewPane.getWidth() - resultsPreviewPane.getDividerSize());
+    resultsPreviewPane.setDividerLocation(1.0);
+    resultsPreviewPane.setEnabled(false);
+    previewButton.setText("Preview \u2192");
+    imagePreview.clearImage();
+    imagePreview.setVisible(false);
+  }
+
   void updatePreview() {
     final WPPathway pathway = tableModel.getSelectedPathwayRef();
     if (pathway == null) {
@@ -416,7 +445,6 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
     public void setPathwayRefs(List<WPPathway> pathwayRefs) {
       this.pathwayRefs = pathwayRefs;
       super.fireTableDataChanged();
-      updatePreview();
     }
 
     public int getRowCount() {
@@ -575,7 +603,6 @@ class ImagePreview extends JComponent implements ImageObserver {
     } catch (MalformedURLException e) {
       throw new IllegalArgumentException(e);
     }
-    img.setImageObserver(this);
     super.repaint();
   }
 
@@ -584,47 +611,37 @@ class ImagePreview extends JComponent implements ImageObserver {
     super.repaint();
   }
 
-  public boolean imageUpdate(Image img, int infoflags, int x, int y, int width, int height) {
-    boolean abort = (infoflags & ImageObserver.ABORT) != 0;
-    System.out.println("abort? " + abort);
-    super.repaint();
-    return false;
-  }
-
   protected void paintComponent(final Graphics g) {
     if (img != null && img.getImage() != null) {
       final Graphics2D g2d = (Graphics2D) g;
-      g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+      g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+      g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
 
-      int x1 = 0, y1 = 0, x2 = 0, y2 = 0;
+      final int cw = super.getWidth();
+      final int ch = super.getHeight();
+      final double ca = (double) ch / cw;
 
-      int cw = super.getWidth();
-      int ch = super.getHeight();
-      double ca = (double) ch / cw;
-
-      int iw = img.getIconWidth();
-      int ih = img.getIconHeight();
-      double ia = (double) ih / iw;
+      final int iw = img.getIconWidth();
+      final int ih = img.getIconHeight();
+      final double ia = (double) ih / iw;
 
       if (cw > iw && ch > ih) {
-        x1 = (cw - iw) / 2;
-        y1 = (ch - ih) / 2;
-        x2 = x1 + iw;
-        y2 = y1 + ih;
+        final int x = (cw - iw) / 2;
+        final int y = (ch - ih) / 2;
+        g2d.drawImage(img.getImage(), x, y, null);
       } else if (ca > ia) {
-        y1 = ch;
-        ch = (int) (cw * ia);
-        y1 = (y1 - ch) / 2;
-        x2 = cw + x1;
-        y2 = ch + y1;
+        final int dw = cw;
+        final int dh = cw * ih / iw;
+        final int x = 0;
+        final int y = (ch - dh) / 2;
+        g.drawImage(img.getImage(), x, y, dw, dh, null);
       } else { // iw <= ih
-        x1 = cw;
-        cw = (int) (ch / ia);
-        x1 = (x1 - cw) / 2;
-        x2 = cw + x1;
-        y2 = ch + y1;
+        final int dw = iw * ch / ih;
+        final int dh = ch;
+        final int x = (cw - dw) / 2;
+        final int y = 0;
+        g.drawImage(img.getImage(), x, y, dw, dh, null);
       }
-      g2d.drawImage(img.getImage(), x1, y1, x2, y2, 0, 0, iw, ih, null);
     }
   }
 }
