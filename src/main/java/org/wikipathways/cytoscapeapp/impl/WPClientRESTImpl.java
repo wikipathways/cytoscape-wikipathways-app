@@ -46,7 +46,7 @@ import org.wikipathways.cytoscapeapp.WPPathway;
 import org.wikipathways.cytoscapeapp.ResultTask;
 
 public class WPClientRESTImpl implements WPClient {
-  protected static final String BASE_URL = "http://www.wikipathways.org/wpi/webservice/webservice.php/";
+  protected static final String BASE_URL = "http://webservice.wikipathways.org/";
 
   final CyApplicationConfiguration appConf;
 
