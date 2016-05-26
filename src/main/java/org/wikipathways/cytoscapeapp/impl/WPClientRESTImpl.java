@@ -1,49 +1,48 @@
 package org.wikipathways.cytoscapeapp.impl;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.net.ProxySelector;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
-import java.io.Reader;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileInputStream;
-import java.io.ObjectOutputStream;
-import java.io.ObjectInputStream;
-import java.io.InputStream;
-import java.io.StringReader;
-import java.io.IOException;
-
-import java.net.URI;
-import java.net.ProxySelector;
-
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
+import org.apache.commons.codec.binary.Base64;
+import org.apache.http.HttpEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.SystemDefaultRoutePlanner;
+import org.cytoscape.application.CyApplicationConfiguration;
+import org.cytoscape.work.TaskMonitor;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.wikipathways.cytoscapeapp.ResultTask;
+import org.wikipathways.cytoscapeapp.WPClient;
+import org.wikipathways.cytoscapeapp.WPPathway;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
-
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.conn.SystemDefaultRoutePlanner;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.HttpEntity;
-
-
-
-
-import org.cytoscape.work.TaskMonitor;
-import org.cytoscape.application.CyApplicationConfiguration;
-
-import org.wikipathways.cytoscapeapp.WPClient;
-import org.wikipathways.cytoscapeapp.WPPathway;
-import org.wikipathways.cytoscapeapp.ResultTask;
 
 public class WPClientRESTImpl implements WPClient {
   protected static final String BASE_URL = "http://webservice.wikipathways.org/";
@@ -206,7 +205,9 @@ public class WPClientRESTImpl implements WPClient {
         final List<String> species = new ArrayList<String>();
         for (int i = 0; i < organismNodes.getLength(); i++) {
           final Node organismNode = organismNodes.item(i);
-          species.add(organismNode.getTextContent());
+          if (organismNode.getNodeType() == Node.ELEMENT_NODE) {
+        	  species.add(organismNode.getTextContent());
+          }
         }
 
         storeSpeciesToCache(species);
@@ -253,7 +254,6 @@ public class WPClientRESTImpl implements WPClient {
         final NodeList resultNodes = responseNode.getChildNodes(); 
         final List<WPPathway> result = new ArrayList<WPPathway>();
         for (int i = 0; i < resultNodes.getLength(); i++) {
-          String id = "", revision = "", name = "", species = "", url = "";
           final Node resultNode = resultNodes.item(i);
           final WPPathway pathway = parsePathwayInfo(resultNode);
           if (pathway != null) {
@@ -301,10 +301,11 @@ public class WPClientRESTImpl implements WPClient {
         }
         if (super.cancelled)
           return null;
+
         final Node responseNode = doc.getFirstChild();
-        final Node pathwayNode = responseNode.getFirstChild(); 
+        final Node pathwayNode = findChildNode(responseNode, "ns1:pathway"); 
         final Node gpmlNode = findChildNode(pathwayNode, "ns2:gpml");
-        final String gpmlContents = gpmlNode.getTextContent();
+        final String gpmlContents = new String(Base64.decodeBase64(gpmlNode.getTextContent()), "UTF-8");
         return new StringReader(gpmlContents);
       }
     };
