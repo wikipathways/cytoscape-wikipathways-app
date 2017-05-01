@@ -1,13 +1,10 @@
 package org.wikipathways.cytoscapeapp.internal.cmd;
 
-import java.util.List;
-
 import org.cytoscape.work.AbstractTaskFactory;
 import org.cytoscape.work.TaskIterator;
-
-import org.wikipathways.cytoscapeapp.WPClient;
-import org.wikipathways.cytoscapeapp.GpmlReaderFactory;
 import org.wikipathways.cytoscapeapp.GpmlConversionMethod;
+import org.wikipathways.cytoscapeapp.GpmlReaderFactory;
+import org.wikipathways.cytoscapeapp.WPClient;
 
 public class WPImportCmdTaskFactory extends AbstractTaskFactory {
   final WPClient client;

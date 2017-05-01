@@ -20,11 +20,11 @@ package org.wikipathways.cytoscapeapp.internal.io;
 
 import java.io.InputStream;
 
-import org.cytoscape.work.TaskIterator;
-import org.cytoscape.io.read.AbstractInputStreamTaskFactory;
 import org.cytoscape.io.BasicCyFileFilter;
 import org.cytoscape.io.DataCategory;
+import org.cytoscape.io.read.AbstractInputStreamTaskFactory;
 import org.cytoscape.io.util.StreamUtil;
+import org.cytoscape.work.TaskIterator;
 import org.wikipathways.cytoscapeapp.GpmlReaderFactory;
 
 /**

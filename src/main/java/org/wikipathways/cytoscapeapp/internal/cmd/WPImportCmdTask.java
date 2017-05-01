@@ -1,20 +1,16 @@
 package org.wikipathways.cytoscapeapp.internal.cmd;
 
 import java.io.Reader;
-
-import java.util.List;
 import java.util.regex.Pattern;
 
 import org.cytoscape.work.AbstractTask;
-import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.Tunable;
-
+import org.wikipathways.cytoscapeapp.GpmlConversionMethod;
+import org.wikipathways.cytoscapeapp.GpmlReaderFactory;
 import org.wikipathways.cytoscapeapp.ResultTask;
 import org.wikipathways.cytoscapeapp.WPClient;
 import org.wikipathways.cytoscapeapp.WPPathway;
-import org.wikipathways.cytoscapeapp.GpmlReaderFactory;
-import org.wikipathways.cytoscapeapp.GpmlConversionMethod;
 
 public class WPImportCmdTask extends AbstractTask {
   static final Pattern WP_ID_REGEX = Pattern.compile("WP\\d+");

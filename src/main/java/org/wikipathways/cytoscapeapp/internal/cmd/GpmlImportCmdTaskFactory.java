@@ -2,9 +2,8 @@ package org.wikipathways.cytoscapeapp.internal.cmd;
 
 import org.cytoscape.work.AbstractTaskFactory;
 import org.cytoscape.work.TaskIterator;
-
-import org.wikipathways.cytoscapeapp.GpmlReaderFactory;
 import org.wikipathways.cytoscapeapp.GpmlConversionMethod;
+import org.wikipathways.cytoscapeapp.GpmlReaderFactory;
 
 public class GpmlImportCmdTaskFactory extends AbstractTaskFactory {
   final GpmlReaderFactory factory;

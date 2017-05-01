@@ -20,10 +20,18 @@ package org.wikipathways.cytoscapeapp.internal;
 import java.util.Properties;
 
 import org.cytoscape.application.CyApplicationConfiguration;
+import org.cytoscape.event.CyEventHelper;
+import org.cytoscape.io.read.InputStreamTaskFactory;
+import org.cytoscape.io.util.StreamUtil;
 import org.cytoscape.model.CyNetworkFactory;
 import org.cytoscape.model.CyNetworkManager;
-import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.service.util.AbstractCyActivator;
+import org.cytoscape.service.util.CyServiceRegistrar;
+import org.cytoscape.session.CyNetworkNaming;
+import org.cytoscape.task.NetworkTaskFactory;
+import org.cytoscape.task.NetworkViewTaskFactory;
+import org.cytoscape.task.NodeViewTaskFactory;
+import org.cytoscape.util.swing.OpenBrowser;
 import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
 import org.cytoscape.view.model.CyNetworkViewFactory;
 import org.cytoscape.view.model.CyNetworkViewManager;
@@ -32,36 +40,27 @@ import org.cytoscape.view.presentation.annotations.AnnotationManager;
 import org.cytoscape.view.presentation.annotations.ArrowAnnotation;
 import org.cytoscape.view.presentation.annotations.ShapeAnnotation;
 import org.cytoscape.view.presentation.annotations.TextAnnotation;
-import org.osgi.framework.BundleContext;
-import org.cytoscape.io.read.InputStreamTaskFactory;
-import org.cytoscape.io.util.StreamUtil;
-import org.cytoscape.view.vizmap.VisualStyleFactory;
-import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.view.vizmap.VisualMappingFunctionFactory;
-import org.cytoscape.session.CyNetworkNaming;
+import org.cytoscape.view.vizmap.VisualMappingManager;
+import org.cytoscape.view.vizmap.VisualStyleFactory;
+import org.cytoscape.work.ServiceProperties;
 import org.cytoscape.work.TaskFactory;
 import org.cytoscape.work.TaskManager;
 import org.cytoscape.work.swing.DialogTaskManager;
-import org.cytoscape.work.ServiceProperties;
-import org.cytoscape.task.NetworkTaskFactory;
-import org.cytoscape.task.NetworkViewTaskFactory;
-import org.cytoscape.task.NodeViewTaskFactory;
-import org.cytoscape.util.swing.OpenBrowser;
-
-import org.wikipathways.cytoscapeapp.WPClient;
-import org.wikipathways.cytoscapeapp.WPClientFactory;
+import org.osgi.framework.BundleContext;
 import org.wikipathways.cytoscapeapp.GpmlConversionMethod;
 import org.wikipathways.cytoscapeapp.GpmlReaderFactory;
+import org.wikipathways.cytoscapeapp.WPClient;
+import org.wikipathways.cytoscapeapp.WPClientFactory;
 import org.wikipathways.cytoscapeapp.impl.WPClientRESTFactoryImpl;
 import org.wikipathways.cytoscapeapp.internal.cmd.GpmlImportCmdTaskFactory;
-import org.wikipathways.cytoscapeapp.internal.cmd.WPSearchCmdTaskFactory;
-import org.wikipathways.cytoscapeapp.internal.cmd.WPSpeciesCmdTaskFactory;
 import org.wikipathways.cytoscapeapp.internal.cmd.WPImportCmdTaskFactory;
+import org.wikipathways.cytoscapeapp.internal.cmd.WPSpeciesCmdTaskFactory;
+import org.wikipathways.cytoscapeapp.internal.guiclient.WPCyGUIClient;
 import org.wikipathways.cytoscapeapp.internal.io.Annots;
-import org.wikipathways.cytoscapeapp.internal.io.GpmlVizStyle;
 import org.wikipathways.cytoscapeapp.internal.io.GpmlCyReaderTaskFactory;
 import org.wikipathways.cytoscapeapp.internal.io.GpmlReaderFactoryImpl;
-import org.wikipathways.cytoscapeapp.internal.guiclient.WPCyGUIClient;
+import org.wikipathways.cytoscapeapp.internal.io.GpmlVizStyle;
 /**
  * 
  * @author martinakutmon
@@ -85,7 +84,8 @@ public class CyActivator extends AbstractCyActivator {
     final OpenBrowser openBrowser = getService(context, OpenBrowser.class);
     final CyNetworkNaming netNaming = getService(context, CyNetworkNaming.class);
     final CyApplicationConfiguration appConf = getService(context, CyApplicationConfiguration.class);
-
+    final CyServiceRegistrar registrar = getService(context, CyServiceRegistrar.class);
+    
     final GpmlVizStyle gpmlStyle = new GpmlVizStyle(
               getService(context, VisualStyleFactory.class),
               getService(context, VisualMappingManager.class),
@@ -103,90 +103,45 @@ public class CyActivator extends AbstractCyActivator {
     registerService(context, clientFactory, WPClientFactory.class, new Properties());
 
     final WPClient client = clientFactory.create();
-
+    final WPManager manager = new WPManager(registrar,annots );
+    
     final GpmlReaderFactory gpmlReaderFactory = new GpmlReaderFactoryImpl(
-      eventHelper,
-      netFactory,
-      netMgr,
-      netNaming,
-      netViewFactory,
-      netViewMgr,
-      layoutMgr,
-      showLODTF,
-      annots,
-      gpmlStyle
-      );
+    		manager, eventHelper,  netFactory, netMgr, netNaming, netViewFactory, netViewMgr, layoutMgr, showLODTF,  annots, gpmlStyle  );
     registerService(context, gpmlReaderFactory, GpmlReaderFactory.class, new Properties());
 
-    final GpmlCyReaderTaskFactory gpmlCyReaderTaskFactory = new GpmlCyReaderTaskFactory(
-      gpmlReaderFactory,
-      streamUtil);
+    final GpmlCyReaderTaskFactory gpmlCyReaderTaskFactory = new GpmlCyReaderTaskFactory( gpmlReaderFactory, streamUtil);
     registerService(context, gpmlCyReaderTaskFactory, InputStreamTaskFactory.class, new Properties());
 
-    final WPCyGUIClient guiClient = new WPCyGUIClient(
-      taskMgr,
-      client,
-      openBrowser,
-      gpmlReaderFactory);
+    final WPCyGUIClient guiClient = new WPCyGUIClient( taskMgr, client, openBrowser, gpmlReaderFactory);
     registerAllServices(context, guiClient, new Properties());
 
     final ToggleShapesTaskFactory toggleShapesTF = new ToggleShapesTaskFactory();
     registerService(context, toggleShapesTF, NetworkViewTaskFactory.class, ezProps(
       ServiceProperties.TITLE, "Toggle Pathway Shapes",
-      ServiceProperties.PREFERRED_MENU, "View"
-      ));
+      ServiceProperties.PREFERRED_MENU, "View" ));
 
     final OpenLinkedPathwayAsNewTaskFactory openLinkedPathwayAsNewTF = new OpenLinkedPathwayAsNewTaskFactory(client, gpmlReaderFactory);
     registerService(context, openLinkedPathwayAsNewTF, NodeViewTaskFactory.class, ezProps(
       ServiceProperties.TITLE, "Open Linked Pathway",
       ServiceProperties.PREFERRED_MENU, "Apps.WikiPathways",
-      ServiceProperties.IN_MENU_BAR, "false"
-      ));
+      ServiceProperties.IN_MENU_BAR, "false"  ));
 
-    registerService(context,
-      new GpmlImportCmdTaskFactory(gpmlReaderFactory, GpmlConversionMethod.PATHWAY),
-      TaskFactory.class, ezProps(
-        ServiceProperties.COMMAND, "import-as-pathway",
-        ServiceProperties.COMMAND_NAMESPACE, "gpml"
-      ));
-
-    registerService(context,
-      new GpmlImportCmdTaskFactory(gpmlReaderFactory, GpmlConversionMethod.NETWORK),
-      TaskFactory.class, ezProps(
-        ServiceProperties.COMMAND, "import-as-network",
-        ServiceProperties.COMMAND_NAMESPACE, "gpml"
-      ));
-
-    registerService(context,
-      new WPSpeciesCmdTaskFactory(client),
-      TaskFactory.class, ezProps(
-        ServiceProperties.COMMAND, "get-species",
-        ServiceProperties.COMMAND_NAMESPACE, "wikipathways"
-      ));
-
-    registerService(context,
-      new WPSearchCmdTaskFactory(client),
-      TaskFactory.class, ezProps(
-        ServiceProperties.COMMAND, "search",
-        ServiceProperties.COMMAND_NAMESPACE, "wikipathways"
-      ));
-
-    registerService(context,
-      new WPImportCmdTaskFactory(client, gpmlReaderFactory, GpmlConversionMethod.PATHWAY),
-      TaskFactory.class, ezProps(
-        ServiceProperties.COMMAND, "import-as-pathway",
-        ServiceProperties.COMMAND_NAMESPACE, "wikipathways"
-      ));
-
-    registerService(context,
-      new WPImportCmdTaskFactory(client, gpmlReaderFactory, GpmlConversionMethod.NETWORK),
-      TaskFactory.class, ezProps(
-        ServiceProperties.COMMAND, "import-as-network",
-        ServiceProperties.COMMAND_NAMESPACE, "wikipathways"
-      ));
+    
+    reg(context,  new GpmlImportCmdTaskFactory(gpmlReaderFactory, GpmlConversionMethod.PATHWAY),"import-as-pathway", "gpml");
+    reg(context,  new GpmlImportCmdTaskFactory(gpmlReaderFactory, GpmlConversionMethod.NETWORK),"import-as-network", "gpml");
+    reg(context,  new WPSpeciesCmdTaskFactory(client), "get-species", "wikipathways");
+    reg(context,  new WPImportCmdTaskFactory(client, gpmlReaderFactory, GpmlConversionMethod.PATHWAY),"import-as-pathway", "wikipathways");
+    reg(context,  new WPImportCmdTaskFactory(client, gpmlReaderFactory, GpmlConversionMethod.NETWORK),"import-as-network", "wikipathways");
   }
+//-----------------------------------------------------
 
-  private static Properties ezProps(String... vals) {
+	private void reg(BundleContext context, Object service, String cmd, String namespace)
+    {
+        registerService(context, service,
+        	 TaskFactory.class, ezProps( ServiceProperties.COMMAND,cmd,  ServiceProperties.COMMAND_NAMESPACE, namespace ));
+    }
+
+	private static Properties ezProps(String... vals) {
     final Properties props = new Properties();
     for (int i = 0; i < vals.length; i += 2)
        props.put(vals[i], vals[i + 1]);

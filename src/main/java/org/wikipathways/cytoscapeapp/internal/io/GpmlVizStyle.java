@@ -57,11 +57,9 @@ public class GpmlVizStyle {
     // set up viz style dependencies
     for (final VisualPropertyDependency<?> dep : vizStyle.getAllVisualPropertyDependencies()) {
       final String id = dep.getIdString();
-      if ("nodeSizeLocked".equals(id)) {
-        dep.setDependency(false);
-      } else if ("arrowColorMatchesEdge".equals(id)) {
-        dep.setDependency(true);
-      }
+      if ("nodeSizeLocked".equals(id))        		 dep.setDependency(false);
+      else if ("arrowColorMatchesEdge".equals(id))   dep.setDependency(true);
+      
     }
 
     vizStyle.setTitle(VIZ_STYLE_NAME);
@@ -77,9 +75,7 @@ public class GpmlVizStyle {
       final VisualMappingFunctionFactory fnFactory = (mapping == null) ? passFnFactory : discFnFactory;
       for (final VisualProperty<?> vizProp : vizTableStore.getCyVizProps()) {
         final VisualMappingFunction<?,?> fn = fnFactory.createVisualMappingFunction(
-            vizTableStore.getCyColumnName(),
-            vizTableStore.getCyColumnType(),
-            vizProp);
+            vizTableStore.getCyColumnName(), vizTableStore.getCyColumnType(), vizProp);
         if (mapping != null) {
           final DiscreteMapping discreteFn = (DiscreteMapping) fn;
           discreteFn.putAll(mapping);

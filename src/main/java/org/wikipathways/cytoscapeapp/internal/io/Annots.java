@@ -32,7 +32,7 @@ public class Annots {
 
   static Map<String,String> ezMap(Object[] elems) {
     final Map<String,String> map = new HashMap<String,String>();
-    for (int i = 0; i < elems.length; i += 2) {
+    for (int i = 0; i < elems.length-1; i += 2) {
       map.put(elems[i].toString(), elems[i+1].toString());
     }
     System.out.println("ezMap: " + map.toString());

@@ -6,15 +6,15 @@
 		<bundle.namespace>org.wikipathways.cytoscapeapp</bundle.namespace>
 		<cytoscape.api.version>3.1.0</cytoscape.api.version>
 	</properties>
+	<packaging>bundle</packaging>
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.wikipathways</groupId>
 	<artifactId>cytoscapeapp</artifactId>
-	<version>3.2.1</version>
+	<version>3.3.alpha3</version>
 
 	<name>WikiPathways Cytoscape App</name>
 	
-	<packaging>bundle</packaging>
 
 	<build>
 		<resources>
@@ -23,7 +23,6 @@
 			</resource>
 		</resources>
       <finalName>WikiPathways-${project.version}</finalName>
-		<!-- Cytoscape requires Java 1.6 -->
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -69,7 +68,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-install-plugin</artifactId>
-        <version>2.3.1</version>
+      <version>2.5.2</version>
         <executions>
           <execution>
             <goals>
@@ -77,7 +76,7 @@
             </goals>
             <phase>install</phase>
             <configuration>
-              <file>${build.directory}/${project.build.finalName}.jar</file>
+              <file>${project.build.directory}/${project.build.finalName}.jar</file>
               <generatePom>false</generatePom>
               <pomFile>pom.xml</pomFile>
               <version>${my.version}</version>
