@@ -1,6 +1,7 @@
 package org.wikipathways.cytoscapeapp.internal.io;
 
 import java.awt.Color;
+import java.awt.Shape;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
@@ -16,9 +17,11 @@ import org.cytoscape.view.model.View;
 import org.cytoscape.view.model.VisualProperty;
 import org.cytoscape.view.presentation.annotations.ShapeAnnotation;
 import org.cytoscape.view.presentation.property.BasicVisualLexicon;
+import org.cytoscape.view.presentation.property.DoubleVisualProperty;
 import org.cytoscape.view.presentation.property.values.Bend;
 import org.cytoscape.view.presentation.property.values.Handle;
 import org.cytoscape.view.presentation.property.values.HandleFactory;
+import org.pathvisio.core.model.LineType;
 import org.wikipathways.cytoscapeapp.internal.WPManager;
 
 /**
@@ -69,16 +72,10 @@ class DelayedVizProp {
 	
 		if ("Node Shape".equals(propName))
 		{
-			if ("Mitochondria".equals(propvalue))
-			{
-				System.out.println("--------------Mitochondria--------------" );
 				final Map<String,String> map = new HashMap<String,String>();
 				CyNode src = (CyNode) delayedProp.netObj;
 				List<DelayedVizProp> relatedProps = getPropsByID(delayedProps, src.getSUID());
-//				  map.put("x", String.valueOf(100));
-//				  map.put("y", String.valueOf(500));
-//				  map.put("zoom", "3.0");
-				  map.put("canvas", "background");
+				map.put("canvas", "background");
 				  double wid = 0;
 				  double hght = 0;
 				  double x = Double.NaN;
@@ -106,10 +103,16 @@ class DelayedVizProp {
 				  }
 				  System.out.println(map);
  				  ShapeAnnotation mAnnotation = mgr.getAnnots().newShape(netView, map);
-				  mAnnotation.setCustomShape(makeMitochondria());
-				  mAnnotation.setBorderWidth(3);
-				  mAnnotation.setBorderColor(Color.gray);
-				  boolean legalSize =  (wid > 0 && hght > 0);
+ 				  Shape thePath = getShapePath(propvalue);
+ 				  if (thePath != null)
+ 				  {
+ 					  mAnnotation.setCustomShape(thePath);
+					  View<CyNode> view = netView.getNodeView(src);
+					  view.setVisualProperty(BasicVisualLexicon.NODE_BORDER_PAINT, Color.GREEN);
+					  view.setVisualProperty(BasicVisualLexicon.NODE_FILL_COLOR, Color.YELLOW);
+				 }
+
+ 				  boolean legalSize =  (wid > 0 && hght > 0);
 				  if (legalSize)
 					  mAnnotation.setSize(wid, hght);
 				  boolean legalXY = (!(Double.isNaN(x) || Double.isNaN(y)));
@@ -123,9 +126,10 @@ class DelayedVizProp {
 					 }
 //					 System.out.println(String.format("moving annotation to : %4.1f , %4.1f", x, y));
 					  mAnnotation.moveAnnotation(new Point2D.Double(x,y));
+//					  view.setLockedValue(prop, 0.);
 				  }
 					  
-			}
+//			}
 		}
 			if ("Edge Bend XX".equals(propName)) {
 // running this code results in:
@@ -175,8 +179,7 @@ class DelayedVizProp {
 			}
 			catch (ClassCastException ex)
 			{
-		    	System.out.println("ClassCastException: " + delayedProp.netObj.getClass());  
-	
+		    	System.out.println("ClassCastException: " + delayedProp.netObj.getClass());  	
 			}
 		}
 	
@@ -196,12 +199,23 @@ class DelayedVizProp {
     }
   }
 	
+	private static Shape getShapePath(String propvalue) {
+		System.out.println("propvalue");
+		if ("Mitochondria".equals(propvalue)) 			  	return makeMitochondria();
+		  if ("Endoplasmic Reticulum".equals(propvalue))  		return makeER();
+		  if ("Sarcoplasmic Reticulum".equals(propvalue)) 		return makeSR();
+		  if ("Golgi Apparatus".equals(propvalue)) 				return makeGolgi();
+		  if ("Brace".equals(propvalue))  						return makeBrace();
+		  if ("Triangle".equals(propvalue))  					return makeTriangle();
+		return null;
+	}
+
 	private static String propTranslator(String inName) {
 		if ("Node X Location".equalsIgnoreCase(inName)) return "x";		
 		if ("Node Y Location".equalsIgnoreCase(inName)) return "y";		
 		if ("Node Width".equalsIgnoreCase(inName)) return "Width";		
 		if ("Node Height".equalsIgnoreCase(inName)) return "Height";		
-		return null;
+		return inName;
 	}
 
 	static List<DelayedVizProp> getPropsByID(final Iterable<DelayedVizProp> allProps, final Long id)
@@ -259,6 +273,7 @@ class DelayedVizProp {
 
 	static private GeneralPath makeSR()
 	{
+		System.out.println("--------------makeSR--------------" );
 		GeneralPath path = new GeneralPath();
 
 		path.moveTo(118.53f, 16.63f);
@@ -274,6 +289,7 @@ class DelayedVizProp {
 
 	static private GeneralPath makeER()
 	{
+		System.out.println("--------------makeER--------------" );
 		GeneralPath path = new GeneralPath();
 		path.moveTo (115.62f, 170.76f);
 		path.curveTo (106.85f, 115.66f, 152.29f , 74.72f, 152.11f , 37.31f);
@@ -301,6 +317,7 @@ class DelayedVizProp {
 
 	static private GeneralPath makeGolgi()
 	{
+		System.out.println("--------------makeGolgi--------------" );
 		GeneralPath path = new GeneralPath();
 		path.moveTo (148.89f, 77.62f);
 		path.curveTo (100.07f, 3.50f, 234.06f , 7.65f, 207.78f , 62.66f);
@@ -331,12 +348,25 @@ class DelayedVizProp {
 
 	static private GeneralPath makeBrace()
 	{
+		System.out.println("--------------makeBrace--------------" );
 		GeneralPath path = new GeneralPath();
 		path.moveTo(0, 4);
 		path.quadTo(0, 2, 3, 2);
 		path.quadTo(6, 2, 6, 0);
 		path.quadTo(6, 2, 9, 2);
 		path.quadTo(12, 2, 12, 4);
+		path.closePath();
+		return path;
+	}
+
+	static private GeneralPath makeTriangle()
+	{
+		System.out.println("--------------makeTriangle--------------" );
+		GeneralPath path = new GeneralPath();
+		path.moveTo(0, 4);
+		path.lineTo(0, -4);
+		path.lineTo(16, 0);
+		path.lineTo(0, 4);
 		path.closePath();
 		return path;
 	}

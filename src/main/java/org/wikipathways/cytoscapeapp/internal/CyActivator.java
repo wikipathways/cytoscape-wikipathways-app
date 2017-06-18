@@ -132,7 +132,10 @@ public class CyActivator extends AbstractCyActivator {
     reg(context,  new WPSpeciesCmdTaskFactory(client), "get-species", "wikipathways");
     reg(context,  new WPImportCmdTaskFactory(client, gpmlReaderFactory, GpmlConversionMethod.PATHWAY),"import-as-pathway", "wikipathways");
     reg(context,  new WPImportCmdTaskFactory(client, gpmlReaderFactory, GpmlConversionMethod.NETWORK),"import-as-network", "wikipathways");
-  }
+
+	
+//	registerAllServices(context, new WPNetworkSearchTaskFactory());				support NetworkSearchBar
+}
 //-----------------------------------------------------
 
 	private void reg(BundleContext context, Object service, String cmd, String namespace)
