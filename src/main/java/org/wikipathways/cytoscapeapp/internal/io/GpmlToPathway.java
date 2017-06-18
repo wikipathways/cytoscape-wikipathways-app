@@ -134,6 +134,7 @@ public class GpmlToPathway {
         IS_GPML_SHAPE,
         BasicVizTableStore.NODE_WIDTH,
         BasicVizTableStore.NODE_HEIGHT,
+//        BasicVizTableStore.NODE_ROTATION,
         BasicVizTableStore.NODE_FILL_COLOR,
         BasicVizTableStore.NODE_COLOR,
         BasicVizTableStore.NODE_LABEL_FONT,
@@ -501,9 +502,13 @@ public class GpmlToPathway {
     PV_SHAPE_MAP.put("Triangle",         NodeShapeVisualProperty.TRIANGLE);
     PV_SHAPE_MAP.put("RoundedRectangle", NodeShapeVisualProperty.ROUND_RECTANGLE);
     PV_SHAPE_MAP.put("Hexagon",          NodeShapeVisualProperty.HEXAGON);
+    PV_SHAPE_MAP.put("Pentagon",          NodeShapeVisualProperty.HEXAGON);			// TODO
     PV_SHAPE_MAP.put("Oval",             NodeShapeVisualProperty.ELLIPSE);
     PV_SHAPE_MAP.put("Octagon",          NodeShapeVisualProperty.OCTAGON);
-    PV_SHAPE_MAP.put("Mitochondria",     new NodeShapeImpl("Mitochondria", "Mitochondria"));			// TODO 
+    PV_SHAPE_MAP.put("Mitochondria",     new NodeShapeImpl("Mitochondria", "Mitochondria"));	
+    PV_SHAPE_MAP.put("Endoplasmic Reticulum", new NodeShapeImpl("Endoplasmic Reticulum", "Endoplasmic Reticulum"));	
+    PV_SHAPE_MAP.put("Golgi Apparatus", new NodeShapeImpl("Golgi Apparatus", "Golgi Apparatus"));	
+    PV_SHAPE_MAP.put("Brace",     		new NodeShapeImpl("Brace", "Brace"));		
     
 
   }
@@ -540,7 +545,9 @@ public class GpmlToPathway {
   }
 
   static class BasicVizTableStore extends BasicTableStore implements VizTableStore {
-    public static final VizTableStore NODE_WIDTH            = new BasicVizTableStore("Width", Double.class,           BasicExtracter.WIDTH,                           BasicVisualLexicon.NODE_WIDTH);
+//    public static final VizTableStore NODE_ROTATION         = new BasicVizTableStore("Rotation", Double.class,        BasicExtracter.ROTATION,                        BasicVisualLexicon.NODE_ROTATION);
+
+	  public static final VizTableStore NODE_WIDTH            = new BasicVizTableStore("Width", Double.class,           BasicExtracter.WIDTH,                           BasicVisualLexicon.NODE_WIDTH);
     public static final VizTableStore NODE_HEIGHT           = new BasicVizTableStore("Height", Double.class,          BasicExtracter.HEIGHT,                          BasicVisualLexicon.NODE_HEIGHT);
     public static final VizTableStore NODE_FILL_COLOR       = new BasicVizTableStore("FillColor",                     BasicExtracter.FILL_COLOR_STRING,               BasicVisualLexicon.NODE_FILL_COLOR);
     public static final VizTableStore NODE_COLOR            = new BasicVizTableStore("Color",                         BasicExtracter.COLOR_STRING,                    BasicVisualLexicon.NODE_LABEL_COLOR, BasicVisualLexicon.NODE_BORDER_PAINT);
@@ -603,6 +610,7 @@ public class GpmlToPathway {
 
   public static List<VizTableStore> getAllVizTableStores() {
     return Arrays.asList(
+//    	      BasicVizTableStore.NODE_ROTATION,
       BasicVizTableStore.NODE_WIDTH,
       BasicVizTableStore.NODE_HEIGHT,
       BasicVizTableStore.NODE_FILL_COLOR,
@@ -774,7 +782,7 @@ public class GpmlToPathway {
     final CyNode cyNode = cyNet.addNode();
     pvToCyNodes.put(pvShape, cyNode);
     IShape shtype = pvShape.getShapeType();
-    
+    if (shtype == null) 	return;
     System.out.println("convertShape: " + (shtype == null ? "NONE" : shtype.getName()));
     store(cyNodeTbl, cyNode, pvShape, BasicTableStore.GRAPH_ID, BasicTableStore.TEXT_LABEL, IS_GPML_SHAPE);
     store(cyNode, pvShape,
