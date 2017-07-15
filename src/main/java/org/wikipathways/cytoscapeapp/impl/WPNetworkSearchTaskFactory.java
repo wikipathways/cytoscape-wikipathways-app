@@ -1,4 +1,4 @@
-package org.wikipathways.cytoscapeapp.internal.cmd;
+package org.wikipathways.cytoscapeapp.impl;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -8,30 +8,29 @@ import javax.swing.ImageIcon;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
+
 import org.cytoscape.application.swing.search.AbstractNetworkSearchTaskFactory;
+import org.cytoscape.work.TaskIterator;
 
-
-public class WPNetworkSearchTaskFactory extends AbstractNetSearchTaskFactory {
+public class WPNetworkSearchTaskFactory extends AbstractNetworkSearchTaskFactory {
 
 	private final ImageIcon ICON = new ImageIcon(getClass().getClassLoader().getResource("images/star-96.png"));
 	
 	public WPNetworkSearchTaskFactory() {
 		super(
-				"netsearchtest.test-b",
+				"wikipathways-netsearchtest.test-b",
 				"Custom Options UI",
-				"Wikipathways"
+				"Wikipathways", null
 		);
 	}
 	
 	@Override
-	public Icon getIcon() {
-		return ICON;
-	}
+	public Icon getIcon() 		{ return ICON; }
 	
 	@Override
 	public JComponent getOptionsComponent() {
-		JCheckBox cb1 = new JCheckBox("Filter by status", true);
-		JCheckBox cb2 = new JCheckBox("Sit Amet");
+		JCheckBox cb1 = new JCheckBox("DWIM", true);
+		JCheckBox cb2 = new JCheckBox("Custom");
 		cb1.setForeground(Color.WHITE);
 		cb2.setForeground(Color.WHITE);
 		
@@ -42,5 +41,11 @@ public class WPNetworkSearchTaskFactory extends AbstractNetSearchTaskFactory {
 		p.add(cb2, BorderLayout.SOUTH);
 		
 		return p;
+	}
+
+	@Override
+	public TaskIterator createTaskIterator() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

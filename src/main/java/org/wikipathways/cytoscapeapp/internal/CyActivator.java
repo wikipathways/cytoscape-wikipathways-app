@@ -53,6 +53,7 @@ import org.wikipathways.cytoscapeapp.GpmlReaderFactory;
 import org.wikipathways.cytoscapeapp.WPClient;
 import org.wikipathways.cytoscapeapp.WPClientFactory;
 import org.wikipathways.cytoscapeapp.impl.WPClientRESTFactoryImpl;
+import org.wikipathways.cytoscapeapp.impl.WPNetworkSearchTaskFactory;
 import org.wikipathways.cytoscapeapp.internal.cmd.GpmlImportCmdTaskFactory;
 import org.wikipathways.cytoscapeapp.internal.cmd.WPImportCmdTaskFactory;
 import org.wikipathways.cytoscapeapp.internal.cmd.WPSpeciesCmdTaskFactory;
@@ -71,11 +72,11 @@ import org.wikipathways.cytoscapeapp.internal.io.GpmlVizStyle;
 public class CyActivator extends AbstractCyActivator {
 	@Override
 	public void start(BundleContext context) throws Exception {
-    final CyNetworkManager netMgr = getService(context,CyNetworkManager.class);
-    final CyNetworkViewManager netViewMgr = getService(context,CyNetworkViewManager.class);
     final CyNetworkViewFactory netViewFactory = getService(context,CyNetworkViewFactory.class);
     final CyNetworkFactory netFactory = getService(context,CyNetworkFactory.class);
     final StreamUtil streamUtil = getService(context,StreamUtil.class);
+    final CyNetworkManager netMgr = getService(context,CyNetworkManager.class);
+    final CyNetworkViewManager netViewMgr = getService(context,CyNetworkViewManager.class);
     final CyEventHelper eventHelper = getService(context,CyEventHelper.class);
     @SuppressWarnings("rawtypes")
     final TaskManager taskMgr = getService(context, DialogTaskManager.class);
@@ -134,7 +135,7 @@ public class CyActivator extends AbstractCyActivator {
     reg(context,  new WPImportCmdTaskFactory(client, gpmlReaderFactory, GpmlConversionMethod.NETWORK),"import-as-network", "wikipathways");
 
 	
-//	registerAllServices(context, new WPNetworkSearchTaskFactory());				support NetworkSearchBar
+	registerAllServices(context, new WPNetworkSearchTaskFactory(), new Properties());		//		support NetworkSearchBar
 }
 //-----------------------------------------------------
 
