@@ -17,9 +17,10 @@ public class WPNetworkSearchTaskFactory extends AbstractNetworkSearchTaskFactory
 
 	public WPNetworkSearchTaskFactory(WPClient clnt, ImageIcon icon) {
 		super(
-				"wikipathways-netsearchtest.test-b",
-				"Wikipathways",
-				"Wikipathways", icon
+				"wikipathways-netsearchtest.test-b",		// id
+				"Wikipathways",								// name
+				"A user-curated pathway collection", 		// description
+				icon										// icon
 		);
 		
 		client = clnt;
