@@ -19,6 +19,8 @@ package org.wikipathways.cytoscapeapp.internal;
 
 import java.util.Properties;
 
+import javax.swing.ImageIcon;
+
 import org.cytoscape.application.CyApplicationConfiguration;
 import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.io.read.InputStreamTaskFactory;
@@ -135,7 +137,8 @@ public class CyActivator extends AbstractCyActivator {
     reg(context,  new WPImportCmdTaskFactory(client, gpmlReaderFactory, GpmlConversionMethod.NETWORK),"import-as-network", "wikipathways");
 
 	
-	registerAllServices(context, new WPNetworkSearchTaskFactory(), new Properties());		//		support NetworkSearchBar
+	final ImageIcon ICON = new ImageIcon(getClass().getClassLoader().getResource("pathway.png"));
+	registerAllServices(context, new WPNetworkSearchTaskFactory(client, ICON));		//		support NetworkSearchBar
 }
 //-----------------------------------------------------
 
