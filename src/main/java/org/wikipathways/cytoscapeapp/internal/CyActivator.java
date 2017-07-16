@@ -135,10 +135,18 @@ public class CyActivator extends AbstractCyActivator {
     reg(context,  new WPSpeciesCmdTaskFactory(client), "get-species", "wikipathways");
     reg(context,  new WPImportCmdTaskFactory(client, gpmlReaderFactory, GpmlConversionMethod.PATHWAY),"import-as-pathway", "wikipathways");
     reg(context,  new WPImportCmdTaskFactory(client, gpmlReaderFactory, GpmlConversionMethod.NETWORK),"import-as-network", "wikipathways");
-
+    ImageIcon icon;
+	try
+	{
+		  icon = new ImageIcon(getClass().getClassLoader().getResource("logo_150.png"));
 	
-	final ImageIcon ICON = new ImageIcon(getClass().getClassLoader().getResource("pathway.png"));
-	registerAllServices(context, new WPNetworkSearchTaskFactory(client, ICON));		//		support NetworkSearchBar
+	}
+	catch (NullPointerException e)
+	{
+		  icon = new ImageIcon(getClass().getClassLoader().getResource("pathway.png"));
+	}
+
+	registerAllServices(context, new WPNetworkSearchTaskFactory(client, icon));		//		support NetworkSearchBar
 }
 //-----------------------------------------------------
 

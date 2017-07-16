@@ -1098,7 +1098,8 @@ public class GpmlToPathway {
 		CyNetworkView networkView = getNetworkView(cyNet);
 	  String connectorType = pvLine.getConnectorType().toString();
 	  org.pathvisio.core.model.LineType endLineType = pvLine.getEndLineType();
-	  System.out.println("pvLine: " + connectorType + " of endlinetype " + endLineType.getMappName() + " / " + endLineType.getName());
+	  org.pathvisio.core.model.LineType startLineType = pvLine.getStartLineType();
+	  System.out.println("pvLine: " + connectorType + " of types " + startLineType.getMappName() + " / " + endLineType.getName());
 	  makeSegments(pvLine);
 	  MPoint firstPoint = pvLine.getMPoints().get(0);
 	    MPoint lastPoint = pvLine.getMPoints().get(pvLine.getMPoints().size()-1);
@@ -1112,7 +1113,7 @@ public class GpmlToPathway {
 	    if (firstPoint.getGraphRef().equals(lastPoint.getGraphRef()))
 	    	System.out.println("selfLoop ignored");	   
 	    
-	    System.out.println( "LastPoint: " +  lastPoint.toString());
+	    System.out.println( "LastPoint: " +  lastPoint.getGraphRef() + " " + lastPoint.getGraphId());
 //	    IShape keys = pvLine.getShapeType();   //getPropertyKeys();
 //	    Set<Object> keys = pvLine.getPropertyKeys();
 //	    for (Object key : keys)

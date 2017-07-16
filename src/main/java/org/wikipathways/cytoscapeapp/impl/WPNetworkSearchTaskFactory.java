@@ -1,13 +1,7 @@
 package org.wikipathways.cytoscapeapp.impl;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
-import javax.swing.JCheckBox;
-import javax.swing.JComponent;
-import javax.swing.JPanel;
 
 import org.cytoscape.application.swing.search.AbstractNetworkSearchTaskFactory;
 import org.cytoscape.work.TaskIterator;
@@ -16,9 +10,11 @@ import org.wikipathways.cytoscapeapp.internal.cmd.WPSearchCmdTaskFactory;
 
 public class WPNetworkSearchTaskFactory extends AbstractNetworkSearchTaskFactory {
 
-	ImageIcon ICON;
 	private final WPClient client;
-	
+	private ImageIcon ICON;
+	@Override
+	public Icon getIcon() 		{ return ICON; }
+
 	public WPNetworkSearchTaskFactory(WPClient clnt, ImageIcon icon) {
 		super(
 				"wikipathways-netsearchtest.test-b",
@@ -28,11 +24,13 @@ public class WPNetworkSearchTaskFactory extends AbstractNetworkSearchTaskFactory
 		
 		client = clnt;
 		ICON = icon;
-		
 	}
 	
 	@Override
-	public Icon getIcon() 		{ return ICON; }
+	public TaskIterator createTaskIterator() {
+		WPSearchCmdTaskFactory factory = new WPSearchCmdTaskFactory(client);
+		return factory.createTaskIterator();
+	}
 	
 //	@Override
 //	public JComponent getOptionsComponent() {
@@ -50,9 +48,4 @@ public class WPNetworkSearchTaskFactory extends AbstractNetworkSearchTaskFactory
 //		return p;
 //	}
 
-	@Override
-	public TaskIterator createTaskIterator() {
-		WPSearchCmdTaskFactory factory = new WPSearchCmdTaskFactory(client);
-		return factory.createTaskIterator();
-	}
 }

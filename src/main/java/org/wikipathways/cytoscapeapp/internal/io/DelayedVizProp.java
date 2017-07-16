@@ -55,20 +55,21 @@ class DelayedVizProp {
     this.value = value;
     this.isLocked = isLocked;
   }
+	static boolean verbose = false;
 
 	public static void applyAll(final CyNetworkView netView,final Iterable<DelayedVizProp> delayedProps,
 			WPManager mgr) 
 	{
 //		System.out.println("\n");
 //		System.out.println("netView: " + netView.toString());
-
 		for (final DelayedVizProp delayedProp : delayedProps) {
 			final Object value = delayedProp.value;
 			if (value == null) continue;
 
 			String propName = delayedProp.prop.getDisplayName();
 			String propvalue = delayedProp.value.toString();
-			System.out.println("delayedProp: " + propName + " " + propvalue + " " + delayedProp.netObj.getSUID());
+			if (verbose)
+				System.out.println("delayedProp: " + propName + " " + propvalue + " " + delayedProp.netObj.getSUID());
 	
 		if ("Node Shape".equals(propName))
 		{
