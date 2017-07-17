@@ -44,7 +44,7 @@ public class CyActivator extends AbstractCyActivator {
 //    final CyNetworkManager netMgr = getService(context,CyNetworkManager.class);
 //    final CyNetworkViewManager netViewMgr = getService(context,CyNetworkViewManager.class);
 //    final CyEventHelper eventHelper = getService(context,CyEventHelper.class);
-    @SuppressWarnings("rawtypes")
+//    @SuppressWarnings("rawtypes")
 //    final TaskManager taskMgr = getService(context, DialogTaskManager.class);
 //    final CyLayoutAlgorithmManager layoutMgr = getService(context, CyLayoutAlgorithmManager.class);
 //    final NetworkTaskFactory showLODTF = getService(context, NetworkTaskFactory.class, String.format("(%s=Show\\/Hide Graphics Details)", ServiceProperties.TITLE));

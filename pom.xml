@@ -84,6 +84,7 @@
           </execution>
         </executions>
       </plugin>
+
       <!-- Generates the OSGi metadata based on the osgi.bnd file. -->
 			<plugin>
 				<groupId>org.apache.felix</groupId>
@@ -104,7 +105,7 @@
 					</instructions>
 				</configuration>
 			</plugin>
-			<plugin>
+ 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<configuration>
@@ -115,7 +116,7 @@
 	</build>
 
 	<repositories>
-             <repository>
+  <!--            <repository>
 			<id>cytoscape_snapshots</id>
 			<snapshots>
 			</snapshots>
@@ -125,7 +126,8 @@
 			<name>Cytoscape Snapshots</name>
 			<url>http://code.cytoscape.org/nexus/content/repositories/snapshots/</url>
 		</repository>
-		<repository>
+ -->
+<!--  		<repository>
 			<id>cytoscape_releases</id>
 			<snapshots>
 				<enabled>false</enabled>
@@ -136,7 +138,8 @@
 			<url>http://code.cytoscape.org/nexus/content/repositories/releases/</url>
 		</repository>
          <repository> <id>com.springsource.repository.bundles.release</id> <name>SpringSource Enterprise Bundle Repository - SpringSource Bundle Releases</name> <url>http://repository.springsource.com/maven/bundles/release</url> </repository> <repository> <id>com.springsource.repository.bundles.external</id> <name>SpringSource Enterprise Bundle Repository - External Bundle Releases</name> <url>http://repository.springsource.com/maven/bundles/external</url> </repository>
-    </repositories>
+ -->   
+  </repositories>
 
 	<!-- Dependencies needed to compile this project. -->
 	<dependencies>
@@ -147,43 +150,38 @@
 			<scope>provided</scope>
 		</dependency>
 		
-		<dependency>
-			<groupId>org.cytoscape</groupId>
-			<artifactId>service-api</artifactId>
-			<version>${cytoscape.api.version}</version>
-			<scope>provided</scope>
-		</dependency>
+
 		<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>core-task-api</artifactId>
 			<version>${cytoscape.api.version}</version>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
+		<!-- <dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>swing-application-api</artifactId>
 			<version>${cytoscape.api.version}</version>
-		</dependency>
+		</dependency> -->
 
-		<dependency>
+<!-- 		<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>session-api</artifactId>
 			<version>${cytoscape.api.version}</version>
 			<scope>provided</scope>
-		</dependency>
-		<dependency>
+		</dependency> -->
+	<!-- 	<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>webservice-api</artifactId>
 			<version>${cytoscape.api.version}</version>
 			<scope>provided</scope>
-		</dependency>
-		<dependency>
+		</dependency> -->
+	<!-- 	<dependency>
     		<groupId>org.cytoscape</groupId>
     		<artifactId>io-api</artifactId>
     		<version>${cytoscape.api.version}</version>
 		<scope>provided</scope>
-		</dependency>
-		 <dependency>
+		</dependency> -->
+	<!-- 	 <dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>swing-util-api</artifactId>
 			<version>${cytoscape.api.version}</version>
@@ -194,8 +192,8 @@
     		<artifactId>swing-app-api</artifactId>
     	<version>${cytoscape.api.version}</version>
 		<scope>provided</scope>
-		</dependency>
-		<dependency>
+		</dependency> -->
+<!-- 		<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>app-api</artifactId>
 			<version>${cytoscape.api.version}</version>
@@ -206,7 +204,7 @@
 			<artifactId>presentation-api</artifactId>
 			<version>${cytoscape.api.version}</version>
 			<scope>provided</scope>
-		</dependency>
+		</dependency> -->
 		<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>vizmap-api</artifactId>
