@@ -11,7 +11,8 @@ import org.wikipathways.cytoscapeapp.internal.cmd.WPSearchCmdTaskFactory;
 public class WPNetworkSearchTaskFactory extends AbstractNetworkSearchTaskFactory {
 
 	private final WPClient client;
-	private ImageIcon ICON;
+//	private ImageIcon ICON;
+	private final ImageIcon ICON = new ImageIcon(getClass().getClassLoader().getResource("logo_150.png"));
 	@Override
 	public Icon getIcon() 		{ return ICON; }
 
@@ -20,11 +21,11 @@ public class WPNetworkSearchTaskFactory extends AbstractNetworkSearchTaskFactory
 				"wikipathways-netsearchtest.test-b",		// id
 				"Wikipathways",								// name
 				"A user-curated pathway collection", 		// description
-				icon										// icon
+				null										// icon
 		);
 		
 		client = clnt;
-		ICON = icon;
+	//	ICON = icon;
 	}
 	
 	@Override

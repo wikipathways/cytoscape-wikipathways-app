@@ -17,53 +17,17 @@
 //
 package org.wikipathways.cytoscapeapp.internal;
 
-import java.util.Properties;
-
 import javax.swing.ImageIcon;
 
 import org.cytoscape.application.CyApplicationConfiguration;
-import org.cytoscape.event.CyEventHelper;
-import org.cytoscape.io.read.InputStreamTaskFactory;
-import org.cytoscape.io.util.StreamUtil;
-import org.cytoscape.model.CyNetworkFactory;
-import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.service.util.AbstractCyActivator;
 import org.cytoscape.service.util.CyServiceRegistrar;
-import org.cytoscape.session.CyNetworkNaming;
-import org.cytoscape.task.NetworkTaskFactory;
-import org.cytoscape.task.NetworkViewTaskFactory;
-import org.cytoscape.task.NodeViewTaskFactory;
-import org.cytoscape.util.swing.OpenBrowser;
-import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
-import org.cytoscape.view.model.CyNetworkViewFactory;
-import org.cytoscape.view.model.CyNetworkViewManager;
-import org.cytoscape.view.presentation.annotations.AnnotationFactory;
-import org.cytoscape.view.presentation.annotations.AnnotationManager;
-import org.cytoscape.view.presentation.annotations.ArrowAnnotation;
-import org.cytoscape.view.presentation.annotations.ShapeAnnotation;
-import org.cytoscape.view.presentation.annotations.TextAnnotation;
-import org.cytoscape.view.vizmap.VisualMappingFunctionFactory;
-import org.cytoscape.view.vizmap.VisualMappingManager;
-import org.cytoscape.view.vizmap.VisualStyleFactory;
-import org.cytoscape.work.ServiceProperties;
-import org.cytoscape.work.TaskFactory;
-import org.cytoscape.work.TaskManager;
-import org.cytoscape.work.swing.DialogTaskManager;
 import org.osgi.framework.BundleContext;
-import org.wikipathways.cytoscapeapp.GpmlConversionMethod;
-import org.wikipathways.cytoscapeapp.GpmlReaderFactory;
 import org.wikipathways.cytoscapeapp.WPClient;
 import org.wikipathways.cytoscapeapp.WPClientFactory;
+import org.wikipathways.cytoscapeapp.impl.TunableOptionsTaskFactory;
 import org.wikipathways.cytoscapeapp.impl.WPClientRESTFactoryImpl;
 import org.wikipathways.cytoscapeapp.impl.WPNetworkSearchTaskFactory;
-import org.wikipathways.cytoscapeapp.internal.cmd.GpmlImportCmdTaskFactory;
-import org.wikipathways.cytoscapeapp.internal.cmd.WPImportCmdTaskFactory;
-import org.wikipathways.cytoscapeapp.internal.cmd.WPSpeciesCmdTaskFactory;
-import org.wikipathways.cytoscapeapp.internal.guiclient.WPCyGUIClient;
-import org.wikipathways.cytoscapeapp.internal.io.Annots;
-import org.wikipathways.cytoscapeapp.internal.io.GpmlCyReaderTaskFactory;
-import org.wikipathways.cytoscapeapp.internal.io.GpmlReaderFactoryImpl;
-import org.wikipathways.cytoscapeapp.internal.io.GpmlVizStyle;
 /**
  * 
  * @author martinakutmon
@@ -87,7 +51,7 @@ public class CyActivator extends AbstractCyActivator {
 //    final OpenBrowser openBrowser = getService(context, OpenBrowser.class);
 //    final CyNetworkNaming netNaming = getService(context, CyNetworkNaming.class);
     final CyApplicationConfiguration appConf = getService(context, CyApplicationConfiguration.class);
-//    final CyServiceRegistrar registrar = getService(context, CyServiceRegistrar.class);
+    final CyServiceRegistrar registrar = getService(context, CyServiceRegistrar.class);
 //    
 //    final GpmlVizStyle gpmlStyle = new GpmlVizStyle(
 //              getService(context, VisualStyleFactory.class),
@@ -102,24 +66,27 @@ public class CyActivator extends AbstractCyActivator {
 //              (AnnotationFactory<ShapeAnnotation>) getService(context, AnnotationFactory.class,"(type=ShapeAnnotation.class)"),
 //              (AnnotationFactory<TextAnnotation>) getService(context, AnnotationFactory.class,"(type=TextAnnotation.class)"));
 
-    final WPClientFactory clientFactory = new WPClientRESTFactoryImpl(appConf);
+//    final WPClientFactory clientFactory = new WPClientRESTFactoryImpl(appConf);
 //    registerService(context, clientFactory, WPClientFactory.class, new Properties());
 
-    final WPClient client = clientFactory.create();
+//    final WPClient client = clientFactory.create();
 //    final WPManager manager = new WPManager(registrar,annots );
     
-    ImageIcon icon = null;
- 	try
- 	{
- 		  icon = new ImageIcon(getClass().getClassLoader().getResource("logo_150.png"));
- 	
- 	}
- 	catch (NullPointerException e)
- 	{
-	}
- 	 	
+//    ImageIcon icon = null;
+// 	try
+// 	{
+// 		  icon = new ImageIcon(getClass().getClassLoader().getResource("logo_150.png"));
+// 	
+// 	}
+// 	catch (NullPointerException e)
+// 	{
+//	}
+// 	 	
+	registerAllServices(context, new CustomOptionsTaskFactory());
+	registerAllServices(context, new CustomQueryTaskFactory(registrar));
+	registerAllServices(context, new TunableOptionsTaskFactory(1));
 
- 	registerAllServices(context, new WPNetworkSearchTaskFactory(client, icon));		//		support NetworkSearchBar
+// 	registerAllServices(context, new WPNetworkSearchTaskFactory(client, icon));		//		support NetworkSearchBar
 //    final GpmlReaderFactory gpmlReaderFactory = new GpmlReaderFactoryImpl(
 //    		manager, eventHelper,  netFactory, netMgr, netNaming, netViewFactory, netViewMgr, layoutMgr, showLODTF,  annots, gpmlStyle  );
 //    registerService(context, gpmlReaderFactory, GpmlReaderFactory.class);
