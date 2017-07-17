@@ -1157,7 +1157,7 @@ public class GpmlToPathway {
 		Point2D[] wps = calculateWayPoints(startPt, endPt, startSide, endSide);
 	    segments = calculateSegments(startPt, endPt, startSide, endSide, wps);
 	}
-
+static boolean verbose = true;
 //--------------------------------------------------------------------
 	private Bend makeCurvedEdgeBend(CyNetworkView networkView, CyEdge edge) {
 	    BendFactory factory = manager.getBendFactory();		
@@ -1166,6 +1166,12 @@ public class GpmlToPathway {
 	    HandleFactory facto = manager.getHandleFactory();
 	    for (Segment seg : segments)
 	    {
+	    	if (verbose)
+	    	{
+	    		System.out.println("Segment start at: " + seg.start.getX() + ", " +  seg.start.getY());
+	    		System.out.println("Segment center at: " + seg.getMCenter().getX() + ", " +  seg.getMCenter().getY());
+	    		System.out.println("Segment end at  : " + seg.end.getX() + ", " +  seg.end.getY());
+	    	}
 		    Handle h = facto.createHandle(networkView, ev,  seg.end.getX(), seg.end.getY());
 		    bend.getAllHandles().add(h);
 	    }
@@ -1185,9 +1191,9 @@ public class GpmlToPathway {
     HandleFactory facto = manager.getHandleFactory();
     for (Segment seg : segments)
     {
-	    Handle h = facto.createHandle(networkView, ev,  seg.end.getX(), seg.end.getY());		// put in 2 handles for a angled bend
+//	    Handle h = facto.createHandle(networkView, ev,  seg.end.getX(), seg.end.getY());		// put in 2 handles for a angled bend
 	    Handle j = facto.createHandle(networkView, ev,  seg.end.getX(), seg.end.getY());
-	    bend.getAllHandles().add(h);
+//	    bend.getAllHandles().add(h);
 	    bend.getAllHandles().add(j);
     }
 	return bend;

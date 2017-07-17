@@ -74,92 +74,92 @@ import org.wikipathways.cytoscapeapp.internal.io.GpmlVizStyle;
 public class CyActivator extends AbstractCyActivator {
 	@Override
 	public void start(BundleContext context) throws Exception {
-    final CyNetworkViewFactory netViewFactory = getService(context,CyNetworkViewFactory.class);
-    final CyNetworkFactory netFactory = getService(context,CyNetworkFactory.class);
-    final StreamUtil streamUtil = getService(context,StreamUtil.class);
-    final CyNetworkManager netMgr = getService(context,CyNetworkManager.class);
-    final CyNetworkViewManager netViewMgr = getService(context,CyNetworkViewManager.class);
-    final CyEventHelper eventHelper = getService(context,CyEventHelper.class);
+//    final CyNetworkViewFactory netViewFactory = getService(context,CyNetworkViewFactory.class);
+//    final CyNetworkFactory netFactory = getService(context,CyNetworkFactory.class);
+//    final StreamUtil streamUtil = getService(context,StreamUtil.class);
+//    final CyNetworkManager netMgr = getService(context,CyNetworkManager.class);
+//    final CyNetworkViewManager netViewMgr = getService(context,CyNetworkViewManager.class);
+//    final CyEventHelper eventHelper = getService(context,CyEventHelper.class);
     @SuppressWarnings("rawtypes")
-    final TaskManager taskMgr = getService(context, DialogTaskManager.class);
-    final CyLayoutAlgorithmManager layoutMgr = getService(context, CyLayoutAlgorithmManager.class);
-    final NetworkTaskFactory showLODTF = getService(context, NetworkTaskFactory.class, String.format("(%s=Show\\/Hide Graphics Details)", ServiceProperties.TITLE));
-    final OpenBrowser openBrowser = getService(context, OpenBrowser.class);
-    final CyNetworkNaming netNaming = getService(context, CyNetworkNaming.class);
+//    final TaskManager taskMgr = getService(context, DialogTaskManager.class);
+//    final CyLayoutAlgorithmManager layoutMgr = getService(context, CyLayoutAlgorithmManager.class);
+//    final NetworkTaskFactory showLODTF = getService(context, NetworkTaskFactory.class, String.format("(%s=Show\\/Hide Graphics Details)", ServiceProperties.TITLE));
+//    final OpenBrowser openBrowser = getService(context, OpenBrowser.class);
+//    final CyNetworkNaming netNaming = getService(context, CyNetworkNaming.class);
     final CyApplicationConfiguration appConf = getService(context, CyApplicationConfiguration.class);
-    final CyServiceRegistrar registrar = getService(context, CyServiceRegistrar.class);
-    
-    final GpmlVizStyle gpmlStyle = new GpmlVizStyle(
-              getService(context, VisualStyleFactory.class),
-              getService(context, VisualMappingManager.class),
-              getService(context, VisualMappingFunctionFactory.class, "(mapping.type=continuous)"),
-              getService(context, VisualMappingFunctionFactory.class, "(mapping.type=discrete)"),
-              getService(context, VisualMappingFunctionFactory.class, "(mapping.type=passthrough)"));
-    @SuppressWarnings("unchecked")
-    final Annots annots = new Annots(
-              getService(context, AnnotationManager.class),
-              (AnnotationFactory<ArrowAnnotation>) getService(context, AnnotationFactory.class,"(type=ArrowAnnotation.class)"),
-              (AnnotationFactory<ShapeAnnotation>) getService(context, AnnotationFactory.class,"(type=ShapeAnnotation.class)"),
-              (AnnotationFactory<TextAnnotation>) getService(context, AnnotationFactory.class,"(type=TextAnnotation.class)"));
+//    final CyServiceRegistrar registrar = getService(context, CyServiceRegistrar.class);
+//    
+//    final GpmlVizStyle gpmlStyle = new GpmlVizStyle(
+//              getService(context, VisualStyleFactory.class),
+//              getService(context, VisualMappingManager.class),
+//              getService(context, VisualMappingFunctionFactory.class, "(mapping.type=continuous)"),
+//              getService(context, VisualMappingFunctionFactory.class, "(mapping.type=discrete)"),
+//              getService(context, VisualMappingFunctionFactory.class, "(mapping.type=passthrough)"));
+//    @SuppressWarnings("unchecked")
+//    final Annots annots = new Annots(
+//              getService(context, AnnotationManager.class),
+//              (AnnotationFactory<ArrowAnnotation>) getService(context, AnnotationFactory.class,"(type=ArrowAnnotation.class)"),
+//              (AnnotationFactory<ShapeAnnotation>) getService(context, AnnotationFactory.class,"(type=ShapeAnnotation.class)"),
+//              (AnnotationFactory<TextAnnotation>) getService(context, AnnotationFactory.class,"(type=TextAnnotation.class)"));
 
     final WPClientFactory clientFactory = new WPClientRESTFactoryImpl(appConf);
-    registerService(context, clientFactory, WPClientFactory.class, new Properties());
+//    registerService(context, clientFactory, WPClientFactory.class, new Properties());
 
     final WPClient client = clientFactory.create();
-    final WPManager manager = new WPManager(registrar,annots );
+//    final WPManager manager = new WPManager(registrar,annots );
     
-    final GpmlReaderFactory gpmlReaderFactory = new GpmlReaderFactoryImpl(
-    		manager, eventHelper,  netFactory, netMgr, netNaming, netViewFactory, netViewMgr, layoutMgr, showLODTF,  annots, gpmlStyle  );
-    registerService(context, gpmlReaderFactory, GpmlReaderFactory.class, new Properties());
-
-    final GpmlCyReaderTaskFactory gpmlCyReaderTaskFactory = new GpmlCyReaderTaskFactory( gpmlReaderFactory, streamUtil);
-    registerService(context, gpmlCyReaderTaskFactory, InputStreamTaskFactory.class, new Properties());
-
-    final WPCyGUIClient guiClient = new WPCyGUIClient( taskMgr, client, openBrowser, gpmlReaderFactory);
-    registerAllServices(context, guiClient, new Properties());
-
-    final ToggleShapesTaskFactory toggleShapesTF = new ToggleShapesTaskFactory();
-    registerService(context, toggleShapesTF, NetworkViewTaskFactory.class, ezProps(
-      ServiceProperties.TITLE, "Toggle Pathway Shapes",
-      ServiceProperties.PREFERRED_MENU, "View" ));
-
-    final OpenLinkedPathwayAsNewTaskFactory openLinkedPathwayAsNewTF = new OpenLinkedPathwayAsNewTaskFactory(client, gpmlReaderFactory);
-    registerService(context, openLinkedPathwayAsNewTF, NodeViewTaskFactory.class, ezProps(
-      ServiceProperties.TITLE, "Open Linked Pathway",
-      ServiceProperties.PREFERRED_MENU, "Apps.WikiPathways",
-      ServiceProperties.IN_MENU_BAR, "false"  ));
-
-    
-    reg(context,  new GpmlImportCmdTaskFactory(gpmlReaderFactory, GpmlConversionMethod.PATHWAY),"import-as-pathway", "gpml");
-    reg(context,  new GpmlImportCmdTaskFactory(gpmlReaderFactory, GpmlConversionMethod.NETWORK),"import-as-network", "gpml");
-    reg(context,  new WPSpeciesCmdTaskFactory(client), "get-species", "wikipathways");
-    reg(context,  new WPImportCmdTaskFactory(client, gpmlReaderFactory, GpmlConversionMethod.PATHWAY),"import-as-pathway", "wikipathways");
-    reg(context,  new WPImportCmdTaskFactory(client, gpmlReaderFactory, GpmlConversionMethod.NETWORK),"import-as-network", "wikipathways");
-    ImageIcon icon;
-	try
-	{
-		  icon = new ImageIcon(getClass().getClassLoader().getResource("logo_150.png"));
-	
+    ImageIcon icon = null;
+ 	try
+ 	{
+ 		  icon = new ImageIcon(getClass().getClassLoader().getResource("logo_150.png"));
+ 	
+ 	}
+ 	catch (NullPointerException e)
+ 	{
 	}
-	catch (NullPointerException e)
-	{
-		  icon = new ImageIcon(getClass().getClassLoader().getResource("pathway.png"));
-	}
+ 	 	
 
-	registerAllServices(context, new WPNetworkSearchTaskFactory(client, icon));		//		support NetworkSearchBar
-}
+ 	registerAllServices(context, new WPNetworkSearchTaskFactory(client, icon));		//		support NetworkSearchBar
+//    final GpmlReaderFactory gpmlReaderFactory = new GpmlReaderFactoryImpl(
+//    		manager, eventHelper,  netFactory, netMgr, netNaming, netViewFactory, netViewMgr, layoutMgr, showLODTF,  annots, gpmlStyle  );
+//    registerService(context, gpmlReaderFactory, GpmlReaderFactory.class);
+//
+//    final GpmlCyReaderTaskFactory gpmlCyReaderTaskFactory = new GpmlCyReaderTaskFactory( gpmlReaderFactory, streamUtil);
+//    registerService(context, gpmlCyReaderTaskFactory, InputStreamTaskFactory.class);
+
+//    final WPCyGUIClient guiClient = new WPCyGUIClient( taskMgr, client, openBrowser, gpmlReaderFactory);
+//    registerAllServices(context, guiClient);
+
+//    final ToggleShapesTaskFactory toggleShapesTF = new ToggleShapesTaskFactory();
+//    registerService(context, toggleShapesTF, NetworkViewTaskFactory.class, ezProps(
+//      ServiceProperties.TITLE, "Toggle Pathway Shapes",
+//      ServiceProperties.PREFERRED_MENU, "View" ));
+//
+//    final OpenLinkedPathwayAsNewTaskFactory openLinkedPathwayAsNewTF = new OpenLinkedPathwayAsNewTaskFactory(client, gpmlReaderFactory);
+//    registerService(context, openLinkedPathwayAsNewTF, NodeViewTaskFactory.class, ezProps(
+//      ServiceProperties.TITLE, "Open Linked Pathway",
+//      ServiceProperties.PREFERRED_MENU, "Apps.WikiPathways",
+//      ServiceProperties.IN_MENU_BAR, "false"  ));
+//
+//    
+//    reg(context,  new GpmlImportCmdTaskFactory(gpmlReaderFactory, GpmlConversionMethod.PATHWAY),"import-as-pathway", "gpml");
+//    reg(context,  new GpmlImportCmdTaskFactory(gpmlReaderFactory, GpmlConversionMethod.NETWORK),"import-as-network", "gpml");
+//    reg(context,  new WPSpeciesCmdTaskFactory(client), "get-species", "wikipathways");
+//    reg(context,  new WPImportCmdTaskFactory(client, gpmlReaderFactory, GpmlConversionMethod.PATHWAY),"import-as-pathway", "wikipathways");
+//    reg(context,  new WPImportCmdTaskFactory(client, gpmlReaderFactory, GpmlConversionMethod.NETWORK),"import-as-network", "wikipathways");
+ }
 //-----------------------------------------------------
 
-	private void reg(BundleContext context, Object service, String cmd, String namespace)
-    {
-        registerService(context, service,
-        	 TaskFactory.class, ezProps( ServiceProperties.COMMAND,cmd,  ServiceProperties.COMMAND_NAMESPACE, namespace ));
-    }
-
-	private static Properties ezProps(String... vals) {
-    final Properties props = new Properties();
-    for (int i = 0; i < vals.length; i += 2)
-       props.put(vals[i], vals[i + 1]);
-    return props;
-  }
+//	private void reg(BundleContext context, Object service, String cmd, String namespace)
+//    {
+//        registerService(context, service,
+//        	 TaskFactory.class, ezProps( ServiceProperties.COMMAND,cmd,  ServiceProperties.COMMAND_NAMESPACE, namespace ));
+//    }
+//
+//	private static Properties ezProps(String... vals) {
+//    final Properties props = new Properties();
+//    for (int i = 0; i < vals.length; i += 2)
+//       props.put(vals[i], vals[i + 1]);
+//    return props;
+//  }
 }
