@@ -157,31 +157,31 @@
 			<version>${cytoscape.api.version}</version>
 			<scope>provided</scope>
 		</dependency>
-		<!-- <dependency>
+	<!--	 <dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>swing-application-api</artifactId>
 			<version>${cytoscape.api.version}</version>
-		</dependency> -->
+		</dependency>  -->
 
-<!-- 		<dependency>
+ 		<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>session-api</artifactId>
 			<version>${cytoscape.api.version}</version>
 			<scope>provided</scope>
-		</dependency> -->
-	<!-- 	<dependency>
+		</dependency>
+	 	<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>webservice-api</artifactId>
 			<version>${cytoscape.api.version}</version>
 			<scope>provided</scope>
-		</dependency> -->
-	<!-- 	<dependency>
+		</dependency>
+	 	<dependency>
     		<groupId>org.cytoscape</groupId>
     		<artifactId>io-api</artifactId>
     		<version>${cytoscape.api.version}</version>
 		<scope>provided</scope>
-		</dependency> -->
-	<!-- 	 <dependency>
+		</dependency> 
+	 	 <dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>swing-util-api</artifactId>
 			<version>${cytoscape.api.version}</version>
@@ -192,8 +192,8 @@
     		<artifactId>swing-app-api</artifactId>
     	<version>${cytoscape.api.version}</version>
 		<scope>provided</scope>
-		</dependency> -->
-<!-- 		<dependency>
+		</dependency> 
+ 		<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>app-api</artifactId>
 			<version>${cytoscape.api.version}</version>
@@ -204,7 +204,7 @@
 			<artifactId>presentation-api</artifactId>
 			<version>${cytoscape.api.version}</version>
 			<scope>provided</scope>
-		</dependency> -->
+		</dependency> 
 		<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>vizmap-api</artifactId>
@@ -217,36 +217,36 @@
     		<version>${cytoscape.api.version}</version>
 		<scope>provided</scope>
 		</dependency>
-                <dependency>
-                        <groupId>org.cytoscape</groupId>
-                        <artifactId>viewmodel-api</artifactId>
-                        <version>${cytoscape.api.version}</version>
-                        <scope>provided</scope>
-                </dependency>
-                <dependency>
-                        <groupId>org.cytoscape</groupId>
-                        <artifactId>application-api</artifactId>
-                        <version>${cytoscape.api.version}</version>
-                        <scope>provided</scope>
-                </dependency>
-                <dependency>
-                        <groupId>org.cytoscape</groupId>
-                        <artifactId>model-api</artifactId>
-                        <version>${cytoscape.api.version}</version>
-                        <scope>provided</scope>
-                </dependency>
-                <dependency>
-                        <groupId>org.cytoscape</groupId>
-                        <artifactId>event-api</artifactId>
-                        <version>${cytoscape.api.version}</version>
-                        <scope>provided</scope>
-                </dependency>
-                <dependency>
-                        <groupId>org.cytoscape</groupId>
-                        <artifactId>work-swing-api</artifactId>
-                        <version>${cytoscape.api.version}</version>
-                        <scope>provided</scope>
-                </dependency>
+         <dependency>
+                 <groupId>org.cytoscape</groupId>
+                 <artifactId>viewmodel-api</artifactId>
+                 <version>${cytoscape.api.version}</version>
+                 <scope>provided</scope>
+         </dependency>
+         <dependency>
+                 <groupId>org.cytoscape</groupId>
+                 <artifactId>application-api</artifactId>
+                 <version>${cytoscape.api.version}</version>
+                 <scope>provided</scope>
+         </dependency>
+         <dependency>
+                 <groupId>org.cytoscape</groupId>
+                 <artifactId>model-api</artifactId>
+                 <version>${cytoscape.api.version}</version>
+                 <scope>provided</scope>
+         </dependency>
+         <dependency>
+                 <groupId>org.cytoscape</groupId>
+                 <artifactId>event-api</artifactId>
+                 <version>${cytoscape.api.version}</version>
+                 <scope>provided</scope>
+         </dependency>
+         <dependency>
+                 <groupId>org.cytoscape</groupId>
+                 <artifactId>work-swing-api</artifactId>
+                 <version>${cytoscape.api.version}</version>
+                 <scope>provided</scope>
+         </dependency>
 
 
 
