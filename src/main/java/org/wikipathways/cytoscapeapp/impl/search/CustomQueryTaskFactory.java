@@ -1,4 +1,4 @@
-package org.wikipathways.cytoscapeapp.internal;
+package org.wikipathways.cytoscapeapp.impl.search;
 
 import static javax.swing.GroupLayout.DEFAULT_SIZE;
 import static javax.swing.GroupLayout.PREFERRED_SIZE;

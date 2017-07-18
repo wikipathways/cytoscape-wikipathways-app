@@ -131,8 +131,6 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
 
     resultsTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION); 
     resultsTable.getSelectionModel().addListSelectionListener(new SharedListSelectionHandler());
-    
-
     resultsTable.requestFocusInWindow();
     
     resultsTable.addMouseListener(new MouseAdapter() {
@@ -155,7 +153,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
     final JPanel resultsPanel = newResultsPanel();
 
     super.gui = new JPanel(new GridBagLayout());
-    EasyGBC c = new EasyGBC();
+    EasyGridBagConstraints c = new EasyGridBagConstraints();
     super.gui.add(searchPanel, c.expandHoriz());
     super.gui.add(resultsPanel, c.down().expandBoth().insets(0, 10, 10, 10));
 
@@ -176,7 +174,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
       }
   }
   private JPanel newResultsPanel() {
-    final EasyGBC c = new EasyGBC();
+    final EasyGridBagConstraints c = new EasyGridBagConstraints();
 //
 //    pathwayMenuItem.addActionListener(new ActionListener() {
 //      public void actionPerformed(ActionEvent e) {
@@ -268,7 +266,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
 
     final JPanel searchBar = new JPanel(new GridBagLayout());
     searchBar.setBorder(new SearchBarBorder());
-    final EasyGBC e = new EasyGBC();
+    final EasyGridBagConstraints e = new EasyGridBagConstraints();
     searchBar.add(searchField, e.expandHoriz().insets(6, 12, 6, 0));
     searchBar.add(searchButton, e.noExpand().right().insets(6, 8, 6, 8));
 
@@ -278,7 +276,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
   private JPanel newSearchPanel() {
     final JPanel searchBar = newSearchBar();
     final JPanel searchPanel = new JPanel(new GridBagLayout());
-    EasyGBC c = new EasyGBC();
+    EasyGridBagConstraints c = new EasyGridBagConstraints();
     searchPanel.add(searchBar, c.expandHoriz().insets(0, 10, 5, 10));
     searchPanel.add(speciesCheckBox, c.noExpand().right().insets(0, 0, 5, 0));
     searchPanel.add(speciesComboBox, c.right().insets(0, 0, 5, 10));

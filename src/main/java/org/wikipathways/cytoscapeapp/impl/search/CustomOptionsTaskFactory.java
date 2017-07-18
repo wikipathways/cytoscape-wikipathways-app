@@ -1,4 +1,4 @@
-package org.wikipathways.cytoscapeapp.internal;
+package org.wikipathways.cytoscapeapp.impl.search;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -8,8 +8,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
-
-import org.wikipathways.cytoscapeapp.impl.AbstractNetSearchTestTaskFactory;
 
 public class CustomOptionsTaskFactory extends AbstractNetSearchTestTaskFactory {
 

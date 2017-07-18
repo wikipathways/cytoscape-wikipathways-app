@@ -1,4 +1,4 @@
-package org.wikipathways.cytoscapeapp.impl;
+package org.wikipathways.cytoscapeapp.impl.search;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;

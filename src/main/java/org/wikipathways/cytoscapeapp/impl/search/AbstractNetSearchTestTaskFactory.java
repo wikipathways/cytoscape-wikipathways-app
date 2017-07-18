@@ -1,4 +1,4 @@
-package org.wikipathways.cytoscapeapp.impl;
+package org.wikipathways.cytoscapeapp.impl.search;
 
 import org.cytoscape.application.swing.search.AbstractNetworkSearchTaskFactory;
 import org.cytoscape.work.AbstractTask;

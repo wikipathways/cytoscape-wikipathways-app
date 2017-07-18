@@ -54,9 +54,9 @@ import org.wikipathways.cytoscapeapp.GpmlConversionMethod;
 import org.wikipathways.cytoscapeapp.GpmlReaderFactory;
 import org.wikipathways.cytoscapeapp.WPClient;
 import org.wikipathways.cytoscapeapp.WPClientFactory;
-import org.wikipathways.cytoscapeapp.impl.TunableOptionsTaskFactory;
 import org.wikipathways.cytoscapeapp.impl.WPClientRESTFactoryImpl;
-import org.wikipathways.cytoscapeapp.impl.WPNetworkSearchTaskFactory;
+import org.wikipathways.cytoscapeapp.impl.search.TunableOptionsTaskFactory;
+import org.wikipathways.cytoscapeapp.impl.search.WPNetworkSearchTaskFactory;
 import org.wikipathways.cytoscapeapp.internal.cmd.GpmlImportCmdTaskFactory;
 import org.wikipathways.cytoscapeapp.internal.cmd.WPImportCmdTaskFactory;
 import org.wikipathways.cytoscapeapp.internal.cmd.WPSpeciesCmdTaskFactory;
@@ -113,17 +113,16 @@ public class CyActivator extends AbstractCyActivator {
  	try
  	{
  		  icon = new ImageIcon(getClass().getClassLoader().getResource("logo_150.png"));
- 	
  	}
- 	catch (NullPointerException e)
+ 	catch (NullPointerException e)				// icon with that name not found
  	{
 	}
 // 	 	
-	registerAllServices(context, new CustomOptionsTaskFactory());
-	registerAllServices(context, new CustomQueryTaskFactory(registrar));
-	registerAllServices(context, new TunableOptionsTaskFactory(1));
+//	registerAllServices(context, new CustomOptionsTaskFactory());
+//	registerAllServices(context, new CustomQueryTaskFactory(registrar));
+//	registerAllServices(context, new TunableOptionsTaskFactory(1));
 
- 	registerAllServices(context, new WPNetworkSearchTaskFactory(client, icon));		//		support NetworkSearchBar
+ 	registerAllServices(context, new WPNetworkSearchTaskFactory(registrar, client, icon));		//		support NetworkSearchBar
     final GpmlReaderFactory gpmlReaderFactory = new GpmlReaderFactoryImpl(
     		manager, eventHelper,  netFactory, netMgr, netNaming, netViewFactory, netViewMgr, layoutMgr, showLODTF,  annots, gpmlStyle  );
     registerService(context, gpmlReaderFactory, GpmlReaderFactory.class);
