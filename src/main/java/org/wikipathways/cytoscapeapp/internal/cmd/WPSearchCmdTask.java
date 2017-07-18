@@ -24,17 +24,26 @@ public class WPSearchCmdTask extends AbstractTask {
   }
 
   public void run(TaskMonitor monitor) {
-    if (query == null || query.length() == 0) {
+
+  	System.out.println("query");
+
+  	if (query == null || query.length() == 0) {
     	// BEEP
     	System.out.println("DON'T LET EMPTY QUERY IN");
       throw new IllegalArgumentException("query must be specified");
     }
     
     final ResultTask<List<WPPathway>> searchTask = client.newFreeTextSearchTask(query, species);
-    System.out.println("Task " + searchTask.toString());
+    
     insertTasksAfterCurrentTask(searchTask, new ObservableTask() {
-      public void run(TaskMonitor monitor) {}
+      public void run(TaskMonitor monitor) {
+    	  
+    	  // RUN
+    	    System.out.println("SearchTask " + searchTask.toString());
+    	  
+      }
       public void cancel() {}
+      
       public <R> R getResults(Class<? extends R> type) {
         if (List.class.equals(type))           
         	return (R) searchTask.get();

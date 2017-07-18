@@ -18,9 +18,15 @@ import javax.swing.SwingConstants;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
+import org.cytoscape.application.CyApplicationConfiguration;
 import org.cytoscape.application.swing.search.NetworkSearchTaskFactory;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.util.swing.IconManager;
+import org.cytoscape.work.swing.DialogTaskManager;
+import org.wikipathways.cytoscapeapp.WPClient;
+import org.wikipathways.cytoscapeapp.WPClientFactory;
+import org.wikipathways.cytoscapeapp.impl.WPClientRESTFactoryImpl;
+import org.wikipathways.cytoscapeapp.internal.cmd.WPSearchCmdTaskFactory;
 
 @SuppressWarnings("serial")
 public class QueryBar extends JPanel {
@@ -28,48 +34,59 @@ public class QueryBar extends JPanel {
 	private JComboBox<String> organismCombo;
 	private JTextField searchTextField;
 	CyServiceRegistrar serviceRegistrar;
-	public QueryBar(CyServiceRegistrar reg) {
+	private WPClient client;
+	Font font = null; 
+	
+	public QueryBar(CyServiceRegistrar reg) 
+	{
 		serviceRegistrar = reg;
+		font = serviceRegistrar.getService(IconManager.class).getIconFont(14.0f);
+	    final CyApplicationConfiguration appConf = reg.getService(CyApplicationConfiguration.class);
+	    final WPClientFactory clientFactory = new WPClientRESTFactoryImpl(appConf);
+	    client = clientFactory.create();
 		final BoxLayout layout = new BoxLayout(this, BoxLayout.LINE_AXIS);
-		this.setLayout(layout);
+		setLayout(layout);
 		add(getOrganismCombo());
 		add(getSearchTextField());
-		add(getGoButton());
+//		add(getGoButton());
 	}
 	
-	public String getQuery() {
+	public String getQueryFromUI() {
 		return getSearchTextField().getText();
 	}
 	
-	public boolean isReady() {
-		JTextField field = getSearchTextField();
-				String query = field.getText();
+	public boolean isReady() {	
+		String query = getQueryFromUI();
+//		System.out.println("isReady: "+ getQueryFromUI().trim());
 		// Let's pretend the query string must have at least 3 characters
 		boolean ready = query != null && query.trim().length() > 2 && getOrganismCombo().getSelectedItem() != null;
 		return ready;
 	}
 	
-	final Font font = serviceRegistrar.getService(IconManager.class).getIconFont(14.0f);
 
 	static final String BASE = "http://wikipath/etc/";
-	private JButton getGoButton()
-	{
-		JButton b = new JButton(IconManager.ICON_SEARCH);
-		b.setFont(font);
-		b.setMaximumSize(new Dimension(24, 24));
-		b.setActionCommand("Search");
-		b.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				System.out.println("Execute query: "+ BASE + "foo?" + getQuery());
-
-				//open the import from database dialog and fill in fields.
-			}
-		});
-		return b;
-	}
+//  This is left over from earlier when the task was run from here.
 	
+	//	private JButton getGoButton()
+//	{
+//		JButton b = new JButton(IconManager.ICON_SEARCH);
+//		b.setFont(font);
+//		b.setMaximumSize(new Dimension(24, 24));
+//		b.setActionCommand("Search");
+//		b.addActionListener(new ActionListener() {
+//			@Override public void actionPerformed(ActionEvent e) 
+//			{
+//				String text =  getQueryFromUI().trim();
+//				System.out.println("Execute query: "+ BASE + "search?" + text);
+//				WPSearchCmdTaskFactory factory = new WPSearchCmdTaskFactory(client);
+//				DialogTaskManager taskManager = serviceRegistrar.getService(DialogTaskManager.class);
+//				taskManager.execute(factory.createTaskIterator());
+//				//open the import from database dialog and fill in fields.
+//			}
+//		});
+//		return b;
+//	}
+//	
 	private JComboBox<String> getOrganismCombo() {
 		if (organismCombo == null) {
 			DefaultComboBoxModel<String> model = new DefaultComboBoxModel<String>();
@@ -100,7 +117,6 @@ public class QueryBar extends JPanel {
 					super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
 					setFont(font);
 					setHorizontalAlignment(SwingConstants.CENTER);
-					
 					return this;
 				}
 			});

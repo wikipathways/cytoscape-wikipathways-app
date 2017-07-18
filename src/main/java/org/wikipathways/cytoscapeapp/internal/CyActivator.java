@@ -39,6 +39,9 @@ import org.wikipathways.cytoscapeapp.GpmlReaderFactory;
 import org.wikipathways.cytoscapeapp.WPClient;
 import org.wikipathways.cytoscapeapp.WPClientFactory;
 import org.wikipathways.cytoscapeapp.impl.WPClientRESTFactoryImpl;
+import org.wikipathways.cytoscapeapp.impl.search.CustomOptionsTaskFactory;
+import org.wikipathways.cytoscapeapp.impl.search.CustomQueryTaskFactory;
+import org.wikipathways.cytoscapeapp.impl.search.TunableOptionsTaskFactory;
 import org.wikipathways.cytoscapeapp.impl.search.WPNetworkSearchTaskFactory;
 import org.wikipathways.cytoscapeapp.internal.cmd.GpmlImportCmdTaskFactory;
 import org.wikipathways.cytoscapeapp.internal.cmd.WPImportCmdTaskFactory;
@@ -49,33 +52,45 @@ import org.wikipathways.cytoscapeapp.internal.io.GpmlReaderFactoryImpl;
 /**
  * 
  * @author martinakutmon
+ * @author adamtreister
  * gets all required services provided by Cytoscape
- * initializes the GPMLNetworkManager
+ * initializes the GpmlReaderFactory, WPCyGUIClient and Network Search Bar
  *
  */
 public class CyActivator extends AbstractCyActivator {
 	@Override
 	public void start(BundleContext context) throws Exception {
-    final StreamUtil streamUtil = getService(context,StreamUtil.class);
-    final TaskManager taskMgr = getService(context, DialogTaskManager.class);
-    final OpenBrowser openBrowser = getService(context, OpenBrowser.class);
-    final CyApplicationConfiguration appConf = getService(context, CyApplicationConfiguration.class);
     final CyServiceRegistrar registrar = getService(context, CyServiceRegistrar.class);
-//    
-
-    final WPClientFactory clientFactory = new WPClientRESTFactoryImpl(appConf);
-    registerService(context, clientFactory, WPClientFactory.class);
-
-    final WPClient client = clientFactory.create();
-
+    
+    // --- get the GpmlReaderFactory and the GpmlCyReaderTaskFactory to manage imports
     final GpmlReaderFactory gpmlReaderFactory = new GpmlReaderFactoryImpl(registrar);
     registerService(context, gpmlReaderFactory, GpmlReaderFactory.class);
-
+    final StreamUtil streamUtil = getService(context,StreamUtil.class);
     final GpmlCyReaderTaskFactory gpmlCyReaderTaskFactory = new GpmlCyReaderTaskFactory( gpmlReaderFactory, streamUtil);
     registerService(context, gpmlCyReaderTaskFactory, InputStreamTaskFactory.class);
 
+    // --- analogous GpmlWriterFactory and the GpmlCyWriterTaskFactory to manage exports go here  
+    // TODO
+     
+   
+    //---- get all the services necessary to build the GUI and then build and register it
+    final CyApplicationConfiguration appConf = getService(context, CyApplicationConfiguration.class);
+    final WPClientFactory clientFactory = new WPClientRESTFactoryImpl(appConf);
+    final WPClient client = clientFactory.create();
+    registerService(context, clientFactory, WPClientFactory.class);
+    final TaskManager<?, ?> taskMgr = getService(context, DialogTaskManager.class);
+    final OpenBrowser openBrowser = getService(context, OpenBrowser.class);
     final WPCyGUIClient guiClient = new WPCyGUIClient( taskMgr, client, openBrowser, gpmlReaderFactory);
     registerAllServices(context, guiClient);
+
+    // ---- create and register a bunch of CommandTaskFactories
+    reg(context,  new WPSpeciesCmdTaskFactory(client), "get-species", "wikipathways");
+    reg(context,  new GpmlImportCmdTaskFactory(gpmlReaderFactory, GpmlConversionMethod.PATHWAY),"import-as-pathway", "gpml");
+    reg(context,  new GpmlImportCmdTaskFactory(gpmlReaderFactory, GpmlConversionMethod.NETWORK),"import-as-network", "gpml");
+    reg(context,  new WPImportCmdTaskFactory(client, gpmlReaderFactory, GpmlConversionMethod.PATHWAY),"import-as-pathway", "wikipathways");
+    reg(context,  new WPImportCmdTaskFactory(client, gpmlReaderFactory, GpmlConversionMethod.NETWORK),"import-as-network", "wikipathways");
+
+    // --- analogous export commands s go here   TODO
 
     final ToggleShapesTaskFactory toggleShapesTF = new ToggleShapesTaskFactory();
     registerService(context, toggleShapesTF, NetworkViewTaskFactory.class, ezProps(
@@ -88,27 +103,22 @@ public class CyActivator extends AbstractCyActivator {
       ServiceProperties.PREFERRED_MENU, "Apps.WikiPathways",
       ServiceProperties.IN_MENU_BAR, "false"  ));
 
+    //  ----- support NetworkSearchBar
     ImageIcon icon = null;
  	try
  	{
  		  icon = new ImageIcon(getClass().getClassLoader().getResource("logo_150.png"));
  	}
- 	catch (NullPointerException e)				// icon with that name not found
- 	{
-	}
- 	registerAllServices(context, new WPNetworkSearchTaskFactory(registrar, client, icon));		//		support NetworkSearchBar
+ 	catch (NullPointerException e)		{ }	// icon with that name not found, null is okay
+ 	
 
 // These are additional sample classes that you could mock up as other services
  	
-//	registerAllServices(context, new CustomOptionsTaskFactory());
-//	registerAllServices(context, new CustomQueryTaskFactory(registrar));
 //	registerAllServices(context, new TunableOptionsTaskFactory(1));
-   
-    reg(context,  new GpmlImportCmdTaskFactory(gpmlReaderFactory, GpmlConversionMethod.PATHWAY),"import-as-pathway", "gpml");
-    reg(context,  new GpmlImportCmdTaskFactory(gpmlReaderFactory, GpmlConversionMethod.NETWORK),"import-as-network", "gpml");
-    reg(context,  new WPSpeciesCmdTaskFactory(client), "get-species", "wikipathways");
-    reg(context,  new WPImportCmdTaskFactory(client, gpmlReaderFactory, GpmlConversionMethod.PATHWAY),"import-as-pathway", "wikipathways");
-    reg(context,  new WPImportCmdTaskFactory(client, gpmlReaderFactory, GpmlConversionMethod.NETWORK),"import-as-network", "wikipathways");
+	registerAllServices(context, new CustomOptionsTaskFactory());
+	registerAllServices(context, new CustomQueryTaskFactory(registrar));
+ 	registerAllServices(context, new WPNetworkSearchTaskFactory(registrar, client, icon));		
+ 
  }
 //-----------------------------------------------------
 

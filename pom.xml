@@ -11,7 +11,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.wikipathways</groupId>
 	<artifactId>cytoscapeapp</artifactId>
-	<version>3.3.alpha9</version>
+	<version>3.3.alpha11</version>
 
 	<name>WikiPathways Cytoscape App</name>
 	
@@ -162,13 +162,13 @@
 			<artifactId>swing-application-api</artifactId>
 			<version>${cytoscape.api.version}</version>
 		</dependency>  -->
-
+<!-- 
  		<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>session-api</artifactId>
 			<version>${cytoscape.api.version}</version>
 			<scope>provided</scope>
-		</dependency>
+		</dependency> -->
 	 	<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>webservice-api</artifactId>
@@ -187,12 +187,12 @@
 			<version>${cytoscape.api.version}</version>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
+<!-- 		<dependency>
     		<groupId>org.cytoscape</groupId>
     		<artifactId>swing-app-api</artifactId>
     	<version>${cytoscape.api.version}</version>
 		<scope>provided</scope>
-		</dependency> 
+		</dependency>  -->
  		<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>app-api</artifactId>
@@ -205,12 +205,12 @@
 			<version>${cytoscape.api.version}</version>
 			<scope>provided</scope>
 		</dependency> 
-		<dependency>
+<!-- 		<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>vizmap-api</artifactId>
 			<version>${cytoscape.api.version}</version>
 			<scope>provided</scope>
-		</dependency>
+		</dependency> -->
 		<dependency>
     		<groupId>org.cytoscape</groupId>
     		<artifactId>work-api</artifactId>
@@ -241,12 +241,12 @@
                  <version>${cytoscape.api.version}</version>
                  <scope>provided</scope>
          </dependency>
-         <dependency>
+ <!--         <dependency>
                  <groupId>org.cytoscape</groupId>
                  <artifactId>work-swing-api</artifactId>
                  <version>${cytoscape.api.version}</version>
                  <scope>provided</scope>
-         </dependency>
+         </dependency> -->
 
 
 
