@@ -115,8 +115,8 @@ public class CyActivator extends AbstractCyActivator {
 // These are additional sample classes that you could mock up as other services
  	
 //	registerAllServices(context, new TunableOptionsTaskFactory(1));
-	registerAllServices(context, new CustomOptionsTaskFactory());
-	registerAllServices(context, new CustomQueryTaskFactory(registrar));
+//	registerAllServices(context, new CustomOptionsTaskFactory());
+//	registerAllServices(context, new CustomQueryTaskFactory(registrar));
  	registerAllServices(context, new WPNetworkSearchTaskFactory(registrar, client, icon));		
  
  }
