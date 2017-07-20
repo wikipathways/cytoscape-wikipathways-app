@@ -1,52 +1,33 @@
 package org.wikipathways.cytoscapeapp.internal.guiclient;
 
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
 import javax.swing.BoxLayout;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.DefaultListCellRenderer;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.SwingConstants;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-import org.cytoscape.application.CyApplicationConfiguration;
 import org.cytoscape.application.swing.search.NetworkSearchTaskFactory;
 import org.cytoscape.service.util.CyServiceRegistrar;
-import org.cytoscape.util.swing.IconManager;
-import org.cytoscape.work.swing.DialogTaskManager;
-import org.wikipathways.cytoscapeapp.WPClient;
-import org.wikipathways.cytoscapeapp.WPClientFactory;
-import org.wikipathways.cytoscapeapp.impl.WPClientRESTFactoryImpl;
-import org.wikipathways.cytoscapeapp.internal.cmd.WPSearchCmdTaskFactory;
 
 @SuppressWarnings("serial")
 public class QueryBar extends JPanel {
 	
-	private JComboBox<String> organismCombo;
+//	private JComboBox<String> organismCombo;
 	private JTextField searchTextField;
 	CyServiceRegistrar serviceRegistrar;
-	private WPClient client;
-	Font font = null; 
+//	private WPClient client;
+//	Font font = null; 
 	
 	public QueryBar(CyServiceRegistrar reg) 
 	{
 		serviceRegistrar = reg;
-		font = serviceRegistrar.getService(IconManager.class).getIconFont(14.0f);
-	    final CyApplicationConfiguration appConf = reg.getService(CyApplicationConfiguration.class);
-	    final WPClientFactory clientFactory = new WPClientRESTFactoryImpl(appConf);
-	    client = clientFactory.create();
+//		font = serviceRegistrar.getService(IconManager.class).getIconFont(14.0f);
+//	    final CyApplicationConfiguration appConf = reg.getService(CyApplicationConfiguration.class);
+//	    final WPClientFactory clientFactory = new WPClientRESTFactoryImpl(appConf);
+//	    client = clientFactory.create();
 		final BoxLayout layout = new BoxLayout(this, BoxLayout.LINE_AXIS);
 		setLayout(layout);
-		add(getOrganismCombo());
+//		add(getOrganismCombo());			REMOVE SPECIES BOX, AS PER PICO
 		add(getSearchTextField());
 //		add(getGoButton());
 	}
@@ -59,12 +40,12 @@ public class QueryBar extends JPanel {
 		String query = getQueryFromUI();
 //		System.out.println("isReady: "+ getQueryFromUI().trim());
 		// Let's pretend the query string must have at least 3 characters
-		boolean ready = query != null && query.trim().length() > 2 && getOrganismCombo().getSelectedItem() != null;
+		boolean ready = query != null && query.trim().length() > 2; //&& getOrganismCombo().getSelectedItem() != null;
 		return ready;
 	}
 	
 
-	static final String BASE = "http://wikipath/etc/";
+//	static final String BASE = "http://wikipath/etc/";
 //  This is left over from earlier when the task was run from here.
 	
 	//	private JButton getGoButton()
@@ -87,6 +68,7 @@ public class QueryBar extends JPanel {
 //		return b;
 //	}
 //	
+	/**
 	private JComboBox<String> getOrganismCombo() {
 		if (organismCombo == null) {
 			DefaultComboBoxModel<String> model = new DefaultComboBoxModel<String>();
@@ -125,10 +107,12 @@ public class QueryBar extends JPanel {
 		return organismCombo;
 	}
 	
+	*/
+	
 	private JTextField getSearchTextField() {
 		if (searchTextField == null) {
 			searchTextField = new JTextField();
-			searchTextField.setMinimumSize(getOrganismCombo().getPreferredSize());
+//			searchTextField.setMinimumSize(getOrganismCombo().getPreferredSize());
 			
 			// Since we provide our own search component, it should let Cytoscape know
 			// when it has been updated by the user, so Cytoscape can give a better

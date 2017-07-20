@@ -5,14 +5,24 @@ import org.cytoscape.work.TaskIterator;
 import org.wikipathways.cytoscapeapp.WPClient;
 
 public class WPSearchCmdTaskFactory extends AbstractTaskFactory {
-  final WPClient client;
+	  final WPClient client;
+	  final String query;
+	  
   public WPSearchCmdTaskFactory(
-      final WPClient client
-    ) {
-    this.client = client;
-  }
+	      final WPClient client
+	    ) {
+	    this.client = client;
+	    query = "";
+	  }
+  public WPSearchCmdTaskFactory(
+	      final WPClient client, final String terms
+	    ) {
+	    this.client = client;
+	    query = terms;
+	  }
 
+  public String getQuery()  { return query;	}
   public TaskIterator createTaskIterator() {
-    return new TaskIterator(new WPSearchCmdTask(client));
+    return new TaskIterator(new WPSearchCmdTask(client, this));
   }
 }

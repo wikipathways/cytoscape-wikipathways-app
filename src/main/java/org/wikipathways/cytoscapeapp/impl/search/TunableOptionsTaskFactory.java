@@ -23,12 +23,12 @@ public class TunableOptionsTaskFactory extends AbstractNetSearchTestTaskFactory 
 	@Tunable(description = "Test Integer:")
 	public int testInt = 100;
 	
-	@Tunable(description = "Test Float:")
-	public float testFloat = 10.5f;
-	
-	@Tunable(description = "Test Boolean:")
-	public boolean testBoolean = true;
-	
+//	@Tunable(description = "Test Float:")
+//	public float testFloat = 10.5f;
+//	
+//	@Tunable(description = "Test Boolean:")
+//	public boolean testBoolean = true;
+//	
 	@Tunable(description = "Test Slider:", params = "slider=true")
 	public BoundedFloat testBoundedFloat = new BoundedFloat(0.0f, 5.0f, 10.0f, false, false);
 	
