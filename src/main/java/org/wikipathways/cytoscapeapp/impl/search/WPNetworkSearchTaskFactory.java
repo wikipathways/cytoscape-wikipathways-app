@@ -58,7 +58,7 @@ public class WPNetworkSearchTaskFactory extends AbstractNetSearchTestTaskFactory
 		}
 //		String terms = getQuery();    // queryBar.getQueryFromUI();
 		System.out.println("createTaskIterator: " + terms);
-		WPSearchCmdTaskFactory factory = new WPSearchCmdTaskFactory(client, terms);
+		WPSearchCmdTaskFactory factory = new WPSearchCmdTaskFactory(client, serviceRegistrar, terms);
 		return factory.createTaskIterator();
 	}
 	

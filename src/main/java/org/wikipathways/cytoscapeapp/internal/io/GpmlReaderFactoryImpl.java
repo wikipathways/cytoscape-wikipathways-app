@@ -62,6 +62,7 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
 	  eventHelper = registrar.getService(CyEventHelper.class);
       netMgr =  registrar.getService(CyNetworkManager.class);
       netNaming = registrar.getService(CyNetworkNaming.class);
+      netFactory = registrar.getService(CyNetworkFactory.class);
       netViewMgr = registrar.getService(CyNetworkViewManager.class);
       layoutMgr = registrar.getService(CyLayoutAlgorithmManager.class);
       showLODTF = registrar.getService(NetworkTaskFactory.class);

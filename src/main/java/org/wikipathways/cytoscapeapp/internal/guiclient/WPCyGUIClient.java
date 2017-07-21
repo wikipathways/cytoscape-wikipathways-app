@@ -3,6 +3,7 @@ package org.wikipathways.cytoscapeapp.internal.guiclient;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -14,7 +15,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.RoundRectangle2D;
@@ -32,6 +32,7 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -83,7 +84,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
   final String PATHWAY_IMG = getClass().getResource("/pathway.png").toString();
   final String NETWORK_IMG = getClass().getResource("/network.png").toString();
 
-  final TaskManager taskMgr;
+  final TaskManager<?, ?> taskMgr;
   final WPClient client;
   final OpenBrowser openBrowser;
   final GpmlReaderFactory gpmlReaderFactory;
@@ -91,7 +92,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
   final JTextField searchField = new JTextField();
   final JButton searchButton = new JButton(new ImageIcon(getClass().getResource("/search-icon.png")));
   final JCheckBox speciesCheckBox = new JCheckBox("Only: ");
-  final JComboBox speciesComboBox = new JComboBox();
+  final JComboBox<String> speciesComboBox = new JComboBox<String>();
   final PathwayRefsTableModel tableModel = new PathwayRefsTableModel();
   final JTable resultsTable = new JTable(tableModel);
   final JLabel noResultsLabel = new JLabel();
@@ -107,7 +108,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
 //  final CheckMarkMenuItem networkMenuItem = new CheckMarkMenuItem("Network", NETWORK_IMG);
 
   public WPCyGUIClient(
-      final TaskManager taskMgr,
+      final TaskManager<?, ?> taskMgr,
       final WPClient client,
       final OpenBrowser openBrowser,
       final GpmlReaderFactory gpmlReaderFactory) {
@@ -306,15 +307,19 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
         getPathwayFromId(query);
       } else {
         final String species = speciesCheckBox.isSelected() ? speciesComboBox.getSelectedItem().toString() : null;
-        performSearch(query, species);
+  	  System.out.println("performSearch");
+       performSearch(query, species);
       }
     }
   }
 
-  void setPathwaysInResultsTable(final List<WPPathway> pathways) {
-    tableModel.setPathwayRefs(pathways);
+  public void setPathwaysInResultsTable(final List<WPPathway> pathways) {
+	  System.out.println("========  ++++++++++");
+	  System.out.println("setPathwaysInResultsTable in WPCyGUIClient");
+
+	  tableModel.setPathwayRefs(pathways);
     resultsTable.getColumnModel().getColumn(2).setMaxWidth(180);
-    if (pathways == null || pathways.size() == 0) {
+   if (pathways == null || pathways.size() == 0) {
 //        importPathwayButton.setEnabled(false);
 //        importNetworkButton.setEnabled(false);
       openUrlButton.setEnabled(false);
@@ -335,10 +340,12 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
   void performSearch(final String query, final String species) {
 //    searchField.setEnabled(false);
 //    searchButton.setEnabled(false);
+  	  System.out.println("About to performSearch");
 
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
-        final ResultTask<List<WPPathway>> searchTask = client.newFreeTextSearchTask(query, species);
+      	  System.out.println("performingSearch");
+     final ResultTask<List<WPPathway>> searchTask = client.newFreeTextSearchTask(query, species);
         taskMgr.execute(new TaskIterator(searchTask, new AbstractTask() {
           public void run(final TaskMonitor monitor) {
             final List<WPPathway> results = searchTask.get();
@@ -383,6 +390,18 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
     });
   }
 
+  //----------------------------------------------------------------------
+  public void bringToFront() {
+    Container parent = gui.getParent();
+    while (parent != null & !(parent instanceof JFrame))
+    	parent = parent.getParent();
+    if (parent instanceof JFrame)
+    {
+    	parent.setVisible(true);
+    	((JFrame) parent).toFront();
+    }
+    else System.err.println("Parent not found");
+  }
   //----------------------------------------------------------------------
   void openPreview() {
     resultsPreviewPane.setEnabled(true);
