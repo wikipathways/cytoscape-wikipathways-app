@@ -64,6 +64,7 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
       netNaming = registrar.getService(CyNetworkNaming.class);
       netFactory = registrar.getService(CyNetworkFactory.class);
       netViewMgr = registrar.getService(CyNetworkViewManager.class);
+      netViewFactory = registrar.getService(CyNetworkViewFactory.class);
       layoutMgr = registrar.getService(CyLayoutAlgorithmManager.class);
       showLODTF = registrar.getService(NetworkTaskFactory.class);
       annots = new Annots(
@@ -77,7 +78,8 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
     		  registrar.getService( VisualMappingFunctionFactory.class, "(mapping.type=continuous)"),
               registrar.getService( VisualMappingFunctionFactory.class, "(mapping.type=discrete)"),
               registrar.getService( VisualMappingFunctionFactory.class, "(mapping.type=passthrough)"));
-  }
+      manager = new WPManager(registrar,annots );
+      }
 
   public TaskIterator createReader( final Reader gpmlContents, final CyNetwork network, 
 		  final GpmlConversionMethod conversionMethod, final boolean setNetworkName) {

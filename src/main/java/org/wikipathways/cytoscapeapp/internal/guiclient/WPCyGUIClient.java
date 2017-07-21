@@ -11,6 +11,7 @@ import java.awt.GridBagLayout;
 import java.awt.Paint;
 import java.awt.RenderingHints;
 import java.awt.Stroke;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -35,6 +36,7 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRootPane;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
@@ -95,6 +97,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
   final JComboBox<String> speciesComboBox = new JComboBox<String>();
   final PathwayRefsTableModel tableModel = new PathwayRefsTableModel();
   final JTable resultsTable = new JTable(tableModel);
+  public JTable getResultsTable()		{ return resultsTable;	}
   final JLabel noResultsLabel = new JLabel();
 //  final SplitButton importButton = new SplitButton("Import as Pathway");
   final JButton importPathwayButton = new JButton("Import as Pathway");
@@ -334,6 +337,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
     	resultsTable.setRowSelectionInterval(0, 0);
     	if (previewButton.isSelected()) 
     		updatePreview();
+    
     }
   }
 
@@ -393,10 +397,12 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
   //----------------------------------------------------------------------
   public void bringToFront() {
     Container parent = gui.getParent();
-    while (parent != null & !(parent instanceof JFrame))
+    while (parent != null & !(parent instanceof JRootPane))
     	parent = parent.getParent();
-    if (parent instanceof JFrame)
+    if (parent instanceof JRootPane)
     {
+    	Container contain = ((JRootPane)parent).getParent();
+    	if (contain instanceof JFrame)
     	parent.setVisible(true);
     	((JFrame) parent).toFront();
     }

@@ -16,8 +16,7 @@ import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskObserver;
 import org.wikipathways.cytoscapeapp.WPClient;
 import org.wikipathways.cytoscapeapp.internal.cmd.WPSearchCmdTask;
-import org.wikipathways.cytoscapeapp.internal.cmd.WPSearchCmdTaskFactory;
-import org.wikipathways.cytoscapeapp.internal.guiclient.QueryBar;
+import org.wikipathways.cytoscapeapp.internal.guiclient.WPCyGUIClient;
 
 public class WPNetworkSearchTaskFactory extends AbstractNetSearchTestTaskFactory  implements TaskObserver {
 
@@ -27,6 +26,7 @@ public class WPNetworkSearchTaskFactory extends AbstractNetSearchTestTaskFactory
 	private URL website;
 	@Override public URL getWebsite() { return website;	}
 	private final CyServiceRegistrar serviceRegistrar;
+	private final WPCyGUIClient guiClient;
 	
 	static String ID = "org.wikipathways.3";
 	static String URL = "http://wikipathways.org";
@@ -36,10 +36,11 @@ public class WPNetworkSearchTaskFactory extends AbstractNetSearchTestTaskFactory
 
 
 	//----------------------------------------------
-	public WPNetworkSearchTaskFactory(CyServiceRegistrar reggie, WPClient clnt, ImageIcon icon) {
+	public WPNetworkSearchTaskFactory(CyServiceRegistrar reggie, WPClient clnt, ImageIcon icon, WPCyGUIClient gui) {
 		super( ID,	NAME, DESC);
 		serviceRegistrar = reggie;
 		client = clnt;
+		guiClient = gui;
 //		getQueryComponent();		// make sure queryBar gets defined early
 		try {
 			website = new URL(URL);
@@ -58,7 +59,7 @@ public class WPNetworkSearchTaskFactory extends AbstractNetSearchTestTaskFactory
 		}
 //		String terms = getQuery();    // queryBar.getQueryFromUI();
 		System.out.println("createTaskIterator: " + terms);
-		WPSearchCmdTaskFactory factory = new WPSearchCmdTaskFactory(client, serviceRegistrar, terms);
+		WPSearchCmdTaskFactory factory = new WPSearchCmdTaskFactory(client, serviceRegistrar, terms, guiClient);
 		return factory.createTaskIterator();
 	}
 	

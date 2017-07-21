@@ -1125,19 +1125,18 @@ public class GpmlToPathway {
 	 }
 	  else if ("Elbow".equals(connectorType))
 	  {	
-	  	System.out.println("This is an elbow segment");  
-	    Bend elbowBend = makeElbowEdgeBend(networkView, cyEdge, segments);
-	    DelayedVizProp prop = new DelayedVizProp(cyEdge, BasicVisualLexicon.EDGE_BEND, elbowBend, true);        
-	    cyDelayedVizProps.add(prop);
-	    ArrowShape arrowProp = "Arrow".equals(endLineType) ? ArrowShapeVisualProperty.ARROW : ArrowShapeVisualProperty.NONE;	// TODO Arrowhead
-	    DelayedVizProp arrow = new DelayedVizProp(cyEdge, BasicVisualLexicon.EDGE_TARGET_ARROW_SHAPE, arrowProp, true);
-	    cyDelayedVizProps.add(arrow);
-	}
-	  else {
-		    Bend noBend = EdgeBendVisualProperty.DEFAULT_EDGE_BEND;
-		    DelayedVizProp prop = new DelayedVizProp(cyEdge, BasicVisualLexicon.EDGE_BEND, noBend, true);        
+		  	System.out.println("This is an elbow segment");  
+		    Bend elbowBend = makeElbowEdgeBend(networkView, cyEdge, segments);
+		    DelayedVizProp prop = new DelayedVizProp(cyEdge, BasicVisualLexicon.EDGE_BEND, elbowBend, true);        
 		    cyDelayedVizProps.add(prop);
-	  }
+		    ArrowShape arrowProp = "Arrow".equals(endLineType) ? ArrowShapeVisualProperty.ARROW : ArrowShapeVisualProperty.NONE;	// TODO Arrowhead
+		    DelayedVizProp arrow = new DelayedVizProp(cyEdge, BasicVisualLexicon.EDGE_TARGET_ARROW_SHAPE, arrowProp, true);
+		    cyDelayedVizProps.add(arrow);
+		} else {
+			Bend noBend = EdgeBendVisualProperty.DEFAULT_EDGE_BEND;
+			DelayedVizProp prop = new DelayedVizProp(cyEdge, BasicVisualLexicon.EDGE_BEND, noBend, true);
+			cyDelayedVizProps.add(prop);
+		}
 	}
 	
 	private void makeSegments(final PathwayElement pvLine)
@@ -1168,9 +1167,9 @@ static boolean verbose = true;
 	    {
 	    	if (verbose)
 	    	{
-	    		System.out.println("Segment start at: " + seg.start.getX() + ", " +  seg.start.getY());
-	    		System.out.println("Segment center at: " + seg.getMCenter().getX() + ", " +  seg.getMCenter().getY());
-	    		System.out.println("Segment end at  : " + seg.end.getX() + ", " +  seg.end.getY());
+	    		System.out.println("Segment start at: " + (int)(seg.start.getX()) + ", " +  seg.start.getY());
+	    		System.out.println("Segment center at: " + (int)(seg.getMCenter().getX()) + ", " +  seg.getMCenter().getY());
+	    		System.out.println("Segment end at  : " + (int)(seg.end.getX()) + ", " +  seg.end.getY());
 	    	}
 		    Handle h = facto.createHandle(networkView, ev,  seg.end.getX(), seg.end.getY());
 		    bend.getAllHandles().add(h);
@@ -1191,7 +1190,7 @@ static boolean verbose = true;
     HandleFactory facto = manager.getHandleFactory();
     for (Segment seg : segments)
     {
-//	    Handle h = facto.createHandle(networkView, ev,  seg.end.getX(), seg.end.getY());		// put in 2 handles for a angled bend
+	    Handle h = facto.createHandle(networkView, ev,  seg.end.getX(), seg.end.getY());		// put in 2 handles for a angled bend
 	    Handle j = facto.createHandle(networkView, ev,  seg.end.getX(), seg.end.getY());
 //	    bend.getAllHandles().add(h);
 	    bend.getAllHandles().add(j);

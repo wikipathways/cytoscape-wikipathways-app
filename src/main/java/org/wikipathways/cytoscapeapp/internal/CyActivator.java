@@ -42,10 +42,10 @@ import org.wikipathways.cytoscapeapp.impl.WPClientRESTFactoryImpl;
 import org.wikipathways.cytoscapeapp.impl.search.CustomOptionsTaskFactory;
 import org.wikipathways.cytoscapeapp.impl.search.TunableOptionsTaskFactory;
 import org.wikipathways.cytoscapeapp.impl.search.WPNetworkSearchTaskFactory;
+import org.wikipathways.cytoscapeapp.impl.search.WPSearchCmdTaskFactory;
+import org.wikipathways.cytoscapeapp.impl.search.WPSpeciesCmdTaskFactory;
 import org.wikipathways.cytoscapeapp.internal.cmd.GpmlImportCmdTaskFactory;
 import org.wikipathways.cytoscapeapp.internal.cmd.WPImportCmdTaskFactory;
-import org.wikipathways.cytoscapeapp.internal.cmd.WPSearchCmdTaskFactory;
-import org.wikipathways.cytoscapeapp.internal.cmd.WPSpeciesCmdTaskFactory;
 import org.wikipathways.cytoscapeapp.internal.guiclient.WPCyGUIClient;
 import org.wikipathways.cytoscapeapp.internal.io.GpmlCyReaderTaskFactory;
 import org.wikipathways.cytoscapeapp.internal.io.GpmlReaderFactoryImpl;
@@ -85,7 +85,7 @@ public class CyActivator extends AbstractCyActivator {
 
     // ---- create and register a bunch of CommandTaskFactories
     reg(context,  new WPSpeciesCmdTaskFactory(client), "get-species", "wikipathways");
-    reg(context,  new WPSearchCmdTaskFactory(client, registrar), "search", "wikipathways");
+    reg(context,  new WPSearchCmdTaskFactory(client, registrar, guiClient), "search", "wikipathways");
     reg(context,  new GpmlImportCmdTaskFactory(gpmlReaderFactory, GpmlConversionMethod.PATHWAY),"import-as-pathway", "gpml");
     reg(context,  new GpmlImportCmdTaskFactory(gpmlReaderFactory, GpmlConversionMethod.NETWORK),"import-as-network", "gpml");
     reg(context,  new WPImportCmdTaskFactory(client, gpmlReaderFactory, GpmlConversionMethod.PATHWAY),"import-as-pathway", "wikipathways");
@@ -119,7 +119,7 @@ public class CyActivator extends AbstractCyActivator {
 	registerAllServices(context, new TunableOptionsTaskFactory(1));
 	registerAllServices(context, new CustomOptionsTaskFactory());
 //	registerAllServices(context, new CustomQueryTaskFactory(registrar));
- 	registerAllServices(context, new WPNetworkSearchTaskFactory(registrar, client, icon));		
+ 	registerAllServices(context, new WPNetworkSearchTaskFactory(registrar, client, icon, guiClient));		
  
  }
 //-----------------------------------------------------

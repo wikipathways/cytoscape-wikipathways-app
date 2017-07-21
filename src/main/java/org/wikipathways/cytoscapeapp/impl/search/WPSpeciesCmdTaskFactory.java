@@ -1,4 +1,4 @@
-package org.wikipathways.cytoscapeapp.internal.cmd;
+package org.wikipathways.cytoscapeapp.impl.search;
 
 import java.util.List;
 
