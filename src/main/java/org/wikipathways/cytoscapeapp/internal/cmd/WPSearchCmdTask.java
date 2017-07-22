@@ -1,10 +1,12 @@
 package org.wikipathways.cytoscapeapp.internal.cmd;
 
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.Window;
 import java.util.List;
 
 import javax.swing.JDialog;
+import javax.swing.JTextField;
 
 import org.cytoscape.io.webservice.NetworkImportWebServiceClient;
 import org.cytoscape.io.webservice.WebServiceClient;
@@ -71,6 +73,24 @@ public class WPSearchCmdTask extends AbstractTask {
 //	  guiClient.bringToFront();
 //	  JTable resultsTable = guiClient.getResultsTable();
 		guiClient.setPathwaysInResultsTable(pathways);
+		Container queryGui = guiClient.getQueryBuilderGUI();
+		Component comp = queryGui.getComponent(0);
+		// JTextField is three layers down from QueryBuilderGUI, inject the query text
+		if (comp instanceof Container)		
+		{
+			Component subComp = ((Container)comp).getComponent(0);
+			if (subComp instanceof Container)
+			{
+				Component subsubComp = ((Container)subComp).getComponent(0);
+			    if (subsubComp instanceof JTextField)
+			    {
+			    	JTextField fld = (JTextField) subsubComp;
+			    	fld.setText(query);
+			    }
+			}
+		}
+		
+		// show the dialog
 		WebServiceGUI wsGui = registrar.getService(WebServiceGUI.class);
 		if (wsGui != null) {
 			Window w = wsGui.getWindow(NetworkImportWebServiceClient.class);
@@ -79,6 +99,7 @@ public class WPSearchCmdTask extends AbstractTask {
 				w.setVisible(true);
 				if (w instanceof JDialog)
 				{
+					Container parent = queryGui.getParent();
 					JDialog dlog = (JDialog) w;
 					Container content = dlog.getContentPane();
 //					org.cytoscape.webservice.internal.ui.WebServiceImportDialog d;
