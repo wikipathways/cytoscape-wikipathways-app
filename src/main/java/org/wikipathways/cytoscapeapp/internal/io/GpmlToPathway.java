@@ -185,7 +185,8 @@ public class GpmlToPathway {
 
   static final Converter PV_ARROW_CONVERTER = new Converter() {
     public Object toCyValue(Object[] pvValues) {
-      return ((org.pathvisio.core.model.LineType) pvValues[0]).getName();
+     String name =   ((org.pathvisio.core.model.LineType) pvValues[0]).getName();
+     return name;
     }
   };
 
@@ -487,13 +488,14 @@ public class GpmlToPathway {
   static Map<String,ArrowShape> PV_ARROW_MAP = new HashMap<String,ArrowShape>();
   static {
     PV_ARROW_MAP.put("Arrow",              ArrowShapeVisualProperty.ARROW);			// TODO 
+    PV_ARROW_MAP.put("Line",               ArrowShapeVisualProperty.NONE);
     PV_ARROW_MAP.put("TBar",               ArrowShapeVisualProperty.T);
     PV_ARROW_MAP.put("mim-binding",        ArrowShapeVisualProperty.ARROW);
-    PV_ARROW_MAP.put("mim-conversion",     ArrowShapeVisualProperty.DELTA);
+    PV_ARROW_MAP.put("mim-conversion",     ArrowShapeVisualProperty.SQUARE);
     PV_ARROW_MAP.put("mim-modification",   ArrowShapeVisualProperty.ARROW);
-    PV_ARROW_MAP.put("mim-catalysis",      ArrowShapeVisualProperty.CIRCLE);
+    PV_ARROW_MAP.put("mim-catalysis",      ArrowShapeVisualProperty.OPEN_CIRCLE);
     PV_ARROW_MAP.put("mim-inhibition",     ArrowShapeVisualProperty.T);
-    PV_ARROW_MAP.put("mim-covalent-bond",  ArrowShapeVisualProperty.DELTA);
+    PV_ARROW_MAP.put("mim-covalent-bond",  ArrowShapeVisualProperty.CROSS_DELTA);
   }
 
   static Map<String,NodeShape> PV_SHAPE_MAP = new HashMap<String,NodeShape>();
@@ -792,8 +794,9 @@ public class GpmlToPathway {
       BasicVizPropStore.NODE_LABEL_FONT, BasicVizPropStore.NODE_LABEL_SIZE,
       BasicVizPropStore.NODE_ALWAYS_TRANSPARENT,
       BasicVizPropStore.NODE_BORDER_STYLE,  BasicVizPropStore.NODE_BORDER_THICKNESS, 
-      BasicVizPropStore.NODE_SHAPE, SELECTED_COLOR
+      BasicVizPropStore.NODE_SHAPE, SELECTED_COLOR 
     );
+
    }
   
   /*
@@ -999,6 +1002,7 @@ public class GpmlToPathway {
   private void assignAnchorVizStyle(final CyNode node, final Point2D position, final Color color) {
     cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_X_LOCATION, position.getX(), false));
     cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_Y_LOCATION, position.getY(), false));
+    cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_Z_LOCATION, 0, false));
     cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_FILL_COLOR, color, true));
     cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_BORDER_WIDTH, 0.0, true));
     cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_WIDTH, 5.0, true));
@@ -1084,7 +1088,7 @@ public class GpmlToPathway {
     
     storeEdgeBend(cyEdge, pvLine);
 
-//    System.out.println("CyEdge: " + cyEdge.toString());
+    // Arrow heads defined here
     if (isStart) 
       store(cyEdgeTbl, cyEdge, pvLine, BasicVizTableStore.EDGE_START_ARROW);
     
@@ -1099,57 +1103,21 @@ public class GpmlToPathway {
 	  String connectorType = pvLine.getConnectorType().toString();
 	  org.pathvisio.core.model.LineType endLineType = pvLine.getEndLineType();
 	  org.pathvisio.core.model.LineType startLineType = pvLine.getStartLineType();
-	  System.out.println("pvLine: " + connectorType + " of types " + startLineType.getMappName() + " / " + endLineType.getName());
-	  if ("Curved".equals(connectorType))
-	  {
-//	   	System.out.println("This is a curve");
-	   	Bend edgeBend = makeCurvedEdgeBend(networkView, cyEdge, pvLine.getMStart(), pvLine.getMEnd());
-	    DelayedVizProp dprop = new DelayedVizProp(cyEdge, BasicVisualLexicon.EDGE_BEND, edgeBend, true);        
-	    cyDelayedVizProps.add(dprop);
-	    
-		  MPoint firstPoint = pvLine.getMPoints().get(0);
-		  MPoint lastPoint = pvLine.getMPoints().get(pvLine.getMPoints().size()-1);
-	    if (firstPoint.getGraphRef().equals(lastPoint.getGraphRef()))
-	    	System.out.println("selfLoop ignored");	   
-	    
-	    System.out.println( "LastPoint: " +  lastPoint.getGraphRef() + " " + lastPoint.getGraphId());
-//	    IShape keys = pvLine.getShapeType();   //getPropertyKeys();
-//	    Set<Object> keys = pvLine.getPropertyKeys();
-//	    for (Object key : keys)
-//	    	System.out.println(key + ": " + pvLine.getPropertyEx(key));
-//	     		
-	   
-	    
-	    ArrowShape prop = ArrowShapeVisualProperty.NONE;
-	    if ("Arrow".equals(endLineType))  prop =ArrowShapeVisualProperty.ARROW;
-	    if ("TBar".equals(endLineType))  prop = ArrowShapeVisualProperty.T;
-	    if ("Circle".equals(endLineType))  prop = ArrowShapeVisualProperty.CIRCLE;
-	    if ("Line".equals(endLineType))  prop = ArrowShapeVisualProperty.OPEN_CIRCLE;
-	    DelayedVizProp arrow = new DelayedVizProp(cyEdge, BasicVisualLexicon.EDGE_TARGET_ARROW_SHAPE, prop, true);
-	    cyDelayedVizProps.add(arrow);
-	 }
-	  else if ("Elbow".equals(connectorType))
-	  {	
-		  	System.out.println("This is an elbow segment");  
-			  makeSegments(pvLine);
-		    Bend elbowBend = makeElbowEdgeBend(networkView, cyEdge, segments);
-		    DelayedVizProp prop = new DelayedVizProp(cyEdge, BasicVisualLexicon.EDGE_BEND, elbowBend, true);        
-		    cyDelayedVizProps.add(prop);
-		    ArrowShape arrowProp = "Arrow".equals(endLineType) ? ArrowShapeVisualProperty.ARROW : ArrowShapeVisualProperty.NONE;	// TODO Arrowhead
-		    if ("Arrow".equals(endLineType))  arrowProp =ArrowShapeVisualProperty.ARROW;
-		    if ("TBar".equals(endLineType))  arrowProp = ArrowShapeVisualProperty.T;
-		    if ("Circle".equals(endLineType))  arrowProp = ArrowShapeVisualProperty.CIRCLE;
-		    if ("Line".equals(endLineType))  arrowProp = ArrowShapeVisualProperty.OPEN_CIRCLE;
-		    DelayedVizProp arrow = new DelayedVizProp(cyEdge, BasicVisualLexicon.EDGE_TARGET_ARROW_SHAPE, arrowProp, true);
-		    cyDelayedVizProps.add(arrow);
-		} else {
-			Bend noBend = EdgeBendVisualProperty.DEFAULT_EDGE_BEND;
-			DelayedVizProp prop = new DelayedVizProp(cyEdge, BasicVisualLexicon.EDGE_BEND, noBend, true);
-			cyDelayedVizProps.add(prop);
-		}
+if (verbose) System.out.println("pvLine: " + connectorType + " of types " + startLineType.getMappName() + " / " + endLineType.getName());
+
+		Bend bend = EdgeBendVisualProperty.DEFAULT_EDGE_BEND;
+		if ("Curved".equals(connectorType)) 
+			bend = makeCurvedEdgeBend(networkView, cyEdge, pvLine.getMStart(), pvLine.getMEnd());
+		else if ("Elbow".equals(connectorType)) 
+			bend = makeElbowEdgeBend(networkView, cyEdge, makeSegments(pvLine));
+		
+		DelayedVizProp prop = new DelayedVizProp(cyEdge, BasicVisualLexicon.EDGE_BEND, bend, true);
+		cyDelayedVizProps.add(prop);
 	}
 	
-	private void makeSegments(final PathwayElement pvLine)
+  
+  
+	private List<Segment> makeSegments(final PathwayElement pvLine)
 	{
 if (verbose)
 		{
@@ -1192,6 +1160,7 @@ if (verbose)
 		
 	  	Point2D[] wps = calculateWayPoints(startPt, endPt, startSide, endSide);
 	    segments = calculateSegments(startPt, endPt, startSide, endSide, wps);
+	    return segments;
 	}
 	
 	private int getNearestSide(Point2D startPt, Point2D endPt) {
@@ -1206,6 +1175,7 @@ if (verbose)
 static boolean verbose = true;
 //--------------------------------------------------------------------
 	private Bend makeCurvedEdgeBend(CyNetworkView networkView, CyEdge edge, MPoint start, MPoint end) {
+		System.out.println("makeCurvedEdgeBend"); 
 	    BendFactory factory = manager.getBendFactory();		
 		View<CyEdge> ev = networkView.getEdgeView(edge);
 	    Bend bend = factory.createBend();
@@ -1240,7 +1210,8 @@ static boolean verbose = true;
 
 
 	private Bend makeElbowEdgeBend(CyNetworkView networkView, CyEdge edge, List<Segment> segments) {
-    BendFactory factory = manager.getBendFactory();	
+		System.out.println("makeElbowEdgeBend"); 
+   BendFactory factory = manager.getBendFactory();	
 	if (networkView == null)    	{
 		System.out.println("networkView == null"); 
 		return null;

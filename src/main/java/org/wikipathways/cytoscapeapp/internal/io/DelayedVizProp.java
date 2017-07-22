@@ -92,14 +92,10 @@ class DelayedVizProp {
 							if (idx > 0)
 								propvalue1 = propvalue1.substring(0, idx);
 							map.put(lookup, propvalue1);
-							if ("Width".equals(lookup))
-								wid = Double.valueOf(propvalue1);
-							if ("Height".equals(lookup))
-								hght = Double.valueOf(propvalue1);
-							if ("x".equals(lookup))
-								x = Double.valueOf(propvalue1);
-							if ("y".equals(lookup))
-								y = Double.valueOf(propvalue1);
+							if ("Width".equals(lookup))			wid = Double.valueOf(propvalue1);
+							if ("Height".equals(lookup))		hght = Double.valueOf(propvalue1);
+							if ("x".equals(lookup))				x = Double.valueOf(propvalue1);
+							if ("y".equals(lookup))				y = Double.valueOf(propvalue1);
 						}
 				  }
 				  System.out.println(map);
@@ -132,56 +128,8 @@ class DelayedVizProp {
 					  
 //			}
 		}
-			if ("Edge Bend XX".equals(propName)) {
-// running this code results in:
-//				java.lang.IllegalStateException: Invalid angle: NaN. Cuased by cos(theta) = NaN
-//						at org.cytoscape.ding.impl.HandleImpl.convertToRatio(HandleImpl.java:175)
-//	
-				try
-			{
-				HandleFactory handleFactory = mgr.getHandleFactory();
-				System.out.println("handleFactory: " + handleFactory.toString());
-				CyEdge edge = (CyEdge) delayedProp.netObj;
-				if (edge != null)
-				{
-					CyNode src = edge.getSource();
-					CyNode targ = edge.getTarget();
-					
-					View<CyNode> srcView =  netView.getNodeView(src);
-					View<CyNode> targView =  netView.getNodeView(targ);
-					View<CyEdge> edgeView = netView.getEdgeView(edge);
-	//			    System.out.println("srcView: " + srcView.getSUID());
-	//			    System.out.println("targView: " + targView.getSUID());
-	//			    System.out.println("edgeView: " + edgeView.getSUID());
-	
-	//				edgeView.getVisualProperty(BasicVisualLexicon.C);
-	
-					Point2D.Double srcCenter = getNodePosition(srcView);
-					Point2D.Double targCenter = getNodePosition(targView);
-	
-					Point2D.Double elbow = new Point2D.Double(srcCenter.getX(), targCenter.getY());
-	//				
-	//				showPoint("src", srcCenter);
-	//				showPoint("target", targCenter);
-	//				showPoint("elbow", elbow);
-	//				
-					
-	//				boolean isCurved = 1 == EdgeView.CURVED_LINES;
-	
-		 			Bend bend = edgeView.getVisualProperty(BasicVisualLexicon.EDGE_BEND);
-				    System.out.println("bend: " + bend.toString()  + " " + (delayedProp.isLocked ? "LOCKED" : "UNLOCKED"));
-	
-		 			List<Handle> handles = bend.getAllHandles();
-		 			if (handles.size() > 0)
-		 				handles.get(0).defineHandle(netView, edgeView, elbow.getX(), elbow.getY());
-		 			else 
-		 				handles.add(handleFactory.createHandle(netView, edgeView, elbow.getX() + 20, elbow.getY()));			// TODO arbitrary shift
-				}
-			}
-			catch (ClassCastException ex)
-			{
-		    	System.out.println("ClassCastException: " + delayedProp.netObj.getClass());  	
-			}
+			if ("Edge Bend".equals(propName)) {
+applyEdgeBend(netView, mgr, delayedProp);
 		}
 	
       View<?> view = null;
@@ -199,9 +147,72 @@ class DelayedVizProp {
         view.setVisualProperty(delayedProp.prop, value);
     }
   }
+
+	private static void applyEdgeBend(final CyNetworkView netView, WPManager mgr, final DelayedVizProp delayedProp) {
+		// SEE BELOW: running this code results in:
+		// java.lang.IllegalStateException: defineHandle
+		//
+		try {
+			HandleFactory handleFactory = mgr.getHandleFactory();
+			System.out.println("handleFactory: " + handleFactory.toString());
+			CyEdge edge = (CyEdge) delayedProp.netObj;
+			if (edge != null) {
+				CyNode src = edge.getSource();
+				CyNode targ = edge.getTarget();
+
+				View<CyNode> srcView = netView.getNodeView(src);
+				View<CyNode> targView = netView.getNodeView(targ);
+				View<CyEdge> edgeView = netView.getEdgeView(edge);
+				// System.out.println("srcView: " + srcView.getSUID());
+				// System.out.println("targView: " + targView.getSUID());
+				// System.out.println("edgeView: " + edgeView.getSUID());
+
+				// edgeView.getVisualProperty(BasicVisualLexicon.C);
+
+				Point2D.Double srcCenter = getNodePosition(srcView);
+				Point2D.Double targCenter = getNodePosition(targView);
+
+				Point2D.Double elbow = new Point2D.Double(srcCenter.getX(), targCenter.getY());
+				//
+				// showPoint("src", srcCenter);
+				// showPoint("target", targCenter);
+				// showPoint("elbow", elbow);
+				//
+
+				// boolean isCurved = 1 == EdgeView.CURVED_LINES;
+
+				Bend bend = edgeView.getVisualProperty(BasicVisualLexicon.EDGE_BEND);
+				System.out.println("bend: " + bend.getAllHandles().size() + " handles "
+						+ (delayedProp.isLocked ? "LOCKED" : "UNLOCKED"));
+
+				List<Handle> handles = bend.getAllHandles();
+				double EPSILON = 0.000000001;
+				if (Math.abs(targCenter.getX() - srcCenter.getX()) < EPSILON) {
+					System.out.println("VERTICAL");
+				}
+				// THROWS: java.lang.IllegalStateException: Invalid angle: NaN.
+				// Caused by cos(theta) = NaN
+				// at org.cytoscape.ding.impl.HandleImpl.convertToRatio(HandleImpl.java:175)
+				if (handles.size() > 0) {
+					try {
+						handles.get(0).defineHandle(netView, edgeView, elbow.getX(), elbow.getY());
+					} catch (IllegalStateException ex) {
+						System.err.println("at " + (int) elbow.getX() + ", " + (int) elbow.getY());
+					}
+				} else
+					handles.add(handleFactory.createHandle(netView, edgeView, elbow.getX() + 20, elbow.getY())); // +
+																													// 20
+																													// TODO
+																													// arbitrary
+																													// shift
+			}
+		} catch (ClassCastException ex) {
+			System.out.println("ClassCastException: " + delayedProp.netObj.getClass());
+		}
+	}
 	
 	private static Shape getShapePath(String propvalue) {
-		System.out.println("propvalue");
+//		System.out.println("propvalue");
 		if ("Mitochondria".equals(propvalue)) 			  	return makeMitochondria();
 		  if ("Endoplasmic Reticulum".equals(propvalue))  		return makeER();
 		  if ("Sarcoplasmic Reticulum".equals(propvalue)) 		return makeSR();
@@ -229,7 +240,7 @@ class DelayedVizProp {
 		}
 		return props;
 	}
-	  static public void showPoint(String name, Point2D pt)
+	  static public void showPoint(String name, Point2D pt)		// DEBUG
 	  {
 		System.out.println(String.format("%s: (%3.1f, %3.1f)" , name, pt.getX() , pt.getY()));
 	  }
@@ -274,7 +285,7 @@ class DelayedVizProp {
 
 	static private GeneralPath makeSR()
 	{
-		System.out.println("--------------makeSR--------------" );
+//		System.out.println("--------------makeSR--------------" );
 		GeneralPath path = new GeneralPath();
 
 		path.moveTo(118.53f, 16.63f);
@@ -290,7 +301,7 @@ class DelayedVizProp {
 
 	static private GeneralPath makeER()
 	{
-		System.out.println("--------------makeER--------------" );
+//		System.out.println("--------------makeER--------------" );
 		GeneralPath path = new GeneralPath();
 		path.moveTo (115.62f, 170.76f);
 		path.curveTo (106.85f, 115.66f, 152.29f , 74.72f, 152.11f , 37.31f);
@@ -318,7 +329,7 @@ class DelayedVizProp {
 
 	static private GeneralPath makeGolgi()
 	{
-		System.out.println("--------------makeGolgi--------------" );
+//		System.out.println("--------------makeGolgi--------------" );
 		GeneralPath path = new GeneralPath();
 		path.moveTo (148.89f, 77.62f);
 		path.curveTo (100.07f, 3.50f, 234.06f , 7.65f, 207.78f , 62.66f);
@@ -349,7 +360,7 @@ class DelayedVizProp {
 
 	static private GeneralPath makeBrace()
 	{
-		System.out.println("--------------makeBrace--------------" );
+//		System.out.println("--------------makeBrace--------------" );
 		GeneralPath path = new GeneralPath();
 		path.moveTo(0, 4);
 		path.quadTo(0, 2, 3, 2);
@@ -362,7 +373,7 @@ class DelayedVizProp {
 
 	static private GeneralPath makeTriangle()
 	{
-		System.out.println("--------------makeTriangle--------------" );
+//		System.out.println("--------------makeTriangle--------------" );
 		GeneralPath path = new GeneralPath();
 		path.moveTo(0, 4);
 		path.lineTo(0, -4);

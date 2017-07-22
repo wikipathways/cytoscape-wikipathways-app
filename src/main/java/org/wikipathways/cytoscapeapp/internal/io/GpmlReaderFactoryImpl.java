@@ -160,7 +160,11 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
       try {
         pathway.readFromXml(gpmlContents, true);
       } catch (Exception e) { throw new Exception("Pathway not available -- invalid GPML", e);  }
-
+//      char buf[] = new char[1000000];
+//      gpmlContents.reset();
+//      int len = gpmlContents.read(buf);
+//      String buffer = String.copyValueOf(buf);
+//      System.out.println(buffer);
       if (setNetworkName) {
         final String name = pathway.getMappInfo().getMapInfoName();
         final String nonConflictingName = netNaming.getSuggestedNetworkTitle(name);
