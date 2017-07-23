@@ -34,6 +34,7 @@ import org.cytoscape.work.TaskFactory;
 import org.cytoscape.work.TaskManager;
 import org.cytoscape.work.swing.DialogTaskManager;
 import org.osgi.framework.BundleContext;
+import org.pathvisio.core.view.MIMShapes;
 import org.wikipathways.cytoscapeapp.GpmlConversionMethod;
 import org.wikipathways.cytoscapeapp.GpmlReaderFactory;
 import org.wikipathways.cytoscapeapp.WPClient;
@@ -72,7 +73,8 @@ public class CyActivator extends AbstractCyActivator {
     // --- analogous GpmlWriterFactory and the GpmlCyWriterTaskFactory to manage exports go here  
     // TODO
      
-   
+	MIMShapes.registerShapes();
+
     //---- get all the services necessary to build the GUI and then build and register it
     final CyApplicationConfiguration appConf = getService(context, CyApplicationConfiguration.class);
     final WPClientFactory clientFactory = new WPClientRESTFactoryImpl(appConf);

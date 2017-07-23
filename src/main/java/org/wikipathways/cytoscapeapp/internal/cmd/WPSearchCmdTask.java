@@ -97,7 +97,7 @@ public class WPSearchCmdTask extends AbstractTask {
 			if (w != null) {
 				w.toFront();
 				w.setVisible(true);
-				if (w instanceof JDialog)
+				if (w instanceof JDialog)		// CANT FIGURE OUT HOW TO INSTALL OUR PANEL
 				{
 					Container parent = queryGui.getParent();
 					JDialog dlog = (JDialog) w;
@@ -114,25 +114,6 @@ public class WPSearchCmdTask extends AbstractTask {
 //		System.out.println(path.getId() + '\t' + path.getName() + '\t' + path.getSpecies());
 //	}
 	// attempting to get the table to populate, and to bring its window to the front
-	if (client instanceof WPClient)
-	{
-		WebServiceClient gui = null;
-		try
-		{
-//			gui = registrar.getService(WebServiceClient.class, "Wikipathways");
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-		if (gui != null)
-		{
-			System.out.println("gui  returned");
-		}
-		else System.out.println("gui not returned");
-//		((WPClient)client).notify();  //setPathwaysInResultsTable(pathways);
-	}
-	else System.out.println("Class cast error");
   }
   
 }

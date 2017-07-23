@@ -46,6 +46,7 @@ import org.pathvisio.core.model.PathwayElement.MAnchor;
 import org.pathvisio.core.model.PathwayElement.MPoint;
 import org.pathvisio.core.model.ShapeType;
 import org.pathvisio.core.model.StaticProperty;
+import org.pathvisio.core.view.MIMShapes;
 import org.wikipathways.cytoscapeapp.internal.WPManager;
 
 /**
@@ -100,12 +101,14 @@ public class GpmlToPathway {
 		this.cyNodeTbl = cyNet.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS);
 		this.cyEdgeTbl = cyNet.getTable(CyEdge.class, CyNetwork.DEFAULT_ATTRS);
 //		System.out.println("GpmlToPathway");
+		MIMShapes.registerShapes();
 	}
 
   /**
    * Convert the pathway given in the constructor.
    */
 	public List<DelayedVizProp> convert() {
+		MIMShapes.registerShapes();
     setupCyTables();
 
     // convert by each pathway element type
@@ -491,7 +494,7 @@ public class GpmlToPathway {
     PV_ARROW_MAP.put("Line",               ArrowShapeVisualProperty.NONE);
     PV_ARROW_MAP.put("TBar",               ArrowShapeVisualProperty.T);
     PV_ARROW_MAP.put("mim-binding",        ArrowShapeVisualProperty.ARROW);
-    PV_ARROW_MAP.put("mim-conversion",     ArrowShapeVisualProperty.SQUARE);
+    PV_ARROW_MAP.put("mim-conversion",     ArrowShapeVisualProperty.ARROW);
     PV_ARROW_MAP.put("mim-modification",   ArrowShapeVisualProperty.ARROW);
     PV_ARROW_MAP.put("mim-catalysis",      ArrowShapeVisualProperty.OPEN_CIRCLE);
     PV_ARROW_MAP.put("mim-inhibition",     ArrowShapeVisualProperty.T);
