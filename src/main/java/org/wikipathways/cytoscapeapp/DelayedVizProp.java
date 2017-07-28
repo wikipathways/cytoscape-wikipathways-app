@@ -1,4 +1,4 @@
-package org.wikipathways.cytoscapeapp.internal.io;
+package org.wikipathways.cytoscapeapp;
 
 import java.awt.Color;
 import java.awt.Shape;
@@ -17,12 +17,10 @@ import org.cytoscape.view.model.View;
 import org.cytoscape.view.model.VisualProperty;
 import org.cytoscape.view.presentation.annotations.ShapeAnnotation;
 import org.cytoscape.view.presentation.property.BasicVisualLexicon;
-import org.cytoscape.view.presentation.property.DoubleVisualProperty;
 import org.cytoscape.view.presentation.property.values.Bend;
 import org.cytoscape.view.presentation.property.values.Handle;
 import org.cytoscape.view.presentation.property.values.HandleFactory;
-import org.pathvisio.core.model.LineType;
-import org.wikipathways.cytoscapeapp.internal.WPManager;
+//import org.wikipathways.cytoscapeapp.internal.WPManager;
 
 /**
  * Temporarily stores visual property values of nodes and edges until
@@ -57,8 +55,7 @@ class DelayedVizProp {
   }
 	static boolean verbose = false;
 
-	public static void applyAll(final CyNetworkView netView,final Iterable<DelayedVizProp> delayedProps,
-			WPManager mgr) 
+	public static void applyAll(final CyNetworkView netView,final Iterable<DelayedVizProp> delayedProps, WPManager mgr) 
 	{
 //		System.out.println("\n");
 //		System.out.println("netView: " + netView.toString());
@@ -98,14 +95,14 @@ class DelayedVizProp {
 							if ("y".equals(lookup))				y = Double.valueOf(propvalue1);
 						}
 				  }
-				  System.out.println(map);
+//				  System.out.println(map);
  				  ShapeAnnotation mAnnotation = mgr.getAnnots().newShape(netView, map);
  				  Shape thePath = getShapePath(propvalue);
  				  if (thePath != null)
  				  {
  					  mAnnotation.setCustomShape(thePath);
 					  View<CyNode> view = netView.getNodeView(src);
-					  view.setVisualProperty(BasicVisualLexicon.NODE_BORDER_PAINT, Color.GREEN);
+//					  view.setVisualProperty(BasicVisualLexicon.NODE_BORDER_PAINT, Color.GREEN);
 					  view.setVisualProperty(BasicVisualLexicon.NODE_FILL_COLOR, Color.YELLOW);
 				 }
 
@@ -128,9 +125,9 @@ class DelayedVizProp {
 					  
 //			}
 		}
-			if ("Edge Bend".equals(propName)) {
-applyEdgeBend(netView, mgr, delayedProp);
-		}
+		if ("Edge Bend".equals(propName)) 
+			applyEdgeBend(netView, mgr, delayedProp);
+			
 	
       View<?> view = null;
       if (delayedProp.netObj instanceof CyNode) {
@@ -154,7 +151,7 @@ applyEdgeBend(netView, mgr, delayedProp);
 		//
 		try {
 			HandleFactory handleFactory = mgr.getHandleFactory();
-			System.out.println("handleFactory: " + handleFactory.toString());
+//			System.out.println("handleFactory: " + handleFactory.toString());
 			CyEdge edge = (CyEdge) delayedProp.netObj;
 			if (edge != null) {
 				CyNode src = edge.getSource();
@@ -182,8 +179,8 @@ applyEdgeBend(netView, mgr, delayedProp);
 				// boolean isCurved = 1 == EdgeView.CURVED_LINES;
 
 				Bend bend = edgeView.getVisualProperty(BasicVisualLexicon.EDGE_BEND);
-				System.out.println("bend: " + bend.getAllHandles().size() + " handles "
-						+ (delayedProp.isLocked ? "LOCKED" : "UNLOCKED"));
+//				System.out.println("bend: " + bend.getAllHandles().size() + " handles "
+//						+ (delayedProp.isLocked ? "LOCKED" : "UNLOCKED"));
 
 				List<Handle> handles = bend.getAllHandles();
 				double EPSILON = 0.000000001;

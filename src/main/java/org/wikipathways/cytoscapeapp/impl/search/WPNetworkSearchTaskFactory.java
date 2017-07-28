@@ -23,8 +23,14 @@ public class WPNetworkSearchTaskFactory extends AbstractNetSearchTestTaskFactory
 	private final WPClient client;
 	private final ImageIcon ICON = new ImageIcon(getClass().getClassLoader().getResource("logo_150.png"));
 	@Override public Icon getIcon() 		{ return ICON; }
-	private URL website;
-	@Override public URL getWebsite() { return website;	}
+	@Override public URL getWebsite() 
+	{ 
+		try { return new URL(URL);	}
+		catch (MalformedURLException e) {
+		e.printStackTrace();
+		return null;
+	}
+	}
 	private final CyServiceRegistrar serviceRegistrar;
 	private final WPCyGUIClient guiClient;
 	
@@ -42,11 +48,12 @@ public class WPNetworkSearchTaskFactory extends AbstractNetSearchTestTaskFactory
 		client = clnt;
 		guiClient = gui;
 //		getQueryComponent();		// make sure queryBar gets defined early
-		try {
-			website = new URL(URL);
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		}
+//		try {
+//			website = new URL(URL);
+//		} catch (MalformedURLException e) {
+//			e.printStackTrace();
+//		}
+		System.out.println("WPNetworkSearchTaskFactory");
 	}
 	
 

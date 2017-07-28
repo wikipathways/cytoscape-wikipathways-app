@@ -1,4 +1,4 @@
-package org.wikipathways.cytoscapeapp.internal.io;
+package org.wikipathways.cytoscapeapp;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -47,7 +47,6 @@ import org.pathvisio.core.model.PathwayElement.MPoint;
 import org.pathvisio.core.model.ShapeType;
 import org.pathvisio.core.model.StaticProperty;
 import org.pathvisio.core.view.MIMShapes;
-import org.wikipathways.cytoscapeapp.internal.WPManager;
 
 /**
  * Converts a GPML file contained in a PathVisio Pathway object to a
@@ -1411,10 +1410,10 @@ static boolean verbose = true;
 
 	private int getSegmentAxis(int side) {
 		switch(side) {
-		case ConnectorRestrictions.SIDE_EAST:
-		case ConnectorRestrictions.SIDE_WEST: 		return AXIS_X;
-		case ConnectorRestrictions.SIDE_NORTH:
-		case ConnectorRestrictions.SIDE_SOUTH: 		return AXIS_Y;
+			case ConnectorRestrictions.SIDE_EAST:
+			case ConnectorRestrictions.SIDE_WEST: 		return AXIS_X;
+			case ConnectorRestrictions.SIDE_NORTH:
+			case ConnectorRestrictions.SIDE_SOUTH: 		return AXIS_Y;
 		}
 		return 0;
 	}
@@ -1535,12 +1534,12 @@ BUG:  	There should be some cases where 4 is returned !!
 		return (Math.sqrt(dx*dx + dy* dy));
 	}
 
-	List<Segment> elbowSegments; //The original segments of the elbow connector
+//	List<Segment> elbowSegments; //The original segments of the elbow connector
 //	CurvedSegment[] curvedSegments; //The elbow segment with bezier points
 	//Higher resolution approximation of the curve  for calculating the anchor position
-	List<Segment> curveHigh;
+//	List<Segment> curveHigh;
 	//Lower resolution approximation of the curve for calculating the arrow heads
-	List<Segment> curveLow;
+//	List<Segment> curveLow;
 
 //
 //	

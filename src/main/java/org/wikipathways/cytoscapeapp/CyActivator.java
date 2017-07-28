@@ -15,7 +15,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-package org.wikipathways.cytoscapeapp.internal;
+package org.wikipathways.cytoscapeapp;
 
 import java.util.Properties;
 
@@ -35,21 +35,18 @@ import org.cytoscape.work.TaskManager;
 import org.cytoscape.work.swing.DialogTaskManager;
 import org.osgi.framework.BundleContext;
 import org.pathvisio.core.view.MIMShapes;
-import org.wikipathways.cytoscapeapp.GpmlConversionMethod;
-import org.wikipathways.cytoscapeapp.GpmlReaderFactory;
-import org.wikipathways.cytoscapeapp.WPClient;
-import org.wikipathways.cytoscapeapp.WPClientFactory;
 import org.wikipathways.cytoscapeapp.impl.WPClientRESTFactoryImpl;
 import org.wikipathways.cytoscapeapp.impl.search.CustomOptionsTaskFactory;
 import org.wikipathways.cytoscapeapp.impl.search.TunableOptionsTaskFactory;
 import org.wikipathways.cytoscapeapp.impl.search.WPNetworkSearchTaskFactory;
 import org.wikipathways.cytoscapeapp.impl.search.WPSearchCmdTaskFactory;
 import org.wikipathways.cytoscapeapp.impl.search.WPSpeciesCmdTaskFactory;
+import org.wikipathways.cytoscapeapp.internal.OpenLinkedPathwayAsNewTaskFactory;
+import org.wikipathways.cytoscapeapp.internal.ToggleShapesTaskFactory;
 import org.wikipathways.cytoscapeapp.internal.cmd.GpmlImportCmdTaskFactory;
 import org.wikipathways.cytoscapeapp.internal.cmd.WPImportCmdTaskFactory;
 import org.wikipathways.cytoscapeapp.internal.guiclient.WPCyGUIClient;
 import org.wikipathways.cytoscapeapp.internal.io.GpmlCyReaderTaskFactory;
-import org.wikipathways.cytoscapeapp.internal.io.GpmlReaderFactoryImpl;
 /**
  * 
  * @author martinakutmon
@@ -118,8 +115,8 @@ public class CyActivator extends AbstractCyActivator {
 // These are additional sample classes that you could mock up as other services
 // I comment them in and out every version to make sure my latest has been loaded!
  	
-	registerAllServices(context, new TunableOptionsTaskFactory(1));
-	registerAllServices(context, new CustomOptionsTaskFactory());
+//	registerAllServices(context, new TunableOptionsTaskFactory(1));
+//	registerAllServices(context, new CustomOptionsTaskFactory());
 //	registerAllServices(context, new CustomQueryTaskFactory(registrar));
  	registerAllServices(context, new WPNetworkSearchTaskFactory(registrar, client, icon, guiClient));		
  

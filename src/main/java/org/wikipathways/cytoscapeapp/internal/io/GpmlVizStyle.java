@@ -16,6 +16,7 @@ import org.cytoscape.view.vizmap.VisualMappingFunctionFactory;
 import org.cytoscape.view.vizmap.VisualMappingFunction;
 import org.cytoscape.view.vizmap.VisualPropertyDependency;
 import org.cytoscape.view.vizmap.mappings.DiscreteMapping;
+import org.wikipathways.cytoscapeapp.GpmlToPathway;
 
 public class GpmlVizStyle {
   static final String VIZ_STYLE_NAME = "WikiPathways";

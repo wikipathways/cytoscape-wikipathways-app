@@ -97,7 +97,7 @@
 						<Bundle-Version>${project.version}</Bundle-Version>
 						<Private-Package>${bundle.namespace}.internal.*,${bundle.namespace}.impl.*</Private-Package>
             <Export-Package>${bundle.namespace}</Export-Package>
-						<Bundle-Activator>${bundle.namespace}.internal.CyActivator</Bundle-Activator>
+						<Bundle-Activator>${bundle.namespace}.CyActivator</Bundle-Activator>
 						<Embed-Dependency>*;scope=!provided</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>
 						<Import-Package>*;resolution:=optional</Import-Package>
@@ -157,18 +157,18 @@
 			<version>${cytoscape.api.version}</version>
 			<scope>provided</scope>
 		</dependency>
-	<!--	 <dependency>
+		 <dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>swing-application-api</artifactId>
 			<version>${cytoscape.api.version}</version>
-		</dependency>  -->
-<!-- 
+		</dependency>  
+ 
  		<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>session-api</artifactId>
 			<version>${cytoscape.api.version}</version>
 			<scope>provided</scope>
-		</dependency> -->
+		</dependency> 
 	 	<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>webservice-api</artifactId>
@@ -187,12 +187,12 @@
 			<version>${cytoscape.api.version}</version>
 			<scope>provided</scope>
 		</dependency>
-<!-- 		<dependency>
+ 		<dependency>
     		<groupId>org.cytoscape</groupId>
     		<artifactId>swing-app-api</artifactId>
     	<version>${cytoscape.api.version}</version>
 		<scope>provided</scope>
-		</dependency>  -->
+		</dependency>  
  		<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>app-api</artifactId>
@@ -205,12 +205,12 @@
 			<version>${cytoscape.api.version}</version>
 			<scope>provided</scope>
 		</dependency> 
-<!-- 		<dependency>
+ 		<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>vizmap-api</artifactId>
 			<version>${cytoscape.api.version}</version>
 			<scope>provided</scope>
-		</dependency> -->
+		</dependency> 
 		<dependency>
     		<groupId>org.cytoscape</groupId>
     		<artifactId>work-api</artifactId>
@@ -241,12 +241,12 @@
                  <version>${cytoscape.api.version}</version>
                  <scope>provided</scope>
          </dependency>
- <!--         <dependency>
+         <dependency>
                  <groupId>org.cytoscape</groupId>
                  <artifactId>work-swing-api</artifactId>
                  <version>${cytoscape.api.version}</version>
                  <scope>provided</scope>
-         </dependency> -->
+         </dependency> 
 
 
 
