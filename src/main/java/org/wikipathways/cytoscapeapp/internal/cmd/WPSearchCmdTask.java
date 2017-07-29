@@ -45,10 +45,10 @@ public class WPSearchCmdTask extends AbstractTask {
   public void run(TaskMonitor monitor) {
 
 		monitor.setTitle("Searching Wikipathways.org");
-		System.out.println("Searching Wikipathways.org");
+//		System.out.println("Searching Wikipathways.org");
 	    query = factory.getQuery();
-	    System.out.println("query: " + query);
-	    System.out.println("species" + species);
+//	    System.out.println("query: " + query);
+//	    System.out.println("species" + species);
 
   	if (query == null || query.length() == 0)  	return;     	// BEEP
     
@@ -62,14 +62,14 @@ public class WPSearchCmdTask extends AbstractTask {
     		new TaskObserver() {
     			public void taskFinished(ObservableTask t) {}
     			public void allFinished(FinishStatus status) {
-    				 System.out.println("sub run all Finished");
+//    				 System.out.println("sub run all Finished");
     				setPathwaysInResultsTable(searchTask.get());
     			}        
       });  }
   
   void setPathwaysInResultsTable(final List<WPPathway> pathways) {
 	  
-	  System.out.println("-- - -- --");
+//	  System.out.println("-- - -- --");
 //	  guiClient.bringToFront();
 //	  JTable resultsTable = guiClient.getResultsTable();
 		guiClient.setPathwaysInResultsTable(pathways);

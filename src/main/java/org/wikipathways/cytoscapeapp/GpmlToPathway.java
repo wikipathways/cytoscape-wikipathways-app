@@ -714,9 +714,13 @@ public class GpmlToPathway {
       final DelayedVizProp[] props = vizPropStore.store(cyNetObj, pvElem);
       for (int i = 0; i < props.length; i++) {
           String s = props[i].prop.getDisplayName();
+          Object  val = props[i].value;
+          String v = (val == null) ? " " : val.toString();
+     if (verbose)      System.out.println("storing: " + s + " = " + v);
         cyDelayedVizProps.add(props[i]);
       }
     }
+    if (verbose)      System.out.println("");
   }
 
   /*
@@ -808,7 +812,7 @@ public class GpmlToPathway {
     pvToCyNodes.put(pvShape, cyNode);
     IShape shtype = pvShape.getShapeType();
     if (shtype == null) 	return;
-    System.out.println("convertShape: " + (shtype == null ? "NONE" : shtype.getName()) + " " + id);
+    if (verbose)    System.out.println("convertShape: " + (shtype == null ? "NONE" : shtype.getName()) + " " + id);
     store(cyNodeTbl, cyNode, pvShape, BasicTableStore.GRAPH_ID, BasicTableStore.TEXT_LABEL, IS_GPML_SHAPE);
     store(cyNode, pvShape,
       BasicVizPropStore.NODE_X, BasicVizPropStore.NODE_Y, BasicVizPropStore.NODE_Z,
@@ -951,7 +955,7 @@ public class GpmlToPathway {
   private void convertGroup(final PathwayElement pvGroup) {
     final CyNode cyGroupNode = cyNet.addNode();
     pvToCyNodes.put(pvGroup, cyGroupNode);
-System.out.println("convertGroup: " + pvGroup.getLineThickness());
+    if (verbose)  System.out.println("convertGroup: " + pvGroup.getLineThickness());
     store(cyGroupNode, pvGroup,
       GROUP_X,
       GROUP_Y,
@@ -1015,9 +1019,8 @@ System.out.println("convertGroup: " + pvGroup.getLineThickness());
     for (final PathwayElement pvElem : pvPathway.getDataObjects()) {
       if (!(pvElem.getObjectType().equals(ObjectType.LINE) || pvElem.getObjectType().equals(ObjectType.GRAPHLINE)))
         continue;
-      if (pvElem.getMAnchors().isEmpty())
-        continue;
-      convertAnchorsInLine(pvElem);
+      if (!pvElem.getMAnchors().isEmpty())
+    	  convertAnchorsInLine(pvElem);
     }
   }
 
@@ -1025,24 +1028,24 @@ System.out.println("convertGroup: " + pvGroup.getLineThickness());
     assignAnchorVizStyle(node, position, Color.WHITE);
   }
 
+	private void convertAnchorsInLine(final PathwayElement pvElem) {
+		final MLine pvLine = (MLine) pvElem;
+		for (final MAnchor pvAnchor : pvElem.getMAnchors()) {
+			final CyNode cyNode = cyNet.addNode();
+			final Point2D position = pvLine.getConnectorShape().fromLineCoordinate(pvAnchor.getPosition());
+			pvToCyNodes.put(pvAnchor, cyNode);
+			assignAnchorVizStyle(cyNode, position, pvLine.getColor());
+		}
+	 }
+
   private void assignAnchorVizStyle(final CyNode node, final Point2D position, final Color color) {
     cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_X_LOCATION, position.getX(), false));
     cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_Y_LOCATION, position.getY(), false));
-    cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_Z_LOCATION, 0, false));
+    cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_Z_LOCATION, 10000, false));
     cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_FILL_COLOR, color, true));
     cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_BORDER_WIDTH, 0.0, true));
-    cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_WIDTH, 1.0, true));
-    cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_HEIGHT, 1.0, true));
-  }
-
-  private void convertAnchorsInLine(final PathwayElement pvElem) {
-    final MLine pvLine = (MLine) pvElem;
-    for (final MAnchor pvAnchor : pvElem.getMAnchors()) {
-      final CyNode cyNode = cyNet.addNode();
-      final Point2D position = pvLine.getConnectorShape().fromLineCoordinate(pvAnchor.getPosition());
-      pvToCyNodes.put(pvAnchor, cyNode);
-      assignAnchorVizStyle(cyNode, position, pvLine.getColor());
-    }
+    cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_WIDTH, 2.0, true));
+    cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_HEIGHT, 2.0, true));
   }
   
   /*
@@ -1079,10 +1082,10 @@ System.out.println("convertGroup: " + pvGroup.getLineThickness());
     }    
     final List<MAnchor> pvAnchors = pvElem.getMAnchors();
 //	System.out.println("NAnchors: " + pvAnchors.size());
-//    for (int i = 0; i < pvAnchors.size(); i++) {
-//    	MAnchor anchor = pvAnchors.get(i);
-//    	System.out.println("anchor at " + anchor.getPosition());
-//      }
+    for (int i = 0; i < pvAnchors.size(); i++) {
+    	MAnchor anchor = pvAnchors.get(i);
+    	System.out.println("anchor at " + anchor.getPosition());
+      }
 
     if (pvAnchors.isEmpty()) 
       newEdge(pvLine, cyStartNode, cyEndNode, true, true);
@@ -1155,7 +1158,7 @@ if (verbose)
 	  	MPoint mStart = pts.get(0);
 	  	int len = pts.size();
 	  	MPoint mEnd = pts.get(len-1);
-	  	System.out.println("length: " + len);
+	  	if (verbose)	  	System.out.println("length: " + len);
 	  	
 		double startRelX = mStart.getRelX();
 		double startRelY = mStart.getRelY();
@@ -1182,7 +1185,7 @@ if (verbose)
 		{
 	  	System.out.println("startSide: " + sides[startSide]);
 	  	System.out.println("endSide: " + sides[endSide]);
-}
+		}
 		
 	  	Point2D[] wps = calculateWayPoints(startPt, endPt, startSide, endSide);
 	    segments = calculateSegments(startPt, endPt, startSide, endSide, wps);
@@ -1201,7 +1204,7 @@ if (verbose)
 static boolean verbose = true;
 //--------------------------------------------------------------------
 	private Bend makeCurvedEdgeBend(CyNetworkView networkView, CyEdge edge, MPoint start, MPoint end) {
-		System.out.println("makeCurvedEdgeBend"); 
+		if (verbose)		System.out.println("makeCurvedEdgeBend"); 
 	    BendFactory factory = manager.getBendFactory();		
 		View<CyEdge> ev = networkView.getEdgeView(edge);
 	    Bend bend = factory.createBend();
@@ -1215,11 +1218,9 @@ static boolean verbose = true;
 //	    		System.out.print("Segment goes from: (" + (int)(seg.start.getX()) + ", " +  (int)seg.start.getY() + ")");
 //	    		System.out.println("to  : " + (int)(seg.end.getX()) + ", " +  (int)seg.end.getY() + ")");
 //	    	}
-		  double x = 0;
-		  double y = 0;
 			
-		  	x = (end.getX() + start.getX() ) / 2. + 10;
-		  	y = (end.getY() + start.getY() ) / 2.;
+		  double x = (end.getX() + start.getX() ) / 2. + 10;		// TODO x shift to make slight bend
+		  double y = (end.getY() + start.getY() ) / 2.;
 //			double startRelX = mStart.getRelX();
 //			double startRelY = mStart.getRelY();
 //			double endRelX = mEnd.getRelX();
