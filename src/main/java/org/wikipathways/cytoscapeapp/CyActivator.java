@@ -37,6 +37,7 @@ import org.osgi.framework.BundleContext;
 import org.pathvisio.core.view.MIMShapes;
 import org.wikipathways.cytoscapeapp.impl.WPClientRESTFactoryImpl;
 import org.wikipathways.cytoscapeapp.impl.search.CustomOptionsTaskFactory;
+import org.wikipathways.cytoscapeapp.impl.search.CustomQueryTaskFactory;
 import org.wikipathways.cytoscapeapp.impl.search.TunableOptionsTaskFactory;
 import org.wikipathways.cytoscapeapp.impl.search.WPNetworkSearchTaskFactory;
 import org.wikipathways.cytoscapeapp.impl.search.WPSearchCmdTaskFactory;
@@ -59,7 +60,6 @@ public class CyActivator extends AbstractCyActivator {
 	@Override
 	public void start(BundleContext context) throws Exception {
     final CyServiceRegistrar registrar = getService(context, CyServiceRegistrar.class);
-    
     // --- get the GpmlReaderFactory and the GpmlCyReaderTaskFactory to manage imports
     final GpmlReaderFactory gpmlReaderFactory = new GpmlReaderFactoryImpl(registrar);
     registerService(context, gpmlReaderFactory, GpmlReaderFactory.class);
@@ -72,18 +72,18 @@ public class CyActivator extends AbstractCyActivator {
      
 	MIMShapes.registerShapes();
 
-    //---- get all the services necessary to build the GUI and then build and register it
-    final CyApplicationConfiguration appConf = getService(context, CyApplicationConfiguration.class);
-    final WPClientFactory clientFactory = new WPClientRESTFactoryImpl(appConf);
-    final WPClient client = clientFactory.create();
-    registerService(context, clientFactory, WPClientFactory.class);
-    final TaskManager<?, ?> taskMgr = getService(context, DialogTaskManager.class);
-    final OpenBrowser openBrowser = getService(context, OpenBrowser.class);
-    final WPCyGUIClient guiClient = new WPCyGUIClient( taskMgr, client, openBrowser, gpmlReaderFactory);
-    registerAllServices(context, guiClient);
+		// ---- get all the services necessary to build the GUI and then build and register it
+		final CyApplicationConfiguration appConf = getService(context, CyApplicationConfiguration.class);
+		final WPClientFactory clientFactory = new WPClientRESTFactoryImpl(appConf);
+		registerService(context, clientFactory, WPClientFactory.class);
+		final TaskManager<?, ?> taskMgr = getService(context, DialogTaskManager.class);
+		final WPClient client = clientFactory.create();
+		final OpenBrowser openBrowser = getService(context, OpenBrowser.class);
+		final WPCyGUIClient guiClient = new WPCyGUIClient(taskMgr, client, openBrowser, gpmlReaderFactory);
+		registerAllServices(context, guiClient);
 
-    // ---- create and register a bunch of CommandTaskFactories
-    reg(context,  new WPSpeciesCmdTaskFactory(client), "get-species", "wikipathways");
+		// ---- create and register a bunch of CommandTaskFactories
+		reg(context,  new WPSpeciesCmdTaskFactory(client), "get-species", "wikipathways");
     reg(context,  new WPSearchCmdTaskFactory(client, registrar, guiClient), "search", "wikipathways");
     reg(context,  new GpmlImportCmdTaskFactory(gpmlReaderFactory, GpmlConversionMethod.PATHWAY),"import-as-pathway", "gpml");
     reg(context,  new GpmlImportCmdTaskFactory(gpmlReaderFactory, GpmlConversionMethod.NETWORK),"import-as-network", "gpml");
@@ -109,13 +109,15 @@ public class CyActivator extends AbstractCyActivator {
  	{
  		  icon = new ImageIcon(getClass().getClassLoader().getResource("logo_150.png"));
  	}
- 	catch (NullPointerException e)		{ }	// icon with that name not found, null is okay
+ 	catch (NullPointerException e)			// icon with that name not found, null is okay
+ 	{
+ 		System.err.println("Icon not found"); 
+ 	}
  	
 
 // These are additional sample classes that you could mock up as other services
 // I comment them in and out every version to make sure my latest has been loaded!
- 	
-//	registerAllServices(context, new TunableOptionsTaskFactory(1));
+	registerAllServices(context, new TunableOptionsTaskFactory(1));
 //	registerAllServices(context, new CustomOptionsTaskFactory());
 //	registerAllServices(context, new CustomQueryTaskFactory(registrar));
  	registerAllServices(context, new WPNetworkSearchTaskFactory(registrar, client, icon, guiClient));		

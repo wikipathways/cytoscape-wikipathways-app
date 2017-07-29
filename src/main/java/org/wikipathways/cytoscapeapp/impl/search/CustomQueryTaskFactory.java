@@ -50,7 +50,7 @@ public class CustomQueryTaskFactory implements NetworkSearchTaskFactory {
 	public CustomQueryTaskFactory(CyServiceRegistrar serviceRegistrar) {
 		this.serviceRegistrar = serviceRegistrar;
 		icon = new TextIcon();
-		
+		System.out.println("create CustomQueryTaskFactory");
 		try {
 			website = new URL("https://github.com/chrtannus/netsearch-test/blob/master/src/main/java/org/cytoscape/netsearchtest/internal/task/CustomQueryTaskFactory.java");
 		} catch (MalformedURLException e) {

@@ -54,7 +54,7 @@ class DelayedVizProp {
     this.isLocked = isLocked;
   }
 	static boolean verbose = false;
-
+public String toString() {  return prop.getDisplayName() + ": " + value.toString(); }
 	public static void applyAll(final CyNetworkView netView,final Iterable<DelayedVizProp> delayedProps, WPManager mgr) 
 	{
 //		System.out.println("\n");
@@ -96,19 +96,19 @@ class DelayedVizProp {
 						}
 				  }
 //				  System.out.println(map);
- 				  ShapeAnnotation mAnnotation = mgr.getAnnots().newShape(netView, map);
+// 				  ShapeAnnotation mAnnotation = mgr.getAnnots().newShape(netView, map);
  				  Shape thePath = getShapePath(propvalue);
  				  if (thePath != null)
  				  {
- 					  mAnnotation.setCustomShape(thePath);
+// 					  mAnnotation.setCustomShape(thePath);
 					  View<CyNode> view = netView.getNodeView(src);
 //					  view.setVisualProperty(BasicVisualLexicon.NODE_BORDER_PAINT, Color.GREEN);
 					  view.setVisualProperty(BasicVisualLexicon.NODE_FILL_COLOR, Color.YELLOW);
 				 }
 
  				  boolean legalSize =  (wid > 0 && hght > 0);
-				  if (legalSize)
-					  mAnnotation.setSize(wid, hght);
+//				  if (legalSize)
+//					  mAnnotation.setSize(wid, hght);
 				  boolean legalXY = (!(Double.isNaN(x) || Double.isNaN(y)));
 				  if (legalXY)
 				  {
@@ -119,7 +119,7 @@ class DelayedVizProp {
 						 y -= (hght / 2.);
 					 }
 //					 System.out.println(String.format("moving annotation to : %4.1f , %4.1f", x, y));
-					  mAnnotation.moveAnnotation(new Point2D.Double(x,y));
+//					  mAnnotation.moveAnnotation(new Point2D.Double(x,y));
 //					  view.setLockedValue(prop, 0.);
 				  }
 					  
@@ -138,7 +138,7 @@ class DelayedVizProp {
         view = netView.getEdgeView(edge);
       }
       if (view == null) continue;			// AST
-      if (delayedProp.isLocked) 
+      if (delayedProp.isLocked) // DEBUG_______________  && !delayedProp.isLocked
         view.setLockedValue(delayedProp.prop, value);
        else 
         view.setVisualProperty(delayedProp.prop, value);
@@ -241,12 +241,18 @@ class DelayedVizProp {
 	  {
 		System.out.println(String.format("%s: (%3.1f, %3.1f)" , name, pt.getX() , pt.getY()));
 	  }
-	static private Point2D.Double getNodePosition(View<CyNode> nodeView) {
+		static private Point2D.Double getNodePosition(View<CyNode> nodeView) {
 		    Double x = nodeView.getVisualProperty(BasicVisualLexicon.NODE_X_LOCATION);
 		    Double y = nodeView.getVisualProperty(BasicVisualLexicon.NODE_Y_LOCATION);
 			return new Point2D.Double(x,y);
 		}
-
+//
+//		static private String getNodeName(View<CyNode> nodeView) {
+//		    Double x = nodeView.getVisualProperty(BasicVisualLexicon.NODE_X_LOCATION);
+//		    Double y = nodeView.getVisualProperty(BasicVisualLexicon.NODE_Y_LOCATION);
+//			return nodeView.getVisualProperty(BasicVisualLexicon.);
+//		}
+//
 
 	static private GeneralPath makeMitochondria()
 	  {
