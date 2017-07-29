@@ -1031,8 +1031,8 @@ System.out.println("convertGroup: " + pvGroup.getLineThickness());
     cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_Z_LOCATION, 0, false));
     cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_FILL_COLOR, color, true));
     cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_BORDER_WIDTH, 0.0, true));
-    cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_WIDTH, 5.0, true));
-    cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_HEIGHT, 5.0, true));
+    cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_WIDTH, 1.0, true));
+    cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_HEIGHT, 1.0, true));
   }
 
   private void convertAnchorsInLine(final PathwayElement pvElem) {
