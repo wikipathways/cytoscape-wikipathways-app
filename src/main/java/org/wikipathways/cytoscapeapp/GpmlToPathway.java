@@ -521,10 +521,10 @@ public class GpmlToPathway {
   static Map<String,NodeShape> PV_SHAPE_MAP = new HashMap<String,NodeShape>();
   static {
     PV_SHAPE_MAP.put("Rectangle",        NodeShapeVisualProperty.RECTANGLE);
-    PV_SHAPE_MAP.put("Triangle",         NodeShapeVisualProperty.TRIANGLE);
+    PV_SHAPE_MAP.put("Triangle",         NodeShapeVisualProperty.TRIANGLE);			// Note: triangle is different shape than PV's
     PV_SHAPE_MAP.put("RoundedRectangle", NodeShapeVisualProperty.ROUND_RECTANGLE);
     PV_SHAPE_MAP.put("Hexagon",          NodeShapeVisualProperty.HEXAGON);
-    PV_SHAPE_MAP.put("Pentagon",          NodeShapeVisualProperty.HEXAGON);			// TODO
+    PV_SHAPE_MAP.put("Pentagon",         NodeShapeVisualProperty.HEXAGON);			// TODO
     PV_SHAPE_MAP.put("Oval",             NodeShapeVisualProperty.ELLIPSE);
     PV_SHAPE_MAP.put("Octagon",          NodeShapeVisualProperty.OCTAGON);
     PV_SHAPE_MAP.put("Mitochondria",     new NodeShapeImpl("Mitochondria", "Mitochondria"));	
@@ -1019,13 +1019,14 @@ public class GpmlToPathway {
     for (final PathwayElement pvElem : pvPathway.getDataObjects()) {
       if (!(pvElem.getObjectType().equals(ObjectType.LINE) || pvElem.getObjectType().equals(ObjectType.GRAPHLINE)))
         continue;
+//      if (pvElem != null) continue;
       if (!pvElem.getMAnchors().isEmpty())
     	  convertAnchorsInLine(pvElem);
     }
   }
 
   private void assignAnchorVizStyle(final CyNode node, final Point2D position) {
-    assignAnchorVizStyle(node, position, Color.WHITE);
+    assignAnchorVizStyle(node, position, Color.RED);
   }
 
 	private void convertAnchorsInLine(final PathwayElement pvElem) {
@@ -1033,6 +1034,7 @@ public class GpmlToPathway {
 		for (final MAnchor pvAnchor : pvElem.getMAnchors()) {
 			final CyNode cyNode = cyNet.addNode();
 			final Point2D position = pvLine.getConnectorShape().fromLineCoordinate(pvAnchor.getPosition());
+			System.out.println("\nAnchor at " + cyNode.getSUID() + "  --------");
 			pvToCyNodes.put(pvAnchor, cyNode);
 			assignAnchorVizStyle(cyNode, position, pvLine.getColor());
 		}
@@ -1043,9 +1045,10 @@ public class GpmlToPathway {
     cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_Y_LOCATION, position.getY(), false));
     cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_Z_LOCATION, 10000, false));
     cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_FILL_COLOR, color, true));
-    cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_BORDER_WIDTH, 0.0, true));
+    cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_BORDER_WIDTH, 20.0, true));
     cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_WIDTH, 2.0, true));
     cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_HEIGHT, 2.0, true));
+    cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_TRANSPARENCY, 128, true));  // AST
   }
   
   /*
