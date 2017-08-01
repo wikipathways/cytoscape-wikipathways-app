@@ -24,9 +24,15 @@ public class WPNetworkSearchTaskFactory extends AbstractNetworkSearchTaskFactory
 	
 	static String ID = "org.wikipathways.3";
 	static String URL = "http://wikipathways.org";
-	static String NAME = "WikiPathways query";
+	static String NAME = "WikiPathways";
 	static String DESC = "A user-curated pathway collection";
-	static String DESC_LONG = "<html>WikiPathways is a database of biological pathways maintained by and for the scientific community. It was established to facilitate the contribution and maintenance of pathway information by the biology community. </p></html>";
+	static String DESC_LONG = "<html>"+
+		"WikiPathways is a user-curated collection of pathway diagrams.</p>"+
+		"<ul><li>Enter one or more keywords, gene symbols or molecular names</li>"+
+		"<li>Separate terms by space, comma or newline</li>"+
+		"<li>Use && between terms to restrict the results</li>"+
+		"<li>Use ? and * for one or more wildcard characters</li>"+
+				"</html>";       
 	private final static ImageIcon ICON = new ImageIcon(WPNetworkSearchTaskFactory.class.getClassLoader().getResource("logo_150.png"));
 
 
@@ -55,7 +61,7 @@ public class WPNetworkSearchTaskFactory extends AbstractNetworkSearchTaskFactory
 	}
 	//----------------------------------------------
 	public WPNetworkSearchTaskFactory(CyServiceRegistrar reggie, WPClient clnt, ImageIcon icon, WPCyGUIClient gui) {
-		super( ID,	NAME, DESC, null, null);  // ICON, getURL()
+		super( ID,	NAME, DESC_LONG, null, null);  // ICON, getURL()
 		serviceRegistrar = reggie;
 		client = clnt;
 		guiClient = gui;
