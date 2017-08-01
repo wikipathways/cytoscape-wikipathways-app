@@ -8,7 +8,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
-import org.cytoscape.application.swing.search.AbstractNetworkSearchTaskFactory;
 
 
 public class WPNetworkSearchTaskFactory extends AbstractNetSearchTaskFactory {
@@ -23,12 +22,12 @@ public class WPNetworkSearchTaskFactory extends AbstractNetSearchTaskFactory {
 		);
 	}
 	
-	@Override
+//	@Override
 	public Icon getIcon() {
 		return ICON;
 	}
 	
-	@Override
+//	@Override
 	public JComponent getOptionsComponent() {
 		JCheckBox cb1 = new JCheckBox("Filter by status", true);
 		JCheckBox cb2 = new JCheckBox("Sit Amet");
