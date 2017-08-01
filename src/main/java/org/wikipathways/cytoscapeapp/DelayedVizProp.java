@@ -58,8 +58,8 @@ class DelayedVizProp {
 	public String toString() {  return prop.getDisplayName() + ": " + value.toString(); }
 	public static void applyAll(final CyNetworkView netView,final Iterable<DelayedVizProp> delayedProps, WPManager mgr) 
 	{
-//		System.out.println("\n");
-//		System.out.println("netView: " + netView.toString());
+		System.out.println("\n");
+		System.out.println("netView: " + netView.toString());
 		for (final DelayedVizProp delayedProp : delayedProps) {
 			final Object value = delayedProp.value;
 			if (value == null) continue;
@@ -84,14 +84,17 @@ class DelayedVizProp {
         final CyEdge edge = (CyEdge) delayedProp.netObj;
         view = netView.getEdgeView(edge);
       }
-      if (view == null) continue;			// AST
-      if (delayedProp.isLocked) // DEBUG_______________     && !delayedProp.isLocked
+      if (view == null) continue;
+		System.out.println("Node id: " + delayedProp.netObj.getSUID()  + " is setting " + propName + " to " + propvalue);
+
+      if (delayedProp.isLocked)
         view.setLockedValue(delayedProp.prop, value);
        else 
         view.setVisualProperty(delayedProp.prop, value);
     }
   }
 
+	//--------------------------------------------------------------------------------
 	private static void applyNodeShape(final CyNetworkView netView,final Iterable<DelayedVizProp> delayedProps, WPManager mgr, DelayedVizProp delayedProp) 		{
 		final Map<String,String> map = new HashMap<String,String>();
 		CyNode src = (CyNode) delayedProp.netObj;
@@ -148,6 +151,7 @@ class DelayedVizProp {
 			// view.setLockedValue(prop, 0.);
 		}
 	}
+	//--------------------------------------------------------------------------------
 	private static void applyEdgeBend(final CyNetworkView netView, WPManager mgr, final DelayedVizProp delayedProp) {
 		// SEE BELOW: running this code results in:
 		// java.lang.IllegalStateException: defineHandle
@@ -185,8 +189,9 @@ class DelayedVizProp {
 //				 boolean isCurved = 1 == EdgeView.CURVED_LINES;
 
 				Bend bend = edgeView.getVisualProperty(BasicVisualLexicon.EDGE_BEND);
-//				System.out.println("bend: " + bend.getAllHandles().size() + " handles "
-//						+ (delayedProp.isLocked ? "LOCKED" : "UNLOCKED"));
+			if (verbose)
+					System.out.println("bend: " + bend.getAllHandles().size() + " handles "
+						+ (delayedProp.isLocked ? "LOCKED" : "UNLOCKED"));
 
 				List<Handle> handles = bend.getAllHandles();
 				double EPSILON = 0.000000001;
@@ -204,17 +209,14 @@ class DelayedVizProp {
 						System.err.println("IllegalStateException at " + (int) elbow.getX() + ", " + (int) elbow.getY());
 					}
 				} else
-					handles.add(handleFactory.createHandle(netView, edgeView, elbow.getX() + 20, elbow.getY())); // +
-																													// 20
-																													// TODO
-																													// arbitrary
-																													// shift
+					handles.add(handleFactory.createHandle(netView, edgeView, elbow.getX(), elbow.getY())); 
 			}
 		} catch (ClassCastException ex) {
 			System.out.println("ClassCastException: " + delayedProp.netObj.getClass());
 		}
 	}
 	
+	//--------------------------------------------------------------------------------
 	private static Shape getShapePath(String propvalue) {
 //		System.out.println("propvalue");
 		if ("Mitochondria".equals(propvalue)) 			  		return makeMitochondria();
@@ -226,6 +228,7 @@ class DelayedVizProp {
 		return null;
 	}
 
+	//--------------------------------------------------------------------------------
 	private static String propTranslator(String inName) {
 		if ("Node X Location".equalsIgnoreCase(inName)) return "x";		
 		if ("Node Y Location".equalsIgnoreCase(inName)) return "y";		
@@ -234,6 +237,7 @@ class DelayedVizProp {
 		return inName;
 	}
 
+	//--------------------------------------------------------------------------------
 	static List<DelayedVizProp> getPropsByID(final Iterable<DelayedVizProp> allProps, final Long id)
 	{
 		List<DelayedVizProp> props = new ArrayList<DelayedVizProp>();
@@ -260,6 +264,7 @@ class DelayedVizProp {
 //			return nodeView.getVisualProperty(BasicVisualLexicon.);
 //		}
 //
+		//--------------------------------------------------------------------------------
 
 	static private GeneralPath makeMitochondria()
 	  {

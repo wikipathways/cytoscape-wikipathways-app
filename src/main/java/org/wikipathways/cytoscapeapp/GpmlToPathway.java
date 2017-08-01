@@ -716,7 +716,8 @@ public class GpmlToPathway {
           String s = props[i].prop.getDisplayName();
           Object  val = props[i].value;
           String v = (val == null) ? " " : val.toString();
-     if (verbose)      System.out.println("storing: " + s + " = " + v);
+     if (verbose)      
+    	 System.out.println("storing: " + s + " = " + v + " in " + props[i].netObj.getSUID());
         cyDelayedVizProps.add(props[i]);
       }
     }
@@ -812,15 +813,15 @@ public class GpmlToPathway {
     pvToCyNodes.put(pvShape, cyNode);
     IShape shtype = pvShape.getShapeType();
     if (shtype == null) 	return;
-    if (verbose)    System.out.println("convertShape: " + (shtype == null ? "NONE" : shtype.getName()) + " " + id);
+    if (verbose)    System.out.println("convertShape: " + (shtype == null ? "NONE" : shtype.getName()) + " " + id + " " + pvShape.getFillColor());
     store(cyNodeTbl, cyNode, pvShape, BasicTableStore.GRAPH_ID, BasicTableStore.TEXT_LABEL, IS_GPML_SHAPE);
     store(cyNode, pvShape,
       BasicVizPropStore.NODE_X, BasicVizPropStore.NODE_Y, BasicVizPropStore.NODE_Z,
       BasicVizPropStore.NODE_WIDTH, 
       BasicVizPropStore.NODE_HEIGHT,
-      BasicVizPropStore.NODE_FILL_COLOR, BasicVizPropStore.NODE_COLOR,
+      BasicVizPropStore.NODE_FILL_COLOR,  BasicVizPropStore.NODE_COLOR,
       BasicVizPropStore.NODE_LABEL_FONT, BasicVizPropStore.NODE_LABEL_SIZE,
-      BasicVizPropStore.NODE_ALWAYS_TRANSPARENT,
+//      BasicVizPropStore.NODE_ALWAYS_TRANSPARENT,
       BasicVizPropStore.NODE_BORDER_STYLE,  
       BasicVizPropStore.NODE_BORDER_THICKNESS, 
       BasicVizPropStore.NODE_SHAPE, 
@@ -1045,10 +1046,10 @@ public class GpmlToPathway {
     cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_Y_LOCATION, position.getY(), false));
     cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_Z_LOCATION, 10000, false));
     cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_FILL_COLOR, color, true));
-    cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_BORDER_WIDTH, 20.0, true));
-    cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_WIDTH, 2.0, true));
-    cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_HEIGHT, 2.0, true));
-    cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_TRANSPARENCY, 128, true));  // AST
+//    cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_BORDER_WIDTH, 20.0, true));
+    cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_WIDTH, 1.0, true));
+    cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_HEIGHT, 1.0, true));
+//    cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_TRANSPARENCY, 128, true));  // AST
   }
   
   /*
@@ -1135,7 +1136,7 @@ public class GpmlToPathway {
 	  String connectorType = pvLine.getConnectorType().toString();
 	  org.pathvisio.core.model.LineType endLineType = pvLine.getEndLineType();
 	  org.pathvisio.core.model.LineType startLineType = pvLine.getStartLineType();
-if (verbose) System.out.println("pvLine: " + connectorType + " of types " + startLineType.getMappName() + " / " + endLineType.getName());
+	  if (verbose) System.out.println("pvLine: " + connectorType + " of types " + startLineType.getMappName() + " / " + endLineType.getName());
 
 		Bend bend = EdgeBendVisualProperty.DEFAULT_EDGE_BEND;
 		if ("Curved".equals(connectorType)) 

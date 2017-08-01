@@ -65,7 +65,7 @@ public class WPNetworkSearchTaskFactory extends AbstractNetworkSearchTaskFactory
 //		} catch (MalformedURLException e) {
 //			e.printStackTrace();
 //		}
-		System.out.println("WPNetworkSearchTaskFactory");
+//		System.out.println("WPNetworkSearchTaskFactory");
 	}
 	
 
