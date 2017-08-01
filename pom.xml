@@ -4,14 +4,14 @@
 	<properties>
 		<bundle.symbolicName>org.wikipathways.cytoscapeapp</bundle.symbolicName>
 		<bundle.namespace>org.wikipathways.cytoscapeapp</bundle.namespace>
-		<cytoscape.api.version>3.1.0</cytoscape.api.version>
+		<cytoscape.api.version>3.6.0-SNAPSHOT</cytoscape.api.version>
 	</properties>
 	<packaging>bundle</packaging>
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.wikipathways</groupId>
 	<artifactId>cytoscapeapp</artifactId>
-	<version>3.3.alpha3</version>
+	<version>3.3.beta3c</version>
 
 	<name>WikiPathways Cytoscape App</name>
 	
@@ -45,8 +45,8 @@
 					</execution>
 				</executions>
 				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
+					<source>1.8</source>
+					<target>1.8</target>
 					<optimize>true</optimize>
 					<showWarnings>true</showWarnings>
 					<showDeprecation>true</showDeprecation>
@@ -84,6 +84,7 @@
           </execution>
         </executions>
       </plugin>
+
       <!-- Generates the OSGi metadata based on the osgi.bnd file. -->
 			<plugin>
 				<groupId>org.apache.felix</groupId>
@@ -96,7 +97,7 @@
 						<Bundle-Version>${project.version}</Bundle-Version>
 						<Private-Package>${bundle.namespace}.internal.*,${bundle.namespace}.impl.*</Private-Package>
             <Export-Package>${bundle.namespace}</Export-Package>
-						<Bundle-Activator>${bundle.namespace}.internal.CyActivator</Bundle-Activator>
+						<Bundle-Activator>${bundle.namespace}.CyActivator</Bundle-Activator>
 						<Embed-Dependency>*;scope=!provided</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>
 						<Import-Package>*;resolution:=optional</Import-Package>
@@ -104,7 +105,7 @@
 					</instructions>
 				</configuration>
 			</plugin>
-			<plugin>
+ 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<configuration>
@@ -115,7 +116,7 @@
 	</build>
 
 	<repositories>
-             <repository>
+  <!--            <repository>
 			<id>cytoscape_snapshots</id>
 			<snapshots>
 			</snapshots>
@@ -125,7 +126,8 @@
 			<name>Cytoscape Snapshots</name>
 			<url>http://code.cytoscape.org/nexus/content/repositories/snapshots/</url>
 		</repository>
-		<repository>
+ -->
+<!--  		<repository>
 			<id>cytoscape_releases</id>
 			<snapshots>
 				<enabled>false</enabled>
@@ -136,7 +138,8 @@
 			<url>http://code.cytoscape.org/nexus/content/repositories/releases/</url>
 		</repository>
          <repository> <id>com.springsource.repository.bundles.release</id> <name>SpringSource Enterprise Bundle Repository - SpringSource Bundle Releases</name> <url>http://repository.springsource.com/maven/bundles/release</url> </repository> <repository> <id>com.springsource.repository.bundles.external</id> <name>SpringSource Enterprise Bundle Repository - External Bundle Releases</name> <url>http://repository.springsource.com/maven/bundles/external</url> </repository>
-    </repositories>
+ -->   
+  </repositories>
 
 	<!-- Dependencies needed to compile this project. -->
 	<dependencies>
@@ -147,55 +150,51 @@
 			<scope>provided</scope>
 		</dependency>
 		
-		<dependency>
-			<groupId>org.cytoscape</groupId>
-			<artifactId>service-api</artifactId>
-			<version>${cytoscape.api.version}</version>
-			<scope>provided</scope>
-		</dependency>
+
 		<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>core-task-api</artifactId>
 			<version>${cytoscape.api.version}</version>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
+	 	 <dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>swing-application-api</artifactId>
 			<version>${cytoscape.api.version}</version>
 			<scope>provided</scope>
-		</dependency>
-		<dependency>
+		</dependency>  
+  
+ 		<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>session-api</artifactId>
 			<version>${cytoscape.api.version}</version>
 			<scope>provided</scope>
-		</dependency>
-		<dependency>
+		</dependency> 
+	 	<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>webservice-api</artifactId>
 			<version>${cytoscape.api.version}</version>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
+	 	<dependency>
     		<groupId>org.cytoscape</groupId>
     		<artifactId>io-api</artifactId>
     		<version>${cytoscape.api.version}</version>
 		<scope>provided</scope>
-		</dependency>
-		 <dependency>
+		</dependency> 
+	 	 <dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>swing-util-api</artifactId>
 			<version>${cytoscape.api.version}</version>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
+ 		<dependency>
     		<groupId>org.cytoscape</groupId>
     		<artifactId>swing-app-api</artifactId>
     	<version>${cytoscape.api.version}</version>
 		<scope>provided</scope>
-		</dependency>
-		<dependency>
+		</dependency>  
+ 		<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>app-api</artifactId>
 			<version>${cytoscape.api.version}</version>
@@ -206,19 +205,51 @@
 			<artifactId>presentation-api</artifactId>
 			<version>${cytoscape.api.version}</version>
 			<scope>provided</scope>
-		</dependency>
-		<dependency>
+		</dependency> 
+ 		<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>vizmap-api</artifactId>
 			<version>${cytoscape.api.version}</version>
 			<scope>provided</scope>
-		</dependency>
+		</dependency> 
 		<dependency>
     		<groupId>org.cytoscape</groupId>
     		<artifactId>work-api</artifactId>
     		<version>${cytoscape.api.version}</version>
 		<scope>provided</scope>
 		</dependency>
+         <dependency>
+                 <groupId>org.cytoscape</groupId>
+                 <artifactId>viewmodel-api</artifactId>
+                 <version>${cytoscape.api.version}</version>
+                 <scope>provided</scope>
+         </dependency>
+         <dependency>
+                 <groupId>org.cytoscape</groupId>
+                 <artifactId>application-api</artifactId>
+                 <version>${cytoscape.api.version}</version>
+                 <scope>provided</scope>
+         </dependency>
+         <dependency>
+                 <groupId>org.cytoscape</groupId>
+                 <artifactId>model-api</artifactId>
+                 <version>${cytoscape.api.version}</version>
+                 <scope>provided</scope>
+         </dependency>
+         <dependency>
+                 <groupId>org.cytoscape</groupId>
+                 <artifactId>event-api</artifactId>
+                 <version>${cytoscape.api.version}</version>
+                 <scope>provided</scope>
+         </dependency>
+         <dependency>
+                 <groupId>org.cytoscape</groupId>
+                 <artifactId>work-swing-api</artifactId>
+                 <version>${cytoscape.api.version}</version>
+                 <scope>provided</scope>
+         </dependency> 
+
+
 
 		<!-- Logging -->
 		<dependency>

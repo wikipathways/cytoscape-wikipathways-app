@@ -1,4 +1,4 @@
-package org.wikipathways.cytoscapeapp.internal.io;
+package org.wikipathways.cytoscapeapp;
 
 import java.util.Map;
 import java.util.HashMap;

@@ -3,6 +3,7 @@ package org.wikipathways.cytoscapeapp.internal.guiclient;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -10,11 +11,11 @@ import java.awt.GridBagLayout;
 import java.awt.Paint;
 import java.awt.RenderingHints;
 import java.awt.Stroke;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.RoundRectangle2D;
@@ -32,8 +33,10 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRootPane;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
@@ -83,7 +86,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
   final String PATHWAY_IMG = getClass().getResource("/pathway.png").toString();
   final String NETWORK_IMG = getClass().getResource("/network.png").toString();
 
-  final TaskManager taskMgr;
+  final TaskManager<?, ?> taskMgr;
   final WPClient client;
   final OpenBrowser openBrowser;
   final GpmlReaderFactory gpmlReaderFactory;
@@ -91,9 +94,10 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
   final JTextField searchField = new JTextField();
   final JButton searchButton = new JButton(new ImageIcon(getClass().getResource("/search-icon.png")));
   final JCheckBox speciesCheckBox = new JCheckBox("Only: ");
-  final JComboBox speciesComboBox = new JComboBox();
+  final JComboBox<String> speciesComboBox = new JComboBox<String>();
   final PathwayRefsTableModel tableModel = new PathwayRefsTableModel();
   final JTable resultsTable = new JTable(tableModel);
+  public JTable getResultsTable()		{ return resultsTable;	}
   final JLabel noResultsLabel = new JLabel();
 //  final SplitButton importButton = new SplitButton("Import as Pathway");
   final JButton importPathwayButton = new JButton("Import as Pathway");
@@ -107,7 +111,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
 //  final CheckMarkMenuItem networkMenuItem = new CheckMarkMenuItem("Network", NETWORK_IMG);
 
   public WPCyGUIClient(
-      final TaskManager taskMgr,
+      final TaskManager<?, ?> taskMgr,
       final WPClient client,
       final OpenBrowser openBrowser,
       final GpmlReaderFactory gpmlReaderFactory) {
@@ -131,8 +135,6 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
 
     resultsTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION); 
     resultsTable.getSelectionModel().addListSelectionListener(new SharedListSelectionHandler());
-    
-
     resultsTable.requestFocusInWindow();
     
     resultsTable.addMouseListener(new MouseAdapter() {
@@ -155,7 +157,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
     final JPanel resultsPanel = newResultsPanel();
 
     super.gui = new JPanel(new GridBagLayout());
-    EasyGBC c = new EasyGBC();
+    EasyGridBagConstraints c = new EasyGridBagConstraints();
     super.gui.add(searchPanel, c.expandHoriz());
     super.gui.add(resultsPanel, c.down().expandBoth().insets(0, 10, 10, 10));
 
@@ -176,7 +178,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
       }
   }
   private JPanel newResultsPanel() {
-    final EasyGBC c = new EasyGBC();
+    final EasyGridBagConstraints c = new EasyGridBagConstraints();
 //
 //    pathwayMenuItem.addActionListener(new ActionListener() {
 //      public void actionPerformed(ActionEvent e) {
@@ -268,7 +270,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
 
     final JPanel searchBar = new JPanel(new GridBagLayout());
     searchBar.setBorder(new SearchBarBorder());
-    final EasyGBC e = new EasyGBC();
+    final EasyGridBagConstraints e = new EasyGridBagConstraints();
     searchBar.add(searchField, e.expandHoriz().insets(6, 12, 6, 0));
     searchBar.add(searchButton, e.noExpand().right().insets(6, 8, 6, 8));
 
@@ -278,7 +280,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
   private JPanel newSearchPanel() {
     final JPanel searchBar = newSearchBar();
     final JPanel searchPanel = new JPanel(new GridBagLayout());
-    EasyGBC c = new EasyGBC();
+    EasyGridBagConstraints c = new EasyGridBagConstraints();
     searchPanel.add(searchBar, c.expandHoriz().insets(0, 10, 5, 10));
     searchPanel.add(speciesCheckBox, c.noExpand().right().insets(0, 0, 5, 0));
     searchPanel.add(speciesComboBox, c.right().insets(0, 0, 5, 10));
@@ -308,15 +310,19 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
         getPathwayFromId(query);
       } else {
         final String species = speciesCheckBox.isSelected() ? speciesComboBox.getSelectedItem().toString() : null;
-        performSearch(query, species);
+  	  System.out.println("performSearch");
+       performSearch(query, species);
       }
     }
   }
 
-  void setPathwaysInResultsTable(final List<WPPathway> pathways) {
-    tableModel.setPathwayRefs(pathways);
+  public void setPathwaysInResultsTable(final List<WPPathway> pathways) {
+	  System.out.println("========  ++++++++++");
+	  System.out.println("setPathwaysInResultsTable in WPCyGUIClient");
+
+	  tableModel.setPathwayRefs(pathways);
     resultsTable.getColumnModel().getColumn(2).setMaxWidth(180);
-    if (pathways == null || pathways.size() == 0) {
+   if (pathways == null || pathways.size() == 0) {
 //        importPathwayButton.setEnabled(false);
 //        importNetworkButton.setEnabled(false);
       openUrlButton.setEnabled(false);
@@ -331,16 +337,19 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
     	resultsTable.setRowSelectionInterval(0, 0);
     	if (previewButton.isSelected()) 
     		updatePreview();
+    
     }
   }
 
   void performSearch(final String query, final String species) {
 //    searchField.setEnabled(false);
 //    searchButton.setEnabled(false);
+  	  System.out.println("About to performSearch");
 
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
-        final ResultTask<List<WPPathway>> searchTask = client.newFreeTextSearchTask(query, species);
+      	  System.out.println("performingSearch");
+     final ResultTask<List<WPPathway>> searchTask = client.newFreeTextSearchTask(query, species);
         taskMgr.execute(new TaskIterator(searchTask, new AbstractTask() {
           public void run(final TaskMonitor monitor) {
             final List<WPPathway> results = searchTask.get();
@@ -385,6 +394,20 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
     });
   }
 
+  //----------------------------------------------------------------------
+  public void bringToFront() {
+    Container parent = gui.getParent();
+    while (parent != null & !(parent instanceof JRootPane))
+    	parent = parent.getParent();
+    if (parent instanceof JRootPane)
+    {
+    	Container contain = ((JRootPane)parent).getParent();
+    	if (contain instanceof JFrame)
+    	parent.setVisible(true);
+    	((JFrame) parent).toFront();
+    }
+    else System.err.println("Parent not found");
+  }
   //----------------------------------------------------------------------
   void openPreview() {
     resultsPreviewPane.setEnabled(true);

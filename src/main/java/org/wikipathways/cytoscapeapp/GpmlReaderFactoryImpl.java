@@ -1,4 +1,4 @@
-package org.wikipathways.cytoscapeapp.internal.io;
+package org.wikipathways.cytoscapeapp;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -14,6 +14,7 @@ import org.cytoscape.model.CyNetworkFactory;
 import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.model.subnetwork.CyRootNetwork;
 import org.cytoscape.model.subnetwork.CySubNetwork;
+import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.session.CyNetworkNaming;
 import org.cytoscape.task.NetworkTaskFactory;
 import org.cytoscape.view.layout.CyLayoutAlgorithm;
@@ -21,57 +22,61 @@ import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.CyNetworkViewFactory;
 import org.cytoscape.view.model.CyNetworkViewManager;
+import org.cytoscape.view.presentation.annotations.AnnotationFactory;
+import org.cytoscape.view.presentation.annotations.AnnotationManager;
+import org.cytoscape.view.presentation.annotations.ArrowAnnotation;
+import org.cytoscape.view.presentation.annotations.ShapeAnnotation;
+import org.cytoscape.view.presentation.annotations.TextAnnotation;
+import org.cytoscape.view.vizmap.VisualMappingFunctionFactory;
+import org.cytoscape.view.vizmap.VisualMappingManager;
+import org.cytoscape.view.vizmap.VisualStyleFactory;
 import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.ObservableTask;
 import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskMonitor;
 import org.pathvisio.core.model.Pathway;
-import org.wikipathways.cytoscapeapp.GpmlConversionMethod;
-import org.wikipathways.cytoscapeapp.GpmlReaderFactory;
-import org.wikipathways.cytoscapeapp.internal.WPManager;
+import org.wikipathways.cytoscapeapp.internal.io.GpmlVizStyle;
 
 public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
 
-	  final WPManager manager;
-	  final CyEventHelper eventHelper;
-  final CyNetworkFactory netFactory;
-  final CyNetworkManager netMgr;
-  final CyNetworkNaming netNaming;
-  final CyNetworkViewFactory netViewFactory;
-  final CyNetworkViewManager netViewMgr;
-  final CyLayoutAlgorithmManager layoutMgr;
-  final NetworkTaskFactory showLODTF;
-  final Annots annots;
-  final GpmlVizStyle vizStyle;
+	private WPManager manager;
+	private CyEventHelper eventHelper;
+	private CyNetworkFactory netFactory;
+	private CyNetworkManager netMgr;
+	private CyNetworkNaming netNaming;
+	private CyNetworkViewFactory netViewFactory;
+	private CyNetworkViewManager netViewMgr;
+	final CyLayoutAlgorithmManager layoutMgr;
+	private NetworkTaskFactory showLODTF;
+	private Annots annots;
+	private GpmlVizStyle vizStyle;
 
   final Map<CyNetwork,GpmlConversionMethod> conversionMethods = new HashMap<CyNetwork,GpmlConversionMethod>();
   final Map<CyNetwork,List<DelayedVizProp>> pendingVizProps = new HashMap<CyNetwork,List<DelayedVizProp>>();
 
-  public GpmlReaderFactoryImpl(
-	  final WPManager mgr,
-	  final CyEventHelper eventHelper,
-      final CyNetworkFactory netFactory,
-      final CyNetworkManager netMgr,
-      final CyNetworkNaming netNaming,
-      final CyNetworkViewFactory netViewFactory,
-      final CyNetworkViewManager netViewMgr,
-      final CyLayoutAlgorithmManager layoutMgr,
-      final NetworkTaskFactory showLODTF,
-      final Annots annots,
-      final GpmlVizStyle vizStyle
-    ) {
-	    this.manager = mgr;
-	    this.eventHelper = eventHelper;
-    this.netFactory = netFactory;
-    this.netMgr = netMgr;
-    this.netNaming = netNaming;
-    this.netViewFactory = netViewFactory;
-    this.netViewMgr = netViewMgr;
-    this.layoutMgr = layoutMgr;
-    this.showLODTF = showLODTF;
-    this.annots = annots;
-    this.vizStyle = vizStyle;
-  }
+  public GpmlReaderFactoryImpl(CyServiceRegistrar registrar)
+     {
+	  eventHelper = registrar.getService(CyEventHelper.class);
+      netMgr =  registrar.getService(CyNetworkManager.class);
+      netNaming = registrar.getService(CyNetworkNaming.class);
+      netFactory = registrar.getService(CyNetworkFactory.class);
+      netViewMgr = registrar.getService(CyNetworkViewManager.class);
+      netViewFactory = registrar.getService(CyNetworkViewFactory.class);
+      layoutMgr = registrar.getService(CyLayoutAlgorithmManager.class);
+      showLODTF = registrar.getService(NetworkTaskFactory.class);
+      annots = new Annots(
+    		  registrar.getService(AnnotationManager.class),
+              (AnnotationFactory<ArrowAnnotation>) registrar.getService(AnnotationFactory.class,"(type=ArrowAnnotation.class)"),
+              (AnnotationFactory<ShapeAnnotation>)registrar.getService( AnnotationFactory.class,"(type=ShapeAnnotation.class)"),
+              (AnnotationFactory<TextAnnotation>) registrar.getService( AnnotationFactory.class,"(type=TextAnnotation.class)"));
+      vizStyle = new GpmlVizStyle(
+    		  registrar.getService( VisualStyleFactory.class),
+    		  registrar.getService( VisualMappingManager.class),
+    		  registrar.getService( VisualMappingFunctionFactory.class, "(mapping.type=continuous)"),
+              registrar.getService( VisualMappingFunctionFactory.class, "(mapping.type=discrete)"),
+              registrar.getService( VisualMappingFunctionFactory.class, "(mapping.type=passthrough)"));
+      manager = new WPManager(registrar,annots );
+      }
 
   public TaskIterator createReader( final Reader gpmlContents, final CyNetwork network, 
 		  final GpmlConversionMethod conversionMethod, final boolean setNetworkName) {
@@ -152,7 +157,11 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
       try {
         pathway.readFromXml(gpmlContents, true);
       } catch (Exception e) { throw new Exception("Pathway not available -- invalid GPML", e);  }
-
+//      char buf[] = new char[1000000];
+//      gpmlContents.reset();
+//      int len = gpmlContents.read(buf);
+//      String buffer = String.copyValueOf(buf);
+//      System.out.println(buffer);
       if (setNetworkName) {
         final String name = pathway.getMappInfo().getMapInfoName();
         final String nonConflictingName = netNaming.getSuggestedNetworkTitle(name);

@@ -7,7 +7,7 @@ import java.util.HashMap;
 /**
  * Uses the  builder pattern for filling fields of a {@link GridBagConstraints}.
  */
-class EasyGBC extends GridBagConstraints {
+class EasyGridBagConstraints extends GridBagConstraints {
 	static final Map<String,Integer> anchors = new HashMap<String,Integer>();
 	static {
 		anchors.put("north",     NORTH);
@@ -18,11 +18,11 @@ class EasyGBC extends GridBagConstraints {
 		anchors.put("east",      EAST);
 	}
 	
-	public EasyGBC() {
+	public EasyGridBagConstraints() {
 		reset();
 	}
 
-	public EasyGBC reset() {
+	public EasyGridBagConstraints reset() {
 		gridx = 0;			gridy = 0;
 		gridwidth = 1;		gridheight = 1;
 		weightx = 0.0;		weighty = 0.0;
@@ -31,71 +31,71 @@ class EasyGBC extends GridBagConstraints {
 		return this;
 	}
 
-	public EasyGBC noExpand() {
+	public EasyGridBagConstraints noExpand() {
 		weightx = 0.0;
 		weighty = 0.0;
 		fill = GridBagConstraints.NONE;
 		return this;
 	}
 
-	public EasyGBC expandHoriz() {
+	public EasyGridBagConstraints expandHoriz() {
 		weightx = 1.0;
 		weighty = 0.0;
 		fill = GridBagConstraints.HORIZONTAL;
 		return this;
 	}
 
-	public EasyGBC expandBoth() {
+	public EasyGridBagConstraints expandBoth() {
 		return expandBoth(1.0, 1.0);
 	}
 
-	public EasyGBC expandBoth(double wx, double wy) {
+	public EasyGridBagConstraints expandBoth(double wx, double wy) {
 		weightx = wx;
 		weighty = wy;
 		fill = GridBagConstraints.BOTH;
 		return this;
 	}
 
-	public EasyGBC right() {
+	public EasyGridBagConstraints right() {
 		gridx++;
 		return this;
 	}
 
-	public EasyGBC down() {
+	public EasyGridBagConstraints down() {
 		gridx = 0;
 		gridy++;
 		return this;
 	}
 
-	public EasyGBC position(int x, int y) {
+	public EasyGridBagConstraints position(int x, int y) {
 		gridx = x;
 		gridy = y;
 		return this;
 	}
 
-	public EasyGBC noSpan() {
+	public EasyGridBagConstraints noSpan() {
 		gridwidth = 1;
 		gridheight = 1;
 		return this;
 	}
 
-	public EasyGBC spanHoriz(int n) {
+	public EasyGridBagConstraints spanHoriz(int n) {
 		gridwidth = n;
 		gridheight = 1;
 		return this;
 	}
 
-	public EasyGBC insets(int t, int l, int b, int r) {
+	public EasyGridBagConstraints insets(int t, int l, int b, int r) {
 		insets.set(t, l, b, r);
 		return this;
 	}
 
-	public EasyGBC noInsets() {
+	public EasyGridBagConstraints noInsets() {
 		insets.set(0, 0, 0, 0);
 		return this;
 	}
 
-	public EasyGBC anchor(String str) {
+	public EasyGridBagConstraints anchor(String str) {
 		anchor = anchors.get(str);
 		return this;
 	}

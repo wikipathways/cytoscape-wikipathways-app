@@ -52,11 +52,8 @@ public class GpmlCyReaderTask extends AbstractTask implements CyNetworkReader {
     @Tunable(description="Import as:", groups={"WikiPathways"})
     public ListSingleSelection<String> importMethod = new ListSingleSelection<String>(PATHWAY_DESC, NETWORK_DESC);
 
-	public GpmlCyReaderTask(
-            final GpmlReaderFactory gpmlReaderFactory,
-            final InputStream input,
-            final String fileName) {
-        this.gpmlReaderFactory = gpmlReaderFactory;
+	public GpmlCyReaderTask( final GpmlReaderFactory factory, final InputStream input, final String fileName) {
+        gpmlReaderFactory = factory;
         this.input = input;
         this.fileName = fileName;
 	}
@@ -66,10 +63,7 @@ public class GpmlCyReaderTask extends AbstractTask implements CyNetworkReader {
         monitor.setTitle("Read GPML file " + fileName);
 		monitor.setProgress(-1.0);
         final Reader reader = new InputStreamReader(input);
-        final GpmlConversionMethod method
-            = importMethod.getSelectedValue().equals(PATHWAY_DESC)
-            ? GpmlConversionMethod.PATHWAY
-            : GpmlConversionMethod.NETWORK;
+        final GpmlConversionMethod method = importMethod.getSelectedValue().equals(PATHWAY_DESC)  ? GpmlConversionMethod.PATHWAY  : GpmlConversionMethod.NETWORK;
         super.insertTasksAfterCurrentTask(gpmlReaderFactory.createReaderAndViewBuilder(reader, method));
     }
 
@@ -81,11 +75,7 @@ public class GpmlCyReaderTask extends AbstractTask implements CyNetworkReader {
         }
     }
 
-    public CyNetworkView buildCyNetworkView(final CyNetwork network) {
-        return null;
-    }
+    public CyNetworkView buildCyNetworkView(final CyNetwork network) {        return null;    }
 
-    public CyNetwork[] getNetworks() {
-        return new CyNetwork[0];
-    }
+    public CyNetwork[] getNetworks() {        return new CyNetwork[0];    }
 }

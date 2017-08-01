@@ -226,19 +226,23 @@ public class WPClientRESTImpl implements WPClient {
 	public ResultTask<List<WPPathway>> newFreeTextSearchTask(final String query, final String species) {
 		return new ReqTask<List<WPPathway>>() {
 			protected List<WPPathway> checkedRun(final TaskMonitor monitor) throws Exception {
+				System.out.println("Search WikiPathways for \'" + query + "\'");
 				monitor.setTitle("Search WikiPathways for \'" + query + "\'");
-				final Document doc = xmlGet(BASE_URL + "findPathwaysByText", "query", query.toLowerCase(), "species",
-						species == null ? "" : species); // AST
+				final Document doc = xmlGet(BASE_URL + "findPathwaysByText", "query", query.toLowerCase(), "species", species == null ? "" : species); // AST
 				if (super.cancelled)
 					return null;
 				final Node responseNode = doc.getFirstChild();
 				final NodeList resultNodes = responseNode.getChildNodes();
 				final List<WPPathway> result = new ArrayList<WPPathway>();
-				for (int i = 0; i < resultNodes.getLength(); i++) {
+				int len = resultNodes.getLength();
+				for (int i = 0; i < len; i++) {
 					final Node resultNode = resultNodes.item(i);
 					final WPPathway pathway = parsePathwayInfo(resultNode);
 					if (pathway != null)
+					{
 						result.add(pathway);
+						System.out.println(pathway.getId() + " :  " + pathway.getName() + "  @  " + pathway.getSpecies());
+					}
 				}
 				return result;
 			}

@@ -1,4 +1,4 @@
-package org.wikipathways.cytoscapeapp.internal.cmd;
+package org.wikipathways.cytoscapeapp.impl.search;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -9,16 +9,15 @@ import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
+public class CustomOptionsTaskFactory extends AbstractNetSearchTestTaskFactory {
 
-public class WPNetworkSearchTaskFactory extends AbstractNetSearchTaskFactory {
-
-	private final ImageIcon ICON = new ImageIcon(getClass().getClassLoader().getResource("images/star-96.png"));
+	private final ImageIcon ICON = new ImageIcon(getClass().getClassLoader().getResource("logo_150.png"));
 	
-	public WPNetworkSearchTaskFactory() {
+	public CustomOptionsTaskFactory() {
 		super(
 				"netsearchtest.test-b",
-				"Custom Options UI",
-				"Wikipathways"
+				"B. Custom Options UI",
+				"Provides its own Options UI component"
 		);
 	}
 	
@@ -29,7 +28,7 @@ public class WPNetworkSearchTaskFactory extends AbstractNetSearchTaskFactory {
 	
 //	@Override
 	public JComponent getOptionsComponent() {
-		JCheckBox cb1 = new JCheckBox("Filter by status", true);
+		JCheckBox cb1 = new JCheckBox("Lorem Ipsum Dolor", true);
 		JCheckBox cb2 = new JCheckBox("Sit Amet");
 		cb1.setForeground(Color.WHITE);
 		cb2.setForeground(Color.WHITE);
