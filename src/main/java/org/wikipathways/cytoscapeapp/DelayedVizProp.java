@@ -39,8 +39,8 @@ import org.cytoscape.view.presentation.property.values.HandleFactory;
  * How do we get around this problem? While we're reading GPML, we create the network topology
  * and store our desired visual style in DelayedVizProp instances.
  * After we finish reading GPML, we ensure that view objects have been created for
- * all our new nodes and edges (via CyEventHelper.flushPayloadEvents). Finally we apply
- * the visual style stored in the DelayedVizProp objects.
+ * all our new nodes and edges (via CyEventHelper.flushPayloadEvents). 
+ * Finally we apply the visual style stored in the DelayedVizProp objects.
  */
 class DelayedVizProp {
   final CyIdentifiable netObj;
@@ -85,7 +85,7 @@ class DelayedVizProp {
         view = netView.getEdgeView(edge);
       }
       if (view == null) continue;
-		System.out.println("Node id: " + delayedProp.netObj.getSUID()  + " is setting " + propName + " to " + propvalue);
+//		System.out.println("Node id: " + delayedProp.netObj.getSUID()  + " is setting " + propName + " to " + propvalue);
 
       if (delayedProp.isLocked)
         view.setLockedValue(delayedProp.prop, value);
@@ -129,11 +129,18 @@ class DelayedVizProp {
 		{
 			mAnnotation = mgr.getAnnots().newShape(netView, map);
 			mAnnotation.setCustomShape(thePath);
-			View<CyNode> view = netView.getNodeView(src);
-			view.setVisualProperty(BasicVisualLexicon.NODE_BORDER_PAINT, Color.GREEN);  // DEBUG
-			view.setVisualProperty(BasicVisualLexicon.NODE_FILL_COLOR, Color.YELLOW);
+			mAnnotation.setCanvas("background");
+			
+//			View<CyNode> view = netView.getNodeView(src);
+//			view.setVisualProperty(BasicVisualLexicon.NODE_BORDER_PAINT, Color.GREEN);  // DEBUG
+//			view.setVisualProperty(BasicVisualLexicon.NODE_FILL_COLOR, Color.YELLOW);
 		}
-
+		else 
+		{
+//			mAnnotation = mgr.getAnnots().newShape(netView, map);
+//			mAnnotation.setShapeType("Rounded Rectangle");  			 // TODO  "Rounded Rectangle"
+		}
+	
 		boolean legalSize = (wid > 0 && hght > 0);
 		if (legalSize && mAnnotation != null)
 			mAnnotation.setSize(wid, hght);
@@ -162,8 +169,8 @@ class DelayedVizProp {
 		try {
 			HandleFactory handleFactory = mgr.getHandleFactory();
 //			System.out.println("handleFactory: " + handleFactory.toString());
-			CyEdge edge = (CyEdge) delayedProp.netObj;
-			if (edge != null) {
+			if (delayedProp.netObj != null) {
+				CyEdge edge = (CyEdge) delayedProp.netObj;
 				CyNode src = edge.getSource();
 				CyNode targ = edge.getTarget();
 //if (src == null || src != null) return;

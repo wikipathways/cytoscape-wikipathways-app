@@ -35,6 +35,7 @@ import org.cytoscape.view.presentation.property.values.NodeShape;
 import org.pathvisio.core.model.ConnectorRestrictions;
 import org.pathvisio.core.model.ConnectorShape;
 import org.pathvisio.core.model.GraphLink;
+import org.pathvisio.core.model.GraphLink.GraphIdContainer;
 import org.pathvisio.core.model.GroupStyle;
 import org.pathvisio.core.model.IShape;
 import org.pathvisio.core.model.LineStyle;
@@ -75,7 +76,7 @@ public class GpmlToPathway {
   final CyTable           cyNodeTbl;
   final CyTable           cyEdgeTbl;
   final WPManager         manager;
-
+  final CyNetworkView 	networkView;
   /**
    * Create a converter from the given pathway and store it in the given network.
    * Constructing this object will not start the conversion and will not modify
@@ -97,6 +98,7 @@ public class GpmlToPathway {
 		this.cyAnnots = cyAnnots;
 		this.pvPathway = pvPathway;
 		this.cyNet = cyNet;
+		networkView = getNetworkView(cyNet);
 		this.cyNodeTbl = cyNet.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS);
 		this.cyEdgeTbl = cyNet.getTable(CyEdge.class, CyNetwork.DEFAULT_ATTRS);
 //		System.out.println("GpmlToPathway");
@@ -716,8 +718,8 @@ public class GpmlToPathway {
           String s = props[i].prop.getDisplayName();
           Object  val = props[i].value;
           String v = (val == null) ? " " : val.toString();
-     if (verbose)      
-    	 System.out.println("storing: " + s + " = " + v + " in " + props[i].netObj.getSUID());
+//     if (verbose)      
+//    	 System.out.println("storing: " + s + " = " + v + " in " + props[i].netObj.getSUID());
         cyDelayedVizProps.add(props[i]);
       }
     }
@@ -786,11 +788,9 @@ public class GpmlToPathway {
       BasicVizPropStore.NODE_Y,
       BasicVizPropStore.NODE_Z
     );
-    if (ZERO.equals(BasicExtracter.NODE_LINE_THICKNESS.extract(pvDataNode))) {
-      store(cyNode, pvDataNode,
-        BasicVizPropStore.NODE_BORDER_THICKNESS
-      );
-    }
+    if (ZERO.equals(BasicExtracter.NODE_LINE_THICKNESS.extract(pvDataNode))) 			// already done above!
+      store(cyNode, pvDataNode,  BasicVizPropStore.NODE_BORDER_THICKNESS );
+    
   }
 
   /*
@@ -821,7 +821,7 @@ public class GpmlToPathway {
       BasicVizPropStore.NODE_HEIGHT,
       BasicVizPropStore.NODE_FILL_COLOR,  BasicVizPropStore.NODE_COLOR,
       BasicVizPropStore.NODE_LABEL_FONT, BasicVizPropStore.NODE_LABEL_SIZE,
-//      BasicVizPropStore.NODE_ALWAYS_TRANSPARENT,
+      BasicVizPropStore.NODE_ALWAYS_TRANSPARENT,
       BasicVizPropStore.NODE_BORDER_STYLE,  
       BasicVizPropStore.NODE_BORDER_THICKNESS, 
       BasicVizPropStore.NODE_SHAPE, 
@@ -1027,7 +1027,7 @@ public class GpmlToPathway {
   }
 
   private void assignAnchorVizStyle(final CyNode node, final Point2D position) {
-    assignAnchorVizStyle(node, position, Color.RED);
+    assignAnchorVizStyle(node, position, Color.WHITE);
   }
 
 	private void convertAnchorsInLine(final PathwayElement pvElem) {
@@ -1038,6 +1038,7 @@ public class GpmlToPathway {
 			System.out.println("\nAnchor at " + cyNode.getSUID() + "  --------");
 			pvToCyNodes.put(pvAnchor, cyNode);
 			assignAnchorVizStyle(cyNode, position, pvLine.getColor());
+			System.out.println("--------");
 		}
 	 }
 
@@ -1070,16 +1071,22 @@ public class GpmlToPathway {
     final MLine pvLine = (MLine) pvElem;
     final String pvStartRef = pvLine.getMStart().getGraphRef();
     final String pvEndRef = pvLine.getMEnd().getGraphRef();
-//    System.out.println("convertLine");
+    System.out.println("convertLine");
 
     Point2D startPt = pvLine.getStartPoint();
     Point2D endPt = pvLine.getEndPoint();
-    CyNode cyStartNode = pvToCyNodes.get(pvPathway.getGraphIdContainer(pvStartRef));
+    GraphIdContainer startref = pvPathway.getGraphIdContainer(pvStartRef);
+    CyNode cyStartNode = pvToCyNodes.get(startref);
     if (cyStartNode == null) {
       cyStartNode = cyNet.addNode();
+      String nodeName = "" + cyStartNode.getSUID();
+      View<CyNode> view = networkView.getNodeView(cyStartNode);
+//      view.getVisualProperty();
+//      view.getModel();
       assignAnchorVizStyle(cyStartNode, startPt);
     }
-    CyNode cyEndNode = pvToCyNodes.get(pvPathway.getGraphIdContainer(pvEndRef));
+    GraphIdContainer endref = pvPathway.getGraphIdContainer(pvEndRef);
+    CyNode cyEndNode = pvToCyNodes.get(endref);
     if (cyEndNode == null) {
       cyEndNode = cyNet.addNode();
       assignAnchorVizStyle(cyEndNode, endPt);
@@ -1131,19 +1138,21 @@ public class GpmlToPathway {
   }
   
   
-  private void storeEdgeBend(final CyEdge cyEdge, final PathwayElement pvLine) {
-		CyNetworkView networkView = getNetworkView(cyNet);
-	  String connectorType = pvLine.getConnectorType().toString();
-	  org.pathvisio.core.model.LineType endLineType = pvLine.getEndLineType();
-	  org.pathvisio.core.model.LineType startLineType = pvLine.getStartLineType();
-	  if (verbose) System.out.println("pvLine: " + connectorType + " of types " + startLineType.getMappName() + " / " + endLineType.getName());
+	private void storeEdgeBend(final CyEdge cyEdge, final PathwayElement pvLine) {
+		String connectorType = pvLine.getConnectorType().toString();
+		org.pathvisio.core.model.LineType endLineType = pvLine.getEndLineType();
+		org.pathvisio.core.model.LineType startLineType = pvLine.getStartLineType();
+		if (verbose)
+			System.out.println("pvLine: " + connectorType + " of types " + startLineType.getMappName() + " / "
+					+ endLineType.getName());
 
+		makeSegments(pvLine);
 		Bend bend = EdgeBendVisualProperty.DEFAULT_EDGE_BEND;
-		if ("Curved".equals(connectorType)) 
-			bend = makeCurvedEdgeBend(networkView, cyEdge, pvLine.getMStart(), pvLine.getMEnd());
-		else if ("Elbow".equals(connectorType)) 
+		if ("Curved".equals(connectorType))
+			bend = makeCurvedEdgeBend(networkView, cyEdge, pvLine);
+		else if ("Elbow".equals(connectorType))
 			bend = makeElbowEdgeBend(networkView, cyEdge, makeSegments(pvLine));
-		
+
 		DelayedVizProp prop = new DelayedVizProp(cyEdge, BasicVisualLexicon.EDGE_BEND, bend, true);
 		cyDelayedVizProps.add(prop);
 	}
@@ -1207,24 +1216,30 @@ if (verbose)
 	String[] sides = {  "North", "East", "South", "West" };
 static boolean verbose = true;
 //--------------------------------------------------------------------
-	private Bend makeCurvedEdgeBend(CyNetworkView networkView, CyEdge edge, MPoint start, MPoint end) {
-		if (verbose)		System.out.println("makeCurvedEdgeBend"); 
+	private Bend makeCurvedEdgeBend(CyNetworkView networkView, CyEdge edge, PathwayElement pvLine) {
+//		if (verbose)		System.out.println("makeCurvedEdgeBend"); 
 	    BendFactory factory = manager.getBendFactory();		
 		View<CyEdge> ev = networkView.getEdgeView(edge);
 	    Bend bend = factory.createBend();
 	    HandleFactory facto = manager.getHandleFactory();
-	    
-	    
-//	    for (Segment seg : segments)
-//	    {
-//	    	if (verbose)
-//	    	{
-//	    		System.out.print("Segment goes from: (" + (int)(seg.start.getX()) + ", " +  (int)seg.start.getY() + ")");
-//	    		System.out.println("to  : " + (int)(seg.end.getX()) + ", " +  (int)seg.end.getY() + ")");
-//	    	}
+	    MPoint start = pvLine.getMStart();
+	    MPoint end = pvLine.getMEnd();
+		if (verbose)		    System.out.println("makeCurvedEdgeBend start at " + (int) start.getX() + ", " + (int) start.getY());
+ 
+	    for (Segment seg : segments)
+	    {
+	    	if (verbose)
+	    	{
+	    		System.out.print("Segment goes from: (" + (int)(seg.start.getX()) + ", " +  (int)seg.start.getY() + ")");
+	    		System.out.println(" to  : " + (int)(seg.end.getX()) + ", " +  (int)seg.end.getY() + ")");
+	    	}
 			
-		  double x = (end.getX() + start.getX() ) / 2. + 10;		// TODO x shift to make slight bend
-		  double y = (end.getY() + start.getY() ) / 2.;
+//			  double x = (end.getX() + start.getX() ) / 2.;		// TODO  + 10     x shift to make slight bend
+//			  double y = (end.getY() + start.getY() ) / 2.;
+			  double x = seg.end.getX();		// TODO  + 10     x shift to make slight bend
+			  double y = seg.end.getY();
+			  x = (seg.end.getX() + seg.start.getX() ) / 2;		// TODO x shift to make slight bend
+			   y = (seg.end.getY() + seg.start.getY() ) / 2.; 
 //			double startRelX = mStart.getRelX();
 //			double startRelY = mStart.getRelY();
 //			double endRelX = mEnd.getRelX();
@@ -1233,8 +1248,9 @@ static boolean verbose = true;
 //		  	Point2D endPt = mEnd.toPoint2D();
 		  	
 		  Handle h = facto.createHandle(networkView, ev,  x, y);
+System.out.println("adding handle at " + (int) x + ", " + (int) y);
 		  bend.getAllHandles().add(h);
-//	    }
+	    }
 		return bend;
 	}
 
@@ -1404,7 +1420,7 @@ static boolean verbose = true;
 		public Point2D getMStart() { return start;	}
 		public Point2D getMCenter()	{ return new Point2D.Double((end.getX() + start.getX()) / 2., (end.getY() + start.getY()) / 2.); }
 		double length() { return distance(end, start);	}
-		public String toString() { return getMStart().toString() +  " -> " + getMEnd().toString(); }
+		public String toString() { return "(" + (int) getMStart().getX() + ", " +  (int) getMStart().getY() +  " -> " + (int) getMEnd().getX() + ", " +  (int) getMStart().getY() + ")"; }
 	}
 	
 	protected Segment createStraightSegment(Point2D start, Point2D end, int axis) {
