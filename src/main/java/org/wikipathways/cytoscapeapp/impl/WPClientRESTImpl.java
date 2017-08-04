@@ -228,7 +228,10 @@ public class WPClientRESTImpl implements WPClient {
 			protected List<WPPathway> checkedRun(final TaskMonitor monitor) throws Exception {
 				System.out.println("Search WikiPathways for \'" + query + "\'");
 				monitor.setTitle("Search WikiPathways for \'" + query + "\'");
-				final Document doc = xmlGet(BASE_URL + "findPathwaysByText", "query", query.toLowerCase(), "species", species == null ? "" : species); // AST
+				String lower = query.toLowerCase();
+				String fix1 = lower.replace(" and ", " AND ");
+				String fixed = fix1.replace(" or ", " OR ");
+				final Document doc = xmlGet(BASE_URL + "findPathwaysByText", "query", fixed, "species", species == null ? "" : species); // AST
 				if (super.cancelled)
 					return null;
 				final Node responseNode = doc.getFirstChild();

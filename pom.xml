@@ -284,12 +284,19 @@
       		<version>2.0.0</version> 
       		<optional>true</optional>
     	</dependency> 
-    	<dependency> 
-      		<groupId>derby</groupId> 
+   <!--  	<dependency> 
+      		<groupId>derby</groupId> 		// https://github.com/wikipathways/cytoscape-wikipathways-app/issues/25
       		<artifactId>derby</artifactId> 
       		<version>10.4</version> 
       		<optional>true</optional>
     	</dependency> 
+ -->    	
+ 	 <dependency> 
+        <groupId>org.apache.derby</groupId>
+        <artifactId>derby</artifactId>
+        <version>10.4.2.0</version>
+        <optional>true</optional>
+    </dependency> 
      <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient</artifactId>

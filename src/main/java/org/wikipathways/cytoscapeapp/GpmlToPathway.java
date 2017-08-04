@@ -510,7 +510,7 @@ public class GpmlToPathway {
 
   static Map<String,ArrowShape> PV_ARROW_MAP = new HashMap<String,ArrowShape>();
   static {
-    PV_ARROW_MAP.put("Arrow",              ArrowShapeVisualProperty.ARROW);			// TODO 
+    PV_ARROW_MAP.put("Arrow",              ArrowShapeVisualProperty.DELTA);	
     PV_ARROW_MAP.put("Line",               ArrowShapeVisualProperty.NONE);
     PV_ARROW_MAP.put("TBar",               ArrowShapeVisualProperty.T);
     PV_ARROW_MAP.put("mim-binding",        ArrowShapeVisualProperty.ARROW);
