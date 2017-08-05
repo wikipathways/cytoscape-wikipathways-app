@@ -75,7 +75,7 @@ public class WPNetworkSearchTaskFactory extends AbstractNetworkSearchTaskFactory
 
 		if (terms == null) 
 			throw new NullPointerException("Query string is null.");
-		System.out.println("createTaskIterator: " + terms);
+//		System.out.println("createTaskIterator: " + terms);
 		WPSearchCmdTaskFactory factory = new WPSearchCmdTaskFactory(client, serviceRegistrar, terms, guiClient);
 		return factory.createTaskIterator();
 	}

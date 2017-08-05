@@ -99,7 +99,7 @@ class DelayedVizProp {
 		final Map<String,String> map = new HashMap<String,String>();
 		CyNode src = (CyNode) delayedProp.netObj;
 		List<DelayedVizProp> relatedProps = getPropsByID(delayedProps, src.getSUID());
-		map.put("canvas", "background");
+//		map.put("canvas", "background");
 		double wid = 0;
 		double hght = 0;
 		double x = Double.NaN;
@@ -137,13 +137,16 @@ class DelayedVizProp {
 		}
 		else 
 		{
-//			mAnnotation = mgr.getAnnots().newShape(netView, map);
-//			mAnnotation.setShapeType("Rounded Rectangle");  			 // TODO  "Rounded Rectangle"
+			mAnnotation = mgr.getAnnots().newShape(netView, map);
+			mAnnotation.setShapeType(propvalue);  		
 		}
 	
 		boolean legalSize = (wid > 0 && hght > 0);
 		if (legalSize && mAnnotation != null)
+		{	
 			mAnnotation.setSize(wid, hght);
+		
+		}
 		boolean legalXY = (!(Double.isNaN(x) || Double.isNaN(y)));
 		if (legalXY && legalSize) 
 		{

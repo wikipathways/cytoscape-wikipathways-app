@@ -27,8 +27,8 @@ import org.wikipathways.cytoscapeapp.internal.guiclient.WPCyGUIClient;
 
 public class WPSearchCmdTask extends AbstractTask {
    public String query;
-  public String species = "";
-  WPSearchCmdTaskFactory factory;
+   public String species = "";
+   WPSearchCmdTaskFactory factory;
 	final TaskManager<?,?> dialogTaskManager;
 	final	CyServiceRegistrar registrar;
 	WPCyGUIClient guiClient;

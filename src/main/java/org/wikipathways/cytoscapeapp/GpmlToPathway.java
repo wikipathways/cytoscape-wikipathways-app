@@ -514,8 +514,8 @@ public class GpmlToPathway {
     PV_ARROW_MAP.put("Line",               ArrowShapeVisualProperty.NONE);
     PV_ARROW_MAP.put("TBar",               ArrowShapeVisualProperty.T);
     PV_ARROW_MAP.put("mim-binding",        ArrowShapeVisualProperty.ARROW);
-    PV_ARROW_MAP.put("mim-conversion",     ArrowShapeVisualProperty.ARROW);
-    PV_ARROW_MAP.put("mim-modification",   ArrowShapeVisualProperty.ARROW);
+    PV_ARROW_MAP.put("mim-conversion",     ArrowShapeVisualProperty.DELTA);
+    PV_ARROW_MAP.put("mim-modification",   ArrowShapeVisualProperty.DELTA);
     PV_ARROW_MAP.put("mim-catalysis",      ArrowShapeVisualProperty.OPEN_CIRCLE);
     PV_ARROW_MAP.put("mim-inhibition",     ArrowShapeVisualProperty.T);
     PV_ARROW_MAP.put("mim-covalent-bond",  ArrowShapeVisualProperty.CROSS_DELTA);
