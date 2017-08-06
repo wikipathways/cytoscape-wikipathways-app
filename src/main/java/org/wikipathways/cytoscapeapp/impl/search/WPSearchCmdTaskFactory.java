@@ -5,21 +5,21 @@ import org.cytoscape.work.AbstractTaskFactory;
 import org.cytoscape.work.TaskIterator;
 import org.wikipathways.cytoscapeapp.WPClient;
 import org.wikipathways.cytoscapeapp.internal.cmd.WPSearchCmdTask;
-import org.wikipathways.cytoscapeapp.internal.guiclient.WPCyGUIClient;
+import org.wikipathways.cytoscapeapp.internal.guiclient.GUI;
 
 public class WPSearchCmdTaskFactory extends AbstractTaskFactory 
 {
 	final WPClient client;
 	final String query;
 	final CyServiceRegistrar registrar;
-	WPCyGUIClient guiClient;
+	GUI guiClient;
 
-  public WPSearchCmdTaskFactory(   final WPClient client, CyServiceRegistrar r, WPCyGUIClient guiClient) 
+  public WPSearchCmdTaskFactory(   final WPClient client, CyServiceRegistrar r, GUI guiClient) 
   {
 	   this(client, r, "", guiClient);
   }
   
-  public WPSearchCmdTaskFactory(WPClient client,  CyServiceRegistrar r, String terms, WPCyGUIClient guiClient) {
+  public WPSearchCmdTaskFactory(WPClient client,  CyServiceRegistrar r, String terms, GUI guiClient) {
 	    this.client = client;
 	    query = terms;
 	    registrar = r;

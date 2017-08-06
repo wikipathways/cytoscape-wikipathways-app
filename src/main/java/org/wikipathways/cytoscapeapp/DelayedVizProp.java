@@ -54,7 +54,7 @@ class DelayedVizProp {
     this.value = value;
     this.isLocked = isLocked;
   }
-	static boolean verbose = false;
+	static boolean verbose = true;
 	public String toString() {  return prop.getDisplayName() + ": " + value.toString(); }
 	public static void applyAll(final CyNetworkView netView,final Iterable<DelayedVizProp> delayedProps, WPManager mgr) 
 	{
@@ -99,7 +99,7 @@ class DelayedVizProp {
 		final Map<String,String> map = new HashMap<String,String>();
 		CyNode src = (CyNode) delayedProp.netObj;
 		List<DelayedVizProp> relatedProps = getPropsByID(delayedProps, src.getSUID());
-//		map.put("canvas", "background");
+		map.put("canvas", "background");
 		double wid = 0;
 		double hght = 0;
 		double x = Double.NaN;
@@ -137,8 +137,11 @@ class DelayedVizProp {
 		}
 		else 
 		{
+			if (mgr == null)		// SKIP
+			{
 			mAnnotation = mgr.getAnnots().newShape(netView, map);
-			mAnnotation.setShapeType(propvalue);  		
+			mAnnotation.setShapeType(propvalue);  
+			}
 		}
 	
 		boolean legalSize = (wid > 0 && hght > 0);
@@ -148,6 +151,11 @@ class DelayedVizProp {
 		
 		}
 		boolean legalXY = (!(Double.isNaN(x) || Double.isNaN(y)));
+		
+		if (verbose) System.out.println("size: "+ (int) x + ",  "+ (int)  y +  " # " + (int) wid + ",  "+ (int)  hght);
+		if (verbose) System.out.println("mAnnotation: "+ mAnnotation);
+		if (verbose) System.out.println("---> legal size: "+ legalSize + " legal pos: "+ legalXY);
+
 		if (legalXY && legalSize) 
 		{
 // System.out.println(String.format("moving annotation from : %4.1f , %4.1f", x, y));

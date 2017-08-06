@@ -9,9 +9,9 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridBagLayout;
 import java.awt.Paint;
+import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.Stroke;
-import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -33,6 +33,7 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -66,8 +67,8 @@ import org.wikipathways.cytoscapeapp.ResultTask;
 import org.wikipathways.cytoscapeapp.WPClient;
 import org.wikipathways.cytoscapeapp.WPPathway;
 
-public class WPCyGUIClient extends AbstractWebServiceGUIClient implements NetworkImportWebServiceClient, SearchWebServiceClient {
-  static final Pattern WP_ID_REGEX = Pattern.compile("WP\\d+");
+public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWebServiceClient, SearchWebServiceClient {
+  static final Pattern WP_ID_REGEX = Pattern.compile("(WP|wp)\\d+");		// AST   was: WP\\d+
   static final String APP_DESCRIPTION
     = "<html>"
     + "This REVISED app imports community-curated pathways from "
@@ -110,7 +111,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
 //  final CheckMarkMenuItem pathwayMenuItem = new CheckMarkMenuItem("Pathway", PATHWAY_IMG, true);
 //  final CheckMarkMenuItem networkMenuItem = new CheckMarkMenuItem("Network", NETWORK_IMG);
 
-  public WPCyGUIClient(
+  public GUI(
       final TaskManager<?, ?> taskMgr,
       final WPClient client,
       final OpenBrowser openBrowser,
@@ -123,10 +124,17 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
 
     speciesCheckBox.addItemListener(new ItemListener() {
       public void itemStateChanged(ItemEvent e) {
-        speciesComboBox.setEnabled(speciesCheckBox.isSelected());
+        boolean selected = speciesCheckBox.isSelected();
+        speciesComboBox.setEnabled(selected);
+        if (!selected) performSearch();			// if species is no longer specified, re-search.
       }
     });
 
+    speciesComboBox.addItemListener(new ItemListener() {
+        public void itemStateChanged(ItemEvent e) {
+            performSearch();
+          }
+        });
     speciesCheckBox.setSelected(false); speciesCheckBox.setVisible(false);
     speciesComboBox.setEnabled(false); 	speciesComboBox.setVisible(false);
     speciesComboBox.setMaximumRowCount(30);
@@ -142,16 +150,27 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
         if (e.getClickCount() == 1) {
           if (previewButton.isSelected())    updatePreview();
         } 
-        else if (e.getClickCount() == 2)     loadSelectedPathway(GpmlConversionMethod.PATHWAY);
+        else if (e.getClickCount() == 2)     
+        	{
+        	closeDialog(); 
+  	    	loadSelectedPathway(GpmlConversionMethod.PATHWAY);
+        	}
       }
     });
     importPathwayButton.setToolTipText("Import pathway annotations and labels");
     importPathwayButton.addActionListener(new ActionListener() {
-		@Override public void actionPerformed(ActionEvent e) { loadSelectedPathway(GpmlConversionMethod.PATHWAY); }
+		@Override public void actionPerformed(ActionEvent e) 
+		{
+			closeDialog();
+			loadSelectedPathway(GpmlConversionMethod.PATHWAY); }
 	});
     importNetworkButton.setToolTipText("Import nodes only");
     importNetworkButton.addActionListener(new ActionListener() {
-		@Override public void actionPerformed(ActionEvent e) { loadSelectedPathway(GpmlConversionMethod.NETWORK); }
+		@Override public void actionPerformed(ActionEvent e) 
+		{ 
+			closeDialog();
+			loadSelectedPathway(GpmlConversionMethod.NETWORK); 
+		}
 	});
     final JPanel searchPanel = newSearchPanel();
     final JPanel resultsPanel = newResultsPanel();
@@ -164,20 +183,37 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
     final ResultTask<List<String>> speciesTask = client.newSpeciesTask();
     taskMgr.execute(new TaskIterator(speciesTask, new PopulateSpecies(speciesTask)));
   }
-//
-  
+  static String speciesCache = null;
+//----------------------------------------------------------------------
+ public void setCurrentDialog(JDialog dlog, String query)	
+ { 
+	 	dlogCache = dlog;	   
+	 	searchField.setText(query);
+	 	noResultsLabel.setVisible(false); 
+	 	if(speciesCache != null)
+	 		speciesComboBox.setSelectedItem(speciesCache);
+ }
+  private JDialog dlogCache = null;
+  private void closeDialog()
+  {
+	  speciesCache = getSpecies();
+	 System.out.println("CloseDialog: " + dlogCache);
+	  if (dlogCache != null)
+		  dlogCache.dispose();
+	  dlogCache = null;
+  }
 
   class SharedListSelectionHandler implements ListSelectionListener {
       public void valueChanged(ListSelectionEvent e) { 
-          ListSelectionModel lsm = (ListSelectionModel)e.getSource();
-
-          int firstIndex = e.getFirstIndex();
-          int lastIndex = e.getLastIndex();
-          boolean isAdjusting = e.getValueIsAdjusting(); 
+//          ListSelectionModel lsm = (ListSelectionModel)e.getSource();
+//
+//          int firstIndex = e.getFirstIndex();
+//          int lastIndex = e.getLastIndex();
+//          boolean isAdjusting = e.getValueIsAdjusting(); 
       	updatePreview(); 
       }
   }
-  private JPanel newResultsPanel() {
+  public JPanel newResultsPanel() {
     final EasyGridBagConstraints c = new EasyGridBagConstraints();
 //
 //    pathwayMenuItem.addActionListener(new ActionListener() {
@@ -216,6 +252,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
       public void actionPerformed(ActionEvent e) {
         final WPPathway pathway = tableModel.getSelectedPathwayRef();
         openBrowser.openURL(pathway.getUrl());
+        closeDialog();
       }
     });
 
@@ -247,7 +284,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
 
     resultsPreviewPane.setLeftComponent(resultsPanel);
     resultsPreviewPane.setRightComponent(imagePreview);
-    resultsPreviewPane.setDividerLocation(1.0);
+    resultsPreviewPane.setDividerLocation(0.25);			// AST panel split
     resultsPreviewPane.setResizeWeight(0.25);
     resultsPreviewPane.setEnabled(false);
 
@@ -277,7 +314,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
     return searchBar;
   }
 
-  private JPanel newSearchPanel() {
+  public JPanel newSearchPanel() {
     final JPanel searchBar = newSearchBar();
     final JPanel searchPanel = new JPanel(new GridBagLayout());
     EasyGridBagConstraints c = new EasyGridBagConstraints();
@@ -306,14 +343,14 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
   class SearchForPathways implements ActionListener {
     public void actionPerformed(ActionEvent e) {
       final String query = searchField.getText();
-      if (WP_ID_REGEX.matcher(query).matches()) {
-        getPathwayFromId(query);
-      } else {
-        final String species = speciesCheckBox.isSelected() ? speciesComboBox.getSelectedItem().toString() : null;
-  	  System.out.println("performSearch");
-       performSearch(query, species);
-      }
+      if (WP_ID_REGEX.matcher(query).matches()) 
+    	  		getPathwayFromId(query);
+       else   	performSearch(query, getSpecies());
     }
+  }
+  String getSpecies()
+  {
+	  return speciesCheckBox.isSelected() ? speciesComboBox.getSelectedItem().toString() : null;
   }
 
   public void setPathwaysInResultsTable(final List<WPPathway> pathways) {
@@ -341,16 +378,23 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
     }
   }
 
+  void performSearch()
+  {
+	     final String species = getSpecies();
+	     final String query = searchField.getText();
+	     performSearch(query, species);
+  }
   void performSearch(final String query, final String species) {
 //    searchField.setEnabled(false);
 //    searchButton.setEnabled(false);
-  	  System.out.println("About to performSearch");
+  	  System.out.println("About to performSearch: " + query + " @ " + species);
 
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
       	  System.out.println("performingSearch");
-     final ResultTask<List<WPPathway>> searchTask = client.newFreeTextSearchTask(query, species);
-        taskMgr.execute(new TaskIterator(searchTask, new AbstractTask() {
+     
+      	  final ResultTask<List<WPPathway>> searchTask = client.newFreeTextSearchTask(query, species);
+      	  taskMgr.execute(new TaskIterator(searchTask, new AbstractTask() {
           public void run(final TaskMonitor monitor) {
             final List<WPPathway> results = searchTask.get();
             if (results.isEmpty()) {
@@ -394,6 +438,7 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
     });
   }
 
+  
   //----------------------------------------------------------------------
   public void bringToFront() {
     Container parent = gui.getParent();
@@ -515,7 +560,28 @@ public class WPCyGUIClient extends AbstractWebServiceGUIClient implements Networ
         return null;
       return pathwayRefs.get(row);
     }
-  }
+	}
+  //--------------------------------------------------------------
+	private JDialog dlog;
+
+	public void displayPathwaysInModal(JFrame parent, String query, List<WPPathway> pathways) {
+		EasyGridBagConstraints c = new EasyGridBagConstraints();
+		if (dlog == null) {
+			dlog = new JDialog(parent, "WikiPathways Search", true);
+			JPanel searchPanel = newSearchPanel();
+			JPanel resultsPanel = newResultsPanel();
+			JPanel gui = new JPanel(new GridBagLayout());
+			dlog.add(gui);
+			gui.add(searchPanel, c.expandHoriz());
+			gui.add(resultsPanel, c.down().expandBoth().insets(0, 10, 10, 10));
+			setCurrentDialog(dlog, query);
+		}
+
+		setPathwaysInResultsTable(pathways);
+		dlog.setBounds(new Rectangle(200, 100, 700, 500));
+		dlog.setVisible(true);
+		
+	}
 }
 
 class SearchBarBorder extends AbstractBorder {
@@ -547,81 +613,6 @@ class SearchBarBorder extends AbstractBorder {
     g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, aa ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF);
   }
 }
-
-//class SplitButton extends JButton {
-//  static final int GAP = 5;
-//  final JLabel mainText;
-//  volatile boolean actionListenersEnabled = true;
-//  JPopupMenu menu = null;
-//
-//  public SplitButton(final String text) {
-//    mainText = new JLabel(text);
-//    final JLabel menuIcon = new JLabel("\u25be");
-//    super.setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
-//    super.add(mainText);
-//    super.add(Box.createRigidArea(new Dimension(GAP, 0)));
-//    super.add(new JSeparator(JSeparator.VERTICAL));
-//    super.add(Box.createRigidArea(new Dimension(GAP, 0)));
-//    super.add(menuIcon);
-//
-//    super.addMouseListener(new MouseAdapter() {
-//      public void mousePressed(final MouseEvent e) {
-//        if (!SplitButton.this.isEnabled())
-//          return;
-//        final int x = e.getX();
-//        final int w = e.getComponent().getWidth();
-//        if (x >= (2 * w / 3)) {
-//          actionListenersEnabled = false;
-//          if (menu != null) {
-//            menu.show(e.getComponent(), e.getX(), e.getY());
-//          }
-//        } else {
-//          actionListenersEnabled = true;
-//        }
-//      }
-//    });
-//  }
-//
-//  public void setText(final String label) {
-//    mainText.setText(label);
-//  }
-//
-//  protected void fireActionPerformed(final ActionEvent e) {
-//    if (actionListenersEnabled) {
-//      super.fireActionPerformed(e);
-//    }
-//  }
-//
-//  public void setMenu(final JPopupMenu menu) {
-//    this.menu = menu;
-//  }
-//}
-
-//class CheckMarkMenuItem extends JMenuItem {
-//  static final String CHECKED_STATE_TEXT_FMT = "<html><font size=\"+1\">\u2714</font> %s<br><img src=\"%s\"></html>";
-//  static final String NORMAL_STATE_TEXT_FMT = "<html>%s<br><img src=\"%s\"></html>";
-//  final String text;
-//  final String imgUrl;
-//
-//  public CheckMarkMenuItem(final String text, final String imgUrl) {
-//    this(text, imgUrl, false);
-//  }
-//
-//  public CheckMarkMenuItem(final String text, final String imgUrl, final boolean state) {
-//    this.text = text;
-//    this.imgUrl = imgUrl;
-//    setSelected(state);
-//  }
-//
-//  public void setSelected(final boolean state) {
-//    super.setSelected(state);
-//    updateText();
-//  }
-//
-//  private void updateText() {
-//    super.setText(String.format(super.isSelected() ? CHECKED_STATE_TEXT_FMT : NORMAL_STATE_TEXT_FMT, text, imgUrl));
-//  }
-//}
 
 class ImagePreview extends JComponent implements ImageObserver {
  	private static final long serialVersionUID = 1L;

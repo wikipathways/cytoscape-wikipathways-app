@@ -1,16 +1,12 @@
 package org.wikipathways.cytoscapeapp.internal.cmd;
 
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Window;
 import java.util.List;
 
 import javax.swing.JDialog;
-import javax.swing.JTextField;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
 
-import org.cytoscape.io.webservice.NetworkImportWebServiceClient;
-import org.cytoscape.io.webservice.WebServiceClient;
-import org.cytoscape.io.webservice.swing.WebServiceGUI;
+import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.FinishStatus;
@@ -23,7 +19,7 @@ import org.wikipathways.cytoscapeapp.ResultTask;
 import org.wikipathways.cytoscapeapp.WPClient;
 import org.wikipathways.cytoscapeapp.WPPathway;
 import org.wikipathways.cytoscapeapp.impl.search.WPSearchCmdTaskFactory;
-import org.wikipathways.cytoscapeapp.internal.guiclient.WPCyGUIClient;
+import org.wikipathways.cytoscapeapp.internal.guiclient.GUI;
 
 public class WPSearchCmdTask extends AbstractTask {
    public String query;
@@ -31,10 +27,10 @@ public class WPSearchCmdTask extends AbstractTask {
    WPSearchCmdTaskFactory factory;
 	final TaskManager<?,?> dialogTaskManager;
 	final	CyServiceRegistrar registrar;
-	WPCyGUIClient guiClient;
+	GUI guiClient;
 	
   final WPClient client;
-  public WPSearchCmdTask(WPClient client, CyServiceRegistrar r, WPSearchCmdTaskFactory factory, WPCyGUIClient guiClient) {
+  public WPSearchCmdTask(WPClient client, CyServiceRegistrar r, WPSearchCmdTaskFactory factory, GUI guiClient) {
     this.client = client;
     this.factory = factory;
     registrar = r;
@@ -67,53 +63,14 @@ public class WPSearchCmdTask extends AbstractTask {
     			}        
       });  }
   
-  void setPathwaysInResultsTable(final List<WPPathway> pathways) {
+	JDialog dlog = null;
+	 JPanel searchPanel, resultsPanel;
+  
+	 void setPathwaysInResultsTable(final List<WPPathway> pathways) {
 	  
-//	  System.out.println("-- - -- --");
-//	  guiClient.bringToFront();
-//	  JTable resultsTable = guiClient.getResultsTable();
-		guiClient.setPathwaysInResultsTable(pathways);
-		Container queryGui = guiClient.getQueryBuilderGUI();
-		Component comp = queryGui.getComponent(0);
-		// JTextField is three layers down from QueryBuilderGUI, inject the query text
-		if (comp instanceof Container)		
-		{
-			Component subComp = ((Container)comp).getComponent(0);
-			if (subComp instanceof Container)
-			{
-				Component subsubComp = ((Container)subComp).getComponent(0);
-			    if (subsubComp instanceof JTextField)
-			    {
-			    	JTextField fld = (JTextField) subsubComp;
-			    	fld.setText(query);
-			    }
-			}
-		}
-		
-		// show the dialog
-		WebServiceGUI wsGui = registrar.getService(WebServiceGUI.class);
-		if (wsGui != null) {
-			Window w = wsGui.getWindow(NetworkImportWebServiceClient.class);
-			if (w != null) {
-				w.toFront();
-				w.setVisible(true);
-				if (w instanceof JDialog)		// CANT FIGURE OUT HOW TO INSTALL OUR PANEL
-				{
-					Container parent = queryGui.getParent();
-					JDialog dlog = (JDialog) w;
-					Container content = dlog.getContentPane();
-//					org.cytoscape.webservice.internal.ui.WebServiceImportDialog d;
-				}
-			}
-		}
-		// System.out.println("RESULTS " + (pathways == null ? "NULL"
-		// :pathways.toString()));
-		//
-//	for (WPPathway path : pathways)
-//	{
-//		System.out.println(path.getId() + '\t' + path.getName() + '\t' + path.getSpecies());
-//	}
-	// attempting to get the table to populate, and to bring its window to the front
+		JFrame frame = registrar.getService(CySwingApplication.class).getJFrame();
+		guiClient.displayPathwaysInModal(frame, query, pathways);
+
   }
   
 }

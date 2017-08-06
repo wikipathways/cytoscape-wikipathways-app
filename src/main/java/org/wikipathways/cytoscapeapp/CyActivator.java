@@ -46,7 +46,7 @@ import org.wikipathways.cytoscapeapp.internal.OpenLinkedPathwayAsNewTaskFactory;
 import org.wikipathways.cytoscapeapp.internal.ToggleShapesTaskFactory;
 import org.wikipathways.cytoscapeapp.internal.cmd.GpmlImportCmdTaskFactory;
 import org.wikipathways.cytoscapeapp.internal.cmd.WPImportCmdTaskFactory;
-import org.wikipathways.cytoscapeapp.internal.guiclient.WPCyGUIClient;
+import org.wikipathways.cytoscapeapp.internal.guiclient.GUI;
 import org.wikipathways.cytoscapeapp.internal.io.GpmlCyReaderTaskFactory;
 /**
  * 
@@ -79,7 +79,7 @@ public class CyActivator extends AbstractCyActivator {
 		final TaskManager<?, ?> taskMgr = getService(context, DialogTaskManager.class);
 		final WPClient client = clientFactory.create();
 		final OpenBrowser openBrowser = getService(context, OpenBrowser.class);
-		final WPCyGUIClient guiClient = new WPCyGUIClient(taskMgr, client, openBrowser, gpmlReaderFactory);
+		final GUI guiClient = new GUI(taskMgr, client, openBrowser, gpmlReaderFactory);
 		registerAllServices(context, guiClient);
 
 		// ---- create and register a bunch of CommandTaskFactories

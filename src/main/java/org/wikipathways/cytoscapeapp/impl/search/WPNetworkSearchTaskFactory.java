@@ -17,7 +17,7 @@ import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskObserver;
 import org.wikipathways.cytoscapeapp.WPClient;
 import org.wikipathways.cytoscapeapp.internal.cmd.WPSearchCmdTask;
-import org.wikipathways.cytoscapeapp.internal.guiclient.WPCyGUIClient;
+import org.wikipathways.cytoscapeapp.internal.guiclient.GUI;
 
 public class WPNetworkSearchTaskFactory extends AbstractNetworkSearchTaskFactory  implements TaskObserver {
 
@@ -41,7 +41,7 @@ public class WPNetworkSearchTaskFactory extends AbstractNetworkSearchTaskFactory
 	}
 	}
 	private final CyServiceRegistrar serviceRegistrar;
-	private final WPCyGUIClient guiClient;
+	private final GUI guiClient;
 
 	private final static URL getURL()
 	{
@@ -54,7 +54,7 @@ public class WPNetworkSearchTaskFactory extends AbstractNetworkSearchTaskFactory
 		}
 	}
 	//----------------------------------------------
-	public WPNetworkSearchTaskFactory(CyServiceRegistrar reggie, WPClient clnt, ImageIcon icon, WPCyGUIClient gui) {
+	public WPNetworkSearchTaskFactory(CyServiceRegistrar reggie, WPClient clnt, ImageIcon icon, GUI gui) {
 		super( ID,	NAME, DESC, null, null);  // ICON, getURL()
 		serviceRegistrar = reggie;
 		client = clnt;

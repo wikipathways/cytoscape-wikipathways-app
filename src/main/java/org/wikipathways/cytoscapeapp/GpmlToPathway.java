@@ -1099,18 +1099,18 @@ public class GpmlToPathway {
     	System.out.println("anchor at " + anchor.getPosition());
       }
 
-    if (pvAnchors.isEmpty()) 
+//    if (pvAnchors.isEmpty()) 
       newEdge(pvLine, cyStartNode, cyEndNode, true, true);
-    else
-    {
-      // this is for multiple segmented lines
-//    	System.out.println("this is for multiple segmented lines: " + pvAnchors.size());
-      newEdge(pvLine, cyStartNode, pvToCyNodes.get(pvAnchors.get(0)), true, false);
-      for (int i = 1; i < pvAnchors.size(); i++) {
-        newEdge(pvLine, pvToCyNodes.get(pvAnchors.get(i - 1)), pvToCyNodes.get(pvAnchors.get(i)), false, false);
-      }
-      newEdge(pvLine, pvToCyNodes.get(pvAnchors.get(pvAnchors.size() - 1)), cyEndNode, false, true);
-    }
+//    else
+//    {
+//      // this is for multiple segmented lines
+////    	System.out.println("this is for multiple segmented lines: " + pvAnchors.size());
+//      newEdge(pvLine, cyStartNode, pvToCyNodes.get(pvAnchors.get(0)), true, false);
+//      for (int i = 1; i < pvAnchors.size(); i++) {
+//        newEdge(pvLine, pvToCyNodes.get(pvAnchors.get(i - 1)), pvToCyNodes.get(pvAnchors.get(i)), false, false);
+//      }
+//      newEdge(pvLine, pvToCyNodes.get(pvAnchors.get(pvAnchors.size() - 1)), cyEndNode, false, true);
+//    }
   }
 //------------------------------------------
 // Changes start here

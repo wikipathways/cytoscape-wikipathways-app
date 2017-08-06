@@ -19,6 +19,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.derby.iapi.util.StringUtil;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -228,6 +229,8 @@ public class WPClientRESTImpl implements WPClient {
 			protected List<WPPathway> checkedRun(final TaskMonitor monitor) throws Exception {
 				System.out.println("Search WikiPathways for \'" + query + "\'");
 				monitor.setTitle("Search WikiPathways for \'" + query + "\'");
+				final List<WPPathway> result = new ArrayList<WPPathway>();
+				if (query.trim().isEmpty()) return result;
 				String lower = query.toLowerCase();
 				String fix1 = lower.replace(" and ", " AND ");
 				String fixed = fix1.replace(" or ", " OR ");
@@ -236,7 +239,6 @@ public class WPClientRESTImpl implements WPClient {
 					return null;
 				final Node responseNode = doc.getFirstChild();
 				final NodeList resultNodes = responseNode.getChildNodes();
-				final List<WPPathway> result = new ArrayList<WPPathway>();
 				int len = resultNodes.getLength();
 				for (int i = 0; i < len; i++) {
 					final Node resultNode = resultNodes.item(i);
