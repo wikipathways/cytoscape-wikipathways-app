@@ -21,12 +21,12 @@ public class CustomOptionsTaskFactory extends AbstractNetSearchTestTaskFactory {
 		);
 	}
 	
-	@Override
+//	@Override
 	public Icon getIcon() {
 		return ICON;
 	}
 	
-	@Override
+//	@Override
 	public JComponent getOptionsComponent() {
 		JCheckBox cb1 = new JCheckBox("Lorem Ipsum Dolor", true);
 		JCheckBox cb2 = new JCheckBox("Sit Amet");
