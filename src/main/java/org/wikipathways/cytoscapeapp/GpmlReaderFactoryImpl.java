@@ -35,7 +35,6 @@ import org.cytoscape.work.ObservableTask;
 import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskMonitor;
 import org.pathvisio.core.model.Pathway;
-import org.wikipathways.cytoscapeapp.internal.io.GpmlVizStyle;
 
 public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
 

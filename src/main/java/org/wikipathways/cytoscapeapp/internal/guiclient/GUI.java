@@ -156,6 +156,8 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
         	}
       }
     });
+    openUrlButton.setToolTipText("View the original pathway on the WikiPathways site");
+
     importPathwayButton.setToolTipText("Import pathway annotations and labels");
     importPathwayButton.addActionListener(new ActionListener() {
 		@Override public void actionPerformed(ActionEvent e) 
@@ -179,8 +181,11 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
     super.gui.add(searchPanel, c.expandHoriz());
     super.gui.add(resultsPanel, c.down().expandBoth().insets(0, 10, 10, 10));
 
+    setButtonStates(! resultsTable.getSelectionModel().isSelectionEmpty());
+    noResultsLabel.setVisible(false);
     final ResultTask<List<String>> speciesTask = client.newSpeciesTask();
     taskMgr.execute(new TaskIterator(speciesTask, new PopulateSpecies(speciesTask)));
+
   }
   static String speciesCache = null;
 //----------------------------------------------------------------------
@@ -196,7 +201,7 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
   private void closeDialog()
   {
 	  speciesCache = getSpecies();
-	 System.out.println("CloseDialog: " + dlogCache);
+//	 System.out.println("CloseDialog: " + dlogCache);
 	  if (dlogCache != null)
 		  dlogCache.dispose();
 	  dlogCache = null;
@@ -320,8 +325,8 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
   }
 
   public void setPathwaysInResultsTable(final List<WPPathway> pathways) {
-		System.out.println("========  ++++++++++");
-		System.out.println("setPathwaysInResultsTable in GUI");
+//		System.out.println("========  ++++++++++");
+//		System.out.println("setPathwaysInResultsTable in GUI");
 
 		tableModel.setPathwayRefs(pathways);
 		resultsTable.getColumnModel().getColumn(2).setMaxWidth(180);
@@ -350,6 +355,7 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
   	importNetworkButton.setEnabled(anySelection);
   	openUrlButton.setEnabled(anySelection);
   	previewButton.setEnabled(anySelection);
+  	speciesComboBox.setEnabled(speciesCheckBox.isSelected());
   }
 
   void performSearch()
@@ -362,11 +368,11 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
   void performSearch(final String query, final String species) {
 //    searchField.setEnabled(false);
 //    searchButton.setEnabled(false);
-  	  System.out.println("About to performSearch: " + query + " @ " + species);
+//  	  System.out.println("About to performSearch: " + query + " @ " + species);
 
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
-      	  System.out.println("performingSearch");
+//      	  System.out.println("performingSearch");
      
       	  final ResultTask<List<WPPathway>> searchTask = client.newFreeTextSearchTask(query, species);
       	  taskMgr.execute(new TaskIterator(searchTask, new AbstractTask() {
@@ -430,7 +436,7 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
   }
   //----------------------------------------------------------------------
   void openPreview() {
-	  System.out.println("lastDividerPosition read as: " + (int) (100 * lastDividerPosition));
+//	  System.out.println("lastDividerPosition read as: " + (int) (100 * lastDividerPosition));
     resultsPreviewPane.setEnabled(true);
     resultsPreviewPane.setDividerLocation(0.25);			//
     previewButton.setText("Preview \u2190");
@@ -440,7 +446,7 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
 
   void closePreview() {
     lastDividerPosition = ((double) resultsPreviewPane.getDividerLocation()) / (resultsPreviewPane.getWidth() - resultsPreviewPane.getDividerSize());
-	  System.out.println("lastDividerPosition stored as: " + (int) (100 * lastDividerPosition));
+//	  System.out.println("lastDividerPosition stored as: " + (int) (100 * lastDividerPosition));
    resultsPreviewPane.setDividerLocation(1.0);
     resultsPreviewPane.setEnabled(false);
     previewButton.setText("Preview \u2192");
@@ -450,16 +456,16 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
 
   void updatePreview() {
     final WPPathway pathway = tableModel.getSelectedPathwayRef();
-    if (pathway == null) {
+    if (pathway == null) 
       imagePreview.clearImage();
-    } else {
+     else 
       imagePreview.setImage("http://www.wikipathways.org//wpi/wpi.php?action=downloadFile&type=png&pwTitle=Pathway:" + pathway.getId());
-    }
+
   }
 
   //----------------------------------------------------------------------
   void loadSelectedPathway(final GpmlConversionMethod method) {
-	  System.out.println("\n\nloadSelectedPathway");
+//	  System.out.println("\n\nloadSelectedPathway");
 //	  importPathwayButton.setEnabled(false);
 //	    importNetworkButton.setEnabled(false);
 //    resultsTable.setEnabled(false);
@@ -476,17 +482,17 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
             super.insertTasksAfterCurrentTask(gpmlReaderFactory.createReaderAndViewBuilder(loadPathwayTask.get(), method));
           }
         });
-    	  System.out.println("append");
+//    	  System.out.println("append");
        taskMgr.execute(taskIterator, new TaskObserver() {
           public void taskFinished(ObservableTask t) {}
           public void allFinished(FinishStatus status) {
 //              importPathwayButton.setEnabled(true);
 //              importNetworkButton.setEnabled(true);
 //            resultsTable.setEnabled(true);
-          	  System.out.println("allFinished");
+//          	  System.out.println("allFinished");
         }
         });
- 	  System.out.println("execute");
+// 	  System.out.println("execute");
 
 //      }
 //    });
@@ -494,6 +500,7 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
 
   class PathwayRefsTableModel extends AbstractTableModel {
     List<WPPathway> pathwayRefs = null;
+	private static final long serialVersionUID = 192L;
 
     public void setPathwayRefs(List<WPPathway> pathwayRefs) {
       this.pathwayRefs = pathwayRefs;
@@ -504,9 +511,7 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
       return (pathwayRefs == null) ? 0 : pathwayRefs.size();
     }
 
-    public int getColumnCount() {
-      return 3;
-    }
+    public int getColumnCount() {      return 3;    }
 
     public Object getValueAt(int row, int col) {
       final WPPathway pathwayRef = pathwayRefs.get(row);
@@ -551,18 +556,22 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
 			dlog.add(gui);
 			gui.add(searchPanel, c.expandHoriz());
 			gui.add(resultsPanel, c.down().expandBoth().insets(0, 10, 10, 10));
-			setCurrentDialog(dlog, query);
 		}
 
+		setCurrentDialog(dlog, query);
 		setPathwaysInResultsTable(pathways);
 		dlog.setBounds(new Rectangle(200, 100, 700, 500));
-		dlog.setVisible(true);
+		dlog.setVisible(true); 
 		
 	}
 }
 
 class SearchBarBorder extends AbstractBorder {
-  final static float ARC = 25.0f;
+  /**
+	 * 
+	 */
+	private static final long serialVersionUID = 12L;
+final static float ARC = 25.0f;
   final static Color BORDER_COLOR = new Color(0x909090);
   final static Color BKGND_COLOR = Color.WHITE;
   final static Stroke BORDER_STROKE = new BasicStroke(1.0f);
