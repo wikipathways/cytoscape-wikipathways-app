@@ -3,11 +3,9 @@ package org.wikipathways.cytoscapeapp.impl.search;
 import java.util.List;
 
 import org.cytoscape.work.AbstractTaskFactory;
-import org.cytoscape.work.AbstractTask;
-import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.ObservableTask;
+import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskMonitor;
-
 import org.wikipathways.cytoscapeapp.ResultTask;
 import org.wikipathways.cytoscapeapp.WPClient;
 

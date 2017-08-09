@@ -13,7 +13,7 @@ import org.wikipathways.cytoscapeapp.WPClient;
 import org.wikipathways.cytoscapeapp.WPPathway;
 
 public class WPImportCmdTask extends AbstractTask {
-  static final Pattern WP_ID_REGEX = Pattern.compile("WP\\d+");
+//  static final Pattern WP_ID_REGEX = Pattern.compile("WP\\d+");
 
   @Tunable
   public String id;
@@ -37,9 +37,9 @@ public class WPImportCmdTask extends AbstractTask {
       throw new IllegalArgumentException("id must be specified");
     }
 
-    if (!WP_ID_REGEX.matcher(id).matches()) {
-      throw new IllegalArgumentException("id must follow this regular format: " + WP_ID_REGEX.pattern());
-    }
+//    if (!WP_ID_REGEX.matcher(id).matches()) {
+//      throw new IllegalArgumentException("id must follow this regular format: " + WP_ID_REGEX.pattern());
+//    }
 
     final ResultTask<WPPathway> infoTask = client.newPathwayInfoTask(id);
     super.insertTasksAfterCurrentTask(

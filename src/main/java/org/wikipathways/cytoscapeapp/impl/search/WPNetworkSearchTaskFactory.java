@@ -5,9 +5,6 @@ import java.net.URL;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
-import javax.swing.JComponent;
-import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
 
 import org.cytoscape.application.swing.search.AbstractNetworkSearchTaskFactory;
 import org.cytoscape.service.util.CyServiceRegistrar;
@@ -16,7 +13,6 @@ import org.cytoscape.work.ObservableTask;
 import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskObserver;
 import org.wikipathways.cytoscapeapp.WPClient;
-import org.wikipathways.cytoscapeapp.internal.cmd.WPSearchCmdTask;
 import org.wikipathways.cytoscapeapp.internal.guiclient.GUI;
 
 public class WPNetworkSearchTaskFactory extends AbstractNetworkSearchTaskFactory  implements TaskObserver {

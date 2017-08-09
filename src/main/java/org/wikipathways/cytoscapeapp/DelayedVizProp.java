@@ -1,6 +1,5 @@
 package org.wikipathways.cytoscapeapp;
 
-import java.awt.Color;
 import java.awt.Shape;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
@@ -129,7 +128,7 @@ class DelayedVizProp {
 		{
 			mAnnotation = mgr.getAnnots().newShape(netView, map);
 			mAnnotation.setCustomShape(thePath);
-			mAnnotation.setCanvas("background");
+//			mAnnotation.setCanvas("background");
 			
 //			View<CyNode> view = netView.getNodeView(src);
 //			view.setVisualProperty(BasicVisualLexicon.NODE_BORDER_PAINT, Color.GREEN);  // DEBUG
@@ -158,7 +157,6 @@ class DelayedVizProp {
 
 		if (legalXY && legalSize) 
 		{
-// System.out.println(String.format("moving annotation from : %4.1f , %4.1f", x, y));
 			x -= (wid / 2.);
 			y -= (hght / 2.);
 			if (mAnnotation != null) 

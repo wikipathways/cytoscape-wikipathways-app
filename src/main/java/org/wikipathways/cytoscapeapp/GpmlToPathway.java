@@ -716,9 +716,9 @@ public class GpmlToPathway {
     for (final VizPropStore vizPropStore : vizPropStores) {
       final DelayedVizProp[] props = vizPropStore.store(cyNetObj, pvElem);
       for (int i = 0; i < props.length; i++) {
-          String s = props[i].prop.getDisplayName();
-          Object  val = props[i].value;
-          String v = (val == null) ? " " : val.toString();
+//          String s = props[i].prop.getDisplayName();
+//          Object  val = props[i].value;
+//          String v = (val == null) ? " " : val.toString();
 //     if (verbose)      
 //    	 System.out.println("storing: " + s + " = " + v + " in " + props[i].netObj.getSUID());
         cyDelayedVizProps.add(props[i]);
@@ -1080,8 +1080,8 @@ public class GpmlToPathway {
     CyNode cyStartNode = pvToCyNodes.get(startref);
     if (cyStartNode == null) {
       cyStartNode = cyNet.addNode();
-      String nodeName = "" + cyStartNode.getSUID();
-      View<CyNode> view = networkView.getNodeView(cyStartNode);
+//      String nodeName = "" + cyStartNode.getSUID();
+//      View<CyNode> view = networkView.getNodeView(cyStartNode);
 //      view.getVisualProperty();
 //      view.getModel();
       assignAnchorVizStyle(cyStartNode, startPt);
@@ -1271,9 +1271,9 @@ static boolean verbose = true;
 		return manager.getNetworkViewMgr().getNetworkViews(cyNet).iterator().next();
 	}
 	
-	private View<CyNode> getNodeView(CyNetworkView networkView, CyNode source) {
-		return networkView.getNodeView(source);
-}
+//	private View<CyNode> getNodeView(CyNetworkView networkView, CyNode source) {
+//		return networkView.getNodeView(source);
+//}
 	
 	private String getNodeName(CyNode source) {
 		CyTable nodeTable = networkView.getModel().getDefaultNodeTable();
@@ -1282,9 +1282,9 @@ static boolean verbose = true;
 		return name;
 }
 	private String getNodeNameWithId(CyNode source) {
-		CyTable nodeTable = networkView.getModel().getDefaultNodeTable();
-		CyRow row = nodeTable.getRow(source.getSUID());
-		String name = row.get("name", String.class);
+//		CyTable nodeTable = networkView.getModel().getDefaultNodeTable();
+//		CyRow row = nodeTable.getRow(source.getSUID());
+//		String name = row.get("name", String.class);
 		return getNodeName(source) + " (" + source.getSUID() + ")";
 }
 	 
@@ -1299,11 +1299,11 @@ static boolean verbose = true;
 		return ("(" + (int) pt.getX() + ", " + (int) pt.getY() + ")");
 	}
 	
-	private Point2D.Double getNodePosition(View<CyNode> nodeView) {
-	    Double x = nodeView.getVisualProperty(BasicVisualLexicon.NODE_X_LOCATION);
-	    Double y = nodeView.getVisualProperty(BasicVisualLexicon.NODE_Y_LOCATION);
-		return new Point2D.Double(x,y);
-	}
+//	private Point2D.Double getNodePosition(View<CyNode> nodeView) {
+//	    Double x = nodeView.getVisualProperty(BasicVisualLexicon.NODE_X_LOCATION);
+//	    Double y = nodeView.getVisualProperty(BasicVisualLexicon.NODE_Y_LOCATION);
+//		return new Point2D.Double(x,y);
+//	}
 
 	List<Segment> segments;
 	List<Segment> getSegments()	{ return segments;	}
@@ -1436,8 +1436,8 @@ static boolean verbose = true;
 	}
 	private int getSide(double relX, double relY)
 	{
-			if (relX < 0)  		return ConnectorRestrictions.SIDE_WEST;
-			if (relX > 0)  		return ConnectorRestrictions.SIDE_EAST;
+			if (relX < 0 && Math.abs(relX) > Math.abs(relY))  		return ConnectorRestrictions.SIDE_WEST;
+			if (relX > 0 && Math.abs(relX) > Math.abs(relY))  		return ConnectorRestrictions.SIDE_EAST;
 			if (relY < 0)  		return ConnectorRestrictions.SIDE_NORTH;
 			if (relY > 0)  		return ConnectorRestrictions.SIDE_SOUTH;
 			return -1;

@@ -13,7 +13,6 @@ import org.cytoscape.model.CyIdentifiable;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyTable;
-import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.VisualProperty;
 import org.cytoscape.view.presentation.property.ArrowShapeVisualProperty;
 import org.cytoscape.view.presentation.property.BasicVisualLexicon;
@@ -72,7 +71,7 @@ public class GpmlToNetwork {
 		this.network = network;
 	}
 	
-	private Boolean unconnectedLines = false;
+//	private Boolean unconnectedLines = false;
 
 	/**
 	 * Convert the pathway given in the constructor.
@@ -125,7 +124,7 @@ public class GpmlToNetwork {
 					map.put(startRef, line);
 					map.put(endRef, line);
 				} else {
-					unconnectedLines = true;
+//					unconnectedLines = true;
 				}
 			}
 		}

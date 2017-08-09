@@ -68,7 +68,7 @@ import org.wikipathways.cytoscapeapp.WPClient;
 import org.wikipathways.cytoscapeapp.WPPathway;
 
 public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWebServiceClient, SearchWebServiceClient {
-  static final Pattern WP_ID_REGEX = Pattern.compile("(WP|wp)\\d+");		// AST   was: WP\\d+
+//  static final Pattern WP_ID_REGEX = Pattern.compile("WP\\d+");		// AST   was: WP\\d+   "[wW][pP]\\d+"
   static final String APP_DESCRIPTION
     = "<html>"
     + "This REVISED app imports community-curated pathways from "
@@ -107,7 +107,7 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
   final JToggleButton previewButton = new JToggleButton("Preview \u2192");
   final ImagePreview imagePreview = new ImagePreview();
   final JSplitPane resultsPreviewPane = new JSplitPane();
-  double lastDividerPosition = 0.35;
+  double lastDividerPosition = 0.25;
 //  final CheckMarkMenuItem pathwayMenuItem = new CheckMarkMenuItem("Pathway", PATHWAY_IMG, true);
 //  final CheckMarkMenuItem networkMenuItem = new CheckMarkMenuItem("Network", NETWORK_IMG);
 
@@ -126,17 +126,16 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
       public void itemStateChanged(ItemEvent e) {
         boolean selected = speciesCheckBox.isSelected();
         speciesComboBox.setEnabled(selected);
-        if (!selected) performSearch();			// if species is no longer specified, re-search.
+        performSearch();
       }
     });
 
     speciesComboBox.addItemListener(new ItemListener() {
-        public void itemStateChanged(ItemEvent e) {
-            performSearch();
-          }
+        public void itemStateChanged(ItemEvent e) {  performSearch();  }
         });
-    speciesCheckBox.setSelected(false); speciesCheckBox.setVisible(false);
-    speciesComboBox.setEnabled(false); 	speciesComboBox.setVisible(false);
+    
+//    speciesCheckBox.setSelected(false); speciesCheckBox.setVisible(false);
+//    speciesComboBox.setEnabled(false); 	speciesComboBox.setVisible(false);
     speciesComboBox.setMaximumRowCount(30);
     noResultsLabel.setVisible(false);
     noResultsLabel.setForeground(new Color(0x802020));
@@ -185,14 +184,14 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
   }
   static String speciesCache = null;
 //----------------------------------------------------------------------
- public void setCurrentDialog(JDialog dlog, String query)	
- { 
+  	public void setCurrentDialog(JDialog dlog, String query)	
+  	{ 
 	 	dlogCache = dlog;	   
 	 	searchField.setText(query);
 	 	noResultsLabel.setVisible(false); 
 	 	if(speciesCache != null)
 	 		speciesComboBox.setSelectedItem(speciesCache);
- }
+  	}
   private JDialog dlogCache = null;
   private void closeDialog()
   {
@@ -215,39 +214,6 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
   }
   public JPanel newResultsPanel() {
     final EasyGridBagConstraints c = new EasyGridBagConstraints();
-//
-//    pathwayMenuItem.addActionListener(new ActionListener() {
-//      public void actionPerformed(ActionEvent e) {
-//        pathwayMenuItem.setSelected(true);
-//        networkMenuItem.setSelected(false);
-//        importButton.setText("Import as Pathway");
-//      }
-//    });
-//
-//    networkMenuItem.addActionListener(new ActionListener() {
-//      public void actionPerformed(ActionEvent e) {
-//        pathwayMenuItem.setSelected(false);
-//        networkMenuItem.setSelected(true);
-//        importButton.setText("Import as Network");
-//      }
-//    });
-//
-//    final JPopupMenu menu = new JPopupMenu();
-//    menu.add(pathwayMenuItem);
-//    menu.addSeparator();
-//    menu.addSeparator();
-//    menu.add(networkMenuItem);
-
-//    importButton.setMenu(menu);
-//    importButton.addActionListener(new ActionListener() {
-//      public void actionPerformed(ActionEvent e) {
-//        loadSelectedPathway();
-//      }
-//    });
-//    importPathwayButton.setEnabled(false);
-//    importNetworkButton.setEnabled(false);
-
-    openUrlButton.setEnabled(false);
     openUrlButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         final WPPathway pathway = tableModel.getSelectedPathwayRef();
@@ -262,7 +228,6 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
         else           						closePreview();
       }
     });
-    previewButton.setEnabled(false);
 
     final JPanel leftButtonsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
     leftButtonsPanel.add(importPathwayButton);
@@ -343,9 +308,10 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
   class SearchForPathways implements ActionListener {
     public void actionPerformed(ActionEvent e) {
       final String query = searchField.getText();
-      if (WP_ID_REGEX.matcher(query).matches()) 
-    	  		getPathwayFromId(query);
-       else   	performSearch(query, getSpecies());
+//      if (WP_ID_REGEX.matcher(query).matches()) 
+//    	  		getPathwayFromId(query);
+//       else   	
+    	   performSearch(query, getSpecies());
     }
   }
   String getSpecies()
@@ -354,28 +320,36 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
   }
 
   public void setPathwaysInResultsTable(final List<WPPathway> pathways) {
-	  System.out.println("========  ++++++++++");
-	  System.out.println("setPathwaysInResultsTable in WPCyGUIClient");
+		System.out.println("========  ++++++++++");
+		System.out.println("setPathwaysInResultsTable in GUI");
 
-	  tableModel.setPathwayRefs(pathways);
-    resultsTable.getColumnModel().getColumn(2).setMaxWidth(180);
-   if (pathways == null || pathways.size() == 0) {
-//        importPathwayButton.setEnabled(false);
-//        importNetworkButton.setEnabled(false);
-      openUrlButton.setEnabled(false);
-      previewButton.setSelected(false);
-      previewButton.setEnabled(false);
-      closePreview();
-    } else {
-    	importPathwayButton.setEnabled(true);
-    	importNetworkButton.setEnabled(true);
-    	openUrlButton.setEnabled(true);
-    	previewButton.setEnabled(true);
-    	resultsTable.setRowSelectionInterval(0, 0);
-    	if (previewButton.isSelected()) 
-    		updatePreview();
-    
-    }
+		tableModel.setPathwayRefs(pathways);
+		resultsTable.getColumnModel().getColumn(2).setMaxWidth(180);
+		updateToContent (pathways == null || pathways.size() == 0);
+  	}
+  
+  private void updateToContent(boolean isEmpty)
+  {
+	 if (isEmpty)
+	 {
+	    	setButtonStates(false);
+	    	previewButton.setSelected(false);
+//	    	closePreview();
+	    } else 
+	    {
+	    	setButtonStates(true);
+	    	resultsTable.setRowSelectionInterval(0, 0);
+	    	if (previewButton.isSelected()) 
+	    		updatePreview();
+	    }
+	  
+  }
+  private void setButtonStates(boolean anySelection)
+  {
+  	importPathwayButton.setEnabled(anySelection);
+  	importNetworkButton.setEnabled(anySelection);
+  	openUrlButton.setEnabled(anySelection);
+  	previewButton.setEnabled(anySelection);
   }
 
   void performSearch()
@@ -384,6 +358,7 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
 	     final String query = searchField.getText();
 	     performSearch(query, species);
   }
+  
   void performSearch(final String query, final String species) {
 //    searchField.setEnabled(false);
 //    searchButton.setEnabled(false);
@@ -455,8 +430,9 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
   }
   //----------------------------------------------------------------------
   void openPreview() {
+	  System.out.println("lastDividerPosition read as: " + (int) (100 * lastDividerPosition));
     resultsPreviewPane.setEnabled(true);
-    resultsPreviewPane.setDividerLocation(lastDividerPosition);
+    resultsPreviewPane.setDividerLocation(0.25);			//
     previewButton.setText("Preview \u2190");
     imagePreview.setVisible(true);
     updatePreview();
@@ -464,7 +440,8 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
 
   void closePreview() {
     lastDividerPosition = ((double) resultsPreviewPane.getDividerLocation()) / (resultsPreviewPane.getWidth() - resultsPreviewPane.getDividerSize());
-    resultsPreviewPane.setDividerLocation(1.0);
+	  System.out.println("lastDividerPosition stored as: " + (int) (100 * lastDividerPosition));
+   resultsPreviewPane.setDividerLocation(1.0);
     resultsPreviewPane.setEnabled(false);
     previewButton.setText("Preview \u2192");
     imagePreview.clearImage();
@@ -619,9 +596,9 @@ class ImagePreview extends JComponent implements ImageObserver {
  	ImageIcon img = null;
 
   public void setImage(final String urlPath) {
-    URL url = null;
+//    URL url = null;
     try {
-      url = new URL(urlPath);
+//      url =s new URL(urlPath);
       img = new ImageIcon(new URL(urlPath));
     } catch (MalformedURLException e) {
       throw new IllegalArgumentException(e);
