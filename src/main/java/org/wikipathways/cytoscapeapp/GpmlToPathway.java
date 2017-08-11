@@ -886,6 +886,11 @@ public class GpmlToPathway {
       BasicVizPropStore.NODE_BORDER_THICKNESS,
       BasicVizPropStore.NODE_SHAPE
     );
+    String id =  pvState.getGraphId();
+    CyRow row = cyNodeTbl.getRow(cyNode.getSUID());
+    if (row != null)
+    	row.set("GraphID", id);
+    
   }
   
   /*
