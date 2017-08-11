@@ -37,14 +37,15 @@ public class WPSearchCmdTask extends AbstractTask {
 	dialogTaskManager = r.getService(TaskManager.class);
 	this.guiClient = guiClient;
   }
-
+  public void setSpecies(String sp)	{ species = sp;	}
   public void run(TaskMonitor monitor) {
 
 		monitor.setTitle("Searching Wikipathways.org");
 //		System.out.println("Searching Wikipathways.org");
 	    query = factory.getQuery();
-//	    System.out.println("query: " + query);
-//	    System.out.println("species" + species);
+	    species = guiClient.getSpecies();
+	    System.out.println("query: " + query);
+	    System.out.println("species" + species);
 
   	if (query == null || query.length() == 0)  	return;     	// BEEP
     

@@ -23,9 +23,9 @@ import java.awt.image.ImageObserver;
 import java.io.Reader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.regex.Pattern;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -44,11 +44,15 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.ListSelectionModel;
+import javax.swing.RowSorter;
+import javax.swing.SortOrder;
 import javax.swing.SwingUtilities;
 import javax.swing.border.AbstractBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 
 import org.cytoscape.io.webservice.NetworkImportWebServiceClient;
 import org.cytoscape.io.webservice.SearchWebServiceClient;
@@ -143,7 +147,14 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
     resultsTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION); 
     resultsTable.getSelectionModel().addListSelectionListener(new SharedListSelectionHandler());
     resultsTable.requestFocusInWindow();
-    
+    TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(resultsTable.getModel());
+    resultsTable.setRowSorter(sorter);
+    List<RowSorter.SortKey> sortKeys = new ArrayList<>(25);
+    sortKeys.add(new RowSorter.SortKey(2, SortOrder.ASCENDING));
+    sortKeys.add(new RowSorter.SortKey(1, SortOrder.ASCENDING));
+    sortKeys.add(new RowSorter.SortKey(0, SortOrder.ASCENDING));
+    sorter.setSortKeys(sortKeys);
+
     resultsTable.addMouseListener(new MouseAdapter() {
       public void mouseClicked(MouseEvent e) {
         if (e.getClickCount() == 1) {
@@ -319,7 +330,7 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
     	   performSearch(query, getSpecies());
     }
   }
-  String getSpecies()
+  public String getSpecies()
   {
 	  return speciesCheckBox.isSelected() ? speciesComboBox.getSelectedItem().toString() : null;
   }
