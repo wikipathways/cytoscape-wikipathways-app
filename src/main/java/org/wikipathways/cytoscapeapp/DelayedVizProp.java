@@ -4,6 +4,7 @@ import java.awt.Shape;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,16 +12,17 @@ import java.util.Map;
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyIdentifiable;
 import org.cytoscape.model.CyNode;
+import org.cytoscape.view.model.AbstractVisualProperty;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.View;
 import org.cytoscape.view.model.VisualProperty;
+import org.cytoscape.view.model.Visualizable;
 import org.cytoscape.view.presentation.annotations.ShapeAnnotation;
 import org.cytoscape.view.presentation.property.BasicVisualLexicon;
 import org.cytoscape.view.presentation.property.EdgeBendVisualProperty;
 import org.cytoscape.view.presentation.property.values.Bend;
 import org.cytoscape.view.presentation.property.values.Handle;
 import org.cytoscape.view.presentation.property.values.HandleFactory;
-//import org.wikipathways.cytoscapeapp.internal.WPManager;
 
 /**
  * Temporarily stores visual property values of nodes and edges until
@@ -53,12 +55,12 @@ class DelayedVizProp {
     this.value = value;
     this.isLocked = isLocked;
   }
-	static boolean verbose = true;
+	static boolean verbose = false;
 	public String toString() {  return prop.getDisplayName() + ": " + value.toString(); }
 	public static void applyAll(final CyNetworkView netView,final Iterable<DelayedVizProp> delayedProps, WPManager mgr) 
 	{
-		System.out.println("\n");
-		System.out.println("netView: " + netView.toString());
+//		System.out.println("\n");
+//		System.out.println("netView: " + netView.toString());
 		for (final DelayedVizProp delayedProp : delayedProps) {
 			final Object value = delayedProp.value;
 			if (value == null) continue;
@@ -110,7 +112,7 @@ class DelayedVizProp {
 			if (lookup != null && prop.value != null)
 			{
 				String propvalue1 = prop.value.toString();
-	 			  System.out.println(lookup + ": " + propvalue1);
+//	 			  System.out.println(lookup + ": " + propvalue1);
 //				int idx = propvalue1.indexOf('.');
 //				if (idx > 0)
 //					propvalue1 = propvalue1.substring(0, idx);
@@ -128,9 +130,12 @@ class DelayedVizProp {
 		{
 			mAnnotation = mgr.getAnnots().newShape(netView, map);
 			mAnnotation.setCustomShape(thePath);
+			View<CyNode> view = netView.getNodeView(src);
 //			mAnnotation.setCanvas("background");
+			view.setVisualProperty(BasicVisualLexicon.NODE_VISIBLE, false);
+
+			netView.getModel().removeNodes(Collections.singletonList((src)));
 			
-//			View<CyNode> view = netView.getNodeView(src);
 //			view.setVisualProperty(BasicVisualLexicon.NODE_BORDER_PAINT, Color.GREEN);  // DEBUG
 //			view.setVisualProperty(BasicVisualLexicon.NODE_FILL_COLOR, Color.YELLOW);
 		}
@@ -211,9 +216,9 @@ class DelayedVizProp {
 
 				List<Handle> handles = bend.getAllHandles();
 				double EPSILON = 0.000000001;
-				if (Math.abs(targCenter.getX() - srcCenter.getX()) < EPSILON) {
-					System.out.println("VERTICAL");
-				}
+//				if (Math.abs(targCenter.getX() - srcCenter.getX()) < EPSILON) {
+//					System.out.println("VERTICAL");
+//				}
 				// THROWS: java.lang.IllegalStateException: Invalid angle: NaN.
 				// Caused by cos(theta) = NaN
 				// at org.cytoscape.ding.impl.HandleImpl.convertToRatio(HandleImpl.java:175)
