@@ -88,7 +88,9 @@ class DelayedVizProp {
       if (view == null) continue;
 //		System.out.println("Node id: " + delayedProp.netObj.getSUID()  + " is setting " + propName + " to " + propvalue);
 
-      if (delayedProp.isLocked)
+      String prop = delayedProp.prop.getIdString();
+      System.out.println(prop);
+      if (delayedProp.isLocked && !prop.contains("_LOCATION"))
         view.setLockedValue(delayedProp.prop, value);
        else 
         view.setVisualProperty(delayedProp.prop, value);

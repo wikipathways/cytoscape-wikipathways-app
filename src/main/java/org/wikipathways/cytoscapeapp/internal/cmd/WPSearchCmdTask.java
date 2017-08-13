@@ -44,8 +44,8 @@ public class WPSearchCmdTask extends AbstractTask {
 //		System.out.println("Searching Wikipathways.org");
 	    query = factory.getQuery();
 	    species = guiClient.getSpecies();
-	    System.out.println("query: " + query);
-	    System.out.println("species" + species);
+//	    System.out.println("query: " + query);
+//	    System.out.println("species" + species);
 
   	if (query == null || query.length() == 0)  	return;     	// BEEP
     

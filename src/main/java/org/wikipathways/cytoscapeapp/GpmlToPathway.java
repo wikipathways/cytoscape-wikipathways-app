@@ -614,10 +614,10 @@ public class GpmlToPathway {
       this.mapping = mapping;
     }
 
-    public String getCyColumnName() {      return super.cyColName;    }
-    public Class<?> getCyColumnType() {      return super.cyColType;    }
-    public VisualProperty<?>[] getCyVizProps() {      return vizProps;    }
-    public Map<?,?> getMapping() {      return mapping;    }
+    public String getCyColumnName() 			{      return super.cyColName;    }
+    public Class<?> getCyColumnType() 			{      return super.cyColType;    }
+    public VisualProperty<?>[] getCyVizProps() 	{      return vizProps;    }
+    public Map<?,?> getMapping() 				{      return mapping;    }
   }
 
   /**
