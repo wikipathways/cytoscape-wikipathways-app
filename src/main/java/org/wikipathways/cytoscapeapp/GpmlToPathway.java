@@ -110,7 +110,7 @@ public class GpmlToPathway {
    * Convert the pathway given in the constructor.
    */
 	public List<DelayedVizProp> convert() {
-		MIMShapes.registerShapes();
+	MIMShapes.registerShapes();
     setupCyTables();
 
     // convert by each pathway element type
@@ -183,10 +183,19 @@ public class GpmlToPathway {
    * without any conversion.
    */
   static final Converter NO_CONVERT = new Converter() {
-    public Object toCyValue(Object[] pvValues) {
-      return pvValues[0];
-    }
-  };
+	    public Object toCyValue(Object[] pvValues) {
+	      return pvValues[0];
+	    }
+	  };
+
+	  static final Converter Z_CONVERT = new Converter() {		// AST
+		    public Object toCyValue(Object[] pvValues) {
+		    	System.out.print("Z_CONVERT: " + pvValues[0] + " @ " + pvValues[0].getClass());
+		     double d = (Integer) pvValues[0] * 1.0;
+		    	System.out.print(d);
+		    		 return new Double( d);
+		    }
+		  };
 
   static final Converter PV_ARROW_CONVERTER = new Converter() {
     public Object toCyValue(Object[] pvValues) {
@@ -340,7 +349,7 @@ public class GpmlToPathway {
     public static final Extracter TEXT_LABEL          = new BasicExtracter(StaticProperty.TEXTLABEL);
     public static final Extracter X                   = new BasicExtracter(StaticProperty.CENTERX);
     public static final Extracter Y                   = new BasicExtracter(StaticProperty.CENTERY);
-    public static final Extracter Z                   = new BasicExtracter(StaticProperty.ZORDER);
+    public static final Extracter Z                   = new BasicExtracter(Z_CONVERT, StaticProperty.ZORDER);
     public static final Extracter WIDTH               = new BasicExtracter(StaticProperty.WIDTH);
     public static final Extracter HEIGHT              = new BasicExtracter(StaticProperty.HEIGHT);
     public static final Extracter COLOR_STRING        = new BasicExtracter(PV_COLOR_STRING_CONVERTER, StaticProperty.COLOR);
@@ -382,10 +391,10 @@ public class GpmlToPathway {
     }
 
     public Object extract(final PathwayElement pvElem) {
-      //System.out.println("Extracting...");
+//      System.out.println("Extracting...");
       for (int i = 0; i < pvValues.length; i++) {
-        //System.out.println(pvProps[i]);
         pvValues[i] = pvElem.getStaticProperty(pvProps[i]);
+        System.out.println(pvProps[i] + " = " + pvValues[i]);
       }
       if (pvValues.length == 1 && pvValues[0] == null)
         return null;
@@ -707,6 +716,7 @@ public class GpmlToPathway {
       final DelayedVizProp[] props = new DelayedVizProp[cyVizProps.length];
       for (int i = 0; i < cyVizProps.length; i++) {
         props[i] = new DelayedVizProp(cyNetObj, cyVizProps[i], cyValue, true);
+        System.out.println("Store: " + props[i].dump());
       }
       return props;
     }
@@ -716,11 +726,8 @@ public class GpmlToPathway {
     for (final VizPropStore vizPropStore : vizPropStores) {
       final DelayedVizProp[] props = vizPropStore.store(cyNetObj, pvElem);
       for (int i = 0; i < props.length; i++) {
-//          String s = props[i].prop.getDisplayName();
-//          Object  val = props[i].value;
-//          String v = (val == null) ? " " : val.toString();
-//     if (verbose)      
-//    	 System.out.println("storing: " + s + " = " + v + " in " + props[i].netObj.getSUID());
+     if (verbose)      
+    	 System.out.println("storing: " + props[i].dump());
         cyDelayedVizProps.add(props[i]);
       }
     }

@@ -12,13 +12,14 @@ import java.util.Map;
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyIdentifiable;
 import org.cytoscape.model.CyNode;
-import org.cytoscape.view.model.AbstractVisualProperty;
+import org.cytoscape.view.model.ContinuousRange;
 import org.cytoscape.view.model.CyNetworkView;
+import org.cytoscape.view.model.Range;
 import org.cytoscape.view.model.View;
 import org.cytoscape.view.model.VisualProperty;
-import org.cytoscape.view.model.Visualizable;
 import org.cytoscape.view.presentation.annotations.ShapeAnnotation;
 import org.cytoscape.view.presentation.property.BasicVisualLexicon;
+import org.cytoscape.view.presentation.property.DoubleVisualProperty;
 import org.cytoscape.view.presentation.property.EdgeBendVisualProperty;
 import org.cytoscape.view.presentation.property.values.Bend;
 import org.cytoscape.view.presentation.property.values.Handle;
@@ -61,15 +62,29 @@ class DelayedVizProp {
 	{
 //		System.out.println("\n");
 //		System.out.println("netView: " + netView.toString());
-		for (final DelayedVizProp delayedProp : delayedProps) {
+		for ( DelayedVizProp delayedProp : delayedProps) {
 			final Object value = delayedProp.value;
 			if (value == null) continue;
 
-			String propName = delayedProp.prop.getDisplayName();
-			String propvalue = delayedProp.value.toString();
+			String propName = delayedProp.prop.getIdString();
+//			String propvalue = delayedProp.value.toString();
 			if (verbose)
-				System.out.println("delayedProp: " + propName + " " + propvalue + " " + delayedProp.netObj.getSUID());
-	
+				System.out.println("apply: " + delayedProp.dump());
+	if (propName.contains("_Z") && propName.isEmpty())
+	{
+		if (value instanceof Integer)
+		{
+			CyIdentifiable obj = delayedProp.netObj;
+			double z = ((Integer)value) * 1.0;
+			Range<Double> ARBITRARY_DOUBLE_RANGE = new ContinuousRange<>(Double.class,
+					Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, true, true);
+			VisualProperty<Double> prop = new DoubleVisualProperty(z, ARBITRARY_DOUBLE_RANGE,
+					"NODE_Z_LOCATION", "NODE_Z_LOCATION", CyNode.class );
+			delayedProp = new DelayedVizProp(obj,prop ,new Double(z),  false);
+			
+		}
+		System.out.println("ZZZZ: " + delayedProp.dump());
+	}
 		if ("Node Shape".equals(propName))
 		 applyNodeShape(netView, delayedProps, mgr, delayedProp);
 
@@ -89,14 +104,23 @@ class DelayedVizProp {
 //		System.out.println("Node id: " + delayedProp.netObj.getSUID()  + " is setting " + propName + " to " + propvalue);
 
       String prop = delayedProp.prop.getIdString();
-      System.out.println(prop);
-      if (delayedProp.isLocked && !prop.contains("_LOCATION"))
+      System.out.println(prop + " @ " + delayedProp.prop.getClass() + " # " + delayedProp.prop.getDisplayName() +  " = " + value + " @ " + value.getClass());
+      boolean isPosition = prop.equals("NODE_X_LOCATION") || prop.equals("NODE_Y_LOCATION");
+     if (delayedProp.isLocked && !isPosition)
         view.setLockedValue(delayedProp.prop, value);
        else 
         view.setVisualProperty(delayedProp.prop, value);
     }
   }
 
+	public String dump()
+	{
+		String propName = prop.getDisplayName();
+		String propvalue = value == null ? "EMPTY" : value.toString();
+		String propClass = value == null ? "EMPTY" : value.getClass().toString();
+		return("delayedProp: " + propName + " " + propvalue + " " + propClass);
+		
+	}
 	//--------------------------------------------------------------------------------
 	private static void applyNodeShape(final CyNetworkView netView,final Iterable<DelayedVizProp> delayedProps, WPManager mgr, DelayedVizProp delayedProp) 		{
 		final Map<String,String> map = new HashMap<String,String>();
@@ -107,6 +131,7 @@ class DelayedVizProp {
 		double hght = 0;
 		double x = Double.NaN;
 		double y = Double.NaN;
+//		double z = Double.NaN;
 		for (DelayedVizProp prop : relatedProps)			// we have to rescan all properties to find other attributes for the same shape
 		{
 			String propName1 = prop.prop.getDisplayName();
@@ -123,6 +148,7 @@ class DelayedVizProp {
 				if ("Height".equals(lookup))		hght = Double.valueOf(propvalue1);
 				if ("x".equals(lookup))				x = Double.valueOf(propvalue1);
 				if ("y".equals(lookup))				y = Double.valueOf(propvalue1);
+//				if ("z".equals(lookup))				z = Double.valueOf(propvalue1);
 			}
 		}
 		String propvalue = delayedProp.value.toString();
@@ -217,7 +243,7 @@ class DelayedVizProp {
 						+ (delayedProp.isLocked ? "LOCKED" : "UNLOCKED"));
 
 				List<Handle> handles = bend.getAllHandles();
-				double EPSILON = 0.000000001;
+//				double EPSILON = 0.000000001;
 //				if (Math.abs(targCenter.getX() - srcCenter.getX()) < EPSILON) {
 //					System.out.println("VERTICAL");
 //				}
@@ -235,7 +261,7 @@ class DelayedVizProp {
 					handles.add(handleFactory.createHandle(netView, edgeView, elbow.getX(), elbow.getY())); 
 			}
 		} catch (ClassCastException ex) {
-			System.out.println("ClassCastException: " + delayedProp.netObj.getClass());
+			System.out.println("->ClassCastException: " + delayedProp.netObj.getClass());
 		}
 	}
 	

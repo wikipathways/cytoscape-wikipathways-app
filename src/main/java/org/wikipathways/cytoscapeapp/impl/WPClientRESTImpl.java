@@ -226,7 +226,7 @@ public class WPClientRESTImpl implements WPClient {
 	public ResultTask<List<WPPathway>> newFreeTextSearchTask(final String query, final String species) {
 		return new ReqTask<List<WPPathway>>() {
 			protected List<WPPathway> checkedRun(final TaskMonitor monitor) throws Exception {
-				System.out.println("Search WikiPathways for \'" + query + "\'");
+//				System.out.println("Search WikiPathways for \'" + query + "\'");
 				monitor.setTitle("Search WikiPathways for \'" + query + "\'");
 				final List<WPPathway> result = new ArrayList<WPPathway>();
 				if (query.trim().isEmpty()) return result;
@@ -245,7 +245,7 @@ public class WPClientRESTImpl implements WPClient {
 					if (pathway != null)
 					{
 						result.add(pathway);
-						System.out.println(pathway.getId() + " :  " + pathway.getName() + "  @  " + pathway.getSpecies());
+//						System.out.println(pathway.getId() + " :  " + pathway.getName() + "  @  " + pathway.getSpecies());
 					}
 				}
 				return result;

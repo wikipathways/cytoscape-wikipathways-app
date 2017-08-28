@@ -149,7 +149,7 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
     resultsTable.requestFocusInWindow();
     TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(resultsTable.getModel());
     resultsTable.setRowSorter(sorter);
-    List<RowSorter.SortKey> sortKeys = new ArrayList<>(25);
+    List<RowSorter.SortKey> sortKeys = new ArrayList<RowSorter.SortKey>(25);
     sortKeys.add(new RowSorter.SortKey(2, SortOrder.ASCENDING));
     sortKeys.add(new RowSorter.SortKey(1, SortOrder.ASCENDING));
     sortKeys.add(new RowSorter.SortKey(0, SortOrder.ASCENDING));
