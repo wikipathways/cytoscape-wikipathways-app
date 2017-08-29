@@ -72,17 +72,17 @@ class DelayedVizProp {
 				System.out.println("apply: " + delayedProp.dump());
 	if (propName.contains("_Z") && propName.isEmpty())
 	{
-		if (value instanceof Integer)
-		{
-			CyIdentifiable obj = delayedProp.netObj;
-			double z = ((Integer)value) * 1.0;
-			Range<Double> ARBITRARY_DOUBLE_RANGE = new ContinuousRange<>(Double.class,
-					Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, true, true);
-			VisualProperty<Double> prop = new DoubleVisualProperty(z, ARBITRARY_DOUBLE_RANGE,
-					"NODE_Z_LOCATION", "NODE_Z_LOCATION", CyNode.class );
-			delayedProp = new DelayedVizProp(obj,prop ,new Double(z),  false);
-			
-		}
+//		if (value instanceof Integer)
+//		{
+//			CyIdentifiable obj = delayedProp.netObj;
+//			double z = ((Integer)value) * 1.0;
+//			Range<Double> ARBITRARY_DOUBLE_RANGE = new ContinuousRange<>(Double.class,
+//					Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, true, true);
+//			VisualProperty<Double> prop = new DoubleVisualProperty(z, ARBITRARY_DOUBLE_RANGE,
+//					"NODE_Z_LOCATION", "NODE_Z_LOCATION", CyNode.class );
+//			delayedProp = new DelayedVizProp(obj,prop ,new Double(z),  false);
+//			
+//		}
 		System.out.println("ZZZZ: " + delayedProp.dump());
 	}
 		if ("Node Shape".equals(propName))
