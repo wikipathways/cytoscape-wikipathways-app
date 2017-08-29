@@ -97,7 +97,7 @@ public class WPNetworkSearchTaskFactory extends AbstractNetworkSearchTaskFactory
 }
 
 	@Override public void allFinished(FinishStatus finishStatus) {
-		System.out.println("allFinished: " + finishStatus.getType().toString());
+//		System.out.println("allFinished: " + finishStatus.getType().toString());
 	}
 
 	// this is the panel that contains a search text field			(used to have a species pop-up too )

@@ -548,7 +548,7 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
     }
 
     public WPPathway getSelectedPathwayRef() {
-      final int row = resultsTable.getSelectedRow();
+      final int row = resultsTable.convertRowIndexToModel(resultsTable.getSelectedRow());
       if (row < 0)
         return null;
       return pathwayRefs.get(row);

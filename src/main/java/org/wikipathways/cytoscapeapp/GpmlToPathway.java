@@ -85,7 +85,7 @@ public class GpmlToPathway {
    *
    * @param eventHelper The {@code CyEventHelper} service -- used to flush network object creation events
    * @param annots A wrapper around the Cytoscape Annotations API
-   * @param gpmlPathway The GPML pathway object from which to convert
+   * @param pvPathway The GPML pathway object from which to convert
    * @param cyNetView The Cytoscape network to contain the converted GPML pathway
    */
 	public GpmlToPathway(
@@ -587,7 +587,7 @@ public class GpmlToPathway {
     public static final VizTableStore NODE_COLOR            = new BasicVizTableStore("Color",                         BasicExtracter.COLOR_STRING,                    BasicVisualLexicon.NODE_LABEL_COLOR, BasicVisualLexicon.NODE_BORDER_PAINT);
     public static final VizTableStore NODE_BORDER_STYLE     = new BasicVizTableStore("BorderStyle",                   BasicExtracter.LINE_STYLE_NAME, PV_LINE_STYLE_MAP, BasicVisualLexicon.NODE_BORDER_LINE_TYPE);
     public static final VizTableStore NODE_LABEL_FONT       = new BasicVizTableStore("LabelFont",                     BasicExtracter.FONT_NAME,                       BasicVisualLexicon.NODE_LABEL_FONT_FACE);
-    public static final VizTableStore NODE_LABEL_SIZE       = new BasicVizTableStore("LabelSize", Integer.class,       BasicExtracter.FONT_SIZE,                       BasicVisualLexicon.NODE_LABEL_FONT_SIZE);
+    public static final VizTableStore NODE_LABEL_SIZE       = new BasicVizTableStore("LabelSize", Double.class,       BasicExtracter.FONT_SIZE,                       BasicVisualLexicon.NODE_LABEL_FONT_SIZE);
     public static final VizTableStore NODE_TRANSPARENT      = new BasicVizTableStore("Transparent",                   BasicExtracter.TRANSPARENT, PV_TRANSPARENT_MAP, BasicVisualLexicon.NODE_TRANSPARENCY);
     public static final VizTableStore NODE_BORDER_THICKNESS = new BasicVizTableStore("BorderThickness", Double.class, BasicExtracter.NODE_LINE_THICKNESS,             BasicVisualLexicon.NODE_BORDER_WIDTH);
     public static final VizTableStore NODE_SHAPE            = new BasicVizTableStore("Shape",                         BasicExtracter.SHAPE, PV_SHAPE_MAP,             BasicVisualLexicon.NODE_SHAPE);
@@ -1062,7 +1062,7 @@ public class GpmlToPathway {
   private void assignAnchorVizStyle(final CyNode node, final Point2D position, final Color color) {
     cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_X_LOCATION, position.getX(), false));
     cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_Y_LOCATION, position.getY(), false));
-    cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_Z_LOCATION, 10000.0, false));
+    cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_Z_LOCATION, 10001.5, false));
     cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_FILL_COLOR, color, true));
 //    cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_BORDER_WIDTH, 20.0, true));
     cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_WIDTH, 1.0, true));
