@@ -17,6 +17,8 @@
 //
 package org.wikipathways.cytoscapeapp;
 
+import static org.cytoscape.work.ServiceProperties.COMMAND_EXAMPLE_JSON;
+
 import java.util.Properties;
 
 import javax.swing.ImageIcon;
@@ -121,12 +123,14 @@ public class CyActivator extends AbstractCyActivator {
  
  }
 //-----------------------------------------------------
+	String JSON_EXAMPLE = "{\"SUID\":1234}";
 
 	private void reg(BundleContext context, Object service, String cmd, String namespace)
     {
         registerService(context, service,
-        	 TaskFactory.class, ezProps( ServiceProperties.COMMAND,cmd,  ServiceProperties.COMMAND_NAMESPACE, namespace ));
-    }
+        	 TaskFactory.class, ezProps( ServiceProperties.COMMAND,cmd,  ServiceProperties.COMMAND_NAMESPACE, namespace, 
+        			 ServiceProperties.COMMAND_SUPPORTS_JSON, "true", ServiceProperties.COMMAND_EXAMPLE_JSON, JSON_EXAMPLE ));
+ }
 
 	private static Properties ezProps(String... vals) {
     final Properties props = new Properties();

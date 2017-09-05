@@ -44,6 +44,7 @@ import org.pathvisio.core.model.MLine;
 import org.pathvisio.core.model.ObjectType;
 import org.pathvisio.core.model.Pathway;
 import org.pathvisio.core.model.PathwayElement;
+import org.pathvisio.core.model.PathwayElement.Comment;
 import org.pathvisio.core.model.PathwayElement.MAnchor;
 import org.pathvisio.core.model.PathwayElement.MPoint;
 import org.pathvisio.core.model.ShapeType;
@@ -190,9 +191,9 @@ public class GpmlToPathway {
 
 	  static final Converter Z_CONVERT = new Converter() {		// AST
 		    public Object toCyValue(Object[] pvValues) {
-		    	System.out.print("Z_CONVERT: " + pvValues[0] + " @ " + pvValues[0].getClass());
+//		    	System.out.println("Z_CONVERT: " + pvValues[0] + " @ " + pvValues[0].getClass());
 		     double d = (Integer) pvValues[0] * 1.0;
-		    	System.out.print(d);
+//		    	System.out.println(d);
 		    		 return new Double( d);
 		    }
 		  };
@@ -394,13 +395,16 @@ public class GpmlToPathway {
 //      System.out.println("Extracting...");
       for (int i = 0; i < pvValues.length; i++) {
         pvValues[i] = pvElem.getStaticProperty(pvProps[i]);
-        System.out.println("Extracting..." + pvProps[i] + " = " + pvValues[i]);
+//        System.out.println("Extracting..." + pvProps[i] + " = " + pvValues[i]);
       }
       if (pvValues.length == 1 && pvValues[0] == null)
         return null;
      try
      {
-    	 return converter.toCyValue(pvValues);
+    	  Object obj = converter.toCyValue(pvValues);
+//          System.out.println("Extracted: " + obj);
+
+    	  return obj;
      }
      catch (Exception e) { return null;	}
     }
@@ -679,20 +683,20 @@ public class GpmlToPathway {
   }
 
   static class BasicVizPropStore implements VizPropStore {
-    public static final VizPropStore NODE_X                 = new BasicVizPropStore(BasicExtracter.X,                               BasicVisualLexicon.NODE_X_LOCATION);
-    public static final VizPropStore NODE_Y                 = new BasicVizPropStore(BasicExtracter.Y,                               BasicVisualLexicon.NODE_Y_LOCATION);
-    public static final VizPropStore NODE_Z                 = new BasicVizPropStore(BasicExtracter.Z,                               BasicVisualLexicon.NODE_Z_LOCATION);
-    public static final VizPropStore NODE_WIDTH             = new BasicVizPropStore(BasicExtracter.WIDTH,                           BasicVisualLexicon.NODE_WIDTH);
-    public static final VizPropStore NODE_HEIGHT            = new BasicVizPropStore(BasicExtracter.HEIGHT,                          BasicVisualLexicon.NODE_HEIGHT);
-    public static final VizPropStore NODE_FILL_COLOR        = new BasicVizPropStore(BasicExtracter.FILL_COLOR,                      BasicVisualLexicon.NODE_FILL_COLOR);
-    public static final VizPropStore NODE_COLOR             = new BasicVizPropStore(BasicExtracter.COLOR,                           BasicVisualLexicon.NODE_LABEL_COLOR, BasicVisualLexicon.NODE_BORDER_PAINT);
-    public static final VizPropStore NODE_LABEL_FONT        = new BasicVizPropStore(BasicExtracter.FONT,                            BasicVisualLexicon.NODE_LABEL_FONT_FACE);
-    public static final VizPropStore NODE_LABEL_SIZE        = new BasicVizPropStore(BasicExtracter.FONT_SIZE,                       BasicVisualLexicon.NODE_LABEL_FONT_SIZE);
-    public static final VizPropStore NODE_TRANSPARENT       = new BasicVizPropStore(BasicExtracter.TRANSPARENT, PV_TRANSPARENT_MAP, BasicVisualLexicon.NODE_TRANSPARENCY);
-    public static final VizPropStore NODE_ALWAYS_TRANSPARENT = new BasicVizPropStore(new DefaultExtracter(0),                       BasicVisualLexicon.NODE_TRANSPARENCY);
-    public static final VizPropStore NODE_BORDER_STYLE      = new BasicVizPropStore(BasicExtracter.LINE_STYLE_NAME, PV_LINE_STYLE_MAP, BasicVisualLexicon.NODE_BORDER_LINE_TYPE);
+    public static final VizPropStore NODE_X   = new BasicVizPropStore(BasicExtracter.X,  BasicVisualLexicon.NODE_X_LOCATION);
+    public static final VizPropStore NODE_Y   = new BasicVizPropStore(BasicExtracter.Y,  BasicVisualLexicon.NODE_Y_LOCATION);
+    public static final VizPropStore NODE_Z   = new BasicVizPropStore(BasicExtracter.Z,  BasicVisualLexicon.NODE_Z_LOCATION);
+    public static final VizPropStore NODE_WIDTH    = new BasicVizPropStore(BasicExtracter.WIDTH,   BasicVisualLexicon.NODE_WIDTH);
+    public static final VizPropStore NODE_HEIGHT   = new BasicVizPropStore(BasicExtracter.HEIGHT,  BasicVisualLexicon.NODE_HEIGHT);
+    public static final VizPropStore NODE_FILL_COLOR  = new BasicVizPropStore(BasicExtracter.FILL_COLOR,  BasicVisualLexicon.NODE_FILL_COLOR);
+    public static final VizPropStore NODE_COLOR       = new BasicVizPropStore(BasicExtracter.COLOR,       BasicVisualLexicon.NODE_LABEL_COLOR, BasicVisualLexicon.NODE_BORDER_PAINT);
+    public static final VizPropStore NODE_LABEL_FONT  = new BasicVizPropStore(BasicExtracter.FONT,        BasicVisualLexicon.NODE_LABEL_FONT_FACE);
+    public static final VizPropStore NODE_LABEL_SIZE  = new BasicVizPropStore(BasicExtracter.FONT_SIZE,   BasicVisualLexicon.NODE_LABEL_FONT_SIZE);
+    public static final VizPropStore NODE_TRANSPARENT = new BasicVizPropStore(BasicExtracter.TRANSPARENT, PV_TRANSPARENT_MAP, BasicVisualLexicon.NODE_TRANSPARENCY);
+    public static final VizPropStore NODE_ALWAYS_TRANSPARENT = new BasicVizPropStore(new DefaultExtracter(0),      BasicVisualLexicon.NODE_TRANSPARENCY);
+    public static final VizPropStore NODE_BORDER_STYLE = new BasicVizPropStore(BasicExtracter.LINE_STYLE_NAME, PV_LINE_STYLE_MAP, BasicVisualLexicon.NODE_BORDER_LINE_TYPE);
     public static final VizPropStore NODE_BORDER_THICKNESS  = new BasicVizPropStore(BasicExtracter.NODE_LINE_THICKNESS,             BasicVisualLexicon.NODE_BORDER_WIDTH);
-    public static final VizPropStore NODE_SHAPE             = new BasicVizPropStore(BasicExtracter.SHAPE, PV_SHAPE_MAP,             BasicVisualLexicon.NODE_SHAPE);
+    public static final VizPropStore NODE_SHAPE       = new BasicVizPropStore(BasicExtracter.SHAPE, PV_SHAPE_MAP, BasicVisualLexicon.NODE_SHAPE);
 
     final VisualProperty<?>[] cyVizProps;
     final Extracter extracter;
@@ -716,7 +720,7 @@ public class GpmlToPathway {
       final DelayedVizProp[] props = new DelayedVizProp[cyVizProps.length];
       for (int i = 0; i < cyVizProps.length; i++) {
         props[i] = new DelayedVizProp(cyNetObj, cyVizProps[i], cyValue, true);
-        System.out.println("Store: " + props[i].dump());
+//        System.out.println("Store: " + props[i].dump());
       }
       return props;
     }
@@ -726,12 +730,12 @@ public class GpmlToPathway {
     for (final VizPropStore vizPropStore : vizPropStores) {
       final DelayedVizProp[] props = vizPropStore.store(cyNetObj, pvElem);
       for (int i = 0; i < props.length; i++) {
-     if (verbose)      
-    	 System.out.println("storing: " + props[i].dump());
+//     if (verbose)      
+//    	 System.out.println("storing: " + props[i].dump());
         cyDelayedVizProps.add(props[i]);
       }
     }
-    if (verbose)      System.out.println("");
+//    if (verbose)      System.out.println("");
   }
 
   /*
@@ -807,6 +811,7 @@ public class GpmlToPathway {
    ========================================================
   */
   static final TableStore IS_GPML_SHAPE = new BasicTableStore("IsGPMLShape", Boolean.class, new DefaultExtracter(true));
+  // TODO: refactor this as an annotation
 
   private void convertShapes() {
     for (final PathwayElement pvElem : pvPathway.getDataObjects()) 
@@ -821,11 +826,11 @@ public class GpmlToPathway {
     pvToCyNodes.put(pvShape, cyNode);
     IShape shtype = pvShape.getShapeType();
     if (shtype == null) 	return;
-    if (verbose)  
-    {
-    	System.out.println("convertShape: " + (shtype == null ? "NONE" : shtype.getName()) + " " + id + " " + pvShape.getFillColor());
-    	System.out.println("at: " + (int) pvShape.getMCenterX() + ", " +  (int) pvShape.getMCenterY());
-    }
+//    if (verbose)  
+//    {
+//    	System.out.println("convertShape: " + (shtype == null ? "NONE" : shtype.getName()) + " " + id + " " + pvShape.getFillColor());
+//    	System.out.println("at: " + (int) pvShape.getMCenterX() + ", " +  (int) pvShape.getMCenterY());
+//    }
     store(cyNodeTbl, cyNode, pvShape, BasicTableStore.GRAPH_ID, BasicTableStore.TEXT_LABEL, IS_GPML_SHAPE);
     store(cyNode, pvShape,
       BasicVizPropStore.NODE_X, BasicVizPropStore.NODE_Y, BasicVizPropStore.NODE_Z,
@@ -872,7 +877,6 @@ public class GpmlToPathway {
   }
 
   private void convertState(final PathwayElement pvState) {
-    // TODO: refactor this as an annotation
 
     final CyNode cyNode = cyNet.addNode();
     pvToCyNodes.put(pvState, cyNode);
@@ -895,9 +899,46 @@ public class GpmlToPathway {
     );
     String id =  pvState.getGraphId();
     CyRow row = cyNodeTbl.getRow(cyNode.getSUID());
-    if (row != null)
-    	row.set("GraphID", id);
+    if (row == null) 
+    	{
+    	System.err.println("NO ROW " + cyNode.getSUID());
+    	return;
+    	}
+//    row.set("GraphID", "ID" + id);
+		CyColumn col = cyNodeTbl.getColumn("Fred");
+		if (col == null)
+		{
+			cyNodeTbl.createColumn("Fred", String.class, false, "");
+			col = cyNodeTbl.getColumn("Fred");
+		}
+    row.set("Fred", "Rogers");
     
+    List<Comment> comments = pvState.getComments();
+    for (Comment c : comments)
+    {
+    	String s = c.getComment();
+    	if (s != null && s.trim().length() > 0)
+    	{
+        	String[] tokens = s.split(";");
+        	for (String token : tokens)
+        	{
+        		int sep = token.indexOf("=");
+        		if (sep < 0) continue;
+        		String attr = token.substring(0, sep).trim();
+        		String val = token.substring(sep+1).trim();
+        		col = cyNodeTbl.getColumn(attr);
+        		if (col == null)
+        		{
+        			cyNodeTbl.createColumn(attr, String.class, false, "");
+        			col = cyNodeTbl.getColumn(attr);
+        		}
+        		row.set(attr, val);
+//        		System.out.println("setting: " + attr + " to " + val);
+//        			row.getAllValues().put(attr, val);
+        	}
+
+    	}
+    }    
   }
   
   /*
@@ -973,7 +1014,7 @@ public class GpmlToPathway {
   private void convertGroup(final PathwayElement pvGroup) {
     final CyNode cyGroupNode = cyNet.addNode();
     pvToCyNodes.put(pvGroup, cyGroupNode);
-    if (verbose)  System.out.println("convertGroup: " + pvGroup.getLineThickness());
+//    if (verbose)  System.out.println("convertGroup: " + pvGroup.getLineThickness());
     store(cyGroupNode, pvGroup,
       GROUP_X,
       GROUP_Y,
@@ -1052,10 +1093,10 @@ public class GpmlToPathway {
 		for (final MAnchor pvAnchor : pvElem.getMAnchors()) {
 			final CyNode cyNode = cyNet.addNode();
 			final Point2D position = pvLine.getConnectorShape().fromLineCoordinate(pvAnchor.getPosition());
-			System.out.println("\nAnchor at " + cyNode.getSUID() + "  --------");
+//			System.out.println("\nAnchor at " + cyNode.getSUID() + "  --------");
 			pvToCyNodes.put(pvAnchor, cyNode);
 			assignAnchorVizStyle(cyNode, position, pvLine.getColor());
-			System.out.println("--------");
+//			System.out.println("--------");
 		}
 	 }
 
@@ -1088,7 +1129,7 @@ public class GpmlToPathway {
     final MLine pvLine = (MLine) pvElem;
     final String pvStartRef = pvLine.getMStart().getGraphRef();
     final String pvEndRef = pvLine.getMEnd().getGraphRef();
-    System.out.println("\n--------------------\nconvertLine");
+//    System.out.println("\n--------------------\nconvertLine");
 
     Point2D startPt = pvLine.getStartPoint();
     Point2D endPt = pvLine.getEndPoint();
@@ -1112,7 +1153,7 @@ public class GpmlToPathway {
 //	System.out.println("NAnchors: " + pvAnchors.size());
     for (int i = 0; i < pvAnchors.size(); i++) {
     	MAnchor anchor = pvAnchors.get(i);
-    	System.out.println("anchor at " + anchor.getPosition());
+//    	System.out.println("anchor at " + anchor.getPosition());
       }
 
 //    if (pvAnchors.isEmpty()) 
@@ -1160,11 +1201,11 @@ public class GpmlToPathway {
 		String connectorType = pvLine.getConnectorType().toString();
 		org.pathvisio.core.model.LineType endLineType = pvLine.getEndLineType();
 		org.pathvisio.core.model.LineType startLineType = pvLine.getStartLineType();
-		if (verbose)
-		{
-			System.out.println(connectorType + " from: " + getNodeNameWithId(cyEdge.getSource()) + "[" + startLineType.getMappName() + "] " + pvLine.getStartGraphRef() + 
-					" to: " + getNodeNameWithId(cyEdge.getTarget()) + "[" + endLineType.getMappName() + "] " + pvLine.getEndGraphRef());
-		}
+//		if (verbose)
+//		{
+//			System.out.println(connectorType + " from: " + getNodeNameWithId(cyEdge.getSource()) + "[" + startLineType.getMappName() + "] " + pvLine.getStartGraphRef() + 
+//					" to: " + getNodeNameWithId(cyEdge.getTarget()) + "[" + endLineType.getMappName() + "] " + pvLine.getEndGraphRef());
+//		}
 
 		makeSegments(pvLine, cyEdge);
 		Bend bend = EdgeBendVisualProperty.DEFAULT_EDGE_BEND;
@@ -1191,7 +1232,7 @@ public class GpmlToPathway {
 	  	MPoint mStart = pts.get(0);
 	  	int len = pts.size();
 	  	MPoint mEnd = pts.get(len-1);
-	  	if (verbose)	  	System.out.println("length: " + len + " points");
+//	  	if (verbose)	  	System.out.println("length: " + len + " points");
 	  	
 		double startRelX = mStart.getRelX();
 		double startRelY = mStart.getRelY();
@@ -1207,11 +1248,11 @@ public class GpmlToPathway {
 		if (endSide < 0)
 			endSide = getNearestSide(endPt, startPt);
 
-if (verbose)
-		{
-	System.out.println("Source: " + getNodeNameWithId(cyEdge.getSource()) + printPoint(startPt) + " on " + sides[startSide] + " side");
-  	System.out.println("Target: "  + getNodeNameWithId(cyEdge.getTarget()) + printPoint(endPt) + " on " + sides[endSide] + " side");
-		}
+//if (verbose)
+//		{
+//	System.out.println("Source: " + getNodeNameWithId(cyEdge.getSource()) + printPoint(startPt) + " on " + sides[startSide] + " side");
+//  	System.out.println("Target: "  + getNodeNameWithId(cyEdge.getTarget()) + printPoint(endPt) + " on " + sides[endSide] + " side");
+//		}
 		
 	  	Point2D[] wps = calculateWayPoints(startPt, endPt, startSide, endSide);
 	    segments = calculateSegments(startPt, endPt, startSide, endSide, wps);
@@ -1236,8 +1277,8 @@ static boolean verbose = true;
 	    HandleFactory facto = manager.getHandleFactory();
 	    MPoint start = pvLine.getMStart();
 	    MPoint end = pvLine.getMEnd();
-		if (verbose)	
-			System.out.println("makeCurvedEdgeBend start at " + printPoint(start) + ", end at " + printPoint(end));
+//		if (verbose)	
+//			System.out.println("makeCurvedEdgeBend start at " + printPoint(start) + ", end at " + printPoint(end));
  
 	    int sz = segments.size();
 	    for (int i=0; i<sz; i++)
@@ -1245,8 +1286,8 @@ static boolean verbose = true;
 	    	Segment seg = segments.get(i);
 		  Point2D centerPoint  = centerPoint(seg.start, seg.end);	
 		  Handle h = facto.createHandle(networkView, ev,  centerPoint.getX(), centerPoint.getY());
-		  if (verbose)	
-			  System.out.println("adding handle at " + printPoint( centerPoint));
+//		  if (verbose)	
+//			  System.out.println("adding handle at " + printPoint( centerPoint));
 		  bend.getAllHandles().add(h);
 	    }
 		return bend;
@@ -1255,10 +1296,10 @@ static boolean verbose = true;
 
 
 	private Bend makeElbowEdgeBend(CyNetworkView networkView, CyEdge edge, List<Segment> segments) {
-		System.out.println("makeElbowEdgeBend"); 
+//		System.out.println("makeElbowEdgeBend"); 
    BendFactory factory = manager.getBendFactory();	
 	if (networkView == null)    	{
-		System.out.println("networkView == null"); 
+//		System.out.println("networkView == null"); 
 		return null;
 	}
 	View<CyEdge> ev = networkView.getEdgeView(edge);
@@ -1273,8 +1314,8 @@ static boolean verbose = true;
 	    Handle j = facto.createHandle(networkView, ev,  seg.end.getX(), seg.end.getY());
 	    bend.getAllHandles().add(h);
 	    bend.getAllHandles().add(j);
-	    
-	    System.out.println("adding two handles at " + seg);
+//	    
+//	    System.out.println("adding two handles at " + seg);
     }
 	return bend;
 }
@@ -1478,7 +1519,8 @@ static boolean verbose = true;
 		}
 		return 0;
 	}
-
+// R=RIGHT, L=LEFT, T=TOP, B=BOTTOM
+// N=NORTH, E=EAST, S=SOUTH, W=WEST
 	/* The number of connector for each side and relative position
 		RN	RE	RS	RW
 BLN		1	2	1	0

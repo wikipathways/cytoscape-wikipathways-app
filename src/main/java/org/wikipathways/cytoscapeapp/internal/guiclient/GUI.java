@@ -547,12 +547,15 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
       return false;
     }
 
-    public WPPathway getSelectedPathwayRef() {
-      final int row = resultsTable.convertRowIndexToModel(resultsTable.getSelectedRow());
-      if (row < 0)
-        return null;
-      return pathwayRefs.get(row);
-    }
+		public WPPathway getSelectedPathwayRef() {
+			int rawRow = resultsTable.getSelectedRow();
+			if (rawRow < 0)
+				return null;
+			final int row = resultsTable.convertRowIndexToModel(rawRow);
+			if (row < 0)
+				return null;
+			return pathwayRefs.get(row);
+		}
 	}
   //--------------------------------------------------------------
 	private JDialog dlog;

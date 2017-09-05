@@ -35,7 +35,7 @@ public class Annots {
     for (int i = 0; i < elems.length-1; i += 2) {
       map.put(elems[i].toString(), elems[i+1].toString());
     }
-    System.out.println("ezMap: " + map.toString());
+//    System.out.println("ezMap: " + map.toString());
     return map;
   }
 

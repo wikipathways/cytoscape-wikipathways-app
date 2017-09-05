@@ -12,14 +12,11 @@ import java.util.Map;
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyIdentifiable;
 import org.cytoscape.model.CyNode;
-import org.cytoscape.view.model.ContinuousRange;
 import org.cytoscape.view.model.CyNetworkView;
-import org.cytoscape.view.model.Range;
 import org.cytoscape.view.model.View;
 import org.cytoscape.view.model.VisualProperty;
 import org.cytoscape.view.presentation.annotations.ShapeAnnotation;
 import org.cytoscape.view.presentation.property.BasicVisualLexicon;
-import org.cytoscape.view.presentation.property.DoubleVisualProperty;
 import org.cytoscape.view.presentation.property.EdgeBendVisualProperty;
 import org.cytoscape.view.presentation.property.values.Bend;
 import org.cytoscape.view.presentation.property.values.Handle;
@@ -56,47 +53,29 @@ class DelayedVizProp {
     this.value = value;
     this.isLocked = isLocked;
   }
-	static boolean verbose = false;
+	static boolean verbose = true;
 	public String toString() {  return prop.getDisplayName() + ": " + value.toString(); }
 	public static void applyAll(final CyNetworkView netView,final Iterable<DelayedVizProp> delayedProps, WPManager mgr) 
 	{
-//		System.out.println("\n");
-//		System.out.println("netView: " + netView.toString());
 		for ( DelayedVizProp delayedProp : delayedProps) {
 			final Object value = delayedProp.value;
 			if (value == null) continue;
 
-			String propName = delayedProp.prop.getIdString();
-//			String propvalue = delayedProp.value.toString();
-			if (verbose)
-				System.out.println("apply: " + delayedProp.dump());
-	if (propName.contains("_Z") && propName.isEmpty())
-	{
-//		if (value instanceof Integer)
-//		{
-//			CyIdentifiable obj = delayedProp.netObj;
-//			double z = ((Integer)value) * 1.0;
-//			Range<Double> ARBITRARY_DOUBLE_RANGE = new ContinuousRange<>(Double.class,
-//					Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, true, true);
-//			VisualProperty<Double> prop = new DoubleVisualProperty(z, ARBITRARY_DOUBLE_RANGE,
-//					"NODE_Z_LOCATION", "NODE_Z_LOCATION", CyNode.class );
-//			delayedProp = new DelayedVizProp(obj,prop ,new Double(z),  false);
-//			
-//		}
-		System.out.println("ZZZZ: " + delayedProp.dump());
-	}
+		String propName = delayedProp.prop.getDisplayName();
 		if ("Node Shape".equals(propName))
-		 applyNodeShape(netView, delayedProps, mgr, delayedProp);
+			applyNodeShape(netView, delayedProps, mgr, delayedProp);
 
 		if ("Edge Bend".equals(propName))
 			applyEdgeBend(netView, mgr, delayedProp);
 			
 	
       View<?> view = null;
-      if (delayedProp.netObj instanceof CyNode) {
+      if (delayedProp.netObj instanceof CyNode) 
+      {
         final CyNode node = (CyNode) delayedProp.netObj;
         view = netView.getNodeView(node);
-      } else if (delayedProp.netObj instanceof CyEdge) {
+      } else if (delayedProp.netObj instanceof CyEdge) 
+      {
         final CyEdge edge = (CyEdge) delayedProp.netObj;
         view = netView.getEdgeView(edge);
       }
@@ -104,7 +83,7 @@ class DelayedVizProp {
 //		System.out.println("Node id: " + delayedProp.netObj.getSUID()  + " is setting " + propName + " to " + propvalue);
 
       String prop = delayedProp.prop.getIdString();
-      System.out.println(prop + " @ " + delayedProp.prop.getClass() + " # " + delayedProp.prop.getDisplayName() +  " = " + value + " @ " + value.getClass());
+//      System.out.println(prop + " @ " + delayedProp.prop.getClass() + " # " + delayedProp.prop.getDisplayName() +  " = " + value + " @ " + value.getClass());
       boolean isPosition = prop.equals("NODE_X_LOCATION") || prop.equals("NODE_Y_LOCATION");
      if (delayedProp.isLocked && !isPosition)
         view.setLockedValue(delayedProp.prop, value);
@@ -113,25 +92,25 @@ class DelayedVizProp {
     }
   }
 
-	public String dump()
-	{
-		String propName = prop.getDisplayName();
-		String propvalue = value == null ? "EMPTY" : value.toString();
-		String propClass = value == null ? "EMPTY" : value.getClass().toString();
-		return("delayedProp: " + propName + " " + propvalue + " " + propClass);
-		
-	}
+//	public String dump()
+//	{
+//		String propName = prop.getDisplayName();
+//		String propvalue = value == null ? "EMPTY" : value.toString();
+//		String propClass = value == null ? "EMPTY" : value.getClass().toString();
+//		return("delayedProp: " + propName + " " + propvalue + " " + propClass);
+//		
+//	}
 	//--------------------------------------------------------------------------------
 	private static void applyNodeShape(final CyNetworkView netView,final Iterable<DelayedVizProp> delayedProps, WPManager mgr, DelayedVizProp delayedProp) 		{
 		final Map<String,String> map = new HashMap<String,String>();
 		CyNode src = (CyNode) delayedProp.netObj;
 		List<DelayedVizProp> relatedProps = getPropsByID(delayedProps, src.getSUID());
-		map.put("canvas", "background");
 		double wid = 0;
 		double hght = 0;
 		double x = Double.NaN;
 		double y = Double.NaN;
 //		double z = Double.NaN;
+//		System.out.println("applyNodeShape");
 		for (DelayedVizProp prop : relatedProps)			// we have to rescan all properties to find other attributes for the same shape
 		{
 			String propName1 = prop.prop.getDisplayName();
@@ -152,53 +131,57 @@ class DelayedVizProp {
 			}
 		}
 		String propvalue = delayedProp.value.toString();
+		
+		if ("Round Rectangle".equals(propvalue))
+		{
+			map.put("edgeThickness", "4.3");
+			propvalue = "Rounded Rectangle";
+		}
+		if ("Octagon".equals(propvalue))			// HACK - should look for group node
+			return;
 		Shape thePath = getShapePath(propvalue);
 		ShapeAnnotation mAnnotation = null;
-		if (thePath != null)
-		{
-			mAnnotation = mgr.getAnnots().newShape(netView, map);
-			mAnnotation.setCustomShape(thePath);
-			View<CyNode> view = netView.getNodeView(src);
-//			mAnnotation.setCanvas("background");
-			view.setVisualProperty(BasicVisualLexicon.NODE_VISIBLE, false);
-
-			netView.getModel().removeNodes(Collections.singletonList((src)));
-			
-//			view.setVisualProperty(BasicVisualLexicon.NODE_BORDER_PAINT, Color.GREEN);  // DEBUG
-//			view.setVisualProperty(BasicVisualLexicon.NODE_FILL_COLOR, Color.YELLOW);
-		}
-		else 
-		{
-			if (mgr == null)		// SKIP
-			{
-			mAnnotation = mgr.getAnnots().newShape(netView, map);
-			mAnnotation.setShapeType(propvalue);  
-			}
-		}
-	
-		boolean legalSize = (wid > 0 && hght > 0);
-		if (legalSize && mAnnotation != null)
-		{	
-			mAnnotation.setSize(wid, hght);
 		
-		}
+//		map.put("canvas", "background");
+		mAnnotation = mgr.getAnnots().newShape(netView, map);
+//		mAnnotation.setCanvas("background");			BUG:  this will cause annotation to move to 0,0!
+		if (thePath != null)
+			mAnnotation.setCustomShape(thePath);
+		else 
+			mAnnotation.setShapeType(propvalue);  
+
+		boolean legalSize = (wid > 0 && hght > 0);
+		if (legalSize)
+			mAnnotation.setSize(wid, hght);
 		boolean legalXY = (!(Double.isNaN(x) || Double.isNaN(y)));
 		
-		if (verbose) System.out.println("size: "+ (int) x + ",  "+ (int)  y +  " # " + (int) wid + ",  "+ (int)  hght);
-		if (verbose) System.out.println("mAnnotation: "+ mAnnotation);
-		if (verbose) System.out.println("---> legal size: "+ legalSize + " legal pos: "+ legalXY);
-
 		if (legalXY && legalSize) 
 		{
 			x -= (wid / 2.);
 			y -= (hght / 2.);
 			if (mAnnotation != null) 
 			{
-				if (verbose) System.out.println(String.format("moving annotation to : %4.1f , %4.1f", x, y));
+//				if (verbose) System.out.println(String.format("moving annotation to : %4.1f , %4.1f", x, y));
 				mAnnotation.moveAnnotation(new Point2D.Double(x, y));
 			}
 			// view.setLockedValue(prop, 0.);
 		}
+//		if (verbose) 
+//		{
+//			System.out.println("size: "+ (int) x + ",  "+ (int)  y +  " # " + (int) wid + ",  "+ (int)  hght);
+//			System.out.println("mAnnotation: "+ mAnnotation);	
+//			System.out.println("---> legal size: "+ legalSize + " legal pos: "+ legalXY);
+//		}
+//		
+		boolean deleteNode = true;  //thePath != null;		
+		if (deleteNode)
+		{
+			View<CyNode> view = netView.getNodeView(src);
+			view.setVisualProperty(BasicVisualLexicon.NODE_VISIBLE, false);
+			netView.getModel().removeNodes(Collections.singletonList((src)));	
+//			mAnnotation.setCanvas("background");		//	BUG:  this will cause annotation to move to 0,0!
+		}
+
 	}
 	//--------------------------------------------------------------------------------
 	private static void applyEdgeBend(final CyNetworkView netView, WPManager mgr, final DelayedVizProp delayedProp) {
@@ -236,11 +219,12 @@ class DelayedVizProp {
 				//
 
 //				 boolean isCurved = 1 == EdgeView.CURVED_LINES;
-
+if (edgeView != null)
+{
 				Bend bend = edgeView.getVisualProperty(BasicVisualLexicon.EDGE_BEND);
-			if (verbose)
-					System.out.println("bend: " + bend.getAllHandles().size() + " handles "
-						+ (delayedProp.isLocked ? "LOCKED" : "UNLOCKED"));
+//			if (verbose)
+//					System.out.println("bend: " + bend.getAllHandles().size() + " handles "
+//						+ (delayedProp.isLocked ? "LOCKED" : "UNLOCKED"));
 
 				List<Handle> handles = bend.getAllHandles();
 //				double EPSILON = 0.000000001;
@@ -260,20 +244,27 @@ class DelayedVizProp {
 				} else
 					handles.add(handleFactory.createHandle(netView, edgeView, elbow.getX(), elbow.getY())); 
 			}
-		} catch (ClassCastException ex) {
+			}
+			} catch (ClassCastException ex) {
 			System.out.println("->ClassCastException: " + delayedProp.netObj.getClass());
 		}
 	}
 	
 	//--------------------------------------------------------------------------------
 	private static Shape getShapePath(String propvalue) {
-//		System.out.println("propvalue");
+		System.out.println("getShapePath: " + propvalue);
+		if ("Cell".equals(propvalue)) 					  		return makeRoundRect();
+		if ("Nucleus".equals(propvalue)) 					  	return makeEllipse();
+		if ("Organelle".equals(propvalue)) 					  	return makeRoundRect();
+		if ("Vesicle".equals(propvalue)) 					  	return makeEllipse();
+		if ("Ellipse".equals(propvalue)) 					  	return makeEllipse();
+		if ("Rounded Rectangle".equals(propvalue)) 			  	return makeRoundRect();
 		if ("Mitochondria".equals(propvalue)) 			  		return makeMitochondria();
-		  if ("Endoplasmic Reticulum".equals(propvalue))  		return makeER();
-		  if ("Sarcoplasmic Reticulum".equals(propvalue)) 		return makeSR();
-		  if ("Golgi Apparatus".equals(propvalue)) 				return makeGolgi();
-		  if ("Brace".equals(propvalue))  						return makeBrace();
-		  if ("Triangle".equals(propvalue))  					return makeTriangle();
+		if ("Endoplasmic Reticulum".equals(propvalue))  		return makeER();
+		if ("Sarcoplasmic Reticulum".equals(propvalue)) 		return makeSR();
+		if ("Golgi Apparatus".equals(propvalue)) 				return makeGolgi();
+		if ("Brace".equals(propvalue))  						return makeBrace();
+		if ("Triangle".equals(propvalue))  						return makeTriangle();
 		return null;
 	}
 
@@ -302,8 +293,13 @@ class DelayedVizProp {
 		System.out.println(String.format("%s: (%3.1f, %3.1f)" , name, pt.getX() , pt.getY()));
 	  }
 		static private Point2D.Double getNodePosition(View<CyNode> nodeView) {
-		    Double x = nodeView.getVisualProperty(BasicVisualLexicon.NODE_X_LOCATION);
-		    Double y = nodeView.getVisualProperty(BasicVisualLexicon.NODE_Y_LOCATION);
+		    Double x = 0.;
+		    Double y = 0.;
+		    if (nodeView != null)
+		    {
+		    	x = nodeView.getVisualProperty(BasicVisualLexicon.NODE_X_LOCATION);
+			    y = nodeView.getVisualProperty(BasicVisualLexicon.NODE_Y_LOCATION);
+		    }
 			return new Point2D.Double(x,y);
 		}
 //
@@ -314,7 +310,97 @@ class DelayedVizProp {
 //		}
 //
 		//--------------------------------------------------------------------------------
+//https://stackoverflow.com/questions/14169234/the-relation-of-the-bezier-curve-and-ellipse
+	static private Shape makeEllipse() {
+		GeneralPath path = new GeneralPath();
 
+		double x = 0;
+		double y = 0;
+		double w = 100;
+		double h = 100;
+
+		double kappa = 0.5522848;
+		double ox = (w / 2) * kappa; // control point offset horizontal
+		double oy = (h / 2) * kappa; // control point offset vertical
+		double xe = x + w; // x-end
+		double ye = y + h; // y-end
+		double xm = x + w / 2; // x-middle
+		double ym = y + h / 2; // y-middle
+
+		path.moveTo(x, ym);
+		path.curveTo(x, ym - oy, xm - ox, y, xm, y);
+		path.curveTo(xm + ox, y, xe, ym - oy, xe, ym);
+		path.curveTo(xe, ym + oy, xm + ox, ye, xm, ye);
+		path.curveTo(xm - ox, ye, x, ym + oy, x, ym);
+
+		x = 2;
+		y = 2;
+		w = 96;
+		h = 96;
+
+		ox = (w / 2) * kappa; // control point offset horizontal
+		oy = (h / 2) * kappa; // control point offset vertical
+		xe = x + w; // x-end
+		ye = y + h; // y-end
+		xm = x + w / 2; // x-middle
+		ym = y + h / 2; // y-middle
+
+		path.moveTo(x, ym);
+		path.curveTo(x, ym - oy, xm - ox, y, xm, y);
+		path.curveTo(xm + ox, y, xe, ym - oy, xe, ym);
+		path.curveTo(xe, ym + oy, xm + ox, ye, xm, ye);
+		path.curveTo(xm - ox, ye, x, ym + oy, x, ym);
+		path.closePath();
+		return path;
+	}
+		//--------------------------------------------------------------------------------
+		static private Shape makeRoundRect()
+		{
+			float width = 100.f;
+			float height = 100.f;
+			float x = 0.0f;
+			float y = 0.0f;
+			float curveRad = 8.0f;
+			
+			GeneralPath path = new GeneralPath();
+//			path.moveTo(-100, -100);
+			path.moveTo(x, curveRad);
+			path.curveTo(x, y, curveRad, y, x+curveRad, y);
+			path.lineTo(width - curveRad, y);
+			path.curveTo(width, y, width, curveRad, width, curveRad);
+			path.lineTo(width, height - curveRad);
+			path.curveTo(width, height, width - curveRad, height, width - curveRad, height);
+			path.lineTo(curveRad, height);
+			path.curveTo(x, height, x, height - curveRad, x, height - curveRad);
+			path.lineTo(x, curveRad);
+			
+			width = 98.f;
+			height = 98.f;
+			x = 1.0f;
+			y = 1.0f;
+			path.moveTo(x, curveRad);
+			path.curveTo(x, y, curveRad, y, x+curveRad, y);
+			path.lineTo(width - curveRad, y);
+			path.curveTo(width, y, width, curveRad, width, curveRad);
+			path.lineTo(width, height - curveRad);
+			path.curveTo(width, height, width - curveRad, height, width - curveRad, height);
+			path.lineTo(curveRad, height);
+			path.curveTo(x, height, x, height - curveRad, x, height - curveRad);
+			path.lineTo(x, curveRad);
+			return path;
+	    }
+		
+//		path.moveTo(0.0, 8.0);
+//		path.curveTo(0.0, 0.0, 8.0, 0.0, 8.0, 0.0);
+//		path.lineTo(width - 8.0, 0.0);
+//		path.curveTo(width, 0.0, width, 8.0, width, 8.0);
+//		path.lineTo(width, height - 8.0);
+//		path.curveTo(width, height, width - 8.0, height, width - 8.0, height);
+//		path.lineTo(8.0, height);
+//		path.curveTo(0.0, .height, 0.0, height - 8.0, 0, height - 8.0);
+//		path.closePath();
+
+		
 	static private GeneralPath makeMitochondria()
 	  {
 		GeneralPath path = new GeneralPath();
