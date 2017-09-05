@@ -254,6 +254,7 @@ if (edgeView != null)
 	private static Shape getShapePath(String propvalue) {
 		System.out.println("getShapePath: " + propvalue);
 		if ("Cell".equals(propvalue)) 					  		return makeRoundRect();
+		if ("Oval".equals(propvalue)) 					  		return makeEllipse();
 		if ("Nucleus".equals(propvalue)) 					  	return makeEllipse();
 		if ("Organelle".equals(propvalue)) 					  	return makeRoundRect();
 		if ("Vesicle".equals(propvalue)) 					  	return makeEllipse();
