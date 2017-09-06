@@ -5,6 +5,7 @@ import java.awt.Font;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -538,15 +539,23 @@ public class GpmlToPathway {
   static {
     PV_SHAPE_MAP.put("Rectangle",        NodeShapeVisualProperty.RECTANGLE);
     PV_SHAPE_MAP.put("Triangle",         NodeShapeVisualProperty.TRIANGLE);			// Note: triangle is different shape than PV's
+    PV_SHAPE_MAP.put("RoundRectangle", NodeShapeVisualProperty.ROUND_RECTANGLE);
     PV_SHAPE_MAP.put("RoundedRectangle", NodeShapeVisualProperty.ROUND_RECTANGLE);
     PV_SHAPE_MAP.put("Hexagon",          NodeShapeVisualProperty.HEXAGON);
     PV_SHAPE_MAP.put("Pentagon",         NodeShapeVisualProperty.HEXAGON);			// TODO
+    PV_SHAPE_MAP.put("Ellipse",             NodeShapeVisualProperty.ELLIPSE);
     PV_SHAPE_MAP.put("Oval",             NodeShapeVisualProperty.ELLIPSE);
     PV_SHAPE_MAP.put("Octagon",          NodeShapeVisualProperty.OCTAGON);
+    PV_SHAPE_MAP.put("Cell",          NodeShapeVisualProperty.ELLIPSE);
+    PV_SHAPE_MAP.put("Nucleus",          NodeShapeVisualProperty.ELLIPSE);
+    PV_SHAPE_MAP.put("Organelle",          NodeShapeVisualProperty.ROUND_RECTANGLE);
+    PV_SHAPE_MAP.put("Octagon",          NodeShapeVisualProperty.OCTAGON);
     PV_SHAPE_MAP.put("Mitochondria",     new NodeShapeImpl("Mitochondria", "Mitochondria"));	
+    PV_SHAPE_MAP.put("Sarcoplasmic Reticulum", new NodeShapeImpl("Sarcoplasmic Reticulum", "Sarcoplasmic Reticulum"));	
     PV_SHAPE_MAP.put("Endoplasmic Reticulum", new NodeShapeImpl("Endoplasmic Reticulum", "Endoplasmic Reticulum"));	
     PV_SHAPE_MAP.put("Golgi Apparatus", new NodeShapeImpl("Golgi Apparatus", "Golgi Apparatus"));	
     PV_SHAPE_MAP.put("Brace",     		new NodeShapeImpl("Brace", "Brace"));		
+    PV_SHAPE_MAP.put("Arc",     		new NodeShapeImpl("Arc", "Arc"));		
     
 
   }
@@ -720,22 +729,18 @@ public class GpmlToPathway {
       final DelayedVizProp[] props = new DelayedVizProp[cyVizProps.length];
       for (int i = 0; i < cyVizProps.length; i++) {
         props[i] = new DelayedVizProp(cyNetObj, cyVizProps[i], cyValue, true);
-//        System.out.println("Store: " + props[i].dump());
       }
       return props;
     }
   }
 
   void store(final CyIdentifiable cyNetObj, final PathwayElement pvElem, final VizPropStore ... vizPropStores) {
-    for (final VizPropStore vizPropStore : vizPropStores) {
+    for (final VizPropStore vizPropStore : vizPropStores) 
+    {
       final DelayedVizProp[] props = vizPropStore.store(cyNetObj, pvElem);
-      for (int i = 0; i < props.length; i++) {
-//     if (verbose)      
-//    	 System.out.println("storing: " + props[i].dump());
-        cyDelayedVizProps.add(props[i]);
-      }
+      for (DelayedVizProp prop : props) 
+        cyDelayedVizProps.add(prop);
     }
-//    if (verbose)      System.out.println("");
   }
 
   /*
@@ -826,11 +831,11 @@ public class GpmlToPathway {
     pvToCyNodes.put(pvShape, cyNode);
     IShape shtype = pvShape.getShapeType();
     if (shtype == null) 	return;
-//    if (verbose)  
-//    {
-//    	System.out.println("convertShape: " + (shtype == null ? "NONE" : shtype.getName()) + " " + id + " " + pvShape.getFillColor());
-//    	System.out.println("at: " + (int) pvShape.getMCenterX() + ", " +  (int) pvShape.getMCenterY());
-//    }
+    if (verbose)  
+    {
+    	System.out.println("convertShape: " + (shtype == null ? "NONE" : shtype.getName()) + " " + id + " " + pvShape.getFillColor());
+    	System.out.println("at: " + (int) pvShape.getMCenterX() + ", " +  (int) pvShape.getMCenterY());
+    }
     store(cyNodeTbl, cyNode, pvShape, BasicTableStore.GRAPH_ID, BasicTableStore.TEXT_LABEL, IS_GPML_SHAPE);
     store(cyNode, pvShape,
       BasicVizPropStore.NODE_X, BasicVizPropStore.NODE_Y, BasicVizPropStore.NODE_Z,
@@ -856,14 +861,14 @@ public class GpmlToPathway {
   final Extracter STATE_X_EXTRACTER = new Extracter() {
     public Object extract(final PathwayElement pvState) {
       final PathwayElement pvParent = (PathwayElement) pvPathway.getGraphIdContainer(pvState.getGraphRef());
-      return pvParent.getMCenterX() + pvState.getRelX() * pvParent.getMWidth() / 2.0;
+      return pvParent.getMCenterX() + (pvState.getRelX() * pvParent.getMWidth() / 2.0);
     }
   };
   
   final Extracter STATE_Y_EXTRACTER = new Extracter() {
     public Object extract(final PathwayElement pvState) {
       final PathwayElement pvParent = (PathwayElement) pvPathway.getGraphIdContainer(pvState.getGraphRef());
-      return pvParent.getMCenterY() + pvState.getRelY() * pvParent.getMHeight() / 2.0;
+      return pvParent.getMCenterY() + (pvState.getRelY() * pvParent.getMHeight() / 2.0);
     }
   };
 
@@ -897,22 +902,27 @@ public class GpmlToPathway {
       BasicVizPropStore.NODE_BORDER_THICKNESS,
       BasicVizPropStore.NODE_SHAPE
     );
-    String id =  pvState.getGraphId();
+//    String id =  pvState.getGraphId();
     CyRow row = cyNodeTbl.getRow(cyNode.getSUID());
-    if (row == null) 
-    	{
-    	System.err.println("NO ROW " + cyNode.getSUID());
-    	return;
-    	}
-//    row.set("GraphID", "ID" + id);
-		CyColumn col = cyNodeTbl.getColumn("Fred");
-		if (col == null)
-		{
-			cyNodeTbl.createColumn("Fred", String.class, false, "");
-			col = cyNodeTbl.getColumn("Fred");
-		}
-    row.set("Fred", "Rogers");
-    
+    row.set(CyNetwork.NAME, pvState.getTextLabel());
+//    if (row == null) 
+//	{
+//    	System.err.println("NO ROW " + cyNode.getSUID());
+//    	return;
+//	}
+//	String graphRef = row.get("GraphRef", String.class);
+    String graphRef = pvState.getGraphRef();
+   
+ //    row.set("GraphID", "ID" + id);
+//		CyColumn col = cyNodeTbl.getColumn("Fred");
+//		if (col == null)
+//		{
+//			cyNodeTbl.createColumn("Fred", String.class, false, "");
+//			col = cyNodeTbl.getColumn("Fred");
+//		}
+//    row.set("Fred", "Rogers");
+//    
+    CyColumn col;
     List<Comment> comments = pvState.getComments();
     for (Comment c : comments)
     {
@@ -931,12 +941,18 @@ public class GpmlToPathway {
         		{
         			cyNodeTbl.createColumn(attr, String.class, false, "");
         			col = cyNodeTbl.getColumn(attr);
+        			
         		}
-        		row.set(attr, val);
-//        		System.out.println("setting: " + attr + " to " + val);
-//        			row.getAllValues().put(attr, val);
+        		if (graphRef != null)
+        		{
+        			Collection<CyRow> nodeRows = cyNodeTbl.getMatchingRows("GraphId", graphRef);
+        			if (nodeRows.size() != 0)
+        			{
+        				CyRow aRow =  nodeRows.iterator().next();
+        				aRow.set(attr, val);
+        			}
+        		}
         	}
-
     	}
     }    
   }

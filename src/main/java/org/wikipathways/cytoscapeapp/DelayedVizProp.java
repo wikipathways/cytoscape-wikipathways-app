@@ -132,11 +132,11 @@ class DelayedVizProp {
 		}
 		String propvalue = delayedProp.value.toString();
 		
-		if ("Round Rectangle".equals(propvalue))
-		{
-			map.put("edgeThickness", "4.3");
-			propvalue = "Rounded Rectangle";
-		}
+//		if ("Round Rectangle".equals(propvalue))
+//		{
+//			map.put("edgeThickness", "4.3");
+//			propvalue = "Rounded Rectangle";
+//		}
 		if ("Octagon".equals(propvalue))			// HACK - should look for group node
 			return;
 		Shape thePath = getShapePath(propvalue);
@@ -183,22 +183,20 @@ class DelayedVizProp {
 		}
 
 	}
-	//--------------------------------------------------------------------------------
+
+	// --------------------------------------------------------------------------------
 	private static void applyEdgeBend(final CyNetworkView netView, WPManager mgr, final DelayedVizProp delayedProp) {
-		// SEE BELOW: running this code results in:
-		// java.lang.IllegalStateException: defineHandle
-		//
 		if (delayedProp.value == EdgeBendVisualProperty.DEFAULT_EDGE_BEND)
 			return;
-		
+
 		try {
 			HandleFactory handleFactory = mgr.getHandleFactory();
-//			System.out.println("handleFactory: " + handleFactory.toString());
+			// System.out.println("handleFactory: " + handleFactory.toString());
 			if (delayedProp.netObj != null) {
 				CyEdge edge = (CyEdge) delayedProp.netObj;
 				CyNode src = edge.getSource();
 				CyNode targ = edge.getTarget();
-//if (src == null || src != null) return;
+				// if (src == null || src != null) return;
 				View<CyNode> srcView = netView.getNodeView(src);
 				View<CyNode> targView = netView.getNodeView(targ);
 				View<CyEdge> edgeView = netView.getEdgeView(edge);
@@ -211,61 +209,57 @@ class DelayedVizProp {
 				Point2D.Double srcCenter = getNodePosition(srcView);
 				Point2D.Double targCenter = getNodePosition(targView);
 
-				Point2D.Double elbow = new Point2D.Double(srcCenter.getX(), targCenter.getY());		// TODO -- two choices here!
+				Point2D.Double elbow = new Point2D.Double(srcCenter.getX(), targCenter.getY()); // TODO -- two  choices here!
 				//
 				// showPoint("src", srcCenter);
 				// showPoint("target", targCenter);
 				// showPoint("elbow", elbow);
 				//
 
-//				 boolean isCurved = 1 == EdgeView.CURVED_LINES;
-if (edgeView != null)
-{
-				Bend bend = edgeView.getVisualProperty(BasicVisualLexicon.EDGE_BEND);
-//			if (verbose)
-//					System.out.println("bend: " + bend.getAllHandles().size() + " handles "
-//						+ (delayedProp.isLocked ? "LOCKED" : "UNLOCKED"));
+				// boolean isCurved = 1 == EdgeView.CURVED_LINES;
+				if (edgeView != null) {
+					Bend bend = edgeView.getVisualProperty(BasicVisualLexicon.EDGE_BEND);
+					// if (verbose)
+					// System.out.println("bend: " + bend.getAllHandles().size()
+					// + " handles " + (delayedProp.isLocked ? "LOCKED" : "UNLOCKED"));
 
-				List<Handle> handles = bend.getAllHandles();
-//				double EPSILON = 0.000000001;
-//				if (Math.abs(targCenter.getX() - srcCenter.getX()) < EPSILON) {
-//					System.out.println("VERTICAL");
-//				}
-				// THROWS: java.lang.IllegalStateException: Invalid angle: NaN.
-				// Caused by cos(theta) = NaN
-				// at org.cytoscape.ding.impl.HandleImpl.convertToRatio(HandleImpl.java:175)
-//				else 
+					List<Handle> handles = bend.getAllHandles();
 					if (handles.size() > 0) {
-					try {
-						handles.get(0).defineHandle(netView, edgeView, elbow.getX(), elbow.getY());
-					} catch (IllegalStateException ex) {
-						System.err.println("IllegalStateException at " + (int) elbow.getX() + ", " + (int) elbow.getY());
-					}
-				} else
-					handles.add(handleFactory.createHandle(netView, edgeView, elbow.getX(), elbow.getY())); 
+						try {
+							handles.get(0).defineHandle(netView, edgeView, elbow.getX(), elbow.getY());
+						} catch (IllegalStateException ex) {
+							System.err.println(
+									"IllegalStateException at " + (int) elbow.getX() + ", " + (int) elbow.getY());
+						}
+					} else
+						handles.add(handleFactory.createHandle(netView, edgeView, elbow.getX(), elbow.getY()));
+				}
 			}
-			}
-			} catch (ClassCastException ex) {
+		} catch (ClassCastException ex) {
 			System.out.println("->ClassCastException: " + delayedProp.netObj.getClass());
 		}
 	}
-	
+
 	//--------------------------------------------------------------------------------
 	private static Shape getShapePath(String propvalue) {
-		System.out.println("getShapePath: " + propvalue);
+		if (verbose) System.out.println("getShapePath: " + propvalue);
+		if ("Rounded Rectangle".equals(propvalue)) 			  	return makeRoundRect();
+		if ("Round Rectangle".equals(propvalue)) 			  	return makeRoundRect();
 		if ("Cell".equals(propvalue)) 					  		return makeRoundRect();
+		if ("Organelle".equals(propvalue)) 					  	return makeRoundRect();
+
 		if ("Oval".equals(propvalue)) 					  		return makeEllipse();
 		if ("Nucleus".equals(propvalue)) 					  	return makeEllipse();
-		if ("Organelle".equals(propvalue)) 					  	return makeRoundRect();
 		if ("Vesicle".equals(propvalue)) 					  	return makeEllipse();
 		if ("Ellipse".equals(propvalue)) 					  	return makeEllipse();
-		if ("Rounded Rectangle".equals(propvalue)) 			  	return makeRoundRect();
+	
 		if ("Mitochondria".equals(propvalue)) 			  		return makeMitochondria();
 		if ("Endoplasmic Reticulum".equals(propvalue))  		return makeER();
 		if ("Sarcoplasmic Reticulum".equals(propvalue)) 		return makeSR();
 		if ("Golgi Apparatus".equals(propvalue)) 				return makeGolgi();
 		if ("Brace".equals(propvalue))  						return makeBrace();
 		if ("Triangle".equals(propvalue))  						return makeTriangle();
+		if ("Arc".equals(propvalue))  							return makeArc();
 		return null;
 	}
 
@@ -401,6 +395,16 @@ if (edgeView != null)
 //		path.curveTo(0.0, .height, 0.0, height - 8.0, 0, height - 8.0);
 //		path.closePath();
 
+		static private GeneralPath makeArc()				// PLACEHOLDER -- arc needs start angle & rotation
+		{
+			GeneralPath path = new GeneralPath();
+			path.moveTo (50f, 0f);
+			path.quadTo (0f, 0f,50f, 50f);
+//			path.quadTo (50f, 100f, 50f, 50f);
+
+//			path.closePath();
+			return path;
+	  }
 		
 	static private GeneralPath makeMitochondria()
 	  {
