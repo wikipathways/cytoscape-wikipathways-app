@@ -909,9 +909,9 @@ public class GpmlToPathway {
       BasicVizPropStore.NODE_BORDER_THICKNESS,
       BasicVizPropStore.NODE_SHAPE
     );
-    DelayedVizProp fillColorProp = new DelayedVizProp(cyNode,
-    		BasicVisualLexicon.NODE_FILL_COLOR, new Color(250, 0, 0), true);
-    cyDelayedVizProps.add(fillColorProp);
+//    DelayedVizProp fillColorProp = new DelayedVizProp(cyNode,
+//    		BasicVisualLexicon.NODE_FILL_COLOR, new Color(250, 0, 0), true);
+//    cyDelayedVizProps.add(fillColorProp);
     CyRow row = cyNodeTbl.getRow(cyNode.getSUID());
     if (row == null) 
 	{
