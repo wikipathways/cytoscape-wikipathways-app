@@ -285,6 +285,7 @@ public class GpmlToNetwork {
 	private void convertShapeTypeNone(final CyNode node, final PathwayElement elem) {
 		if (ShapeType.NONE.equals(elem.getShapeType())) {
 			delayedVizProps.add(new DelayedVizProp(node,BasicVisualLexicon.NODE_BORDER_WIDTH, 0.0, true));
+			delayedVizProps.add(new DelayedVizProp(node,BasicVisualLexicon.NODE_BORDER_TRANSPARENCY, 0.0, true));
 		}
 	}
 

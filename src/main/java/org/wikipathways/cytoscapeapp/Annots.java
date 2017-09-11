@@ -45,6 +45,11 @@ public class Annots {
     return annot;
   }
 
+  public ShapeAnnotation addShape(ShapeAnnotation annot) {
+    mgr.addAnnotation(annot);
+    return annot;
+  }
+
   public ShapeAnnotation newShape(final CyNetworkView netView, Object ... args) {
     final ShapeAnnotation annot = shapeFct.createAnnotation(ShapeAnnotation.class, netView, ezMap(args));
     mgr.addAnnotation(annot);

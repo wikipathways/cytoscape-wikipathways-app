@@ -1,5 +1,6 @@
 package org.wikipathways.cytoscapeapp;
 
+import java.awt.Color;
 import java.awt.Shape;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
@@ -9,12 +10,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.SwingUtilities;
+
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyIdentifiable;
+import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.View;
 import org.cytoscape.view.model.VisualProperty;
+import org.cytoscape.view.presentation.annotations.Annotation;
 import org.cytoscape.view.presentation.annotations.ShapeAnnotation;
 import org.cytoscape.view.presentation.property.BasicVisualLexicon;
 import org.cytoscape.view.presentation.property.EdgeBendVisualProperty;
@@ -90,8 +95,10 @@ class DelayedVizProp {
        else 
         view.setVisualProperty(delayedProp.prop, value);
     }
+		wpManagerInstance = mgr;
+	postProcessShapes();
   }
-
+	static WPManager wpManagerInstance;
 //	public String dump()
 //	{
 //		String propName = prop.getDisplayName();
@@ -100,10 +107,32 @@ class DelayedVizProp {
 //		return("delayedProp: " + propName + " " + propvalue + " " + propClass);
 //		
 //	}
+	static private void postProcessShapes()
+	{
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+//			System.out.println("postProcessShapes");
+			while (shapes.size() > 0)
+			{
+				ShapeAnnotation shape = shapes.remove(shapes.size() - 1);
+				shape.setCanvas(Annotation.BACKGROUND);
+//				shape.setFillColor(new Color(100,100,100));
+				shape.removeAnnotation();
+				wpManagerInstance.getAnnots().addShape(shape);
+//				System.out.println("shape: " + shape.getCanvasName() + " " +  shape.getShapeType());
+			}
+			//force a refresh????
+		}}
+				);
+	}
+	static final List<ShapeAnnotation> shapes = new ArrayList<ShapeAnnotation>();
 	//--------------------------------------------------------------------------------
 	private static void applyNodeShape(final CyNetworkView netView,final Iterable<DelayedVizProp> delayedProps, WPManager mgr, DelayedVizProp delayedProp) 		{
 		final Map<String,String> map = new HashMap<String,String>();
 		CyNode src = (CyNode) delayedProp.netObj;
+		CyNetwork network = netView.getModel();
+		List<CyNode> neighbors = network.getNeighborList(src, CyEdge.Type.ANY);
 		List<DelayedVizProp> relatedProps = getPropsByID(delayedProps, src.getSUID());
 		double wid = 0;
 		double hght = 0;
@@ -142,7 +171,6 @@ class DelayedVizProp {
 		Shape thePath = getShapePath(propvalue);
 		ShapeAnnotation mAnnotation = null;
 		
-//		map.put("canvas", "background");
 		mAnnotation = mgr.getAnnots().newShape(netView, map);
 //		mAnnotation.setCanvas("background");			BUG:  this will cause annotation to move to 0,0!
 		if (thePath != null)
@@ -163,6 +191,7 @@ class DelayedVizProp {
 			{
 //				if (verbose) System.out.println(String.format("moving annotation to : %4.1f , %4.1f", x, y));
 				mAnnotation.moveAnnotation(new Point2D.Double(x, y));
+				shapes.add(mAnnotation);
 			}
 			// view.setLockedValue(prop, 0.);
 		}
@@ -172,18 +201,23 @@ class DelayedVizProp {
 //			System.out.println("mAnnotation: "+ mAnnotation);	
 //			System.out.println("---> legal size: "+ legalSize + " legal pos: "+ legalXY);
 //		}
-//		
-		boolean deleteNode = true;  //thePath != null;		
+		
+		boolean noNeighbors = neighbors.size() == 0;
+		boolean deleteNode = noNeighbors;  //thePath != null;		
+		View<CyNode> view = netView.getNodeView(src);
 		if (deleteNode)
 		{
-			View<CyNode> view = netView.getNodeView(src);
 			view.setVisualProperty(BasicVisualLexicon.NODE_VISIBLE, false);
 			netView.getModel().removeNodes(Collections.singletonList((src)));	
 //			mAnnotation.setCanvas("background");		//	BUG:  this will cause annotation to move to 0,0!
 		}
-
+		else 
+		{
+			view.setLockedValue(BasicVisualLexicon.NODE_BORDER_TRANSPARENCY, 0);
+//			view.setLockedValue(BasicVisualLexicon.NODE_WIDTH, 1.0);
+//			view.setLockedValue(BasicVisualLexicon.NODE_HEIGHT, 1.0);
+		}
 	}
-
 	// --------------------------------------------------------------------------------
 	private static void applyEdgeBend(final CyNetworkView netView, WPManager mgr, final DelayedVizProp delayedProp) {
 		if (delayedProp.value == EdgeBendVisualProperty.DEFAULT_EDGE_BEND)

@@ -678,9 +678,9 @@ public class GpmlToPathway {
   }
 
   void store(final CyTable cyTable, final CyIdentifiable cyNetObj, final PathwayElement pvElem, final TableStore ... tableStores) {
-    for (final TableStore tableStore : tableStores) {
+    for (final TableStore tableStore : tableStores) 
       tableStore.store(cyTable, cyNetObj, pvElem);
-    }
+    
   }
 
   /**
@@ -695,6 +695,7 @@ public class GpmlToPathway {
     public static final VizPropStore NODE_X   = new BasicVizPropStore(BasicExtracter.X,  BasicVisualLexicon.NODE_X_LOCATION);
     public static final VizPropStore NODE_Y   = new BasicVizPropStore(BasicExtracter.Y,  BasicVisualLexicon.NODE_Y_LOCATION);
     public static final VizPropStore NODE_Z   = new BasicVizPropStore(BasicExtracter.Z,  BasicVisualLexicon.NODE_Z_LOCATION);
+    public static final VizPropStore NODE_LABEL    = new BasicVizPropStore(BasicExtracter.TEXT_LABEL,   BasicVisualLexicon.NODE_LABEL);
     public static final VizPropStore NODE_WIDTH    = new BasicVizPropStore(BasicExtracter.WIDTH,   BasicVisualLexicon.NODE_WIDTH);
     public static final VizPropStore NODE_HEIGHT   = new BasicVizPropStore(BasicExtracter.HEIGHT,  BasicVisualLexicon.NODE_HEIGHT);
     public static final VizPropStore NODE_FILL_COLOR  = new BasicVizPropStore(BasicExtracter.FILL_COLOR,  BasicVisualLexicon.NODE_FILL_COLOR);
@@ -831,11 +832,11 @@ public class GpmlToPathway {
     pvToCyNodes.put(pvShape, cyNode);
     IShape shtype = pvShape.getShapeType();
     if (shtype == null) 	return;
-    if (verbose)  
-    {
-    	System.out.println("convertShape: " + (shtype == null ? "NONE" : shtype.getName()) + " " + id + " " + pvShape.getFillColor());
-    	System.out.println("at: " + (int) pvShape.getMCenterX() + ", " +  (int) pvShape.getMCenterY());
-    }
+//    if (verbose)  
+//    {
+//    	System.out.println("convertShape: " + (shtype == null ? "NONE" : shtype.getName()) + " " + id + " " + pvShape.getFillColor());
+//    	System.out.println("at: " + (int) pvShape.getMCenterX() + ", " +  (int) pvShape.getMCenterY());
+//    }
     store(cyNodeTbl, cyNode, pvShape, BasicTableStore.GRAPH_ID, BasicTableStore.TEXT_LABEL, IS_GPML_SHAPE);
     store(cyNode, pvShape,
       BasicVizPropStore.NODE_X, BasicVizPropStore.NODE_Y, BasicVizPropStore.NODE_Z,
@@ -887,6 +888,10 @@ public class GpmlToPathway {
     pvToCyNodes.put(pvState, cyNode);
 
     store(cyNodeTbl, cyNode, pvState, BasicTableStore.TEXT_LABEL );
+    
+    CyRow row0 = cyNodeTbl.getRow(cyNode.getSUID());
+//	System.out.println("stored: " + row0.get("name", String.class));
+
     store(cyNode, pvState,
       STATE_X_STORE,
       STATE_Y_STORE,
@@ -895,6 +900,7 @@ public class GpmlToPathway {
       BasicVizPropStore.NODE_HEIGHT,
       BasicVizPropStore.NODE_FILL_COLOR,
       BasicVizPropStore.NODE_COLOR,
+      BasicVizPropStore.NODE_LABEL,
       BasicVizPropStore.NODE_LABEL_FONT,
       BasicVizPropStore.NODE_LABEL_SIZE,
       BasicVizPropStore.NODE_TRANSPARENT,
@@ -902,26 +908,18 @@ public class GpmlToPathway {
       BasicVizPropStore.NODE_BORDER_THICKNESS,
       BasicVizPropStore.NODE_SHAPE
     );
-//    String id =  pvState.getGraphId();
+    DelayedVizProp fillColorProp = new DelayedVizProp(cyNode,
+    		BasicVisualLexicon.NODE_FILL_COLOR, new Color(250, 0, 0), true);
+    cyDelayedVizProps.add(fillColorProp);
     CyRow row = cyNodeTbl.getRow(cyNode.getSUID());
-    row.set(CyNetwork.NAME, pvState.getTextLabel());
-//    if (row == null) 
-//	{
-//    	System.err.println("NO ROW " + cyNode.getSUID());
-//    	return;
-//	}
-//	String graphRef = row.get("GraphRef", String.class);
+    if (row == null) 
+	{
+    	System.err.println("NO ROW " + cyNode.getSUID());
+    	return;
+	}
+//    row.set(CyNetwork.NODE_LABEL, pvState.getTextLabel());
     String graphRef = pvState.getGraphRef();
-   
- //    row.set("GraphID", "ID" + id);
-//		CyColumn col = cyNodeTbl.getColumn("Fred");
-//		if (col == null)
-//		{
-//			cyNodeTbl.createColumn("Fred", String.class, false, "");
-//			col = cyNodeTbl.getColumn("Fred");
-//		}
-//    row.set("Fred", "Rogers");
-//    
+//System.out.println("state = " + row.get(CyNetwork.NODE_LABEL, String.class));
     CyColumn col;
     List<Comment> comments = pvState.getComments();
     for (Comment c : comments)
@@ -1165,12 +1163,12 @@ public class GpmlToPathway {
       cyEndNode = cyNet.addNode();
       assignAnchorVizStyle(cyEndNode, endPt);
     }    
-    final List<MAnchor> pvAnchors = pvElem.getMAnchors();
+//    final List<MAnchor> pvAnchors = pvElem.getMAnchors();
 //	System.out.println("NAnchors: " + pvAnchors.size());
-    for (int i = 0; i < pvAnchors.size(); i++) {
-    	MAnchor anchor = pvAnchors.get(i);
+//    for (int i = 0; i < pvAnchors.size(); i++) {
+//    	MAnchor anchor = pvAnchors.get(i);
 //    	System.out.println("anchor at " + anchor.getPosition());
-      }
+//      }
 
 //    if (pvAnchors.isEmpty()) 
       newEdge(pvLine, cyStartNode, cyEndNode, true, true);
@@ -1201,6 +1199,8 @@ public class GpmlToPathway {
         	      );
     
     storeEdgeBend(cyEdge, pvLine);
+	DelayedVizProp prop = new DelayedVizProp(cyEdge, BasicVisualLexicon.EDGE_WIDTH, 1.0, true);		// #44
+	cyDelayedVizProps.add(prop);
 
     // Arrow heads defined here
     if (isStart) 
@@ -1209,14 +1209,15 @@ public class GpmlToPathway {
     if (isEnd) 
       store(cyEdgeTbl, cyEdge, pvLine, BasicVizTableStore.EDGE_END_ARROW);
     
+    
   }
   
   
 	private void storeEdgeBend(final CyEdge cyEdge, final PathwayElement pvLine) 
 	{
 		String connectorType = pvLine.getConnectorType().toString();
-		org.pathvisio.core.model.LineType endLineType = pvLine.getEndLineType();
-		org.pathvisio.core.model.LineType startLineType = pvLine.getStartLineType();
+//		org.pathvisio.core.model.LineType endLineType = pvLine.getEndLineType();
+//		org.pathvisio.core.model.LineType startLineType = pvLine.getStartLineType();
 //		if (verbose)
 //		{
 //			System.out.println(connectorType + " from: " + getNodeNameWithId(cyEdge.getSource()) + "[" + startLineType.getMappName() + "] " + pvLine.getStartGraphRef() + 
@@ -1291,8 +1292,8 @@ static boolean verbose = true;
 		View<CyEdge> ev = networkView.getEdgeView(edge);
 	    Bend bend = factory.createBend();
 	    HandleFactory facto = manager.getHandleFactory();
-	    MPoint start = pvLine.getMStart();
-	    MPoint end = pvLine.getMEnd();
+//	    MPoint start = pvLine.getMStart();
+//	    MPoint end = pvLine.getMEnd();
 //		if (verbose)	
 //			System.out.println("makeCurvedEdgeBend start at " + printPoint(start) + ", end at " + printPoint(end));
  
@@ -1300,11 +1301,11 @@ static boolean verbose = true;
 	    for (int i=0; i<sz; i++)
 	    {
 	    	Segment seg = segments.get(i);
-		  Point2D centerPoint  = centerPoint(seg.start, seg.end);	
-		  Handle h = facto.createHandle(networkView, ev,  centerPoint.getX(), centerPoint.getY());
+	    	Point2D centerPoint  = centerPoint(seg.start, seg.end);	
+	    	Handle h = facto.createHandle(networkView, ev,  centerPoint.getX(), centerPoint.getY());
 //		  if (verbose)	
 //			  System.out.println("adding handle at " + printPoint( centerPoint));
-		  bend.getAllHandles().add(h);
+	    	bend.getAllHandles().add(h);
 	    }
 		return bend;
 	}
@@ -1377,7 +1378,9 @@ static boolean verbose = true;
 //	    Double y = nodeView.getVisualProperty(BasicVisualLexicon.NODE_Y_LOCATION);
 //		return new Point2D.Double(x,y);
 //	}
-
+//=================================================================================
+	// EDGES
+	
 	List<Segment> segments;
 	List<Segment> getSegments()	{ return segments;	}
 	private final static double SEGMENT_OFFSET = 40;
@@ -1441,11 +1444,6 @@ static boolean verbose = true;
 	return waypoints;
 	}
 
-	private Point2D centerPoint(Point2D start, Point2D end) 
-	{
-		return new Point2D.Double( (start.getX() + end.getX() ) / 2, (start.getY() + end.getY()) / 2 );
-	}
-
 	protected Point2D calculateWayPoint(Point2D start, Point2D end, int axis, int direction) {
 		double x,y = 0;
 		if(axis == AXIS_Y) {
@@ -1507,7 +1505,7 @@ static boolean verbose = true;
 	private int getOppositeAxis(int axis) {
 		return axis == ConnectorShape.AXIS_X ? AXIS_Y : AXIS_X;
 	}
-	private int getSide(double relX, double relY)
+	static private int getSide(double relX, double relY)
 	{
 			if (relX < 0 && Math.abs(relX) > Math.abs(relY))  		return ConnectorRestrictions.SIDE_WEST;
 			if (relX > 0 && Math.abs(relX) > Math.abs(relY))  		return ConnectorRestrictions.SIDE_EAST;
@@ -1516,7 +1514,7 @@ static boolean verbose = true;
 			return -1;
 	}
 
-	private int getSegmentDirection(int side) {
+	static private int getSegmentDirection(int side) {
 		switch(side) {
 		case ConnectorRestrictions.SIDE_EAST:
 		case ConnectorRestrictions.SIDE_SOUTH: 		return 1;
@@ -1526,7 +1524,7 @@ static boolean verbose = true;
 		return 0;
 	}
 
-	private int getSegmentAxis(int side) {
+	static private int getSegmentAxis(int side) {
 		switch(side) {
 			case ConnectorRestrictions.SIDE_EAST:
 			case ConnectorRestrictions.SIDE_WEST: 		return AXIS_X;
@@ -1574,7 +1572,7 @@ BUG:  	There should be some cases where 4 is returned !!
 	 * @return 1 if the direction is positive (from left to right),
 	 * -1 if the direction is negative (from right to left)
 	 */
-	int getDirectionX(Point2D start, Point2D end) {
+	static int getDirectionX(Point2D start, Point2D end) {
 		return (int)Math.signum(end.getX() - start.getX());
 	}
 
@@ -1638,90 +1636,24 @@ BUG:  	There should be some cases where 4 is returned !!
 
 
 	/** @returns sum of the lengths of the segments */
-	private double getTotalLength (List<Segment> segments) 
+	static private double getTotalLength (List<Segment> segments) 
 	{
 		double totLength = 0.0;
 		for (Segment seg : segments)
 			totLength += seg.length();
 		return totLength;
 	}
+	//-----------------------------------------------
+	static private Point2D centerPoint(Point2D start, Point2D end) 
+	{
+		return new Point2D.Double( (start.getX() + end.getX() ) / 2, (start.getY() + end.getY()) / 2 );
+	}
 	
-	private double distance(Point2D a, Point2D b)	
+	static private double distance(Point2D a, Point2D b)	
 	{
 		double dx = a.getX() - b.getX();
 		double dy = a.getY() - b.getY();
 		return (Math.sqrt(dx*dx + dy* dy));
 	}
-
-//	List<Segment> elbowSegments; //The original segments of the elbow connector
-//	CurvedSegment[] curvedSegments; //The elbow segment with bezier points
-	//Higher resolution approximation of the curve  for calculating the anchor position
-//	List<Segment> curveHigh;
-	//Lower resolution approximation of the curve for calculating the arrow heads
-//	List<Segment> curveLow;
-
-//
-//	
-//	/**
-//	 * Calculates the bezier curve, using NRSTEP segments for each curvedSegment.
-//	 * @see calculateCurvedSegments
-//	 * @return An array with the curve broken down into small segments
-//	 */
-//	protected List<Segment> calculateCurve(int nrStep) {
-//		Segment[] curve = new Segment[nrStep * curvedSegments.length];
-//
-//		for(int i = 0; i < curvedSegments.length; i++) {
-//			CurvedSegment cs = curvedSegments[i];
-//			Point2D prev = cs.getMStart();
-//
-//			for(int j = 0; j < nrStep; j++) 
-//			{
-//				double t = (j + 1) * 1.0/nrStep;
-//				double xe = bezier( cs.getMStart().getX(),
-//						cs.getC1().getX(), cs.getC2().getX(), cs.getMEnd().getX(), t );
-//				double ye = bezier( cs.getMStart().getY(),
-//						cs.getC1().getY(), cs.getC2().getY(), cs.getMEnd().getY(), t );
-//				curve[i * nrStep + j] = new Segment(prev, new Point2D.Double(xe, ye));
-//				prev = new Point2D.Double(xe, ye);
-//			}
-//		}
-//		return Arrays.asList(curve);
-//	}
-
-	/**
-	 * Function for the cubic bezier curve
-	 * @param p0 The start coordinate
-	 * @param p1 The first helper coordinate
-	 * @param p2 The second helper coordinate
-	 * @param p3 The end coordinate
-	 * @param t The relative position in the curve (0 <= t <= 1)
-	 * @return The coordinate on the curve for t
-//	 */
-//	private double bezier(double p0, double p1, double p2, double p3, double t) {
-//		return 	(pow((1-t), 3))*p0 + 3*t*pow((1-t),2)*p1 +
-//				3*pow(t, 2)*(1-t)*p2 + pow(t, 3)*p3;
-//	}
-
-//	private double pow(double a, double b) { 	return Math.pow(a, b); 	}
-
-	/**
-	 * Segment for curved connector, also stores bezier control points
-	 * @author thomas
-//	 */
-//	private class CurvedSegment extends Segment {
-//		private Point2D c1;
-//		private Point2D c2;
-//
-//		public CurvedSegment(Point2D start, Point2D end, Point2D c1, Point2D c2) {
-//			super(start, end);
-//			this.c1 = c1;
-//			this.c2 = c2;
-//		}
-//
-//		public Point2D getC1() { return c1; }
-//		public Point2D getC2() { return c2; }
-//	}
-
-//	public Point2D fromLineCoordinate(double l) { return fromLineCoordinate(l, curveHigh); }
 
 }
