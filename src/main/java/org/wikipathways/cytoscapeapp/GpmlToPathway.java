@@ -5,7 +5,6 @@ import java.awt.Font;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -877,6 +876,7 @@ public class GpmlToPathway {
   final VizPropStore STATE_Y_STORE = new BasicVizPropStore(STATE_Y_EXTRACTER, BasicVisualLexicon.NODE_Y_LOCATION);
 
   private void convertStates() {
+	  DelayedVizProp.clearStateList();
     for (final PathwayElement pvElem : pvPathway.getDataObjects()) 
       if (pvElem.getObjectType().equals(ObjectType.STATE))
       convertState(pvElem);
@@ -885,11 +885,12 @@ public class GpmlToPathway {
   private void convertState(final PathwayElement pvState) {
 
     final CyNode cyNode = cyNet.addNode();
+
     pvToCyNodes.put(pvState, cyNode);
 
     store(cyNodeTbl, cyNode, pvState, BasicTableStore.TEXT_LABEL );
     
-    CyRow row0 = cyNodeTbl.getRow(cyNode.getSUID());
+//    CyRow row0 = cyNodeTbl.getRow(cyNode.getSUID());
 //	System.out.println("stored: " + row0.get("name", String.class));
 
     store(cyNode, pvState,
@@ -917,8 +918,10 @@ public class GpmlToPathway {
     	System.err.println("NO ROW " + cyNode.getSUID());
     	return;
 	}
+    DelayedVizProp.saveState(cyNode.getSUID());
+    row.getAllValues().put("State", 1);
 //    row.set(CyNetwork.NODE_LABEL, pvState.getTextLabel());
-    String graphRef = pvState.getGraphRef();
+//    String graphRef = pvState.getGraphRef();
 //System.out.println("state = " + row.get(CyNetwork.NODE_LABEL, String.class));
     CyColumn col;
     List<Comment> comments = pvState.getComments();
@@ -941,15 +944,16 @@ public class GpmlToPathway {
         			col = cyNodeTbl.getColumn(attr);
         			
         		}
-        		if (graphRef != null)
-        		{
-        			Collection<CyRow> nodeRows = cyNodeTbl.getMatchingRows("GraphId", graphRef);
-        			if (nodeRows.size() != 0)
-        			{
-        				CyRow aRow =  nodeRows.iterator().next();
-        				aRow.set(attr, val);
-        			}
-        		}
+        		row.set(attr, val);
+//        		if (graphRef != null)
+//        		{
+//        			cyNodeTbl.getRow(primaryKey)Collection<CyRow> nodeRows = cyNodeTbl.getMatchingRows("GraphId", graphRef);
+//        			if (nodeRows.size() != 0)
+//        			{
+//        				CyRow aRow =  nodeRows.iterator().next();
+//        				aRow.set(attr, val);
+//        			}
+//        		}
         	}
     	}
     }    

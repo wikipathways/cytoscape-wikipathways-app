@@ -1,6 +1,5 @@
 package org.wikipathways.cytoscapeapp;
 
-import java.awt.Color;
 import java.awt.Shape;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
@@ -16,6 +15,7 @@ import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyIdentifiable;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
+import org.cytoscape.model.CyRow;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.View;
 import org.cytoscape.view.model.VisualProperty;
@@ -112,25 +112,38 @@ class DelayedVizProp {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-//			System.out.println("postProcessShapes");
 			while (shapes.size() > 0)
 			{
 				ShapeAnnotation shape = shapes.remove(shapes.size() - 1);
 				shape.setCanvas(Annotation.BACKGROUND);
-//				shape.setFillColor(new Color(100,100,100));
 				shape.removeAnnotation();
 				wpManagerInstance.getAnnots().addShape(shape);
-//				System.out.println("shape: " + shape.getCanvasName() + " " +  shape.getShapeType());
 			}
-			//force a refresh????
 		}}
 				);
 	}
 	static final List<ShapeAnnotation> shapes = new ArrayList<ShapeAnnotation>();
 	//--------------------------------------------------------------------------------
+	static final List<Long> states = new ArrayList<Long>();
+	public static void saveState(Long suid) {
+		states.add(suid);
+	}
+	public static boolean isState(Long suid) {
+		return states.contains(suid);
+	}
+	public static void clearStateList() { states.clear();}
+	//--------------------------------------------------------------------------------
 	private static void applyNodeShape(final CyNetworkView netView,final Iterable<DelayedVizProp> delayedProps, WPManager mgr, DelayedVizProp delayedProp) 		{
 		final Map<String,String> map = new HashMap<String,String>();
 		CyNode src = (CyNode) delayedProp.netObj;
+		CyRow row = netView.getModel().getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS).getRow(src.getSUID());
+	    Object val = row.getAllValues().get("State");
+	    if (val != null)
+	    	return;
+	    if (isState(src.getSUID()))
+	    	return;
+
+		
 		CyNetwork network = netView.getModel();
 		List<CyNode> neighbors = network.getNeighborList(src, CyEdge.Type.ANY);
 		List<DelayedVizProp> relatedProps = getPropsByID(delayedProps, src.getSUID());
