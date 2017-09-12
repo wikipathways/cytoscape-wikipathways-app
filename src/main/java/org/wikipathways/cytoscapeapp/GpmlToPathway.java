@@ -531,7 +531,14 @@ public class GpmlToPathway {
     PV_ARROW_MAP.put("mim-modification",   ArrowShapeVisualProperty.DELTA);
     PV_ARROW_MAP.put("mim-catalysis",      ArrowShapeVisualProperty.OPEN_CIRCLE);
     PV_ARROW_MAP.put("mim-inhibition",     ArrowShapeVisualProperty.T);
-    PV_ARROW_MAP.put("mim-covalent-bond",  ArrowShapeVisualProperty.CROSS_DELTA);
+    PV_ARROW_MAP.put("mim-necessary-stimulation",     ArrowShapeVisualProperty.CROSS_OPEN_DELTA);
+    PV_ARROW_MAP.put("mim-stimulation",     ArrowShapeVisualProperty.OPEN_DELTA);
+    PV_ARROW_MAP.put("mim-cleavage",     	ArrowShapeVisualProperty.DIAMOND);
+    PV_ARROW_MAP.put("mim-branching-left",  ArrowShapeVisualProperty.DELTA);
+    PV_ARROW_MAP.put("mim-branching-right", ArrowShapeVisualProperty.DELTA);
+    PV_ARROW_MAP.put("mim-translation",     ArrowShapeVisualProperty.DELTA);
+    PV_ARROW_MAP.put("mim-gap",    			ArrowShapeVisualProperty.NONE);
+    PV_ARROW_MAP.put("mim-covalent-bond",  	ArrowShapeVisualProperty.CROSS_DELTA);
   }
 
   static Map<String,NodeShape> PV_SHAPE_MAP = new HashMap<String,NodeShape>();
@@ -851,6 +858,7 @@ public class GpmlToPathway {
     );
     double rotation =  pvShape.getRotation();
     DelayedVizProp.putRotation(cyNode, rotation);
+    DelayedVizProp.putPathwayElement(cyNode, pvShape);
 
    }
   

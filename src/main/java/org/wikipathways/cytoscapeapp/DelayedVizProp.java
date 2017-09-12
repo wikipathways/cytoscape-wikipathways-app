@@ -2,6 +2,7 @@ package org.wikipathways.cytoscapeapp;
 
 import java.awt.Color;
 import java.awt.Shape;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Arc2D;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
@@ -28,6 +29,7 @@ import org.cytoscape.view.presentation.property.EdgeBendVisualProperty;
 import org.cytoscape.view.presentation.property.values.Bend;
 import org.cytoscape.view.presentation.property.values.Handle;
 import org.cytoscape.view.presentation.property.values.HandleFactory;
+import org.pathvisio.core.model.PathwayElement;
 
 
 /**
@@ -100,6 +102,8 @@ class DelayedVizProp {
     }
 		wpManagerInstance = mgr;
 	postProcessShapes();
+	netView.updateView();
+
   }
 	static WPManager wpManagerInstance;
 //	public String dump()
@@ -144,6 +148,16 @@ class DelayedVizProp {
 	public static double getRotation(CyNode node) {
 		Double d = rotations.get(node);
 		return (d == null) ? Double.NaN : d.doubleValue();
+	}
+
+	//--------------------------------------------------------------------------------
+	static final Map<CyNode, PathwayElement>pvShapes = new HashMap<CyNode, PathwayElement>();
+	
+	public static void putPathwayElement(CyNode node, PathwayElement pv) {
+		pvShapes.put(node, pv);
+	}
+	public static PathwayElement getPathwayElement(CyNode node) {
+		return pvShapes.get(node);
 	}
 
 	
@@ -203,8 +217,10 @@ class DelayedVizProp {
 		if ("Arc".equals(propvalue))
 		{
 			double startRotation = getRotation(src);
-			mAnnotation.setCustomShape(makeArc(startRotation));
-			
+			Arc2D.Float arc = makeArc(startRotation);
+		
+			mAnnotation.setCustomShape(arc);
+			mAnnotation.setFillOpacity(3);
 			double d = startRotation / (Math.PI / 2.0);
 			double epsilon = 0.001;
 			if ((d - Math.round(d) < epsilon) && ((int) Math.round(d) % 2 == 1))
@@ -216,16 +232,41 @@ class DelayedVizProp {
 		}
 		else
 		{
-			Shape theShape = getShape(propvalue);
-			if (theShape != null)
-				mAnnotation.setCustomShape(theShape);
-			else 
-				mAnnotation.setShapeType(propvalue);  
+			GeneralPath path = getPath(propvalue);
+			if (path != null)
+			{
+				double cx = path.getBounds2D().getCenterX();
+				double cy = path.getBounds2D().getCenterY();
+				double startRotation = getRotation(src);
+				AffineTransform rotater = new AffineTransform();
+				rotater.rotate(startRotation, cx, cy);
+				path.transform(rotater);
+				mAnnotation.setCustomShape(path);
+			}
+			else				
+			{
+				Shape theShape = getShape(propvalue);
+				if (theShape != null)
+					mAnnotation.setCustomShape(theShape);
+				else 
+					mAnnotation.setShapeType(propvalue);  
+			}
 		}
 
 		View<CyNode> view = netView.getNodeView(src);
-		Color fill = (Color) view.getVisualProperty(BasicVisualLexicon.NODE_FILL_COLOR);
-		mAnnotation.setFillColor(fill);
+		PathwayElement elem = getPathwayElement(src);
+		if (elem != null)
+		{
+			Color stroke = elem.getColor();
+			mAnnotation.setBorderColor(stroke);
+			mAnnotation.setBorderWidth(elem.getLineThickness());
+			Color fill = elem.getFillColor();   //(Color) view.getVisualProperty(BasicVisualLexicon.NODE_FILL_COLOR);
+			mAnnotation.setFillColor(fill);
+		}
+//		Color fill = (Color) view.getLockedProperty(BasicVisualLexicon.NODE_FILL_COLOR);
+//		Color fill2 = (Color) view.getVisualProperty(BasicVisualLexicon.NODE_COLOR);
+//		System.out.println("Filling annotation with " + fill.toString());
+//		mAnnotation.setBorderColor(Color.green);
 		
 		boolean legalSize = (wid > 0 && hght > 0);
 		if (legalSize)
@@ -262,7 +303,7 @@ class DelayedVizProp {
 		else 
 		{
 			view.setLockedValue(BasicVisualLexicon.NODE_BORDER_TRANSPARENCY, 0);		// opacity
-//			view.setLockedValue(BasicVisualLexicon.NODE_WIDTH, 1.0);
+			view.setLockedValue(BasicVisualLexicon.NODE_WIDTH, 10.0);
 //			view.setLockedValue(BasicVisualLexicon.NODE_HEIGHT, 1.0);
 		}
 	}
@@ -323,8 +364,17 @@ class DelayedVizProp {
 	}
 
 	//--------------------------------------------------------------------------------
+	private static GeneralPath getPath(String propvalue) {
+		if ("Mitochondria".equals(propvalue)) 			  		return makeMitochondria();
+		if ("Endoplasmic Reticulum".equals(propvalue))  		return makeER();
+		if ("Sarcoplasmic Reticulum".equals(propvalue)) 		return makeSR();
+		if ("Golgi Apparatus".equals(propvalue)) 				return makeGolgi();
+		if ("Brace".equals(propvalue))  						return makeBrace();
+		if ("Triangle".equals(propvalue))  						return makeTriangle();
+		return null;
+	}
 	private static Shape getShape(String propvalue) {
-		if (verbose) System.out.println("getShapePath: " + propvalue);
+//		if (verbose) System.out.println("getShapePath: " + propvalue);
 		if ("Rounded Rectangle".equals(propvalue)) 			  	return makeRoundRect();
 		if ("Round Rectangle".equals(propvalue)) 			  	return makeRoundRect();
 		if ("Cell".equals(propvalue)) 					  		return makeRoundRect();
@@ -334,14 +384,8 @@ class DelayedVizProp {
 		if ("Nucleus".equals(propvalue)) 					  	return makeEllipse();
 		if ("Vesicle".equals(propvalue)) 					  	return makeEllipse();
 		if ("Ellipse".equals(propvalue)) 					  	return makeEllipse();
-	
-		if ("Mitochondria".equals(propvalue)) 			  		return makeMitochondria();
-		if ("Endoplasmic Reticulum".equals(propvalue))  		return makeER();
-		if ("Sarcoplasmic Reticulum".equals(propvalue)) 		return makeSR();
-		if ("Golgi Apparatus".equals(propvalue)) 				return makeGolgi();
-		if ("Brace".equals(propvalue))  						return makeBrace();
-		if ("Triangle".equals(propvalue))  						return makeTriangle();
-		if ("Arc".equals(propvalue))  							return arcShape();
+//	
+//		if ("Arc".equals(propvalue))  							return arcShape();
 		return null;
 	}
 
@@ -477,7 +521,7 @@ class DelayedVizProp {
 //		path.curveTo(0.0, .height, 0.0, height - 8.0, 0, height - 8.0);
 //		path.closePath();
 
-		static private Shape makeArc(double startRotation)	
+		static private Arc2D.Float makeArc(double startRotation)	
 		{
 			float degrees = (float) (startRotation * 180 / Math.PI);
 			return new Arc2D.Float(0f, 0f, 100f, 10f, degrees, 180f, Arc2D.OPEN);
