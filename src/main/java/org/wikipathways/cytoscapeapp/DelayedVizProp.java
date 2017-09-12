@@ -1,6 +1,8 @@
 package org.wikipathways.cytoscapeapp;
 
+import java.awt.Color;
 import java.awt.Shape;
+import java.awt.geom.Arc2D;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
@@ -26,6 +28,7 @@ import org.cytoscape.view.presentation.property.EdgeBendVisualProperty;
 import org.cytoscape.view.presentation.property.values.Bend;
 import org.cytoscape.view.presentation.property.values.Handle;
 import org.cytoscape.view.presentation.property.values.HandleFactory;
+
 
 /**
  * Temporarily stores visual property values of nodes and edges until
@@ -133,6 +136,19 @@ class DelayedVizProp {
 	}
 	public static void clearStateList() { states.clear();}
 	//--------------------------------------------------------------------------------
+	static final Map<CyNode, Double>rotations = new HashMap<CyNode, Double>();
+	
+	public static void putRotation(CyNode node, double r) {
+		rotations.put(node, new Double(r));
+	}
+	public static double getRotation(CyNode node) {
+		Double d = rotations.get(node);
+		return (d == null) ? Double.NaN : d.doubleValue();
+	}
+
+	
+	//--------------------------------------------------------------------------------
+
 	private static void applyNodeShape(final CyNetworkView netView,final Iterable<DelayedVizProp> delayedProps, WPManager mgr, DelayedVizProp delayedProp) 		{
 		final Map<String,String> map = new HashMap<String,String>();
 		CyNode src = (CyNode) delayedProp.netObj;
@@ -181,16 +197,36 @@ class DelayedVizProp {
 //		}
 		if ("Octagon".equals(propvalue))			// HACK - should look for group node
 			return;
-		Shape thePath = getShapePath(propvalue);
-		ShapeAnnotation mAnnotation = null;
 		
-		mAnnotation = mgr.getAnnots().newShape(netView, map);
-//		mAnnotation.setCanvas("background");			BUG:  this will cause annotation to move to 0,0!
-		if (thePath != null)
-			mAnnotation.setCustomShape(thePath);
-		else 
-			mAnnotation.setShapeType(propvalue);  
+		ShapeAnnotation mAnnotation = mgr.getAnnots().newShape(netView, map);
 
+		if ("Arc".equals(propvalue))
+		{
+			double startRotation = getRotation(src);
+			mAnnotation.setCustomShape(makeArc(startRotation));
+			
+			double d = startRotation / (Math.PI / 2.0);
+			double epsilon = 0.001;
+			if ((d - Math.round(d) < epsilon) && ((int) Math.round(d) % 2 == 1))
+			{
+				double t = wid;
+				wid = hght;
+				hght = t;
+			}
+		}
+		else
+		{
+			Shape theShape = getShape(propvalue);
+			if (theShape != null)
+				mAnnotation.setCustomShape(theShape);
+			else 
+				mAnnotation.setShapeType(propvalue);  
+		}
+
+		View<CyNode> view = netView.getNodeView(src);
+		Color fill = (Color) view.getVisualProperty(BasicVisualLexicon.NODE_FILL_COLOR);
+		mAnnotation.setFillColor(fill);
+		
 		boolean legalSize = (wid > 0 && hght > 0);
 		if (legalSize)
 			mAnnotation.setSize(wid, hght);
@@ -217,7 +253,6 @@ class DelayedVizProp {
 		
 		boolean noNeighbors = neighbors.size() == 0;
 		boolean deleteNode = noNeighbors;  //thePath != null;		
-		View<CyNode> view = netView.getNodeView(src);
 		if (deleteNode)
 		{
 			view.setVisualProperty(BasicVisualLexicon.NODE_VISIBLE, false);
@@ -226,7 +261,7 @@ class DelayedVizProp {
 		}
 		else 
 		{
-			view.setLockedValue(BasicVisualLexicon.NODE_BORDER_TRANSPARENCY, 0);
+			view.setLockedValue(BasicVisualLexicon.NODE_BORDER_TRANSPARENCY, 0);		// opacity
 //			view.setLockedValue(BasicVisualLexicon.NODE_WIDTH, 1.0);
 //			view.setLockedValue(BasicVisualLexicon.NODE_HEIGHT, 1.0);
 		}
@@ -288,7 +323,7 @@ class DelayedVizProp {
 	}
 
 	//--------------------------------------------------------------------------------
-	private static Shape getShapePath(String propvalue) {
+	private static Shape getShape(String propvalue) {
 		if (verbose) System.out.println("getShapePath: " + propvalue);
 		if ("Rounded Rectangle".equals(propvalue)) 			  	return makeRoundRect();
 		if ("Round Rectangle".equals(propvalue)) 			  	return makeRoundRect();
@@ -306,7 +341,7 @@ class DelayedVizProp {
 		if ("Golgi Apparatus".equals(propvalue)) 				return makeGolgi();
 		if ("Brace".equals(propvalue))  						return makeBrace();
 		if ("Triangle".equals(propvalue))  						return makeTriangle();
-		if ("Arc".equals(propvalue))  							return makeArc();
+		if ("Arc".equals(propvalue))  							return arcShape();
 		return null;
 	}
 
@@ -442,17 +477,17 @@ class DelayedVizProp {
 //		path.curveTo(0.0, .height, 0.0, height - 8.0, 0, height - 8.0);
 //		path.closePath();
 
-		static private GeneralPath makeArc()				// PLACEHOLDER -- arc needs start angle & rotation
+		static private Shape makeArc(double startRotation)	
 		{
-			GeneralPath path = new GeneralPath();
-			path.moveTo (50f, 0f);
-			path.quadTo (0f, 0f,50f, 50f);
-//			path.quadTo (50f, 100f, 50f, 50f);
-
-//			path.closePath();
-			return path;
+			float degrees = (float) (startRotation * 180 / Math.PI);
+			return new Arc2D.Float(0f, 0f, 100f, 10f, degrees, 180f, Arc2D.OPEN);
 	  }
-		
+		static private Shape arcShape()				// PLACEHOLDER -- arc needs start angle & rotation
+		{
+			
+			Arc2D.Float arc = new Arc2D.Float(0f, 0f, 100f, 10f, 90f, 180f, Arc2D.OPEN);
+			return arc;
+	  }
 	static private GeneralPath makeMitochondria()
 	  {
 		GeneralPath path = new GeneralPath();

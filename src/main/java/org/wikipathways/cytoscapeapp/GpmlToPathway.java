@@ -849,6 +849,8 @@ public class GpmlToPathway {
       BasicVizPropStore.NODE_SHAPE, 
       SELECTED_COLOR 
     );
+    double rotation =  pvShape.getRotation();
+    DelayedVizProp.putRotation(cyNode, rotation);
 
    }
   
@@ -887,7 +889,6 @@ public class GpmlToPathway {
     final CyNode cyNode = cyNet.addNode();
 
     pvToCyNodes.put(pvState, cyNode);
-
     store(cyNodeTbl, cyNode, pvState, BasicTableStore.TEXT_LABEL );
     
 //    CyRow row0 = cyNodeTbl.getRow(cyNode.getSUID());
