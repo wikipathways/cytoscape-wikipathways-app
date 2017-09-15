@@ -534,10 +534,10 @@ public class GpmlToPathway {
     PV_ARROW_MAP.put("mim-necessary-stimulation",     ArrowShapeVisualProperty.CROSS_OPEN_DELTA);
     PV_ARROW_MAP.put("mim-stimulation",     ArrowShapeVisualProperty.OPEN_DELTA);
     PV_ARROW_MAP.put("mim-cleavage",     	ArrowShapeVisualProperty.DIAMOND);
-    PV_ARROW_MAP.put("mim-branching-left",  ArrowShapeVisualProperty.DELTA);
-    PV_ARROW_MAP.put("mim-branching-right", ArrowShapeVisualProperty.DELTA);
+    PV_ARROW_MAP.put("mim-branching-left",  ArrowShapeVisualProperty.CROSS_DELTA);
+    PV_ARROW_MAP.put("mim-branching-right", ArrowShapeVisualProperty.CROSS_OPEN_DELTA);
     PV_ARROW_MAP.put("mim-translation",     ArrowShapeVisualProperty.DELTA);
-    PV_ARROW_MAP.put("mim-gap",    			ArrowShapeVisualProperty.NONE);
+    PV_ARROW_MAP.put("mim-gap",    			ArrowShapeVisualProperty.DELTA);
     PV_ARROW_MAP.put("mim-covalent-bond",  	ArrowShapeVisualProperty.CROSS_DELTA);
   }
 

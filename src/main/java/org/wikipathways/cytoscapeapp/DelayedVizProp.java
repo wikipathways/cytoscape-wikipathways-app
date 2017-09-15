@@ -6,6 +6,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Arc2D;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -95,17 +96,31 @@ class DelayedVizProp {
       String prop = delayedProp.prop.getIdString();
 //      System.out.println(prop + " @ " + delayedProp.prop.getClass() + " # " + delayedProp.prop.getDisplayName() +  " = " + value + " @ " + value.getClass());
       boolean isPosition = prop.equals("NODE_X_LOCATION") || prop.equals("NODE_Y_LOCATION");
-     if (delayedProp.isLocked && !isPosition)
-        view.setLockedValue(delayedProp.prop, value);
-       else 
-        view.setVisualProperty(delayedProp.prop, value);
-    }
-		wpManagerInstance = mgr;
+      boolean isDimension = prop.equals("WIDTH") || prop.equals("HEIGHT");
+      if (isDimension)
+      {
+    	  Double d = Double.parseDouble(value.toString());
+    	  if (d <= 0) continue;   // WP2848
+      }
+      	try
+			{
+				if (delayedProp.isLocked && !isPosition)
+					view.setLockedValue(delayedProp.prop, value);
+				else
+					view.setVisualProperty(delayedProp.prop, value);
+			}
+		catch (IllegalArgumentException ex)
+		{ 
+			System.err.println(delayedProp.prop + " - " + value);
+			continue;
+		}
+	}
+	wpManagerInstance = mgr;
 	postProcessShapes();
 	netView.updateView();
 
   }
-	static WPManager wpManagerInstance;
+	static WPManager wpManagerInstance = null;
 //	public String dump()
 //	{
 //		String propName = prop.getDisplayName();
@@ -254,6 +269,7 @@ class DelayedVizProp {
 		}
 
 		View<CyNode> view = netView.getNodeView(src);
+		double nodex = 0, nodey = 0;
 		PathwayElement elem = getPathwayElement(src);
 		if (elem != null)
 		{
@@ -262,6 +278,17 @@ class DelayedVizProp {
 			mAnnotation.setBorderWidth(elem.getLineThickness());
 			Color fill = elem.getFillColor();   //(Color) view.getVisualProperty(BasicVisualLexicon.NODE_FILL_COLOR);
 			mAnnotation.setFillColor(fill);
+
+			double relx = 0; //elem.getRelX();
+			double rely = -1; //elem.getRelY();
+			Rectangle2D bounds = elem.getMBounds();
+			double cx = bounds.getCenterX();
+			double cy = bounds.getCenterY();
+			double w = bounds.getWidth();
+			double h = bounds.getHeight();
+			
+			nodex = cx + relx * w/2;
+			nodey = cy + rely * h/2;
 		}
 //		Color fill = (Color) view.getLockedProperty(BasicVisualLexicon.NODE_FILL_COLOR);
 //		Color fill2 = (Color) view.getVisualProperty(BasicVisualLexicon.NODE_COLOR);
@@ -302,9 +329,14 @@ class DelayedVizProp {
 		}
 		else 
 		{
+			if (elem != null)
+			{
+				view.setVisualProperty(BasicVisualLexicon.NODE_X_LOCATION, nodex);
+				view.setVisualProperty(BasicVisualLexicon.NODE_X_LOCATION, nodey);
+			}
 			view.setLockedValue(BasicVisualLexicon.NODE_BORDER_TRANSPARENCY, 0);		// opacity
-			view.setLockedValue(BasicVisualLexicon.NODE_WIDTH, 10.0);
-//			view.setLockedValue(BasicVisualLexicon.NODE_HEIGHT, 1.0);
+			view.setLockedValue(BasicVisualLexicon.NODE_WIDTH, 25.0);
+			view.setLockedValue(BasicVisualLexicon.NODE_HEIGHT, 25.0);
 		}
 	}
 	// --------------------------------------------------------------------------------
