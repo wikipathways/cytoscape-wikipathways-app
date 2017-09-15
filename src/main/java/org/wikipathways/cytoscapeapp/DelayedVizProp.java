@@ -281,14 +281,14 @@ class DelayedVizProp {
 
 			double relx = 0; //elem.getRelX();
 			double rely = -1; //elem.getRelY();
-			Rectangle2D bounds = elem.getMBounds();
-			double cx = bounds.getCenterX();
-			double cy = bounds.getCenterY();
-			double w = bounds.getWidth();
-			double h = bounds.getHeight();
+//			Rectangle2D bounds = elem.getMBounds();
+//			double cx = bounds.getCenterX();
+//			double cy = bounds.getCenterY();
+//			double w = bounds.getWidth();
+//			double h = bounds.getHeight();
 			
-			nodex = cx + relx * w/2;
-			nodey = cy + rely * h/2;
+			nodex = x + relx * wid/2;
+			nodey = y + rely * hght/2;
 		}
 //		Color fill = (Color) view.getLockedProperty(BasicVisualLexicon.NODE_FILL_COLOR);
 //		Color fill2 = (Color) view.getVisualProperty(BasicVisualLexicon.NODE_COLOR);
@@ -332,11 +332,11 @@ class DelayedVizProp {
 			if (elem != null)
 			{
 				view.setVisualProperty(BasicVisualLexicon.NODE_X_LOCATION, nodex);
-				view.setVisualProperty(BasicVisualLexicon.NODE_X_LOCATION, nodey);
+				view.setVisualProperty(BasicVisualLexicon.NODE_Y_LOCATION, nodey);
 			}
 			view.setLockedValue(BasicVisualLexicon.NODE_BORDER_TRANSPARENCY, 0);		// opacity
-			view.setLockedValue(BasicVisualLexicon.NODE_WIDTH, 25.0);
-			view.setLockedValue(BasicVisualLexicon.NODE_HEIGHT, 25.0);
+			view.setLockedValue(BasicVisualLexicon.NODE_WIDTH, 2.0);
+			view.setLockedValue(BasicVisualLexicon.NODE_HEIGHT, 2.0);
 		}
 	}
 	// --------------------------------------------------------------------------------

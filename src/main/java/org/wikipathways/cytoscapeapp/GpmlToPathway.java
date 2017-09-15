@@ -833,8 +833,6 @@ public class GpmlToPathway {
 
   private void convertShape(final PathwayElement pvShape) {
     final CyNode cyNode = cyNet.addNode();
-    Long id = cyNode.getSUID();
-//    pvShape.setLineThickness(10);
     pvToCyNodes.put(pvShape, cyNode);
     IShape shtype = pvShape.getShapeType();
     if (shtype == null) 	return;
