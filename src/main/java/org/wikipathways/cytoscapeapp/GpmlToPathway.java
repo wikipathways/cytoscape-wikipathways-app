@@ -1054,6 +1054,7 @@ public class GpmlToPathway {
       BasicVizPropStore.NODE_ALWAYS_TRANSPARENT,
       GROUP_SHAPE 
     );
+    
   }
 
   /*

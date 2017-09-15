@@ -175,6 +175,16 @@ class DelayedVizProp {
 		return pvShapes.get(node);
 	}
 
+	//--------------------------------------------------------------------------------
+	static final Map<CyEdge, PathwayElement>pvEdges = new HashMap<CyEdge, PathwayElement>();
+	
+	public static void putPathwayElement(CyEdge e, PathwayElement pv) {
+		pvEdges.put(e, pv);
+	}
+	public static PathwayElement getPathwayElement(CyEdge e) {
+		return pvEdges.get(e);
+	}
+
 	
 	//--------------------------------------------------------------------------------
 
@@ -198,6 +208,7 @@ class DelayedVizProp {
 		double y = Double.NaN;
 //		double z = Double.NaN;
 //		System.out.println("applyNodeShape");
+		View<CyNode> view = netView.getNodeView(src);
 		for (DelayedVizProp prop : relatedProps)			// we have to rescan all properties to find other attributes for the same shape
 		{
 			String propName1 = prop.prop.getDisplayName();
@@ -225,7 +236,11 @@ class DelayedVizProp {
 //			propvalue = "Rounded Rectangle";
 //		}
 		if ("Octagon".equals(propvalue))			// HACK - should look for group node
+		{
+			Color beige = new Color(249, 249, 243);
+			view.setVisualProperty(BasicVisualLexicon.NODE_FILL_COLOR, false);
 			return;
+		}
 		
 		ShapeAnnotation mAnnotation = mgr.getAnnots().newShape(netView, map);
 
@@ -268,7 +283,6 @@ class DelayedVizProp {
 			}
 		}
 
-		View<CyNode> view = netView.getNodeView(src);
 		double nodex = 0, nodey = 0;
 		PathwayElement elem = getPathwayElement(src);
 		if (elem != null)
@@ -281,6 +295,18 @@ class DelayedVizProp {
 
 			double relx = 0; //elem.getRelX();
 			double rely = -1; //elem.getRelY();
+
+			List<CyEdge> edges = network.getAdjacentEdgeList(src, CyEdge.Type.ANY);
+			if (edges != null)
+				for (CyEdge edge : edges)
+				{
+					PathwayElement edgeElement = getPathwayElement(edge);
+					if (edgeElement != null)
+					{
+						relx = edgeElement.getRelX();
+						rely = edgeElement.getRelY();
+					}
+				}
 //			Rectangle2D bounds = elem.getMBounds();
 //			double cx = bounds.getCenterX();
 //			double cy = bounds.getCenterY();
