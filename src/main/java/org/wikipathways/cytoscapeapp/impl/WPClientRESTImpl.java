@@ -99,7 +99,7 @@ public class WPClientRESTImpl implements WPClient {
 				if (encoding != null)
 					inputSource.setEncoding(encoding);
 				return xmlParser.parse(inputSource);
-			} catch (IOException e) {
+			} catch (Exception e) {
 				if (!cancelled) {
 					throw e; // ignore exceptions thrown during cancellation
 				}
@@ -234,8 +234,11 @@ public class WPClientRESTImpl implements WPClient {
 				String fix1 = lower.replace(" and ", " AND ");
 				String fixed = fix1.replace(" or ", " OR ");
 				final Document doc = xmlGet(BASE_URL + "findPathwaysByText", "query", fixed, "species", species == null ? "" : species); // AST
-				if (super.cancelled)
-					return null;
+				if (super.cancelled)					return result;
+				if (doc == null) 						return result;
+				boolean hasChildren = doc.hasChildNodes();
+				if (!hasChildren)					return result;
+				
 				final Node responseNode = doc.getFirstChild();
 				final NodeList resultNodes = responseNode.getChildNodes();
 				int len = resultNodes.getLength();

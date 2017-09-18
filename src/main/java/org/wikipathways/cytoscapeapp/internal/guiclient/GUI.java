@@ -380,7 +380,7 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
           public void run(final TaskMonitor monitor) {
             final List<WPPathway> results = searchTask.get();
             
-            if (results.isEmpty()) {
+            if (results == null || results.isEmpty()) {
               noResultsLabel.setText(String.format("<html><b>No results for \'%s\'.</b></html>", query));
               noResultsLabel.setVisible(true);
             } 
@@ -541,7 +541,7 @@ String id = pathway.getId();
 	public void displayPathwaysInModal(JFrame parent, String query, List<WPPathway> pathways) {
 		EasyGridBagConstraints c = new EasyGridBagConstraints();
 		if (dlog == null) {
-			dlog = new JDialog(parent, "WikiPathways Search", true);
+			dlog = new JDialog(parent, "WikiPathways Search", false);
 			JPanel searchPanel = newSearchPanel();
 			JPanel resultsPanel = newResultsPanel();
 			JPanel gui = new JPanel(new GridBagLayout());
