@@ -29,6 +29,7 @@ public class GpmlImportCmdTask extends AbstractTask {
 
   public void run(TaskMonitor monitor) throws Exception {
     final Reader reader = new FileReader(file);
-    super.insertTasksAfterCurrentTask(factory.createReaderAndViewBuilder(reader, method));
+    String id = file.getName().substring(0, file.getName().indexOf("_"));
+    super.insertTasksAfterCurrentTask(factory.createReaderAndViewBuilder(id, reader, method));
   }
 }

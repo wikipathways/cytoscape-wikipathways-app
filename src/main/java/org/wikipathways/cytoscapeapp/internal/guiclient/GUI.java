@@ -471,11 +471,11 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
  	  	System.out.println("execute loadSelectedPathway");
         final WPPathway pathway = tableModel.getSelectedPathwayRef();
         final ResultTask<Reader> loadPathwayTask = client.newGPMLContentsTask(pathway);
-
+String id = pathway.getId();
         final TaskIterator taskIterator = new TaskIterator(loadPathwayTask);
         taskIterator.append(new AbstractTask() {
           public void run(TaskMonitor monitor) {
-            super.insertTasksAfterCurrentTask(gpmlReaderFactory.createReaderAndViewBuilder(loadPathwayTask.get(), method));
+            super.insertTasksAfterCurrentTask(gpmlReaderFactory.createReaderAndViewBuilder(id, loadPathwayTask.get(), method));
           }
         });
        taskMgr.execute(taskIterator, new TaskObserver() {

@@ -77,13 +77,13 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
       manager = new WPManager(registrar,annots );
       }
 
-  public TaskIterator createReader( final Reader gpmlContents, final CyNetwork network, 
+  public TaskIterator createReader(final String id, final Reader gpmlContents, final CyNetwork network, 
 		  final GpmlConversionMethod conversionMethod, final boolean setNetworkName) {
     conversionMethods.put(network, conversionMethod);
     return new TaskIterator(new ReaderTask(manager, gpmlContents, network, conversionMethod, setNetworkName));
   }
 
-  public TaskIterator createViewBuilder(final CyNetwork gpmlNetwork, final CyNetworkView networkView) {
+  public TaskIterator createViewBuilder(final String id, final CyNetwork gpmlNetwork, final CyNetworkView networkView) {
     if (!conversionMethods.containsKey(gpmlNetwork)) 
       throw new IllegalArgumentException("gpmlNetwork is invalid");
 
@@ -109,22 +109,22 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
     return iterator;
   }
 
-  public TaskIterator createReaderAndViewBuilder( final Reader gpmlContents, final CyNetworkView networkView,
+  public TaskIterator createReaderAndViewBuilder(final String id,  final Reader gpmlContents, final CyNetworkView networkView,
       final GpmlConversionMethod conversionMethod, final boolean setNetworkName) {
     final TaskIterator iterator = new TaskIterator();
     final CyNetwork network = networkView.getModel();
-    iterator.append(createReader(gpmlContents, network, conversionMethod, setNetworkName));
-    iterator.append(createViewBuilder(network, networkView));
+    iterator.append(createReader(id, gpmlContents, network, conversionMethod, setNetworkName));
+    iterator.append(createViewBuilder(id, network, networkView));
     return iterator;
   }
 
-  public TaskIterator createReaderAndViewBuilder(final Reader gpmlContents, final GpmlConversionMethod conversionMethod) {
+  public TaskIterator createReaderAndViewBuilder(final String id, final Reader gpmlContents, final GpmlConversionMethod conversionMethod) {
     final CyNetwork network = netFactory.createNetwork();
-    network.getRow(network).set(CyNetwork.NAME, "Pathway");
+    network.getRow(network).set(CyNetwork.NAME, id);
     netMgr.addNetwork(network);
     final CyNetworkView view = netViewFactory.createNetworkView(network);
     netViewMgr.addNetworkView(view);
-    return createReaderAndViewBuilder(gpmlContents, view, conversionMethod, true);
+    return createReaderAndViewBuilder(id, gpmlContents, view, conversionMethod, true);
   }
 //-----------------------------------------------------------------------
   class ReaderTask extends AbstractTask {
@@ -135,7 +135,7 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
     final WPManager manager;
 
     public ReaderTask(
-         final WPManager wpMgr,
+        final WPManager wpMgr,
         final Reader gpmlContents,
         final CyNetwork network,
         final GpmlConversionMethod conversionMethod,

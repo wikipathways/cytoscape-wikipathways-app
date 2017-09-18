@@ -101,31 +101,34 @@ public class GpmlToPathway {
 		this.pvPathway = pvPathway;
 		this.cyNet = cyNet;
 		networkView = getNetworkView(cyNet);
-		this.cyNodeTbl = cyNet.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS);
-		this.cyEdgeTbl = cyNet.getTable(CyEdge.class, CyNetwork.DEFAULT_ATTRS);
-//		System.out.println("GpmlToPathway");
+		cyNodeTbl = cyNet.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS);
+		cyEdgeTbl = cyNet.getTable(CyEdge.class, CyNetwork.DEFAULT_ATTRS);
 		MIMShapes.registerShapes();
+		manager.setUpTableRefs(cyNet);
+//		System.out.println("GpmlToPathway");
 	}
 
   /**
    * Convert the pathway given in the constructor.
    */
 	public List<DelayedVizProp> convert() {
-	MIMShapes.registerShapes();
-    setupCyTables();
-
-    // convert by each pathway element type
-    convertDataNodes();
-    convertShapes();
-    convertStates();
-    convertGroups();
-    convertLabels();
-    convertAnchors();
-    convertLines();
-
-    // clear our data structures just to be nice to the GC
-    pvToCyNodes.clear();
-    return cyDelayedVizProps;
+		MIMShapes.registerShapes();
+		System.out.println("GraphID = " + pvPathway.getUniqueGraphId());
+	    setupCyTables();
+		// Disable all events from our table
+	
+	    // convert by each pathway element type
+	    convertDataNodes();
+	    convertShapes();
+	    convertStates();
+	    convertGroups();
+	    convertLabels();
+	    convertAnchors();
+	    convertLines();
+	
+	    
+	    pvToCyNodes.clear();				// clear our data structures to be nice to the GC
+		return cyDelayedVizProps;
 	}
 
   /**
@@ -140,7 +143,6 @@ public class GpmlToPathway {
         IS_GPML_SHAPE,
         BasicVizTableStore.NODE_WIDTH,
         BasicVizTableStore.NODE_HEIGHT,
-//        BasicVizTableStore.NODE_ROTATION,
         BasicVizTableStore.NODE_FILL_COLOR,
         BasicVizTableStore.NODE_COLOR,
         BasicVizTableStore.NODE_LABEL_FONT,
@@ -536,7 +538,7 @@ public class GpmlToPathway {
     PV_ARROW_MAP.put("mim-cleavage",     	ArrowShapeVisualProperty.DIAMOND);
     PV_ARROW_MAP.put("mim-branching-left",  ArrowShapeVisualProperty.CROSS_DELTA);
     PV_ARROW_MAP.put("mim-branching-right", ArrowShapeVisualProperty.CROSS_OPEN_DELTA);
-    PV_ARROW_MAP.put("mim-translation",     ArrowShapeVisualProperty.DELTA);
+    PV_ARROW_MAP.put("mim-transcription-translation",     ArrowShapeVisualProperty.DELTA);
     PV_ARROW_MAP.put("mim-gap",    			ArrowShapeVisualProperty.DELTA);
     PV_ARROW_MAP.put("mim-covalent-bond",  	ArrowShapeVisualProperty.CROSS_DELTA);
   }

@@ -44,7 +44,8 @@ public class OpenLinkedPathwayAsNewTaskFactory implements NodeViewTaskFactory {
           final ResultTask<Reader> gpmlContentsTask = client.newGPMLContentsTask(pathwayInfoTask.get());
           super.insertTasksAfterCurrentTask(gpmlContentsTask, new AbstractTask() {
             public void run(final TaskMonitor monitor) {
-              super.insertTasksAfterCurrentTask(gpmlReaderFactory.createReaderAndViewBuilder(gpmlContentsTask.get(), method));
+            	String id = "";
+              super.insertTasksAfterCurrentTask(gpmlReaderFactory.createReaderAndViewBuilder(id, gpmlContentsTask.get(), method));
             }
           });
         }

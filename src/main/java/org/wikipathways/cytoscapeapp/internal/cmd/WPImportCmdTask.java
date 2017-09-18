@@ -52,7 +52,7 @@ public class WPImportCmdTask extends AbstractTask {
           final ResultTask<Reader> gpmlTask = client.newGPMLContentsTask(infoTask.get());
           super.insertTasksAfterCurrentTask(gpmlTask, new AbstractTask() {
             public void run(TaskMonitor monitor) {
-              super.insertTasksAfterCurrentTask(factory.createReaderAndViewBuilder(gpmlTask.get(), method));
+              super.insertTasksAfterCurrentTask(factory.createReaderAndViewBuilder(id, gpmlTask.get(), method));
             }
           });
         }

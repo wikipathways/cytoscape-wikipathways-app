@@ -82,8 +82,8 @@ public class CyActivator extends AbstractCyActivator {
 		registerAllServices(context, guiClient);
 
 		// ---- create and register a bunch of CommandTaskFactories
-		reg(context,  new WPSpeciesCmdTaskFactory(client), "get-species", "wikipathways");
-    reg(context,  new WPSearchCmdTaskFactory(client, registrar, guiClient), "search", "wikipathways");
+//		reg(context,  new WPSpeciesCmdTaskFactory(client), "get-species", "wikipathways");
+//    reg(context,  new WPSearchCmdTaskFactory(client, registrar, guiClient), "search", "wikipathways");
     reg(context,  new GpmlImportCmdTaskFactory(gpmlReaderFactory, GpmlConversionMethod.PATHWAY),"import-as-pathway", "gpml");
     reg(context,  new GpmlImportCmdTaskFactory(gpmlReaderFactory, GpmlConversionMethod.NETWORK),"import-as-network", "gpml");
     reg(context,  new WPImportCmdTaskFactory(client, gpmlReaderFactory, GpmlConversionMethod.PATHWAY),"import-as-pathway", "wikipathways");

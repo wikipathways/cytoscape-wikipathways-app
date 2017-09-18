@@ -6,7 +6,6 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Arc2D;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -68,56 +67,66 @@ class DelayedVizProp {
 	public String toString() {  return prop.getDisplayName() + ": " + value.toString(); }
 	public static void applyAll(final CyNetworkView netView,final Iterable<DelayedVizProp> delayedProps, WPManager mgr) 
 	{
-		for ( DelayedVizProp delayedProp : delayedProps) {
-			final Object value = delayedProp.value;
-			if (value == null) continue;
-
-		String propName = delayedProp.prop.getDisplayName();
-		if ("Node Shape".equals(propName))
-			applyNodeShape(netView, delayedProps, mgr, delayedProp);
-
-		if ("Edge Bend".equals(propName))
-			applyEdgeBend(netView, mgr, delayedProp);
-			
-	
-      View<?> view = null;
-      if (delayedProp.netObj instanceof CyNode) 
-      {
-        final CyNode node = (CyNode) delayedProp.netObj;
-        view = netView.getNodeView(node);
-      } else if (delayedProp.netObj instanceof CyEdge) 
-      {
-        final CyEdge edge = (CyEdge) delayedProp.netObj;
-        view = netView.getEdgeView(edge);
-      }
-      if (view == null) continue;
-//		System.out.println("Node id: " + delayedProp.netObj.getSUID()  + " is setting " + propName + " to " + propvalue);
-
-      String prop = delayedProp.prop.getIdString();
-//      System.out.println(prop + " @ " + delayedProp.prop.getClass() + " # " + delayedProp.prop.getDisplayName() +  " = " + value + " @ " + value.getClass());
-      boolean isPosition = prop.equals("NODE_X_LOCATION") || prop.equals("NODE_Y_LOCATION");
-      boolean isDimension = prop.equals("WIDTH") || prop.equals("HEIGHT");
-      if (isDimension)
-      {
-    	  Double d = Double.parseDouble(value.toString());
-    	  if (d <= 0) continue;   // WP2848
-      }
-      	try
+		try 
+		{
+			mgr.turnOffEvents();
+			for ( DelayedVizProp delayedProp : delayedProps) 
 			{
-				if (delayedProp.isLocked && !isPosition)
-					view.setLockedValue(delayedProp.prop, value);
-				else
-					view.setVisualProperty(delayedProp.prop, value);
+				final Object value = delayedProp.value;
+				if (value == null) continue;
+
+				String propName = delayedProp.prop.getDisplayName();
+				if ("Node Shape".equals(propName))
+					applyNodeShape(netView, delayedProps, mgr, delayedProp);
+		
+				if ("Edge Bend".equals(propName))
+					applyEdgeBend(netView, mgr, delayedProp);
+					
+				
+			      View<?> view = null;
+			      if (delayedProp.netObj instanceof CyNode) 
+			      {
+			        final CyNode node = (CyNode) delayedProp.netObj;
+			        view = netView.getNodeView(node);
+			      } else if (delayedProp.netObj instanceof CyEdge) 
+			      {
+			        final CyEdge edge = (CyEdge) delayedProp.netObj;
+			        view = netView.getEdgeView(edge);
+			      }
+			     if (view == null) continue;
+			//		System.out.println("Node id: " + delayedProp.netObj.getSUID()  + " is setting " + propName + " to " + propvalue);
+			
+			     String prop = delayedProp.prop.getIdString();
+	//      System.out.println(prop + " @ " + delayedProp.prop.getClass() + " # " + delayedProp.prop.getDisplayName() +  " = " + value + " @ " + value.getClass());
+			      boolean isPosition = prop.equals("NODE_X_LOCATION") || prop.equals("NODE_Y_LOCATION");
+			      boolean isDimension = prop.equals("WIDTH") || prop.equals("HEIGHT");
+			      if (isDimension)
+			      {
+			    	  Double d = Double.parseDouble(value.toString());
+			    	  if (d <= 0) continue;   // WP2848
+			      }
+			   try
+			   {
+					if (delayedProp.isLocked && !isPosition)
+						view.setLockedValue(delayedProp.prop, value);
+					else
+						view.setVisualProperty(delayedProp.prop, value);
+			  	}
+			    catch (IllegalArgumentException ex)
+				{ 
+					System.err.println(delayedProp.prop + " - " + value);
+					continue;
+				}
 			}
-		catch (IllegalArgumentException ex)
-		{ 
-			System.err.println(delayedProp.prop + " - " + value);
-			continue;
+				wpManagerInstance = mgr;
+				postProcessShapes();
+			}
+		catch (Exception e) {		} 
+		finally 
+		{
+			mgr.turnOnEvents();
+			netView.updateView();
 		}
-	}
-	wpManagerInstance = mgr;
-	postProcessShapes();
-	netView.updateView();
 
   }
 	static WPManager wpManagerInstance = null;
@@ -276,10 +285,18 @@ class DelayedVizProp {
 			else				
 			{
 				Shape theShape = getShape(propvalue);
-				if (theShape != null)
+				if (theShape == null)		mAnnotation.setShapeType(propvalue);  
+				else
+				{
+					double startRotation = getRotation(src);
+					AffineTransform rotater = new AffineTransform();
+					double cx = theShape.getBounds2D().getCenterX();
+					double cy = theShape.getBounds2D().getCenterY();
+					rotater.rotate(startRotation, cx, cy);
+//					theShape.transform(rotater);
 					mAnnotation.setCustomShape(theShape);
-				else 
-					mAnnotation.setShapeType(propvalue);  
+				}
+					
 			}
 		}
 
@@ -299,14 +316,14 @@ class DelayedVizProp {
 			List<CyEdge> edges = network.getAdjacentEdgeList(src, CyEdge.Type.ANY);
 			if (edges != null)
 				for (CyEdge edge : edges)
+			{
+				PathwayElement edgeElement = getPathwayElement(edge);
+				if (edgeElement != null)
 				{
-					PathwayElement edgeElement = getPathwayElement(edge);
-					if (edgeElement != null)
-					{
-						relx = edgeElement.getRelX();
-						rely = edgeElement.getRelY();
-					}
+					relx = edgeElement.getRelX();
+					rely = edgeElement.getRelY();
 				}
+			}
 //			Rectangle2D bounds = elem.getMBounds();
 //			double cx = bounds.getCenterX();
 //			double cy = bounds.getCenterY();
@@ -584,12 +601,12 @@ class DelayedVizProp {
 			float degrees = (float) (startRotation * 180 / Math.PI);
 			return new Arc2D.Float(0f, 0f, 100f, 10f, degrees, 180f, Arc2D.OPEN);
 	  }
-		static private Shape arcShape()				// PLACEHOLDER -- arc needs start angle & rotation
-		{
-			
-			Arc2D.Float arc = new Arc2D.Float(0f, 0f, 100f, 10f, 90f, 180f, Arc2D.OPEN);
-			return arc;
-	  }
+//		static private Shape arcShape()				// PLACEHOLDER -- arc needs start angle & rotation
+//		{
+//			
+//			Arc2D.Float arc = new Arc2D.Float(0f, 0f, 100f, 10f, 90f, 180f, Arc2D.OPEN);
+//			return arc;
+//	  }
 	static private GeneralPath makeMitochondria()
 	  {
 		GeneralPath path = new GeneralPath();
