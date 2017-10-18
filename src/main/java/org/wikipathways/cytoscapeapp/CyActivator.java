@@ -1,4 +1,4 @@
-// WikiPathways App for Cytoscape
+  // WikiPathways App for Cytoscape
 // opens pathways from WikiPathways as networks in Cytoscape
 //
 // Copyright 2013 WikiPathways.org
@@ -115,7 +115,7 @@ public class CyActivator extends AbstractCyActivator {
  	
 
 // These are additional sample classes that you could mock up as other services
-// I comment them in and out every version to make sure my latest has been loaded!
+// I comment some in and out every version to make sure my latest has been loaded!
 //	registerAllServices(context, new TunableOptionsTaskFactory(1));
 //	registerAllServices(context, new CustomOptionsTaskFactory());
 //	registerAllServices(context, new CustomQueryTaskFactory(registrar));

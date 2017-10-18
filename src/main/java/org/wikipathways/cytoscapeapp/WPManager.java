@@ -1,8 +1,11 @@
 package org.wikipathways.cytoscapeapp;
 
+import java.util.Map;
+
 import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyNetwork;
+import org.cytoscape.model.CyNetworkTableManager;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyTable;
 import org.cytoscape.service.util.CyServiceRegistrar;
@@ -32,28 +35,30 @@ public class WPManager {
 	
 	//-----------------------------------------------------
 	private Object networkView;
-	private CyTable cyNodeTbl;
-	private CyTable cyEdgeTbl;
+	Map<String,CyTable> tables;
+boolean bypass = true;
 
 	public void turnOnEvents() {
+		if (bypass) return;
 		System.out.println("turnOnEvents");
 		CyEventHelper eventHelper = getEventHelper();
-		eventHelper.unsilenceEventSource(cyNodeTbl);
-		eventHelper.unsilenceEventSource(cyEdgeTbl);
+		for (CyTable table : tables.values())
+			eventHelper.unsilenceEventSource(table);
+		eventHelper.flushPayloadEvents();
 	}
 	public void turnOffEvents() {
-		System.out.println("turnOffEvents");
+	if (bypass) return;
+	System.out.println("turnOffEvents");
 		CyEventHelper eventHelper = getEventHelper();
-		eventHelper.silenceEventSource(cyNodeTbl);
-		eventHelper.silenceEventSource(cyEdgeTbl);		
+		for (CyTable table : tables.values())
+			eventHelper.silenceEventSource(table);
 	}
 	public void setUpTableRefs(CyNetwork cyNet) {
 		if (networkView == null)
 		{
+			CyNetworkTableManager netTablMgr = registrar.getService(CyNetworkTableManager.class);
 			networkView = getNetworkViewMgr().getNetworkViews(cyNet).iterator().next();
-			cyNodeTbl = cyNet.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS);
-			cyEdgeTbl = cyNet.getTable(CyEdge.class, CyNetwork.DEFAULT_ATTRS);
+			tables = netTablMgr.getTables(cyNet, CyNode.class);		
 		}
-		
 	}
 }

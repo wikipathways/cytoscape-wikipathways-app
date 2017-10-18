@@ -155,7 +155,6 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
       final Pathway pathway = new Pathway();
       try {
         pathway.readFromXml(gpmlContents, true);
-      } catch (Exception e) { throw new Exception("Pathway not available -- invalid GPML", e);  }
 //      char buf[] = new char[1000000];
 //      gpmlContents.reset();
 //      int len = gpmlContents.read(buf);
@@ -178,6 +177,11 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
       }
 
        pendingVizProps.put(network, vizProps);
+      } catch (Exception e) { throw new Exception("Pathway not available -- invalid GPML", e);  }
+      finally
+      {
+//    	  manager.turnOnEvents();
+      }
     }
 
     public void cancel() {

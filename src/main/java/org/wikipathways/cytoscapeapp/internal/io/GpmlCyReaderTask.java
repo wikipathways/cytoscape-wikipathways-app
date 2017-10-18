@@ -62,7 +62,8 @@ public class GpmlCyReaderTask extends AbstractTask implements CyNetworkReader {
 	public void run(TaskMonitor monitor) throws Exception {
         monitor.setTitle("Read GPML file " + fileName);
 		monitor.setProgress(-1.0);
-		String id = fileName.substring(0, fileName.indexOf("_"));
+		int index = fileName.indexOf("_");			
+		String id = (index > 0) ? fileName.substring(0, index) : fileName;
         final Reader reader = new InputStreamReader(input);
         final GpmlConversionMethod method = importMethod.getSelectedValue().equals(PATHWAY_DESC)  ? GpmlConversionMethod.PATHWAY  : GpmlConversionMethod.NETWORK;
         super.insertTasksAfterCurrentTask(gpmlReaderFactory.createReaderAndViewBuilder(id, reader, method));

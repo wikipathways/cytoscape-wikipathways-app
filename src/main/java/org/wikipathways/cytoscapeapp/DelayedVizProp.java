@@ -69,7 +69,7 @@ class DelayedVizProp {
 	{
 		try 
 		{
-			mgr.turnOffEvents();
+//			mgr.turnOffEvents();
 			for ( DelayedVizProp delayedProp : delayedProps) 
 			{
 				final Object value = delayedProp.value;
@@ -124,8 +124,8 @@ class DelayedVizProp {
 		catch (Exception e) {		} 
 		finally 
 		{
-			mgr.turnOnEvents();
-			netView.updateView();
+//			mgr.turnOnEvents();
+//			netView.updateView();
 		}
 
   }
@@ -398,12 +398,6 @@ class DelayedVizProp {
 				View<CyNode> srcView = netView.getNodeView(src);
 				View<CyNode> targView = netView.getNodeView(targ);
 				View<CyEdge> edgeView = netView.getEdgeView(edge);
-				// System.out.println("srcView: " + srcView.getSUID());
-				// System.out.println("targView: " + targView.getSUID());
-				// System.out.println("edgeView: " + edgeView.getSUID());
-
-				// edgeView.getVisualProperty(BasicVisualLexicon.C);
-
 				Point2D.Double srcCenter = getNodePosition(srcView);
 				Point2D.Double targCenter = getNodePosition(targView);
 
@@ -424,10 +418,14 @@ class DelayedVizProp {
 					List<Handle> handles = bend.getAllHandles();
 					if (handles.size() > 0) {
 						try {
-							handles.get(0).defineHandle(netView, edgeView, elbow.getX(), elbow.getY());
-						} catch (IllegalStateException ex) {
-							System.err.println(
-									"IllegalStateException at " + (int) elbow.getX() + ", " + (int) elbow.getY());
+							for (Handle h : handles)
+							{
+								h.defineHandle(netView, edgeView, elbow.getX(), elbow.getY());
+								System.out.println("Handle at: " + h.getSerializableString());
+							}
+						} 
+						catch (IllegalStateException ex) {
+							System.err.println( "IllegalStateException " + ex.getMessage() + "  at  " + (int) elbow.getX() + ", " + (int) elbow.getY());
 						}
 					} else
 						handles.add(handleFactory.createHandle(netView, edgeView, elbow.getX(), elbow.getY()));

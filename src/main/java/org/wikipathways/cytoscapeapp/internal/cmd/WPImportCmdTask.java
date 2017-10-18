@@ -46,7 +46,8 @@ public class WPImportCmdTask extends AbstractTask {
       infoTask, new AbstractTask() {
         public void run(TaskMonitor monitor) {
           if (infoTask.get() == null) {
-            throw new IllegalArgumentException("No such pathway with ID: " + id);
+        	  return;
+//            throw new IllegalArgumentException("No such pathway with ID: " + id);
           }
           
           final ResultTask<Reader> gpmlTask = client.newGPMLContentsTask(infoTask.get());

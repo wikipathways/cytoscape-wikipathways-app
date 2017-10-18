@@ -70,7 +70,7 @@ public class WPClientRESTImpl implements WPClient {
 	 */
 	protected abstract class ReqTask<T> extends ResultTask<T> {
 		protected volatile boolean cancelled = false;
-		protected volatile HttpRequestBase req = null;
+		protected volatile HttpRequestBase request = null;
 		protected volatile CloseableHttpResponse resp = null;
 		protected volatile InputStream stream = null;
 
@@ -86,11 +86,12 @@ public class WPClientRESTImpl implements WPClient {
 			} catch (Exception e) {
 				throw new IllegalArgumentException("Invalid URL request", e);
 			}
-			req = new HttpGet(uri);
-
+			request = new HttpGet(uri);
+			System.out.println(uri);
+			System.out.println(request);
 			// issue the request
 			try {
-				resp = client.execute(req);
+				resp = client.execute(request);
 				final HttpEntity entity = resp.getEntity();
 				final String encoding = entity.getContentEncoding() != null ? entity.getContentEncoding().getValue()
 						: null;
@@ -98,15 +99,16 @@ public class WPClientRESTImpl implements WPClient {
 				final InputSource inputSource = new InputSource(stream);
 				if (encoding != null)
 					inputSource.setEncoding(encoding);
+				System.out.println(inputSource.toString());
 				return xmlParser.parse(inputSource);
 			} catch (Exception e) {
 				if (!cancelled) {
 					throw e; // ignore exceptions thrown during cancellation
 				}
 			} finally {
-				req.releaseConnection();
+				request.releaseConnection();
 				resp.close();
-				req = null;
+				request = null;
 				resp = null;
 				stream = null;
 			}
@@ -116,7 +118,7 @@ public class WPClientRESTImpl implements WPClient {
 		public void cancel() {
 			cancelled = true; // this must be set before calling abort() or
 								// close()
-			final HttpRequestBase req2 = req; // copy the ref to req so that it
+			final HttpRequestBase req2 = request; // copy the ref to req so that it
 												// doesn't become null when
 												// trying to abort it
 			if (req2 != null)
@@ -209,7 +211,9 @@ public class WPClientRESTImpl implements WPClient {
 	private static WPPathway parsePathwayInfo(final Node node) {
 		final NodeList argNodes = node.getChildNodes();
 		String id = "", revision = "", name = "", species = "", url = "";
-		for (int j = 0; j < argNodes.getLength(); j++) {
+		for (int j = 0; j 
+				
+				< argNodes.getLength(); j++) {
 			final Node argNode = argNodes.item(j);
 			final String argName = argNode.getNodeName();
 			final String argVal = argNode.getTextContent();
@@ -220,6 +224,7 @@ public class WPClientRESTImpl implements WPClient {
 			else if (argName.equals("ns2:url"))			url = argVal;
 		}
 		if ("".equals(name))	return null;
+		System.out.println("parsePathwayInfo: " + id + " " + name + " " + species + " " + url );
 		return new WPPathway(id, revision, name, species, url);
 	}
 
@@ -265,6 +270,7 @@ public class WPClientRESTImpl implements WPClient {
 					return null;
 				final Node responseNode = doc.getFirstChild();
 				final Node resultNode = responseNode.getFirstChild();
+				System.out.println("ResultNode: " + resultNode);
 				return parsePathwayInfo(resultNode);
 			}
 		};

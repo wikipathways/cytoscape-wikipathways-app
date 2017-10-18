@@ -71,14 +71,14 @@ public class GpmlToPathway {
 
   final List<DelayedVizProp> cyDelayedVizProps = new ArrayList<DelayedVizProp>();
 
-  final CyEventHelper     cyEventHelper;
-  final Annots            cyAnnots;
-  final Pathway           pvPathway;
-  final CyNetwork         cyNet;
-  final CyTable           cyNodeTbl;
-  final CyTable           cyEdgeTbl;
-  final WPManager         manager;
-  final CyNetworkView 	networkView;
+//  private final CyEventHelper   cyEventHelper;
+//  private final Annots          cyAnnots;
+  private final Pathway         pvPathway;
+  private  final CyNetwork      cyNet;
+  private final CyTable         cyNodeTbl;
+  private final CyTable         cyEdgeTbl;
+  private final WPManager       manager;
+  private final CyNetworkView 	networkView;
   /**
    * Create a converter from the given pathway and store it in the given network.
    * Constructing this object will not start the conversion and will not modify
@@ -96,8 +96,8 @@ public class GpmlToPathway {
       final Pathway           pvPathway,
       final CyNetwork         cyNet) {
 		manager = inManager;
-		this.cyEventHelper = cyEventHelper;
-		this.cyAnnots = cyAnnots;
+//		this.cyEventHelper = cyEventHelper;
+//		this.cyAnnots = cyAnnots;
 		this.pvPathway = pvPathway;
 		this.cyNet = cyNet;
 		networkView = getNetworkView(cyNet);
@@ -113,7 +113,8 @@ public class GpmlToPathway {
    */
 	public List<DelayedVizProp> convert() {
 		MIMShapes.registerShapes();
-		System.out.println("GraphID = " + pvPathway.getUniqueGraphId());
+		manager.turnOffEvents();
+//		System.out.println("GraphID = " + pvPathway.getUniqueGraphId());
 	    setupCyTables();
 		// Disable all events from our table
 	
@@ -1157,7 +1158,6 @@ public class GpmlToPathway {
     final MLine pvLine = (MLine) pvElem;
     final String pvStartRef = pvLine.getMStart().getGraphRef();
     final String pvEndRef = pvLine.getMEnd().getGraphRef();
-//    System.out.println("\n--------------------\nconvertLine");
 
     Point2D startPt = pvLine.getStartPoint();
     Point2D endPt = pvLine.getEndPoint();
@@ -1165,10 +1165,6 @@ public class GpmlToPathway {
     CyNode cyStartNode = pvToCyNodes.get(startref);
     if (cyStartNode == null) {
       cyStartNode = cyNet.addNode();
-//      String nodeName = "" + cyStartNode.getSUID();
-//      View<CyNode> view = networkView.getNodeView(cyStartNode);
-//      view.getVisualProperty();
-//      view.getModel();
       assignAnchorVizStyle(cyStartNode, startPt);
     }
     GraphIdContainer endref = pvPathway.getGraphIdContainer(pvEndRef);
@@ -1177,28 +1173,17 @@ public class GpmlToPathway {
       cyEndNode = cyNet.addNode();
       assignAnchorVizStyle(cyEndNode, endPt);
     }    
-//    final List<MAnchor> pvAnchors = pvElem.getMAnchors();
-//	System.out.println("NAnchors: " + pvAnchors.size());
-//    for (int i = 0; i < pvAnchors.size(); i++) {
-//    	MAnchor anchor = pvAnchors.get(i);
-//    	System.out.println("anchor at " + anchor.getPosition());
-//      }
-
 //    if (pvAnchors.isEmpty()) 
       newEdge(pvLine, cyStartNode, cyEndNode, true, true);
 //    else
 //    {
-//      // this is for multiple segmented lines
-////    	System.out.println("this is for multiple segmented lines: " + pvAnchors.size());
 //      newEdge(pvLine, cyStartNode, pvToCyNodes.get(pvAnchors.get(0)), true, false);
-//      for (int i = 1; i < pvAnchors.size(); i++) {
+//      for (int i = 1; i < pvAnchors.size(); i++) 
 //        newEdge(pvLine, pvToCyNodes.get(pvAnchors.get(i - 1)), pvToCyNodes.get(pvAnchors.get(i)), false, false);
-//      }
 //      newEdge(pvLine, pvToCyNodes.get(pvAnchors.get(pvAnchors.size() - 1)), cyEndNode, false, true);
 //    }
   }
 //------------------------------------------
-// Changes start here
   
   private void newEdge(final PathwayElement pvLine, final CyNode cySourceNode, 
 		  final CyNode cyTargetNode, final boolean isStart, final boolean isEnd) {
