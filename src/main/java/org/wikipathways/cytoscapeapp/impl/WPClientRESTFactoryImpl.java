@@ -1,8 +1,8 @@
 package org.wikipathways.cytoscapeapp.impl;
 
 import org.cytoscape.application.CyApplicationConfiguration;
-import org.wikipathways.cytoscapeapp.WPClient;
-import org.wikipathways.cytoscapeapp.WPClientFactory;
+import org.wikipathways.cytoscapeapp.api.WPClient;
+import org.wikipathways.cytoscapeapp.api.WPClientFactory;
 
 
 public class WPClientRESTFactoryImpl implements WPClientFactory {

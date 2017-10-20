@@ -1,4 +1,4 @@
-package org.wikipathways.cytoscapeapp;
+package org.wikipathways.cytoscapeapp.core;
 
 import java.awt.Color;
 import java.awt.Shape;
@@ -51,7 +51,7 @@ import org.pathvisio.core.model.PathwayElement;
  * all our new nodes and edges (via CyEventHelper.flushPayloadEvents). 
  * Finally we apply the visual style stored in the DelayedVizProp objects.
  */
-class DelayedVizProp {
+public class DelayedVizProp {
   final CyIdentifiable netObj;
   final VisualProperty<?> prop;
   final Object value;

@@ -1,4 +1,4 @@
-package org.wikipathways.cytoscapeapp;
+package org.wikipathways.cytoscapeapp.core;
 
 /**
  * Represents a pathway on WikiPathways.

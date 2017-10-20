@@ -65,11 +65,11 @@ import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskManager;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.TaskObserver;
-import org.wikipathways.cytoscapeapp.GpmlConversionMethod;
-import org.wikipathways.cytoscapeapp.GpmlReaderFactory;
-import org.wikipathways.cytoscapeapp.ResultTask;
-import org.wikipathways.cytoscapeapp.WPClient;
-import org.wikipathways.cytoscapeapp.WPPathway;
+import org.wikipathways.cytoscapeapp.api.GpmlConversionMethod;
+import org.wikipathways.cytoscapeapp.api.GpmlReaderFactory;
+import org.wikipathways.cytoscapeapp.api.WPClient;
+import org.wikipathways.cytoscapeapp.core.ResultTask;
+import org.wikipathways.cytoscapeapp.core.WPPathway;
 
 public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWebServiceClient, SearchWebServiceClient {
 //  static final Pattern WP_ID_REGEX = Pattern.compile("WP\\d+");		// AST   was: WP\\d+   "[wW][pP]\\d+"

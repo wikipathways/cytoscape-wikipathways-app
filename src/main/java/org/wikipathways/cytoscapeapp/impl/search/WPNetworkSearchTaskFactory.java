@@ -12,7 +12,7 @@ import org.cytoscape.work.FinishStatus;
 import org.cytoscape.work.ObservableTask;
 import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskObserver;
-import org.wikipathways.cytoscapeapp.WPClient;
+import org.wikipathways.cytoscapeapp.api.WPClient;
 import org.wikipathways.cytoscapeapp.internal.guiclient.GUI;
 
 public class WPNetworkSearchTaskFactory extends AbstractNetworkSearchTaskFactory  implements TaskObserver {

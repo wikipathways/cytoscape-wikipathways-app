@@ -1,4 +1,4 @@
-package org.wikipathways.cytoscapeapp;
+package org.wikipathways.cytoscapeapp.api;
 
 import java.awt.Color;
 import java.util.HashSet;
@@ -15,6 +15,7 @@ import org.cytoscape.view.vizmap.VisualPropertyDependency;
 import org.cytoscape.view.vizmap.VisualStyle;
 import org.cytoscape.view.vizmap.VisualStyleFactory;
 import org.cytoscape.view.vizmap.mappings.DiscreteMapping;
+import org.wikipathways.cytoscapeapp.core.GpmlToPathway;
 
 public class GpmlVizStyle {
   static final String VIZ_STYLE_NAME = "WikiPathways";

@@ -1,4 +1,4 @@
-package org.wikipathways.cytoscapeapp;
+package org.wikipathways.cytoscapeapp.api;
 
 import java.io.Reader;
 

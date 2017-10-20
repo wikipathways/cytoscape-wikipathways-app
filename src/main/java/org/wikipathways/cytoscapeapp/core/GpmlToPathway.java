@@ -1,4 +1,4 @@
-package org.wikipathways.cytoscapeapp;
+package org.wikipathways.cytoscapeapp.core;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -50,6 +50,7 @@ import org.pathvisio.core.model.PathwayElement.MPoint;
 import org.pathvisio.core.model.ShapeType;
 import org.pathvisio.core.model.StaticProperty;
 import org.pathvisio.core.view.MIMShapes;
+import org.wikipathways.cytoscapeapp.Annots;
 
 /**
  * Converts a GPML file contained in a PathVisio Pathway object to a

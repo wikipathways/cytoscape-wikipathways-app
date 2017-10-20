@@ -15,9 +15,9 @@ import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskManager;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.TaskObserver;
-import org.wikipathways.cytoscapeapp.ResultTask;
-import org.wikipathways.cytoscapeapp.WPClient;
-import org.wikipathways.cytoscapeapp.WPPathway;
+import org.wikipathways.cytoscapeapp.api.WPClient;
+import org.wikipathways.cytoscapeapp.core.ResultTask;
+import org.wikipathways.cytoscapeapp.core.WPPathway;
 import org.wikipathways.cytoscapeapp.impl.search.WPSearchCmdTaskFactory;
 import org.wikipathways.cytoscapeapp.internal.guiclient.GUI;
 

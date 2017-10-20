@@ -1,4 +1,4 @@
-package org.wikipathways.cytoscapeapp;
+package org.wikipathways.cytoscapeapp.impl;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -35,6 +35,13 @@ import org.cytoscape.work.ObservableTask;
 import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskMonitor;
 import org.pathvisio.core.model.Pathway;
+import org.wikipathways.cytoscapeapp.Annots;
+import org.wikipathways.cytoscapeapp.api.GpmlConversionMethod;
+import org.wikipathways.cytoscapeapp.api.GpmlReaderFactory;
+import org.wikipathways.cytoscapeapp.api.GpmlVizStyle;
+import org.wikipathways.cytoscapeapp.core.DelayedVizProp;
+import org.wikipathways.cytoscapeapp.core.GpmlToPathway;
+import org.wikipathways.cytoscapeapp.core.WPManager;
 
 public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
 

@@ -7,9 +7,8 @@ import java.io.FileReader;
 import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.Tunable;
 import org.cytoscape.work.TaskMonitor;
-
-import org.wikipathways.cytoscapeapp.GpmlReaderFactory;
-import org.wikipathways.cytoscapeapp.GpmlConversionMethod;
+import org.wikipathways.cytoscapeapp.api.GpmlConversionMethod;
+import org.wikipathways.cytoscapeapp.api.GpmlReaderFactory;
 
 
 public class GpmlImportCmdTask extends AbstractTask {

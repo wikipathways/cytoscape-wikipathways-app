@@ -1,4 +1,4 @@
-package org.wikipathways.cytoscapeapp;
+package org.wikipathways.cytoscapeapp.core;
 
 import org.cytoscape.work.Task;
 import org.cytoscape.work.TaskMonitor;
