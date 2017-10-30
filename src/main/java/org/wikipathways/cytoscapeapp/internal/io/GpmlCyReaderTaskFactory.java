@@ -25,7 +25,7 @@ import org.cytoscape.io.DataCategory;
 import org.cytoscape.io.read.AbstractInputStreamTaskFactory;
 import org.cytoscape.io.util.StreamUtil;
 import org.cytoscape.work.TaskIterator;
-import org.wikipathways.cytoscapeapp.api.GpmlReaderFactory;
+import org.wikipathways.cytoscapeapp.impl.GpmlReaderFactory;
 
 /**
  * 

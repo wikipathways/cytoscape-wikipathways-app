@@ -65,24 +65,24 @@ import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskManager;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.TaskObserver;
-import org.wikipathways.cytoscapeapp.api.GpmlConversionMethod;
-import org.wikipathways.cytoscapeapp.api.GpmlReaderFactory;
-import org.wikipathways.cytoscapeapp.api.WPClient;
-import org.wikipathways.cytoscapeapp.core.ResultTask;
-import org.wikipathways.cytoscapeapp.core.WPPathway;
+import org.wikipathways.cytoscapeapp.impl.GpmlConversionMethod;
+import org.wikipathways.cytoscapeapp.impl.GpmlReaderFactory;
+import org.wikipathways.cytoscapeapp.impl.ResultTask;
+import org.wikipathways.cytoscapeapp.impl.WPClient;
+import org.wikipathways.cytoscapeapp.impl.WPPathway;
 
 public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWebServiceClient, SearchWebServiceClient {
 //  static final Pattern WP_ID_REGEX = Pattern.compile("WP\\d+");		// AST   was: WP\\d+   "[wW][pP]\\d+"
   static final String APP_DESCRIPTION
     = "<html>"
-    + "This REVISED app imports community-curated pathways from "
+    + "This app imports community-curated pathways from "
     + "the <a href=\"http://wikipathways.org\">WikiPathways</a> website. "
     + "Pathways can be imported in two ways: "
     + "<ul>"
     + "<li><i>Pathway mode</i>: Complete graphical annotations; "
     + "ideal for custom visualizations of pathways.</li>"
     + "<li><i>Network mode</i>: Simple network without graphical annotations; "
-    + "ideal for algorithmic analysis."
+    + "suited for algorithmic analysis."
     + "</ul>"
     + "This app also supports importing GPML files from "
     + "WikiPathways or PathVisio into Cytoscape."
@@ -471,7 +471,7 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
  	  	System.out.println("execute loadSelectedPathway");
         final WPPathway pathway = tableModel.getSelectedPathwayRef();
         final ResultTask<Reader> loadPathwayTask = client.newGPMLContentsTask(pathway);
-String id = pathway.getId();
+        String id = pathway.getId();
         final TaskIterator taskIterator = new TaskIterator(loadPathwayTask);
         taskIterator.append(new AbstractTask() {
           public void run(TaskMonitor monitor) {
@@ -484,7 +484,7 @@ String id = pathway.getId();
 //              importPathwayButton.setEnabled(true);
 //              importNetworkButton.setEnabled(true);
 //            resultsTable.setEnabled(true);
-          	  System.out.println("allFinished");
+//          	  System.out.println("allFinished");
         }
         });
   }

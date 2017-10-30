@@ -11,7 +11,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.wikipathways</groupId>
 	<artifactId>cytoscapeapp</artifactId>
-	<version>3.3.beta8</version>
+	<version>3.3.beta9</version>
 
 	<name>WikiPathways Cytoscape App</name>
 	
@@ -96,7 +96,7 @@
 						<Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
 						<Bundle-Version>${project.version}</Bundle-Version>
 						<Private-Package>${bundle.namespace}.internal.*,${bundle.namespace}.impl.*</Private-Package>
-            <Export-Package>${bundle.namespace}</Export-Package>
+           				 <Export-Package>${bundle.namespace}</Export-Package>
 						<Bundle-Activator>${bundle.namespace}.CyActivator</Bundle-Activator>
 						<Embed-Dependency>*;scope=!provided</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>

@@ -1,7 +1,8 @@
-package org.wikipathways.cytoscapeapp.api;
+package org.wikipathways.cytoscapeapp.impl;
 
 import java.io.Reader;
 
+import org.cytoscape.io.read.CyNetworkReader;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.work.TaskIterator;

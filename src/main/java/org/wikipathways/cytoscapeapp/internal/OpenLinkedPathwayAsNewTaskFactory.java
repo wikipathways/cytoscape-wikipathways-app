@@ -12,11 +12,11 @@ import org.cytoscape.view.model.View;
 import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskMonitor;
-import org.wikipathways.cytoscapeapp.api.GpmlConversionMethod;
-import org.wikipathways.cytoscapeapp.api.GpmlReaderFactory;
-import org.wikipathways.cytoscapeapp.api.WPClient;
-import org.wikipathways.cytoscapeapp.core.ResultTask;
-import org.wikipathways.cytoscapeapp.core.WPPathway;
+import org.wikipathways.cytoscapeapp.impl.GpmlConversionMethod;
+import org.wikipathways.cytoscapeapp.impl.GpmlReaderFactory;
+import org.wikipathways.cytoscapeapp.impl.ResultTask;
+import org.wikipathways.cytoscapeapp.impl.WPClient;
+import org.wikipathways.cytoscapeapp.impl.WPPathway;
 
 public class OpenLinkedPathwayAsNewTaskFactory implements NodeViewTaskFactory {
   final WPClient client;

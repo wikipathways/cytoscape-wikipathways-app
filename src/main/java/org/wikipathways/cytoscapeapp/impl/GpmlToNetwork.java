@@ -24,7 +24,6 @@ import org.pathvisio.core.model.ObjectType;
 import org.pathvisio.core.model.Pathway;
 import org.pathvisio.core.model.PathwayElement;
 import org.pathvisio.core.model.PathwayElement.MAnchor;
-import org.wikipathways.cytoscapeapp.core.DelayedVizProp;
 import org.pathvisio.core.model.ShapeType;
 import org.pathvisio.core.model.StaticProperty;
 

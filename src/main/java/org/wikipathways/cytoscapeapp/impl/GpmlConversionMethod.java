@@ -1,4 +1,4 @@
-package org.wikipathways.cytoscapeapp.api;
+package org.wikipathways.cytoscapeapp.impl;
 
 /**
  * Used in {@link GpmlReaderFactory} to specify how

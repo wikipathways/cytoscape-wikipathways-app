@@ -17,8 +17,6 @@
 //
 package org.wikipathways.cytoscapeapp;
 
-import static org.cytoscape.work.ServiceProperties.COMMAND_EXAMPLE_JSON;
-
 import java.util.Properties;
 
 import javax.swing.ImageIcon;
@@ -37,15 +35,13 @@ import org.cytoscape.work.TaskManager;
 import org.cytoscape.work.swing.DialogTaskManager;
 import org.osgi.framework.BundleContext;
 import org.pathvisio.core.view.MIMShapes;
-import org.wikipathways.cytoscapeapp.api.GpmlConversionMethod;
-import org.wikipathways.cytoscapeapp.api.GpmlReaderFactory;
-import org.wikipathways.cytoscapeapp.api.WPClient;
-import org.wikipathways.cytoscapeapp.api.WPClientFactory;
+import org.wikipathways.cytoscapeapp.impl.GpmlConversionMethod;
+import org.wikipathways.cytoscapeapp.impl.GpmlReaderFactory;
 import org.wikipathways.cytoscapeapp.impl.GpmlReaderFactoryImpl;
+import org.wikipathways.cytoscapeapp.impl.WPClient;
+import org.wikipathways.cytoscapeapp.impl.WPClientFactory;
 import org.wikipathways.cytoscapeapp.impl.WPClientRESTFactoryImpl;
 import org.wikipathways.cytoscapeapp.impl.search.WPNetworkSearchTaskFactory;
-import org.wikipathways.cytoscapeapp.impl.search.WPSearchCmdTaskFactory;
-import org.wikipathways.cytoscapeapp.impl.search.WPSpeciesCmdTaskFactory;
 import org.wikipathways.cytoscapeapp.internal.OpenLinkedPathwayAsNewTaskFactory;
 import org.wikipathways.cytoscapeapp.internal.ToggleShapesTaskFactory;
 import org.wikipathways.cytoscapeapp.internal.cmd.GpmlImportCmdTaskFactory;
@@ -63,7 +59,7 @@ import org.wikipathways.cytoscapeapp.internal.io.GpmlCyReaderTaskFactory;
 public class CyActivator extends AbstractCyActivator {
 	@Override
 	public void start(BundleContext context) throws Exception {
-    final CyServiceRegistrar registrar = getService(context, CyServiceRegistrar.class);
+	final CyServiceRegistrar registrar = getService(context, CyServiceRegistrar.class);
     // --- get the GpmlReaderFactory and the GpmlCyReaderTaskFactory to manage imports
     final GpmlReaderFactory gpmlReaderFactory = new GpmlReaderFactoryImpl(registrar);
     registerService(context, gpmlReaderFactory, GpmlReaderFactory.class);
@@ -94,7 +90,7 @@ public class CyActivator extends AbstractCyActivator {
     reg(context,  new WPImportCmdTaskFactory(client, gpmlReaderFactory, GpmlConversionMethod.PATHWAY),"import-as-pathway", "wikipathways");
     reg(context,  new WPImportCmdTaskFactory(client, gpmlReaderFactory, GpmlConversionMethod.NETWORK),"import-as-network", "wikipathways");
 
-    // --- analogous export commands s go here   TODO
+    // --- analogous export commands go here   TODO
 
     final ToggleShapesTaskFactory toggleShapesTF = new ToggleShapesTaskFactory();
     registerService(context, toggleShapesTF, NetworkViewTaskFactory.class, ezProps(

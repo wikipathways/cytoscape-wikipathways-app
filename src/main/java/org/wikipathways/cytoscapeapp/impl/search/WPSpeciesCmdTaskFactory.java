@@ -6,8 +6,8 @@ import org.cytoscape.work.AbstractTaskFactory;
 import org.cytoscape.work.ObservableTask;
 import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskMonitor;
-import org.wikipathways.cytoscapeapp.api.WPClient;
-import org.wikipathways.cytoscapeapp.core.ResultTask;
+import org.wikipathways.cytoscapeapp.impl.ResultTask;
+import org.wikipathways.cytoscapeapp.impl.WPClient;
 
 public class WPSpeciesCmdTaskFactory extends AbstractTaskFactory {
   final WPClient client;

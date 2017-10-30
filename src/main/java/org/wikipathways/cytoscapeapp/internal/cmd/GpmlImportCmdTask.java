@@ -1,14 +1,14 @@
 package org.wikipathways.cytoscapeapp.internal.cmd;
 
 import java.io.File;
-import java.io.Reader;
 import java.io.FileReader;
+import java.io.Reader;
 
 import org.cytoscape.work.AbstractTask;
-import org.cytoscape.work.Tunable;
 import org.cytoscape.work.TaskMonitor;
-import org.wikipathways.cytoscapeapp.api.GpmlConversionMethod;
-import org.wikipathways.cytoscapeapp.api.GpmlReaderFactory;
+import org.cytoscape.work.Tunable;
+import org.wikipathways.cytoscapeapp.impl.GpmlConversionMethod;
+import org.wikipathways.cytoscapeapp.impl.GpmlReaderFactory;
 
 
 public class GpmlImportCmdTask extends AbstractTask {

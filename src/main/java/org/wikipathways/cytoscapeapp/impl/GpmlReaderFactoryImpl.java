@@ -36,12 +36,6 @@ import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskMonitor;
 import org.pathvisio.core.model.Pathway;
 import org.wikipathways.cytoscapeapp.Annots;
-import org.wikipathways.cytoscapeapp.api.GpmlConversionMethod;
-import org.wikipathways.cytoscapeapp.api.GpmlReaderFactory;
-import org.wikipathways.cytoscapeapp.api.GpmlVizStyle;
-import org.wikipathways.cytoscapeapp.core.DelayedVizProp;
-import org.wikipathways.cytoscapeapp.core.GpmlToPathway;
-import org.wikipathways.cytoscapeapp.core.WPManager;
 
 public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
 
@@ -53,7 +47,7 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
 	private CyNetworkViewFactory netViewFactory;
 	private CyNetworkViewManager netViewMgr;
 	final CyLayoutAlgorithmManager layoutMgr;
-	private NetworkTaskFactory showLODTF;
+//	private NetworkTaskFactory networkTF;
 	private Annots annots;
 	private GpmlVizStyle vizStyle;
 
@@ -62,6 +56,7 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
 
   public GpmlReaderFactoryImpl(CyServiceRegistrar registrar)
      {
+	  System.out.println("GpmlReaderFactoryImpl");
 	  eventHelper = registrar.getService(CyEventHelper.class);
       netMgr =  registrar.getService(CyNetworkManager.class);
       netNaming = registrar.getService(CyNetworkNaming.class);
@@ -69,7 +64,7 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
       netViewMgr = registrar.getService(CyNetworkViewManager.class);
       netViewFactory = registrar.getService(CyNetworkViewFactory.class);
       layoutMgr = registrar.getService(CyLayoutAlgorithmManager.class);
-      showLODTF = registrar.getService(NetworkTaskFactory.class);
+//      networkTF = registrar.getService(NetworkTaskFactory.class);
       annots = new Annots(
     		  registrar.getService(AnnotationManager.class),
               (AnnotationFactory<ArrowAnnotation>) registrar.getService(AnnotationFactory.class,"(type=ArrowAnnotation.class)"),
@@ -111,13 +106,15 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
       });
     }
 
-    iterator.append(showLODTF.createTaskIterator(gpmlNetwork));
+//    iterator.append(networkTF.createTaskIterator(gpmlNetwork));
     iterator.append(new UpdateViewTask(networkView));
     return iterator;
   }
 
   public TaskIterator createReaderAndViewBuilder(final String id,  final Reader gpmlContents, final CyNetworkView networkView,
-      final GpmlConversionMethod conversionMethod, final boolean setNetworkName) {
+      final GpmlConversionMethod conversionMethod, final boolean setNetworkName) 
+  {
+	  System.out.println("createReaderAndViewBuilder");
     final TaskIterator iterator = new TaskIterator();
     final CyNetwork network = networkView.getModel();
     iterator.append(createReader(id, gpmlContents, network, conversionMethod, setNetworkName));
@@ -126,7 +123,8 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
   }
 
   public TaskIterator createReaderAndViewBuilder(final String id, final Reader gpmlContents, final GpmlConversionMethod conversionMethod) {
-    final CyNetwork network = netFactory.createNetwork();
+	  System.out.println("createReaderAndViewBuilder2");
+   final CyNetwork network = netFactory.createNetwork();
     network.getRow(network).set(CyNetwork.NAME, id);
     netMgr.addNetwork(network);
     final CyNetworkView view = netViewFactory.createNetworkView(network);

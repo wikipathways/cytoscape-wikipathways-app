@@ -1,4 +1,4 @@
-package org.wikipathways.cytoscapeapp.core;
+package org.wikipathways.cytoscapeapp.impl;
 
 import java.awt.Color;
 import java.awt.Shape;
@@ -14,6 +14,7 @@ import java.util.Map;
 
 import javax.swing.SwingUtilities;
 
+//import org.cytoscape.group.CyGroup;
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyIdentifiable;
 import org.cytoscape.model.CyNetwork;
@@ -218,6 +219,7 @@ public class DelayedVizProp {
 //		double z = Double.NaN;
 //		System.out.println("applyNodeShape");
 		View<CyNode> view = netView.getNodeView(src);
+		String style = "";
 		for (DelayedVizProp prop : relatedProps)			// we have to rescan all properties to find other attributes for the same shape
 		{
 			String propName1 = prop.prop.getDisplayName();
@@ -231,7 +233,8 @@ public class DelayedVizProp {
 //					propvalue1 = propvalue1.substring(0, idx);
 				map.put(lookup, propvalue1);
 				if ("Width".equals(lookup))			wid = Double.valueOf(propvalue1);
-				if ("Height".equals(lookup))		hght = Double.valueOf(propvalue1);
+				if ("Height".equals(lookup))			hght = Double.valueOf(propvalue1);
+//				if ("Style".equals(lookup))			{ System.out.println("set style to: " + style);  style = propvalue1;   }
 				if ("x".equals(lookup))				x = Double.valueOf(propvalue1);
 				if ("y".equals(lookup))				y = Double.valueOf(propvalue1);
 //				if ("z".equals(lookup))				z = Double.valueOf(propvalue1);
@@ -246,7 +249,29 @@ public class DelayedVizProp {
 //		}
 		if ("Octagon".equals(propvalue))			// HACK - should look for group node
 		{
-			Color beige = new Color(249, 249, 243);
+//			if (src instanceof CyGroup) 
+				System.out.println("Style: " + style);
+			
+			if (!style.isEmpty())
+			{	
+				if("Complex".equals(style))
+				{
+				}
+				if("Pathway".equals(style))
+				{
+					//green rect
+				}
+				}
+				if("None".equals(style))
+				{ // beige rect
+						
+				}
+				if("Group".equals(style))
+				{
+					// no line width
+				}
+					
+					Color beige = new Color(249, 249, 243);
 			view.setVisualProperty(BasicVisualLexicon.NODE_FILL_COLOR, false);
 			return;
 		}
@@ -550,13 +575,28 @@ public class DelayedVizProp {
 		//--------------------------------------------------------------------------------
 		static private Shape makeRoundRect()
 		{
-			float width = 100.f;
-			float height = 100.f;
-			float x = 0.0f;
-			float y = 0.0f;
-			float curveRad = 8.0f;
-			
-			GeneralPath path = new GeneralPath();
+			double width = 100.0;
+			double height = 80.0;
+			double x = 0.0;
+			double y = 0.0;
+			double curveRad = 8.0;
+			double gap = 2.0;
+//			Shape rrect = new RoundRectangle2D.Double(x,y, width, height, curveRad, curveRad);
+//			x += gap;
+//			y += gap;
+//			gap *= 2;
+//			width -= gap;
+//			height -= gap;
+//			Shape innerrrect = new RoundRectangle2D.Double(x,y, width, height, curveRad, curveRad);
+//			PathIterator iter = rrect.getPathIterator(new AffineTransform());
+//	        for (; !iter.isDone(); iter.next()) {
+//	         outPath.append(iter.next())}
+//	        }
+
+		
+		
+		
+		GeneralPath path = new GeneralPath();
 //			path.moveTo(-100, -100);
 			path.moveTo(x, curveRad);
 			path.curveTo(x, y, curveRad, y, x+curveRad, y);
@@ -568,10 +608,10 @@ public class DelayedVizProp {
 			path.curveTo(x, height, x, height - curveRad, x, height - curveRad);
 			path.lineTo(x, curveRad);
 			
-			width = 98.f;
-			height = 98.f;
-			x = 1.0f;
-			y = 1.0f;
+			width -= 2 * gap;
+			height -= 2 * gap;
+			x += gap;
+			y += gap;
 			path.moveTo(x, curveRad);
 			path.curveTo(x, y, curveRad, y, x+curveRad, y);
 			path.lineTo(width - curveRad, y);

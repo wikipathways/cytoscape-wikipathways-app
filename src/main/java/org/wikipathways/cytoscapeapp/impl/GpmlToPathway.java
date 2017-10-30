@@ -1,4 +1,4 @@
-package org.wikipathways.cytoscapeapp.core;
+package org.wikipathways.cytoscapeapp.impl;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -1043,7 +1043,8 @@ public class GpmlToPathway {
   private void convertGroup(final PathwayElement pvGroup) {
     final CyNode cyGroupNode = cyNet.addNode();
     pvToCyNodes.put(pvGroup, cyGroupNode);
-//    if (verbose)  System.out.println("convertGroup: " + pvGroup.getLineThickness());
+    if (verbose)  System.out.println("convertGroup: " + pvGroup.getGroupStyle());
+//    cyGroupNode.pvGroup.getGroupStyle();
     store(cyGroupNode, pvGroup,
       GROUP_X,
       GROUP_Y,

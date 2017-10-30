@@ -1,10 +1,7 @@
-package org.wikipathways.cytoscapeapp.api;
+package org.wikipathways.cytoscapeapp.impl;
 
 import java.io.Reader;
 import java.util.List;
-
-import org.wikipathways.cytoscapeapp.core.ResultTask;
-import org.wikipathways.cytoscapeapp.core.WPPathway;
 
 /**
  * Issues requests to WikiPathways.

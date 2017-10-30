@@ -19,20 +19,18 @@ package org.wikipathways.cytoscapeapp.internal.io;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Reader;
 import java.io.InputStreamReader;
+import java.io.Reader;
 
 import org.cytoscape.io.read.CyNetworkReader;
-
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.view.model.CyNetworkView;
-
 import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.Tunable;
 import org.cytoscape.work.util.ListSingleSelection;
-import org.wikipathways.cytoscapeapp.api.GpmlConversionMethod;
-import org.wikipathways.cytoscapeapp.api.GpmlReaderFactory;
+import org.wikipathways.cytoscapeapp.impl.GpmlConversionMethod;
+import org.wikipathways.cytoscapeapp.impl.GpmlReaderFactory;
 
 /**
  * 
