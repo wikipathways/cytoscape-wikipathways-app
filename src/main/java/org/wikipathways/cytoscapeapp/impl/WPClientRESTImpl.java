@@ -89,6 +89,7 @@ public class WPClientRESTImpl implements WPClient {
 			// issue the request
 			try {
 				resp = client.execute(request);
+				System.out.println(resp);
 				final HttpEntity entity = resp.getEntity();
 				final String encoding = entity.getContentEncoding() != null ? entity.getContentEncoding().getValue()
 						: null;
@@ -208,9 +209,7 @@ public class WPClientRESTImpl implements WPClient {
 	private static WPPathway parsePathwayInfo(final Node node) {
 		final NodeList argNodes = node.getChildNodes();
 		String id = "", revision = "", name = "", species = "", url = "";
-		for (int j = 0; j 
-				
-				< argNodes.getLength(); j++) {
+		for (int j = 0; j  < argNodes.getLength(); j++) {
 			final Node argNode = argNodes.item(j);
 			final String argName = argNode.getNodeName();
 			final String argVal = argNode.getTextContent();
@@ -286,15 +285,23 @@ public class WPClientRESTImpl implements WPClient {
 	public ResultTask<Reader> newGPMLContentsTask(final WPPathway pathway) {
 		return new ReqTask<Reader>() {
 			protected Reader checkedRun(final TaskMonitor monitor) throws Exception {
-				monitor.setTitle("Get \'" + pathway.getName() + "\' from WikiPathways");
+				String title = "Get \'" + pathway.getName() + "\' from WikiPathways";
+				System.out.println(title);
+				monitor.setTitle(title);
 				Document doc = null;
 				try {
-					doc = xmlGet(BASE_URL + "getPathway", "pwId", pathway.getId(), "revision", pathway.getRevision());
+					String url = BASE_URL + "getPathway?pwId" + pathway.getId();
+					System.out.println(url);
+					doc = xmlGet(url, "pwId", pathway.getId(), "revision", pathway.getRevision());
 				} catch (SAXParseException e) {
 					throw new Exception(String.format("'%s' is not available -- invalid GPML", pathway.getName()), e);
 				}
 				if (super.cancelled)
 					return null;
+
+				NodeList nodes = doc.getChildNodes();
+				for (int i=0; i<nodes.getLength(); i++)
+					System.out.println(nodes.item(i));
 
 				final Node responseNode = doc.getFirstChild();
 				final Node pathwayNode = findChildNode(responseNode, "ns1:pathway");

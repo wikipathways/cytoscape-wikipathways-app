@@ -82,9 +82,9 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
     + "<li><i>Pathway mode</i>: Complete graphical annotations; "
     + "ideal for custom visualizations of pathways.</li>"
     + "<li><i>Network mode</i>: Simple network without graphical annotations; "
-    + "suited for algorithmic analysis."
+    + "suited for algorithmic analysis.  [coming later]"
     + "</ul>"
-    + "This app also supports importing GPML files from "
+    + "This app supports importing GPML files from "
     + "WikiPathways or PathVisio into Cytoscape."
     + "</html>";
 
@@ -468,9 +468,15 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
 
   //----------------------------------------------------------------------
   void loadSelectedPathway(final GpmlConversionMethod method) {
- 	  	System.out.println("execute loadSelectedPathway");
-        final WPPathway pathway = tableModel.getSelectedPathwayRef();
-        final ResultTask<Reader> loadPathwayTask = client.newGPMLContentsTask(pathway);
+	  	System.out.println("execute loadSelectedPathway");
+      final WPPathway pathway = tableModel.getSelectedPathwayRef();
+      loadSelectedPathway(method, pathway);
+  }     
+      
+      void loadSelectedPathway(final GpmlConversionMethod method, WPPathway pathway) {
+   	  	System.out.println("execute loadSelectedPathway");
+//          final WPPathway pathway = tableModel.getSelectedPathwayRef();
+          final ResultTask<Reader> loadPathwayTask = client.newGPMLContentsTask(pathway);
         String id = pathway.getId();
         final TaskIterator taskIterator = new TaskIterator(loadPathwayTask);
         taskIterator.append(new AbstractTask() {
