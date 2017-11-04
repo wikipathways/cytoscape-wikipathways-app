@@ -1,28 +1,17 @@
 package org.wikipathways.cytoscapeapp.internal.guiclient;
 
-import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Container;
 import java.awt.FlowLayout;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.GridBagLayout;
-import java.awt.Paint;
 import java.awt.Rectangle;
-import java.awt.RenderingHints;
-import java.awt.Stroke;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.geom.RoundRectangle2D;
-import java.awt.image.ImageObserver;
 import java.io.Reader;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -32,7 +21,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
-import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -47,7 +35,6 @@ import javax.swing.ListSelectionModel;
 import javax.swing.RowSorter;
 import javax.swing.SortOrder;
 import javax.swing.SwingUtilities;
-import javax.swing.border.AbstractBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
@@ -184,8 +171,8 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
 			loadSelectedPathway(GpmlConversionMethod.NETWORK); 
 		}
 	});
-    final JPanel searchPanel = newSearchPanel();
-    final JPanel resultsPanel = newResultsPanel();
+    final JPanel searchPanel = makeSearchPanel();
+    final JPanel resultsPanel = makeResultsPanel();
 
     super.gui = new JPanel(new GridBagLayout());
     EasyGridBagConstraints c = new EasyGridBagConstraints();
@@ -194,7 +181,7 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
 
     setButtonStates(! resultsTable.getSelectionModel().isSelectionEmpty());
     noResultsLabel.setVisible(false);
-    final ResultTask<List<String>> speciesTask = client.newSpeciesTask();
+    final ResultTask<List<String>> speciesTask = client.getSpeciesListTask();
     taskMgr.execute(new TaskIterator(speciesTask, new PopulateSpecies(speciesTask)));
 
   }
@@ -218,7 +205,8 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
 	  dlogCache = null;
   }
 
-  class SharedListSelectionHandler implements ListSelectionListener {
+//----------------------------------------------------------------------
+ class SharedListSelectionHandler implements ListSelectionListener {
       public void valueChanged(ListSelectionEvent e) { 
 //          ListSelectionModel lsm = (ListSelectionModel)e.getSource();
 //
@@ -228,7 +216,8 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
       	updatePreview(); 
       }
   }
-  public JPanel newResultsPanel() {
+//----------------------------------------------------------------------
+ private JPanel makeResultsPanel() {
     final EasyGridBagConstraints c = new EasyGridBagConstraints();
     openUrlButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -275,7 +264,8 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
     return bottomPanel;
   }
 
-  private JPanel newSearchBar() {
+//----------------------------------------------------------------------
+  private JPanel makeSearchBar() {
     final ActionListener performSearch = new SearchForPathways();
 
     searchButton.setBorder(BorderFactory.createEmptyBorder());
@@ -295,8 +285,9 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
     return searchBar;
   }
 
-  public JPanel newSearchPanel() {
-    final JPanel searchBar = newSearchBar();
+//----------------------------------------------------------------------
+  public JPanel makeSearchPanel() {
+    final JPanel searchBar = makeSearchBar();
     final JPanel searchPanel = new JPanel(new GridBagLayout());
     EasyGridBagConstraints c = new EasyGridBagConstraints();
     searchPanel.add(searchBar, c.expandHoriz().insets(0, 10, 5, 10));
@@ -307,6 +298,7 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
 
   public TaskIterator createTaskIterator(Object query) {    return new TaskIterator();  }
 
+//----------------------------------------------------------------------
   class PopulateSpecies extends AbstractTask {
     final ResultTask<List<String>> speciesTask;
     public PopulateSpecies(final ResultTask<List<String>> speciesTask) {
@@ -321,6 +313,7 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
     }
   }
 
+//----------------------------------------------------------------------
   class SearchForPathways implements ActionListener {
     public void actionPerformed(ActionEvent e) {
       final String query = searchField.getText();
@@ -330,11 +323,14 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
     	   performSearch(query, getSpecies());
     }
   }
-  public String getSpecies()
+
+//----------------------------------------------------------------------
+public String getSpecies()
   {
 	  return speciesCheckBox.isSelected() ? speciesComboBox.getSelectedItem().toString() : null;
   }
 
+//----------------------------------------------------------------------
   public void setPathwaysInResultsTable(final List<WPPathway> pathways) {
 		tableModel.setPathwayRefs(pathways);
 		resultsTable.getColumnModel().getColumn(2).setMaxWidth(180);
@@ -363,6 +359,7 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
   	speciesComboBox.setEnabled(speciesCheckBox.isSelected());
   }
 
+//----------------------------------------------------------------------
   void performSearch()
   {
 	     final String species = getSpecies();
@@ -375,7 +372,7 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
       public void run() {
 //      	  System.out.println("performingSearch");
      
-      	  final ResultTask<List<WPPathway>> searchTask = client.newFreeTextSearchTask(query, species);
+      	  final ResultTask<List<WPPathway>> searchTask = client.freeTextSearchTask(query, species);
       	  taskMgr.execute(new TaskIterator(searchTask, new AbstractTask() {
           public void run(final TaskMonitor monitor) {
             final List<WPPathway> results = searchTask.get();
@@ -385,7 +382,6 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
               noResultsLabel.setVisible(true);
             } 
             else  noResultsLabel.setVisible(false);
-            
             setPathwaysInResultsTable(results);
           }
         }), new TaskObserver() {
@@ -400,7 +396,7 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
   }
   //----------------------------------------------------------------------
   void getPathwayFromId(final String id) {
-    final ResultTask<WPPathway> infoTask = client.newPathwayInfoTask(id);
+    final ResultTask<WPPathway> infoTask = client.pathwayInfoTask(id);
     taskMgr.execute(new TaskIterator(infoTask, new AbstractTask() {
       public void run(final TaskMonitor monitor) {
         final WPPathway pathway = infoTask.get();
@@ -473,29 +469,30 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
       loadSelectedPathway(method, pathway);
   }     
       
-      void loadSelectedPathway(final GpmlConversionMethod method, WPPathway pathway) {
-   	  	System.out.println("execute loadSelectedPathway");
-//          final WPPathway pathway = tableModel.getSelectedPathwayRef();
-          final ResultTask<Reader> loadPathwayTask = client.newGPMLContentsTask(pathway);
-        String id = pathway.getId();
-        final TaskIterator taskIterator = new TaskIterator(loadPathwayTask);
-        taskIterator.append(new AbstractTask() {
-          public void run(TaskMonitor monitor) {
-            super.insertTasksAfterCurrentTask(gpmlReaderFactory.createReaderAndViewBuilder(id, loadPathwayTask.get(), method));
-          }
-        });
-       taskMgr.execute(taskIterator, new TaskObserver() {
-          public void taskFinished(ObservableTask t) {}
-          public void allFinished(FinishStatus status) {
-//              importPathwayButton.setEnabled(true);
-//              importNetworkButton.setEnabled(true);
-//            resultsTable.setEnabled(true);
-//          	  System.out.println("allFinished");
-        }
-        });
+  void loadSelectedPathway(final GpmlConversionMethod method, WPPathway pathway) 
+  {
+  	  final ResultTask<Reader> loadPathwayTask = client.gpmlContentsTask(pathway);
+	      final TaskIterator taskIterator = new TaskIterator(loadPathwayTask);
+	      taskIterator.append(new AbstractTask() {
+	        public void run(TaskMonitor monitor) {
+	          super.insertTasksAfterCurrentTask(gpmlReaderFactory.createReaderAndViewBuilder(pathway.getId(), loadPathwayTask.get(), method));
+	        }
+	      });
+	     taskMgr.execute(taskIterator, new TaskObserver() {
+	        public void taskFinished(ObservableTask t) {}
+	        public void allFinished(FinishStatus status) {
+//    	            importPathwayButton.setEnabled(true);
+//    	            importNetworkButton.setEnabled(true);
+//    	          resultsTable.setEnabled(true);
+//    	        	  System.out.println("allFinished");
+	      }
+	 });
+
+//    		}    
   }
 
-  class PathwayRefsTableModel extends AbstractTableModel {
+//----------------------------------------------------------------------
+class PathwayRefsTableModel extends AbstractTableModel {
     List<WPPathway> pathwayRefs = null;
 	private static final long serialVersionUID = 192L;
 
@@ -540,7 +537,7 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
 				return null;
 			return pathwayRefs.get(row);
 		}
-	}
+  }
   //--------------------------------------------------------------
 	private JDialog dlog;
 
@@ -548,8 +545,8 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
 		EasyGridBagConstraints c = new EasyGridBagConstraints();
 		if (dlog == null) {
 			dlog = new JDialog(parent, "WikiPathways Search", false);
-			JPanel searchPanel = newSearchPanel();
-			JPanel resultsPanel = newResultsPanel();
+			JPanel searchPanel = makeSearchPanel();
+			JPanel resultsPanel = makeResultsPanel();
 			JPanel gui = new JPanel(new GridBagLayout());
 			dlog.add(gui);
 			gui.add(searchPanel, c.expandHoriz());
@@ -562,93 +559,4 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
 		dlog.setVisible(true); 
 		
 	}
-}
-
-class SearchBarBorder extends AbstractBorder {
-  /**
-	 * 
-	 */
-	private static final long serialVersionUID = 12L;
-final static float ARC = 25.0f;
-  final static Color BORDER_COLOR = new Color(0x909090);
-  final static Color BKGND_COLOR = Color.WHITE;
-  final static Stroke BORDER_STROKE = new BasicStroke(1.0f);
-
-  final RoundRectangle2D.Float borderShape = new RoundRectangle2D.Float();
-  public void paintBorder(final Component c, final Graphics g, final int x, final int y, final int w, final int h) {
-    final Graphics2D g2d = (Graphics2D) g;
-
-    final boolean aa = RenderingHints.VALUE_ANTIALIAS_ON.equals(g2d.getRenderingHint(RenderingHints.KEY_ANTIALIASING));
-    final Paint oldPaint = g2d.getPaint();
-    final Stroke oldStroke = g2d.getStroke();
-
-    borderShape.setRoundRect((float) x, (float) y, (float) (w - 1), (float) (h - 1), ARC, ARC);
-    g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-    g2d.setColor(BKGND_COLOR);
-    g2d.fill(borderShape);
-
-    g2d.setColor(BORDER_COLOR);
-    g2d.setStroke(BORDER_STROKE);
-    g2d.draw(borderShape);
-
-    g2d.setPaint(oldPaint);
-    g2d.setStroke(oldStroke);
-    g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, aa ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF);
-  }
-}
-
-class ImagePreview extends JComponent implements ImageObserver {
- 	private static final long serialVersionUID = 1L;
- 	ImageIcon img = null;
-
-  public void setImage(final String urlPath) {
-//    URL url = null;
-    try {
-//      url =s new URL(urlPath);
-      img = new ImageIcon(new URL(urlPath));
-    } catch (MalformedURLException e) {
-      throw new IllegalArgumentException(e);
-    }
-    super.repaint();
-  }
-
-  public void clearImage() {
-    img = null;
-    super.repaint();
-  }
-
-  protected void paintComponent(final Graphics g) {
-    if (img != null && img.getImage() != null) {
-      final Graphics2D g2d = (Graphics2D) g;
-      g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-      g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-
-      final int cw = super.getWidth();
-      final int ch = super.getHeight();
-      final double ca = (double) ch / cw;
-
-      final int iw = img.getIconWidth();
-      final int ih = img.getIconHeight();
-      final double ia = (double) ih / iw;
-
-      if (cw > iw && ch > ih) {
-        final int x = (cw - iw) / 2;
-        final int y = (ch - ih) / 2;
-        g2d.drawImage(img.getImage(), x, y, null);
-      } else if (ca > ia) {
-        final int dw = cw;
-        final int dh = cw * ih / iw;
-        final int x = 0;
-        final int y = (ch - dh) / 2;
-        g.drawImage(img.getImage(), x, y, dw, dh, null);
-      } else { // iw <= ih
-        final int dw = iw * ch / ih;
-        final int dh = ch;
-        final int x = (cw - dw) / 2;
-        final int y = 0;
-        g.drawImage(img.getImage(), x, y, dw, dh, null);
-      }
-    }
-  }
 }

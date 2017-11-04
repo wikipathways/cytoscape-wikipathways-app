@@ -36,12 +36,12 @@ public class OpenLinkedPathwayAsNewTaskFactory implements NodeViewTaskFactory {
     final String xrefId = nodeTbl.getRow(nodeId).get(isPathway ? "XrefId" : "GeneID", String.class);
     final GpmlConversionMethod method = isPathway ? GpmlConversionMethod.PATHWAY : GpmlConversionMethod.NETWORK;
 
-    final ResultTask<WPPathway> pathwayInfoTask = client.newPathwayInfoTask(xrefId);
+    final ResultTask<WPPathway> pathwayInfoTask = client.pathwayInfoTask(xrefId);
     return new TaskIterator(
       pathwayInfoTask,
       new AbstractTask() {
         public void run(final TaskMonitor monitor) {
-          final ResultTask<Reader> gpmlContentsTask = client.newGPMLContentsTask(pathwayInfoTask.get());
+          final ResultTask<Reader> gpmlContentsTask = client.gpmlContentsTask(pathwayInfoTask.get());
           super.insertTasksAfterCurrentTask(gpmlContentsTask, new AbstractTask() {
             public void run(final TaskMonitor monitor) {
             	String id = "";

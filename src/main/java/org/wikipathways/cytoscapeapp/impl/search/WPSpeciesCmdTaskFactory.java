@@ -18,7 +18,7 @@ public class WPSpeciesCmdTaskFactory extends AbstractTaskFactory {
   }
 
   public TaskIterator createTaskIterator() {
-    final ResultTask<List<String>> speciesTask = client.newSpeciesTask();
+    final ResultTask<List<String>> speciesTask = client.getSpeciesListTask();
     return new TaskIterator(speciesTask, new ObservableTask() {
       public void run(TaskMonitor monitor) {}
       public void cancel() {}

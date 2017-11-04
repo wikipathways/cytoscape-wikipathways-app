@@ -40,7 +40,7 @@ public class WPImportCmdTask extends AbstractTask {
 //      throw new IllegalArgumentException("id must follow this regular format: " + WP_ID_REGEX.pattern());
 //    }
 
-    final ResultTask<WPPathway> infoTask = client.newPathwayInfoTask(id);
+    final ResultTask<WPPathway> infoTask = client.pathwayInfoTask(id);
     super.insertTasksAfterCurrentTask(
       infoTask, new AbstractTask() {
         public void run(TaskMonitor monitor) {
@@ -49,7 +49,7 @@ public class WPImportCmdTask extends AbstractTask {
 //            throw new IllegalArgumentException("No such pathway with ID: " + id);
           }
           
-          final ResultTask<Reader> gpmlTask = client.newGPMLContentsTask(infoTask.get());
+          final ResultTask<Reader> gpmlTask = client.gpmlContentsTask(infoTask.get());
           super.insertTasksAfterCurrentTask(gpmlTask, new AbstractTask() {
             public void run(TaskMonitor monitor) {
               super.insertTasksAfterCurrentTask(factory.createReaderAndViewBuilder(id, gpmlTask.get(), method));

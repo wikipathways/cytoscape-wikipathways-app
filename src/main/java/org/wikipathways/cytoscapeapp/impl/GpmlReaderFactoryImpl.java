@@ -76,7 +76,7 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
     		  registrar.getService( VisualMappingFunctionFactory.class, "(mapping.type=continuous)"),
               registrar.getService( VisualMappingFunctionFactory.class, "(mapping.type=discrete)"),
               registrar.getService( VisualMappingFunctionFactory.class, "(mapping.type=passthrough)"));
-      manager = new WPManager(registrar,annots );
+      manager = new WPManager(registrar,annots, this );
       }
 
   public TaskIterator createReader(final String id, final Reader gpmlContents, final CyNetwork network, 

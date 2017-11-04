@@ -49,7 +49,7 @@ public class WPSearchCmdTask extends AbstractTask {
 
   	if (query == null || query.length() == 0)  	return;     	// BEEP
     
-    final ResultTask<List<WPPathway>> searchTask = client.newFreeTextSearchTask(query, species);
+    final ResultTask<List<WPPathway>> searchTask = client.freeTextSearchTask(query, species);
     
     
 //    final WebServiceImportDialog<?> dialog = (WebServiceImportDialog) registrar.getService(WebServiceImportDialog.class);
