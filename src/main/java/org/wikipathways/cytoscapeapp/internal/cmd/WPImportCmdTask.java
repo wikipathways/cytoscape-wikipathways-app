@@ -44,9 +44,7 @@ public class WPImportCmdTask extends AbstractTask {
       throw new IllegalArgumentException("id must be specified");
     }
    id = id.trim();
-    System.out.println("We know the id:  " + id);
     if (id.startsWith("“"))   id=id.substring(1);			// somehow id has an extra quote to start, but doesn't carry the final quote thru
-    System.out.println("now the id is:  " + id);
     final ResultTask<WPPathway> infoTask = client.pathwayInfoTask(id);
     final TaskIterator taskIterator = new TaskIterator(infoTask);
       taskIterator.append(new AbstractTask() {
@@ -54,7 +52,7 @@ public class WPImportCmdTask extends AbstractTask {
         	WPPathway pathway = infoTask.get();
         	if (pathway == null)
         	{
-        		System.err.println("Shit!");
+        		System.err.println("Something went wrong...");
         		return;
         }
      taskIterator.append(new AbstractTask() {
@@ -64,15 +62,15 @@ public class WPImportCmdTask extends AbstractTask {
               }
            });
      taskMgr.execute(taskIterator, new TaskObserver() {
-        public void taskFinished(ObservableTask t) { System.out.println("task finished! " + t);}
-        public void allFinished(FinishStatus status) {  System.out.println("done!");}
+        public void taskFinished(ObservableTask t) { System.out.println("inner task finished " + t);}
+        public void allFinished(FinishStatus status) {  System.out.println("inner all done");}
  });
 
 
   } });
       taskMgr.execute(taskIterator, new TaskObserver() {
-          public void taskFinished(ObservableTask t) { System.err.println("outside finished! " + t);}
-          public void allFinished(FinishStatus status) {  System.out.println("really done!");}
+          public void taskFinished(ObservableTask t) { System.err.println("outer finished! " + t);}
+          public void allFinished(FinishStatus status) {  System.out.println("outer all done");}
    });
 
   }
