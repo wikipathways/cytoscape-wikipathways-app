@@ -471,24 +471,8 @@ public String getSpecies()
       
   void loadSelectedPathway(final GpmlConversionMethod method, WPPathway pathway) 
   {
-  	  final ResultTask<Reader> loadPathwayTask = client.gpmlContentsTask(pathway);
-	      final TaskIterator taskIterator = new TaskIterator(loadPathwayTask);
-	      taskIterator.append(new AbstractTask() {
-	        public void run(TaskMonitor monitor) {
-	          super.insertTasksAfterCurrentTask(gpmlReaderFactory.createReaderAndViewBuilder(pathway.getId(), loadPathwayTask.get(), method));
-	        }
-	      });
-	     taskMgr.execute(taskIterator, new TaskObserver() {
-	        public void taskFinished(ObservableTask t) {}
-	        public void allFinished(FinishStatus status) {
-//    	            importPathwayButton.setEnabled(true);
-//    	            importNetworkButton.setEnabled(true);
-//    	          resultsTable.setEnabled(true);
-//    	        	  System.out.println("allFinished");
-	      }
-	 });
-
-//    		}    
+	  gpmlReaderFactory.getWPManager().loadPathway(method, pathway, taskMgr);
+  
   }
 
 //----------------------------------------------------------------------

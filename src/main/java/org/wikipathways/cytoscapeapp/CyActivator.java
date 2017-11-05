@@ -74,10 +74,11 @@ public class CyActivator extends AbstractCyActivator {
 
 		// ---- get all the services necessary to build the GUI and then build and register it
 		final CyApplicationConfiguration appConf = getService(context, CyApplicationConfiguration.class);
-		final WPClientFactory clientFactory = new WPClientRESTFactoryImpl(appConf);
+		final WPClientFactory clientFactory = new WPClientRESTFactoryImpl(appConf, gpmlReaderFactory.getWPManager());
 		registerService(context, clientFactory, WPClientFactory.class);
 		final TaskManager<?, ?> taskMgr = getService(context, DialogTaskManager.class);
 		final WPClient client = clientFactory.create();
+		gpmlReaderFactory.setClient(client);
 		final OpenBrowser openBrowser = getService(context, OpenBrowser.class);
 		final GUI guiClient = new GUI(taskMgr, client, openBrowser, gpmlReaderFactory);
 		registerAllServices(context, guiClient);
@@ -86,9 +87,9 @@ public class CyActivator extends AbstractCyActivator {
 //		reg(context,  new WPSpeciesCmdTaskFactory(client), "get-species", "wikipathways");
 //    reg(context,  new WPSearchCmdTaskFactory(client, registrar, guiClient), "search", "wikipathways");
     reg(context,  new GpmlImportCmdTaskFactory(gpmlReaderFactory, GpmlConversionMethod.PATHWAY),"import-as-pathway", "gpml");
-    reg(context,  new GpmlImportCmdTaskFactory(gpmlReaderFactory, GpmlConversionMethod.NETWORK),"import-as-network", "gpml");
-    reg(context,  new WPImportCmdTaskFactory(client, gpmlReaderFactory, GpmlConversionMethod.PATHWAY),"import-as-pathway", "wikipathways");
-    reg(context,  new WPImportCmdTaskFactory(client, gpmlReaderFactory, GpmlConversionMethod.NETWORK),"import-as-network", "wikipathways");
+//    reg(context,  new GpmlImportCmdTaskFactory(gpmlReaderFactory, GpmlConversionMethod.NETWORK),"import-as-network", "gpml");
+    reg(context,  new WPImportCmdTaskFactory(client, gpmlReaderFactory, GpmlConversionMethod.PATHWAY, taskMgr),"import-as-pathway", "wikipathways");
+//    reg(context,  new WPImportCmdTaskFactory(client, gpmlReaderFactory, GpmlConversionMethod.NETWORK, taskMgr),"import-as-network", "wikipathways");
 
     // --- analogous export commands go here   TODO
 

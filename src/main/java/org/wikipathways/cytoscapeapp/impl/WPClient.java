@@ -33,5 +33,6 @@ public interface WPClient {
    * Return a task that provides the {@code Reader} containing the GPML contents of {@code pathway}.
    */
   ResultTask<Reader> gpmlContentsTask(final WPPathway pathway);
+	public WPManager getManager();
 
 }

@@ -40,7 +40,11 @@ import org.wikipathways.cytoscapeapp.Annots;
 public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
 
 	private WPManager manager;
-	private CyEventHelper eventHelper;
+	  public WPManager getWPManager() { return manager;	}
+	  WPClient client;
+	  @Override public void setClient(WPClient inClient) {	client = inClient;  manager.setClient(client); }
+	  @Override public  WPClient getClient() {	return client;}
+	  private CyEventHelper eventHelper;
 	private CyNetworkFactory netFactory;
 	private CyNetworkManager netMgr;
 	private CyNetworkNaming netNaming;
@@ -263,5 +267,6 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
       return null;
     }
   }
+
 }
 
