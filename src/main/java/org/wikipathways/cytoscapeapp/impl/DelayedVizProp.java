@@ -14,7 +14,6 @@ import java.util.Map;
 
 import javax.swing.SwingUtilities;
 
-//import org.cytoscape.group.CyGroup;
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyIdentifiable;
 import org.cytoscape.model.CyNetwork;
@@ -219,7 +218,7 @@ public class DelayedVizProp {
 //		double z = Double.NaN;
 //		System.out.println("applyNodeShape");
 		View<CyNode> view = netView.getNodeView(src);
-		String style = "";
+//		String style = "";
 		for (DelayedVizProp prop : relatedProps)			// we have to rescan all properties to find other attributes for the same shape
 		{
 			String propName1 = prop.prop.getDisplayName();
@@ -247,32 +246,10 @@ public class DelayedVizProp {
 //			map.put("edgeThickness", "4.3");
 //			propvalue = "Rounded Rectangle";
 //		}
-		if ("Octagon".equals(propvalue))			// HACK - should look for group node
+		if ("Rectangle".equals(propvalue) || "Octagon".equals(propvalue))			// HACK - should look for group node
 		{
-//			if (src instanceof CyGroup) 
-				System.out.println("Style: " + style);
+			//Nothing to do here; Group style is set in GpmlToPathway.java
 			
-			if (!style.isEmpty())
-			{	
-				if("Complex".equals(style))
-				{
-				}
-				if("Pathway".equals(style))
-				{
-					//green rect
-				}
-				}
-				if("None".equals(style))
-				{ // beige rect
-						
-				}
-				if("Group".equals(style))
-				{
-					// no line width
-				}
-					
-					Color beige = new Color(249, 249, 243);
-			view.setVisualProperty(BasicVisualLexicon.NODE_FILL_COLOR, false);
 			return;
 		}
 		
@@ -296,6 +273,7 @@ public class DelayedVizProp {
 		}
 		else
 		{
+			System.out.println("propvalue: "+propvalue);
 			GeneralPath path = getPath(propvalue);
 			if (path != null)
 			{
@@ -469,17 +447,17 @@ public class DelayedVizProp {
 		if ("Golgi Apparatus".equals(propvalue)) 				return makeGolgi();
 		if ("Brace".equals(propvalue))  						return makeBrace();
 		if ("Triangle".equals(propvalue))  						return makeTriangle();
+		if ("Cell".equals(propvalue))                                                   return makeCell();
+		if ("Nucleus".equals(propvalue))                                                return makeNucleus();
 		return null;
 	}
 	private static Shape getShape(String propvalue) {
-//		if (verbose) System.out.println("getShapePath: " + propvalue);
+		System.out.println("getShapePath: " + propvalue);
 		if ("Rounded Rectangle".equals(propvalue)) 			  	return makeRoundRect();
 		if ("Round Rectangle".equals(propvalue)) 			  	return makeRoundRect();
-		if ("Cell".equals(propvalue)) 					  		return makeRoundRect();
 		if ("Organelle".equals(propvalue)) 					  	return makeRoundRect();
 
 		if ("Oval".equals(propvalue)) 					  		return makeEllipse();
-		if ("Nucleus".equals(propvalue)) 					  	return makeEllipse();
 		if ("Vesicle".equals(propvalue)) 					  	return makeEllipse();
 		if ("Ellipse".equals(propvalue)) 					  	return makeEllipse();
 //	
@@ -530,7 +508,32 @@ public class DelayedVizProp {
 //
 		//--------------------------------------------------------------------------------
 //https://stackoverflow.com/questions/14169234/the-relation-of-the-bezier-curve-and-ellipse
-	static private Shape makeEllipse() {
+        static private Shape makeEllipse() {
+                GeneralPath path = new GeneralPath();
+
+                double x = 0;
+                double y = 0;
+                double w = 100;
+                double h = 100;
+
+                double kappa = 0.5522848;
+                double ox = (w / 2) * kappa; // control point offset horizontal
+                double oy = (h / 2) * kappa; // control point offset vertical
+                double xe = x + w; // x-end
+                double ye = y + h; // y-end
+                double xm = x + w / 2; // x-middle
+                double ym = y + h / 2; // y-middle
+
+                path.moveTo(x, ym);
+                path.curveTo(x, ym - oy, xm - ox, y, xm, y);
+                path.curveTo(xm + ox, y, xe, ym - oy, xe, ym);
+                path.curveTo(xe, ym + oy, xm + ox, ye, xm, ye);
+                path.curveTo(xm - ox, ye, x, ym + oy, x, ym);
+                path.closePath();
+                return path;
+	}
+
+	static private GeneralPath makeNucleus() {
 		GeneralPath path = new GeneralPath();
 
 		double x = 0;
@@ -573,6 +576,55 @@ public class DelayedVizProp {
 		return path;
 	}
 		//--------------------------------------------------------------------------------
+
+                static private GeneralPath makeCell()
+                {
+                        double width = 100.0;
+                        double height = 80.0;
+                        double x = 0.0;
+                        double y = 0.0;
+                        double curveRad = 8.0;
+                        double gap = 2.0;
+//                      Shape rrect = new RoundRectangle2D.Double(x,y, width, height, curveRad, curveRad);
+//                      x += gap;
+//                      y += gap;
+//                      gap *= 2;
+//                      width -= gap;
+//                      height -= gap;
+//                      Shape innerrrect = new RoundRectangle2D.Double(x,y, width, height, curveRad, curveRad);
+//                      PathIterator iter = rrect.getPathIterator(new AffineTransform());
+//              for (; !iter.isDone(); iter.next()) {
+//               outPath.append(iter.next())}
+//              }
+
+                GeneralPath path = new GeneralPath();
+//                      path.moveTo(-100, -100);
+                        path.moveTo(x, curveRad);
+                        path.curveTo(x, y, curveRad, y, x+curveRad, y);
+                        path.lineTo(width - curveRad, y);
+                        path.curveTo(width, y, width, curveRad, width, curveRad);
+                        path.lineTo(width, height - curveRad);
+                        path.curveTo(width, height, width - curveRad, height, width - curveRad, height);
+                        path.lineTo(curveRad, height);
+                        path.curveTo(x, height, x, height - curveRad, x, height - curveRad);
+                        path.lineTo(x, curveRad);
+
+                        width -= 2 * gap;
+                        height -= 2 * gap;
+                        x += gap;
+                        y += gap;
+                        path.moveTo(x, curveRad);
+                        path.curveTo(x, y, curveRad, y, x+curveRad, y);
+                        path.lineTo(width - curveRad, y);
+                        path.curveTo(width, y, width, curveRad, width, curveRad);
+                        path.lineTo(width, height - curveRad);
+                        path.curveTo(width, height, width - curveRad, height, width - curveRad, height);
+                        path.lineTo(curveRad, height);
+                        path.curveTo(x, height, x, height - curveRad, x, height - curveRad);
+                        path.lineTo(x, curveRad);
+                        return path;
+		}
+
 		static private Shape makeRoundRect()
 		{
 			double width = 100.0;
@@ -581,37 +633,8 @@ public class DelayedVizProp {
 			double y = 0.0;
 			double curveRad = 8.0;
 			double gap = 2.0;
-//			Shape rrect = new RoundRectangle2D.Double(x,y, width, height, curveRad, curveRad);
-//			x += gap;
-//			y += gap;
-//			gap *= 2;
-//			width -= gap;
-//			height -= gap;
-//			Shape innerrrect = new RoundRectangle2D.Double(x,y, width, height, curveRad, curveRad);
-//			PathIterator iter = rrect.getPathIterator(new AffineTransform());
-//	        for (; !iter.isDone(); iter.next()) {
-//	         outPath.append(iter.next())}
-//	        }
-
-		
-		
 		
 		GeneralPath path = new GeneralPath();
-//			path.moveTo(-100, -100);
-			path.moveTo(x, curveRad);
-			path.curveTo(x, y, curveRad, y, x+curveRad, y);
-			path.lineTo(width - curveRad, y);
-			path.curveTo(width, y, width, curveRad, width, curveRad);
-			path.lineTo(width, height - curveRad);
-			path.curveTo(width, height, width - curveRad, height, width - curveRad, height);
-			path.lineTo(curveRad, height);
-			path.curveTo(x, height, x, height - curveRad, x, height - curveRad);
-			path.lineTo(x, curveRad);
-			
-			width -= 2 * gap;
-			height -= 2 * gap;
-			x += gap;
-			y += gap;
 			path.moveTo(x, curveRad);
 			path.curveTo(x, y, curveRad, y, x+curveRad, y);
 			path.lineTo(width - curveRad, y);
@@ -622,18 +645,8 @@ public class DelayedVizProp {
 			path.curveTo(x, height, x, height - curveRad, x, height - curveRad);
 			path.lineTo(x, curveRad);
 			return path;
-	    }
+	    	}
 		
-//		path.moveTo(0.0, 8.0);
-//		path.curveTo(0.0, 0.0, 8.0, 0.0, 8.0, 0.0);
-//		path.lineTo(width - 8.0, 0.0);
-//		path.curveTo(width, 0.0, width, 8.0, width, 8.0);
-//		path.lineTo(width, height - 8.0);
-//		path.curveTo(width, height, width - 8.0, height, width - 8.0, height);
-//		path.lineTo(8.0, height);
-//		path.curveTo(0.0, .height, 0.0, height - 8.0, 0, height - 8.0);
-//		path.closePath();
-
 		static private Arc2D.Float makeArc(double startRotation)	
 		{
 			float degrees = (float) (startRotation * 180 / Math.PI);

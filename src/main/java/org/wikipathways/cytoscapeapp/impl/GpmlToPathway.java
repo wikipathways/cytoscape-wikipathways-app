@@ -56,6 +56,9 @@ import org.wikipathways.cytoscapeapp.Annots;
  * Converts a GPML file contained in a PathVisio Pathway object to a
  * Cytoscape network view, and it tries to reproduce
  * the pathway's visual representation.
+ * 
+ * Style information is sync'd with PathVisio Java, e.g. see:
+ * https://github.com/PathVisio/pathvisio/blob/master/modules/org.pathvisio.core/src/org/pathvisio/core/view/GroupPainterRegistry.java
  */
 public class GpmlToPathway {
   /*
@@ -398,7 +401,16 @@ public class GpmlToPathway {
     public Object extract(final PathwayElement pvElem) {
 //      System.out.println("Extracting...");
       for (int i = 0; i < pvValues.length; i++) {
-        pvValues[i] = pvElem.getStaticProperty(pvProps[i]);
+	pvValues[i] = pvElem.getStaticProperty(pvProps[i]);
+
+	//check for cellular compartments
+	if (pvProps[i] == StaticProperty.SHAPETYPE)
+		if (pvElem.getPropertyEx("org.pathvisio.CellularComponentProperty") != null)
+			if (pvElem.getPropertyEx("org.pathvisio.CellularComponentProperty").toString().equals("Cell"))
+				pvValues[i] = (IShape) ShapeType.CELL;
+			else if (pvElem.getPropertyEx("org.pathvisio.CellularComponentProperty").toString().equals("Nucleus"))
+				pvValues[i] = (IShape) ShapeType.NUCLEUS;
+
 //        System.out.println("Extracting..." + pvProps[i] + " = " + pvValues[i]);
       }
       if (pvValues.length == 1 && pvValues[0] == null)
@@ -556,10 +568,9 @@ public class GpmlToPathway {
     PV_SHAPE_MAP.put("Ellipse",             NodeShapeVisualProperty.ELLIPSE);
     PV_SHAPE_MAP.put("Oval",             NodeShapeVisualProperty.ELLIPSE);
     PV_SHAPE_MAP.put("Octagon",          NodeShapeVisualProperty.OCTAGON);
-    PV_SHAPE_MAP.put("Cell",          NodeShapeVisualProperty.ELLIPSE);
-    PV_SHAPE_MAP.put("Nucleus",          NodeShapeVisualProperty.ELLIPSE);
+    PV_SHAPE_MAP.put("Cell",          new NodeShapeImpl("Cell", "Cell")); 
+    PV_SHAPE_MAP.put("Nucleus",           new NodeShapeImpl("Nucleus", "Nucleus"));
     PV_SHAPE_MAP.put("Organelle",          NodeShapeVisualProperty.ROUND_RECTANGLE);
-    PV_SHAPE_MAP.put("Octagon",          NodeShapeVisualProperty.OCTAGON);
     PV_SHAPE_MAP.put("Mitochondria",     new NodeShapeImpl("Mitochondria", "Mitochondria"));	
     PV_SHAPE_MAP.put("Sarcoplasmic Reticulum", new NodeShapeImpl("Sarcoplasmic Reticulum", "Sarcoplasmic Reticulum"));	
     PV_SHAPE_MAP.put("Endoplasmic Reticulum", new NodeShapeImpl("Endoplasmic Reticulum", "Endoplasmic Reticulum"));	
@@ -714,6 +725,7 @@ public class GpmlToPathway {
     public static final VizPropStore NODE_LABEL_SIZE  = new BasicVizPropStore(BasicExtracter.FONT_SIZE,   BasicVisualLexicon.NODE_LABEL_FONT_SIZE);
     public static final VizPropStore NODE_TRANSPARENT = new BasicVizPropStore(BasicExtracter.TRANSPARENT, PV_TRANSPARENT_MAP, BasicVisualLexicon.NODE_TRANSPARENCY);
     public static final VizPropStore NODE_ALWAYS_TRANSPARENT = new BasicVizPropStore(new DefaultExtracter(0),      BasicVisualLexicon.NODE_TRANSPARENCY);
+    public static final VizPropStore NODE_ALWAYS_SEMI_TRANSPARENT = new BasicVizPropStore(new DefaultExtracter(25),      BasicVisualLexicon.NODE_TRANSPARENCY);
     public static final VizPropStore NODE_BORDER_STYLE = new BasicVizPropStore(BasicExtracter.LINE_STYLE_NAME, PV_LINE_STYLE_MAP, BasicVisualLexicon.NODE_BORDER_LINE_TYPE);
     public static final VizPropStore NODE_BORDER_THICKNESS  = new BasicVizPropStore(BasicExtracter.NODE_LINE_THICKNESS,             BasicVisualLexicon.NODE_BORDER_WIDTH);
     public static final VizPropStore NODE_SHAPE       = new BasicVizPropStore(BasicExtracter.SHAPE, PV_SHAPE_MAP, BasicVisualLexicon.NODE_SHAPE);
@@ -834,12 +846,13 @@ public class GpmlToPathway {
       if (pvElem.getObjectType().equals(ObjectType.SHAPE))
     	  convertShape(pvElem);
   }
-
   private void convertShape(final PathwayElement pvShape) {
+    System.out.println("convertShape: " + pvShape.getShapeType()+", "+pvShape.getPropertyEx("org.pathvisio.CellularComponentProperty"));
     final CyNode cyNode = cyNet.addNode();
     pvToCyNodes.put(pvShape, cyNode);
     IShape shtype = pvShape.getShapeType();
     if (shtype == null) 	return;
+
 //    if (verbose)  
 //    {
 //    	System.out.println("convertShape: " + (shtype == null ? "NONE" : shtype.getName()) + " " + id + " " + pvShape.getFillColor());
@@ -992,28 +1005,55 @@ public class GpmlToPathway {
     public Object extract(final PathwayElement pvGroup) { return pvGroup.getMHeight(); }
   };
 
-  static Color GRAY = new Color(0xefefef);
-  
+  static final Converter GROUP_SHAPE_CONVERTER = new Converter() {
+    public Object toCyValue(Object[] pvValues) {
+      final String styleName = (String) pvValues[0];
+      final GroupStyle style = styleName != null ? GroupStyle.fromName(styleName) : null;
+      if (GroupStyle.COMPLEX.equals(style))
+          return NodeShapeVisualProperty.OCTAGON; 
+      else
+          return NodeShapeVisualProperty.RECTANGLE; 
+    }
+  };
+
+  static final Extracter GROUP_SHAPE_EXTRACTER = new BasicExtracter(GROUP_SHAPE_CONVERTER, StaticProperty.GROUPSTYLE);
+
   static final Converter GROUP_FILL_COLOR_CONVERTER = new Converter() {
     public Object toCyValue(Object[] pvValues) {
       final String styleName = (String) pvValues[0];
       final GroupStyle style = styleName != null ? GroupStyle.fromName(styleName) : null;
-      return (GroupStyle.GROUP.equals(style)) ? Color.WHITE : GRAY;
+      if (GroupStyle.PATHWAY.equals(style))
+	  return Color.GREEN;
+      else if (GroupStyle.COMPLEX.equals(style) || GroupStyle.NONE.equals(style))
+	  return new Color(180, 180, 100);
+      else 
+      	  return Color.WHITE;
     }
   };
 
   static final Extracter GROUP_FILL_COLOR_EXTRACTER = new BasicExtracter(GROUP_FILL_COLOR_CONVERTER, StaticProperty.GROUPSTYLE);
 
-  static final Converter GROUP_BORDER_THICKNESS_CONVERTER = new Converter() {
+  static final Converter GROUP_BORDER_STYLE_CONVERTER = new Converter() {
     public Object toCyValue(Object[] pvValues) {
       final String styleName = (String) pvValues[0];
       final GroupStyle style = styleName != null ? GroupStyle.fromName(styleName) : null;
       if (GroupStyle.COMPLEX.equals(style))
-          return 3.0;
-    if (GroupStyle.GROUP.equals(style))
-        return 0.0;
+	  return getCyNodeLineType("Solid"); 
       else
-        return 1.0;
+          return getCyNodeLineType("Dash");
+    }
+  };
+
+  static final Extracter GROUP_BORDER_STYLE_EXTRACTER = new BasicExtracter(GROUP_BORDER_STYLE_CONVERTER, StaticProperty.GROUPSTYLE);
+
+  static final Converter GROUP_BORDER_THICKNESS_CONVERTER = new Converter() {
+    public Object toCyValue(Object[] pvValues) {
+      final String styleName = (String) pvValues[0];
+      final GroupStyle style = styleName != null ? GroupStyle.fromName(styleName) : null;
+      if (GroupStyle.GROUP.equals(style))
+          return 0.0;
+      else
+	  return 1.0;
   
     }
   };
@@ -1028,8 +1068,8 @@ public class GpmlToPathway {
   static final VizPropStore GROUP_FILL_COLOR        = new BasicVizPropStore(GROUP_FILL_COLOR_EXTRACTER,                           BasicVisualLexicon.NODE_FILL_COLOR);
   static final VizPropStore GROUP_COLOR             = new BasicVizPropStore(new DefaultExtracter(new Color(0xaaaaaa)),            BasicVisualLexicon.NODE_LABEL_COLOR, BasicVisualLexicon.NODE_BORDER_PAINT);
   static final VizPropStore GROUP_BORDER_THICKNESS  = new BasicVizPropStore(GROUP_BORDER_THICKNESS_EXTRACTER,                     BasicVisualLexicon.NODE_BORDER_WIDTH);
-  static final VizPropStore GROUP_BORDER_STYLE      = new BasicVizPropStore(new DefaultExtracter("Dash"), PV_LINE_STYLE_MAP,      BasicVisualLexicon.NODE_BORDER_LINE_TYPE);
-  static final VizPropStore GROUP_SHAPE             = new BasicVizPropStore(new DefaultExtracter("Octagon"), PV_SHAPE_MAP,      BasicVisualLexicon.NODE_SHAPE);
+  static final VizPropStore GROUP_BORDER_STYLE      = new BasicVizPropStore(GROUP_BORDER_STYLE_EXTRACTER, BasicVisualLexicon.NODE_BORDER_LINE_TYPE);
+  static final VizPropStore GROUP_SHAPE             = new BasicVizPropStore(GROUP_SHAPE_EXTRACTER,      BasicVisualLexicon.NODE_SHAPE);
 
   private void convertGroups() {
     for (final PathwayElement pvElem : pvPathway.getDataObjects()) {
@@ -1056,7 +1096,7 @@ public class GpmlToPathway {
       GROUP_FILL_COLOR,
       GROUP_BORDER_THICKNESS,
       GROUP_BORDER_STYLE,
-      BasicVizPropStore.NODE_ALWAYS_TRANSPARENT,
+      BasicVizPropStore.NODE_ALWAYS_SEMI_TRANSPARENT,
       GROUP_SHAPE 
     );
     
