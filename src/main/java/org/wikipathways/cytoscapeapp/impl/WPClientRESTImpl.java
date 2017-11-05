@@ -43,9 +43,11 @@ public class WPClientRESTImpl implements WPClient {
 	final private CyApplicationConfiguration appConf;		//  gives access to a species cache file
 	final private DocumentBuilder xmlParser;
 	final private CloseableHttpClient httpClient;
-
+	final private WPManager manager;
+	public WPManager getManager() 	{ return manager;	}
 	//----------------------------
-	public WPClientRESTImpl(final CyApplicationConfiguration appConf) {
+	public WPClientRESTImpl(final CyApplicationConfiguration appConf, WPManager mgr) {
+		manager = mgr;
 		this.appConf = appConf;
 		try {
 			xmlParser = makeXmlParser();
@@ -134,6 +136,7 @@ public class WPClientRESTImpl implements WPClient {
 			protected WPPathway checkedRun(final TaskMonitor monitor) throws Exception {
 				monitor.setTitle("Retrieve info for \'" + id + "\'");
 				final Document doc = xmlGet(BASE_URL + "getPathwayInfo", "pwId", id);
+				docPeek(doc);
 				if (super.cancelled)
 					return null;
 				final Node responseNode = doc.getFirstChild();
@@ -151,7 +154,6 @@ public class WPClientRESTImpl implements WPClient {
 			final Node argNode = argNodes.item(j);
 			final String argName = argNode.getNodeName();
 			final String argVal = argNode.getTextContent();
-			System.out.println("argName: " + argName);
 			if (argName.equals("ns2:id"))				id = argVal;
 			else if (argName.equals("ns2:revision"))     revision = argVal;
 			else if (argName.equals("ns2:name"))			name = argVal;
@@ -270,7 +272,7 @@ public class WPClientRESTImpl implements WPClient {
 				System.out.println(resp);
 				final HttpEntity entity = resp.getEntity();
 				final String encoding = entity.getContentEncoding() != null ? entity.getContentEncoding().getValue()
-					: null;
+						: null;
 				stream = entity.getContent();
 				final InputSource inputSource = new InputSource(stream);
 				if (encoding != null)
@@ -310,19 +312,24 @@ public class WPClientRESTImpl implements WPClient {
 			}
 		}
 	}
-
-	
 	private void docPeek(Document doc)
 	{
+		elemPeek(doc.getDocumentElement());
+	}
+	
+	private void elemPeek(Node parent )
+	{
        try { // get the first element
-        Element element = doc.getDocumentElement();
+//        Element element = doc.getDocumentElement();
 
         // get all child nodes
-        NodeList nodes = element.getChildNodes();
+        NodeList nodes = parent.getChildNodes();
 
         // print the text content of each child
         for (int i = 0; i < nodes.getLength(); i++) {
-           //System.out.println("" + nodes.item(i).getTextContent());
+        	Node node = nodes.item(i);
+           System.out.println("" +node.getTextContent());
+           elemPeek(node);
         }
      } catch (Exception ex) {
         ex.printStackTrace();

@@ -154,4 +154,9 @@ public interface GpmlReaderFactory {
 	 final String id,
     final Reader gpmlContents,
     final GpmlConversionMethod conversionMethod);
+  
+  public WPManager getWPManager();
+
+public void setClient(WPClient client);
+public WPClient getClient();
 }
