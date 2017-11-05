@@ -122,10 +122,7 @@ public class WPClientRESTImpl implements WPClient {
 					final Node resultNode = resultNodes.item(i);
 					final WPPathway pathway = parsePathwayInfo(resultNode);
 					if (pathway != null)
-					{
 						result.add(pathway);
-//						System.out.println(pathway.getId() + " :  " + pathway.getName() + "  @  " + pathway.getSpecies());
-					}
 				}
 				return result;
 			}
@@ -140,9 +137,8 @@ public class WPClientRESTImpl implements WPClient {
 				if (super.cancelled)
 					return null;
 				final Node responseNode = doc.getFirstChild();
-				final Node resultNode = responseNode.getFirstChild();
-				System.out.println("ResultNode: " + resultNode);
-				return parsePathwayInfo(resultNode);
+				final NodeList resultNodes = responseNode.getChildNodes();
+				return parsePathwayInfo(resultNodes.item(1));
 			}
 		};
 	}
@@ -155,6 +151,7 @@ public class WPClientRESTImpl implements WPClient {
 			final Node argNode = argNodes.item(j);
 			final String argName = argNode.getNodeName();
 			final String argVal = argNode.getTextContent();
+			System.out.println("argName: " + argName);
 			if (argName.equals("ns2:id"))				id = argVal;
 			else if (argName.equals("ns2:revision"))     revision = argVal;
 			else if (argName.equals("ns2:name"))			name = argVal;
@@ -178,7 +175,7 @@ public class WPClientRESTImpl implements WPClient {
 				try {
 					String url = BASE_URL + "getPathway?pwId=" + pathway.getId();
 					System.out.println(url);
-					doc = xmlGet(url, "pwId", pathway.getId(), "revision", pathway.getRevision());
+					doc = xmlGet(url, "pwId", pathway.getId(), "revision", "0"); //0 = latest revision  //pathway.getRevision());
 				} catch (SAXParseException e) {
 					throw new Exception(String.format("'%s' is not available -- invalid GPML", pathway.getName()), e);
 				}
@@ -273,12 +270,11 @@ public class WPClientRESTImpl implements WPClient {
 				System.out.println(resp);
 				final HttpEntity entity = resp.getEntity();
 				final String encoding = entity.getContentEncoding() != null ? entity.getContentEncoding().getValue()
-						: null;
+					: null;
 				stream = entity.getContent();
 				final InputSource inputSource = new InputSource(stream);
 				if (encoding != null)
 					inputSource.setEncoding(encoding);
-				System.out.println(inputSource.toString());
 				return xmlParser.parse(inputSource);
 			} catch (Exception e) {
 				if (!cancelled) {
@@ -326,7 +322,7 @@ public class WPClientRESTImpl implements WPClient {
 
         // print the text content of each child
         for (int i = 0; i < nodes.getLength(); i++) {
-           System.out.println("" + nodes.item(i).getTextContent());
+           //System.out.println("" + nodes.item(i).getTextContent());
         }
      } catch (Exception ex) {
         ex.printStackTrace();
