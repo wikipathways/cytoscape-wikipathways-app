@@ -1,6 +1,7 @@
 package org.wikipathways.cytoscapeapp.internal.cmd;
 
 import java.io.Reader;
+import java.util.regex.Pattern;
 
 import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.FinishStatus;
@@ -17,7 +18,7 @@ import org.wikipathways.cytoscapeapp.impl.WPClient;
 import org.wikipathways.cytoscapeapp.impl.WPPathway;
 
 public class WPImportCmdTask extends AbstractTask {
-//  static final Pattern WP_ID_REGEX = Pattern.compile("WP\\d+");
+  static final Pattern WP_ID_REGEX = Pattern.compile("WP\\d+");
 
   @Tunable
   public String id;
@@ -43,8 +44,14 @@ public class WPImportCmdTask extends AbstractTask {
     if (id == null || id.length() == 0) {
       throw new IllegalArgumentException("id must be specified");
     }
-   id = id.trim();
+   id = id.trim().toUpperCase();
     if (id.startsWith("“"))   id=id.substring(1);			// somehow id has an extra quote to start, but doesn't carry the final quote thru
+
+
+    if (!WP_ID_REGEX.matcher(id).matches()) {
+      throw new IllegalArgumentException("id must follow this regular format: " + WP_ID_REGEX.pattern());
+    }
+
     final ResultTask<WPPathway> infoTask = client.pathwayInfoTask(id);
     final TaskIterator taskIterator = new TaskIterator(infoTask);
       taskIterator.append(new AbstractTask() {
