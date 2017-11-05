@@ -401,7 +401,16 @@ public class GpmlToPathway {
     public Object extract(final PathwayElement pvElem) {
 //      System.out.println("Extracting...");
       for (int i = 0; i < pvValues.length; i++) {
-        pvValues[i] = pvElem.getStaticProperty(pvProps[i]);
+	pvValues[i] = pvElem.getStaticProperty(pvProps[i]);
+
+	//check for cellular compartments
+	if (pvProps[i] == StaticProperty.SHAPETYPE)
+		if (pvElem.getPropertyEx("org.pathvisio.CellularComponentProperty") != null)
+			if (pvElem.getPropertyEx("org.pathvisio.CellularComponentProperty").toString().equals("Cell"))
+				pvValues[i] = (IShape) ShapeType.CELL;
+			else if (pvElem.getPropertyEx("org.pathvisio.CellularComponentProperty").toString().equals("Nucleus"))
+				pvValues[i] = (IShape) ShapeType.NUCLEUS;
+
 //        System.out.println("Extracting..." + pvProps[i] + " = " + pvValues[i]);
       }
       if (pvValues.length == 1 && pvValues[0] == null)
@@ -559,8 +568,8 @@ public class GpmlToPathway {
     PV_SHAPE_MAP.put("Ellipse",             NodeShapeVisualProperty.ELLIPSE);
     PV_SHAPE_MAP.put("Oval",             NodeShapeVisualProperty.ELLIPSE);
     PV_SHAPE_MAP.put("Octagon",          NodeShapeVisualProperty.OCTAGON);
-    PV_SHAPE_MAP.put("Cell",          NodeShapeVisualProperty.ELLIPSE);
-    PV_SHAPE_MAP.put("Nucleus",          NodeShapeVisualProperty.ELLIPSE);
+    PV_SHAPE_MAP.put("Cell",          new NodeShapeImpl("Cell", "Cell")); 
+    PV_SHAPE_MAP.put("Nucleus",           new NodeShapeImpl("Nucleus", "Nucleus"));
     PV_SHAPE_MAP.put("Organelle",          NodeShapeVisualProperty.ROUND_RECTANGLE);
     PV_SHAPE_MAP.put("Mitochondria",     new NodeShapeImpl("Mitochondria", "Mitochondria"));	
     PV_SHAPE_MAP.put("Sarcoplasmic Reticulum", new NodeShapeImpl("Sarcoplasmic Reticulum", "Sarcoplasmic Reticulum"));	
@@ -837,12 +846,13 @@ public class GpmlToPathway {
       if (pvElem.getObjectType().equals(ObjectType.SHAPE))
     	  convertShape(pvElem);
   }
-
   private void convertShape(final PathwayElement pvShape) {
+    System.out.println("convertShape: " + pvShape.getShapeType()+", "+pvShape.getPropertyEx("org.pathvisio.CellularComponentProperty"));
     final CyNode cyNode = cyNet.addNode();
     pvToCyNodes.put(pvShape, cyNode);
     IShape shtype = pvShape.getShapeType();
     if (shtype == null) 	return;
+
 //    if (verbose)  
 //    {
 //    	System.out.println("convertShape: " + (shtype == null ? "NONE" : shtype.getName()) + " " + id + " " + pvShape.getFillColor());
