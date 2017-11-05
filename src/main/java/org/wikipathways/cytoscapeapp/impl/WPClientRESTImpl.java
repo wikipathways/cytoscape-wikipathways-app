@@ -328,7 +328,7 @@ public class WPClientRESTImpl implements WPClient {
         // print the text content of each child
         for (int i = 0; i < nodes.getLength(); i++) {
         	Node node = nodes.item(i);
-           System.out.println("" +node.getTextContent());
+           //System.out.println("" +node.getTextContent());
            elemPeek(node);
         }
      } catch (Exception ex) {
