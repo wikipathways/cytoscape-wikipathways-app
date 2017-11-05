@@ -14,7 +14,6 @@ import java.util.Map;
 
 import javax.swing.SwingUtilities;
 
-//import org.cytoscape.group.CyGroup;
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyIdentifiable;
 import org.cytoscape.model.CyNetwork;
@@ -219,7 +218,7 @@ public class DelayedVizProp {
 //		double z = Double.NaN;
 //		System.out.println("applyNodeShape");
 		View<CyNode> view = netView.getNodeView(src);
-		String style = "";
+//		String style = "";
 		for (DelayedVizProp prop : relatedProps)			// we have to rescan all properties to find other attributes for the same shape
 		{
 			String propName1 = prop.prop.getDisplayName();
@@ -247,32 +246,10 @@ public class DelayedVizProp {
 //			map.put("edgeThickness", "4.3");
 //			propvalue = "Rounded Rectangle";
 //		}
-		if ("Octagon".equals(propvalue))			// HACK - should look for group node
+		if ("Rectangle".equals(propvalue) || "Octagon".equals(propvalue))			// HACK - should look for group node
 		{
-//			if (src instanceof CyGroup) 
-				System.out.println("Style: " + style);
+			//Nothing to do here; Group style is set in GpmlToPathway.java
 			
-			if (!style.isEmpty())
-			{	
-				if("Complex".equals(style))
-				{
-				}
-				if("Pathway".equals(style))
-				{
-					//green rect
-				}
-				}
-				if("None".equals(style))
-				{ // beige rect
-						
-				}
-				if("Group".equals(style))
-				{
-					// no line width
-				}
-					
-					Color beige = new Color(249, 249, 243);
-			view.setVisualProperty(BasicVisualLexicon.NODE_FILL_COLOR, false);
 			return;
 		}
 		
