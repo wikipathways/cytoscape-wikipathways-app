@@ -124,10 +124,7 @@ public class WPClientRESTImpl implements WPClient {
 					final Node resultNode = resultNodes.item(i);
 					final WPPathway pathway = parsePathwayInfo(resultNode);
 					if (pathway != null)
-					{
 						result.add(pathway);
-//						System.out.println(pathway.getId() + " :  " + pathway.getName() + "  @  " + pathway.getSpecies());
-					}
 				}
 				return result;
 			}
@@ -143,9 +140,8 @@ public class WPClientRESTImpl implements WPClient {
 				if (super.cancelled)
 					return null;
 				final Node responseNode = doc.getFirstChild();
-				final Node resultNode = responseNode.getFirstChild();
-				System.out.println("ResultNode: " + resultNode);
-				return parsePathwayInfo(resultNode);
+				final NodeList resultNodes = responseNode.getChildNodes();
+				return parsePathwayInfo(resultNodes.item(1));
 			}
 		};
 	}
@@ -181,7 +177,7 @@ public class WPClientRESTImpl implements WPClient {
 				try {
 					String url = BASE_URL + "getPathway?pwId=" + pathway.getId();
 					System.out.println(url);
-					doc = xmlGet(url, "pwId", pathway.getId(), "revision", pathway.getRevision());
+					doc = xmlGet(url, "pwId", pathway.getId(), "revision", "0"); //0 = latest revision  //pathway.getRevision());
 				} catch (SAXParseException e) {
 					throw new Exception(String.format("'%s' is not available -- invalid GPML", pathway.getName()), e);
 				}
@@ -281,7 +277,6 @@ public class WPClientRESTImpl implements WPClient {
 				final InputSource inputSource = new InputSource(stream);
 				if (encoding != null)
 					inputSource.setEncoding(encoding);
-				System.out.println(inputSource.toString());
 				return xmlParser.parse(inputSource);
 			} catch (Exception e) {
 				if (!cancelled) {
@@ -333,7 +328,7 @@ public class WPClientRESTImpl implements WPClient {
         // print the text content of each child
         for (int i = 0; i < nodes.getLength(); i++) {
         	Node node = nodes.item(i);
-           System.out.println("" +node.getTextContent());
+           //System.out.println("" +node.getTextContent());
            elemPeek(node);
         }
      } catch (Exception ex) {

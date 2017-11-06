@@ -536,10 +536,11 @@ public class DelayedVizProp {
 	static private GeneralPath makeNucleus() {
 		GeneralPath path = new GeneralPath();
 
+		double gap = 7.0; 
 		double x = 0;
 		double y = 0;
-		double w = 100;
-		double h = 100;
+		double w = 100 + gap;
+		double h = 100 + gap;
 
 		double kappa = 0.5522848;
 		double ox = (w / 2) * kappa; // control point offset horizontal
@@ -554,11 +555,12 @@ public class DelayedVizProp {
 		path.curveTo(xm + ox, y, xe, ym - oy, xe, ym);
 		path.curveTo(xe, ym + oy, xm + ox, ye, xm, ye);
 		path.curveTo(xm - ox, ye, x, ym + oy, x, ym);
+		path.closePath();
 
-		x = 2;
-		y = 2;
-		w = 96;
-		h = 96;
+		x += gap/2;
+		y += gap/2;
+		w -= gap;
+		h -= gap;
 
 		ox = (w / 2) * kappa; // control point offset horizontal
 		oy = (h / 2) * kappa; // control point offset vertical
@@ -579,26 +581,14 @@ public class DelayedVizProp {
 
                 static private GeneralPath makeCell()
                 {
-                        double width = 100.0;
-                        double height = 80.0;
+			double gap = 1.0; 
+                        double width = 100.0 + gap;
+                        double height = 80.0 + gap;
                         double x = 0.0;
                         double y = 0.0;
-                        double curveRad = 8.0;
-                        double gap = 2.0;
-//                      Shape rrect = new RoundRectangle2D.Double(x,y, width, height, curveRad, curveRad);
-//                      x += gap;
-//                      y += gap;
-//                      gap *= 2;
-//                      width -= gap;
-//                      height -= gap;
-//                      Shape innerrrect = new RoundRectangle2D.Double(x,y, width, height, curveRad, curveRad);
-//                      PathIterator iter = rrect.getPathIterator(new AffineTransform());
-//              for (; !iter.isDone(); iter.next()) {
-//               outPath.append(iter.next())}
-//              }
+                        double curveRad = 2.0;
 
-                GeneralPath path = new GeneralPath();
-//                      path.moveTo(-100, -100);
+                	GeneralPath path = new GeneralPath();
                         path.moveTo(x, curveRad);
                         path.curveTo(x, y, curveRad, y, x+curveRad, y);
                         path.lineTo(width - curveRad, y);
@@ -608,9 +598,10 @@ public class DelayedVizProp {
                         path.lineTo(curveRad, height);
                         path.curveTo(x, height, x, height - curveRad, x, height - curveRad);
                         path.lineTo(x, curveRad);
+			path.closePath();
 
-                        width -= 2 * gap;
-                        height -= 2 * gap;
+                        width -= gap;
+                        height -= gap;
                         x += gap;
                         y += gap;
                         path.moveTo(x, curveRad);
@@ -622,6 +613,7 @@ public class DelayedVizProp {
                         path.lineTo(curveRad, height);
                         path.curveTo(x, height, x, height - curveRad, x, height - curveRad);
                         path.lineTo(x, curveRad);
+			path.closePath();
                         return path;
 		}
 
@@ -634,7 +626,7 @@ public class DelayedVizProp {
 			double curveRad = 8.0;
 			double gap = 2.0;
 		
-		GeneralPath path = new GeneralPath();
+			GeneralPath path = new GeneralPath();
 			path.moveTo(x, curveRad);
 			path.curveTo(x, y, curveRad, y, x+curveRad, y);
 			path.lineTo(width - curveRad, y);

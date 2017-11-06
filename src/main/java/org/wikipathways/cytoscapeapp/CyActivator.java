@@ -130,8 +130,12 @@ public class CyActivator extends AbstractCyActivator {
 	private void reg(BundleContext context, Object service, String cmd, String namespace)
     {
         registerService(context, service,
-        	 TaskFactory.class, ezProps( ServiceProperties.COMMAND,cmd,  ServiceProperties.COMMAND_NAMESPACE, namespace, 
-        			 ServiceProperties.COMMAND_SUPPORTS_JSON, "true", ServiceProperties.COMMAND_EXAMPLE_JSON, JSON_EXAMPLE ));
+        	 TaskFactory.class, ezProps( 
+			 ServiceProperties.COMMAND,cmd,  
+			 ServiceProperties.COMMAND_NAMESPACE, namespace, 
+			 ServiceProperties.COMMAND_SUPPORTS_JSON, "true", 
+			 ServiceProperties.COMMAND_EXAMPLE_JSON, JSON_EXAMPLE 
+		 ));
  }
 
 	private static Properties ezProps(String... vals) {
