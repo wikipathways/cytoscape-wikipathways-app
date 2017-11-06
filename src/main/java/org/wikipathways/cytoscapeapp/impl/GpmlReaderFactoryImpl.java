@@ -170,7 +170,7 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
 //      String buffer = String.copyValueOf(buf);
 //      System.out.println(buffer);
       if (setNetworkName) {
-        final String name = pathway.getMappInfo().getMapInfoName();
+        final String name = pathway.getMappInfo().getMapInfoName() + " - " + pathway.getMappInfo().getOrganism();
         final String nonConflictingName = netNaming.getSuggestedNetworkTitle(name);
         network.getRow(network).set(CyNetwork.NAME, nonConflictingName);
         if (network instanceof CySubNetwork) {
