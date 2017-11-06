@@ -49,32 +49,32 @@ public class WPImportCmdTask extends AbstractTask {
     System.out.println("now the id is:  " + id);
     final ResultTask<WPPathway> infoTask = client.pathwayInfoTask(id);
     final TaskIterator taskIterator = new TaskIterator(infoTask);
-      taskIterator.append(new AbstractTask() {
-        public void run(TaskMonitor monitor) {
-        	WPPathway pathway = infoTask.get();
-        	if (pathway == null)
-        	{
-        		System.err.println("Shit!");
-        		return;
-        }
-     taskIterator.append(new AbstractTask() {
-              public void run(TaskMonitor monitor) {
-          		System.out.println("loading!");
-              	factory.getWPManager().loadPathway(method, pathway, taskMgr);
-              }
-           });
-     taskMgr.execute(taskIterator, new TaskObserver() {
-        public void taskFinished(ObservableTask t) { System.out.println("task finished! " + t);}
-        public void allFinished(FinishStatus status) {  System.out.println("done!");}
- });
+//      taskIterator.append(new AbstractTask() {
+//        public void run(TaskMonitor monitor) {
+        	
+            taskMgr.execute(taskIterator, new TaskObserver() {
+                public void taskFinished(ObservableTask t) { }
+                public void allFinished(FinishStatus status) {System.out.println("done" + id);} });
 
-
-  } });
-      taskMgr.execute(taskIterator, new TaskObserver() {
-          public void taskFinished(ObservableTask t) { System.err.println("outside finished! " + t);}
-          public void allFinished(FinishStatus status) {  System.out.println("really done!");}
-   });
-
+//  }
+//});
   }
 }
 
+
+//WPPathway pathway = infoTask.get();
+//if (pathway == null)
+//{
+//	System.err.println("Shit!");
+//	return;
+//}
+//taskIterator.append(new AbstractTask() {
+//public void run(TaskMonitor monitor) {
+//	System.out.println("loading!");
+//	factory.getWPManager().loadPathway(method, pathway, taskMgr);
+//}
+//});
+//taskMgr.execute(taskIterator, new TaskObserver() {
+//public void taskFinished(ObservableTask t) { }
+//public void allFinished(FinishStatus status) { 	System.out.println("done!");}
+//});

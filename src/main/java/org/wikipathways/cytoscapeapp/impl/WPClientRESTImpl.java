@@ -38,7 +38,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
 public class WPClientRESTImpl implements WPClient {
-	protected static final String BASE_URL = "http://webservice.wikipathways.org/";
+	protected static final String BASE_URL = "https://webservice.wikipathways.org/";
 
 	final private CyApplicationConfiguration appConf;		//  gives access to a species cache file
 	final private DocumentBuilder xmlParser;
@@ -71,7 +71,7 @@ public class WPClientRESTImpl implements WPClient {
  *  	getSpeciesList -- the list of options to present
  *  freeTextSearch -- instigate a server side search for text found in pathways
  *  pathwayInfo -- build a WPPathway record of pathway, version, revision, etc
- *  pathwayContents -- get the GPML (XML) for one specfied pathway
+ *  pathwayContents -- get the GPML (XML) for one specified pathway
  */
 	List<String> species = null;
 
