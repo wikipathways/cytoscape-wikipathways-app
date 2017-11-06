@@ -579,26 +579,14 @@ public class DelayedVizProp {
 
                 static private GeneralPath makeCell()
                 {
-                        double width = 100.0;
-                        double height = 80.0;
+			double halfgap = 1.0; // e.g., 1.0 is half of a 2.0 symmetrically-scaling gap
+                        double width = 100.0 + halfgap;
+                        double height = 80.0 + halfgap;
                         double x = 0.0;
                         double y = 0.0;
-                        double curveRad = 8.0;
-                        double gap = 2.0;
-//                      Shape rrect = new RoundRectangle2D.Double(x,y, width, height, curveRad, curveRad);
-//                      x += gap;
-//                      y += gap;
-//                      gap *= 2;
-//                      width -= gap;
-//                      height -= gap;
-//                      Shape innerrrect = new RoundRectangle2D.Double(x,y, width, height, curveRad, curveRad);
-//                      PathIterator iter = rrect.getPathIterator(new AffineTransform());
-//              for (; !iter.isDone(); iter.next()) {
-//               outPath.append(iter.next())}
-//              }
+                        double curveRad = 2.0;
 
-                GeneralPath path = new GeneralPath();
-//                      path.moveTo(-100, -100);
+                	GeneralPath path = new GeneralPath();
                         path.moveTo(x, curveRad);
                         path.curveTo(x, y, curveRad, y, x+curveRad, y);
                         path.lineTo(width - curveRad, y);
@@ -609,10 +597,10 @@ public class DelayedVizProp {
                         path.curveTo(x, height, x, height - curveRad, x, height - curveRad);
                         path.lineTo(x, curveRad);
 
-                        width -= 2 * gap;
-                        height -= 2 * gap;
-                        x += gap;
-                        y += gap;
+                        width -= halfgap;
+                        height -= halfgap;
+                        x += halfgap;
+                        y += halfgap;
                         path.moveTo(x, curveRad);
                         path.curveTo(x, y, curveRad, y, x+curveRad, y);
                         path.lineTo(width - curveRad, y);
