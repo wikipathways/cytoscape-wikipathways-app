@@ -38,7 +38,7 @@ import org.wikipathways.cytoscapeapp.impl.GpmlReaderFactory;
  * Reads the GPML file and creates a GPMLNetwork 
  * TODO: currently network and pathway view are initialized --> setting!
  */
-public class GpmlReaderTask extends AbstractTask implements CyNetworkReader {
+public class GpmlCyReaderTask extends AbstractTask implements CyNetworkReader {
     public static final String PATHWAY_DESC = "Pathway";
     public static final String NETWORK_DESC = "Network";
 
@@ -49,7 +49,7 @@ public class GpmlReaderTask extends AbstractTask implements CyNetworkReader {
     @Tunable(description="Import as:", groups={"WikiPathways"})
     public ListSingleSelection<String> importMethod = new ListSingleSelection<String>(PATHWAY_DESC, NETWORK_DESC);
 
-	public GpmlReaderTask( final GpmlReaderFactory factory, final InputStream input, final String fileName) {
+	public GpmlCyReaderTask( final GpmlReaderFactory factory, final InputStream input, final String fileName) {
         gpmlReaderFactory = factory;
         this.input = input;
         this.fileName = fileName;

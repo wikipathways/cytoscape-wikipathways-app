@@ -15,7 +15,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-package org.wikipathways.cytoscapeapp.internal;
+package org.wikipathways.cytoscapeapp;
 
 import java.util.Properties;
 

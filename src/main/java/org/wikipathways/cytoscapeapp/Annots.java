@@ -14,17 +14,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package org.wikipathways.cytoscapeapp.internal.io;
+package org.wikipathways.cytoscapeapp;
 
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.cytoscape.view.model.CyNetworkView;
+import org.cytoscape.view.presentation.annotations.AnnotationFactory;
+import org.cytoscape.view.presentation.annotations.AnnotationManager;
 import org.cytoscape.view.presentation.annotations.ArrowAnnotation;
 import org.cytoscape.view.presentation.annotations.ShapeAnnotation;
 import org.cytoscape.view.presentation.annotations.TextAnnotation;
-import org.cytoscape.view.presentation.annotations.AnnotationFactory;
-import org.cytoscape.view.presentation.annotations.AnnotationManager;
 
 /**
  * A wrapper for the kafka-esque annotations API.
@@ -48,15 +48,20 @@ public class Annots {
 
   static Map<String,String> ezMap(Object[] elems) {
     final Map<String,String> map = new HashMap<String,String>();
-    for (int i = 0; i < elems.length; i += 2) {
+    for (int i = 0; i < elems.length-1; i += 2) {
       map.put(elems[i].toString(), elems[i+1].toString());
     }
-    System.out.println("ezMap: " + map.toString());
+//    System.out.println("ezMap: " + map.toString());
     return map;
   }
 
   public ArrowAnnotation newArrow(final CyNetworkView netView, Object ... args) {
     final ArrowAnnotation annot = arrowFct.createAnnotation(ArrowAnnotation.class, netView, ezMap(args));
+    mgr.addAnnotation(annot);
+    return annot;
+  }
+
+  public ShapeAnnotation addShape(ShapeAnnotation annot) {
     mgr.addAnnotation(annot);
     return annot;
   }

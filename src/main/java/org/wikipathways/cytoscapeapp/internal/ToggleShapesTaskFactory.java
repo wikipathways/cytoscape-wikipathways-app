@@ -16,6 +16,7 @@
 
 package org.wikipathways.cytoscapeapp.internal;
 
+import org.cytoscape.model.CyNetwork;
 import org.cytoscape.view.model.CyNetworkView;
 
 import org.cytoscape.task.NetworkViewTaskFactory;
@@ -30,6 +31,11 @@ public class ToggleShapesTaskFactory implements NetworkViewTaskFactory {
   }
 
   public boolean isReady(final CyNetworkView netView) {
-    return netView.getModel().getDefaultNodeTable().getColumn("IsGPMLShape") != null;
+    if (netView == null)
+      return false;
+    final CyNetwork network = netView.getModel();
+    if (network == null)
+      return false;
+    return network.getDefaultNodeTable().getColumn("IsGPMLShape") != null;
   }
 }

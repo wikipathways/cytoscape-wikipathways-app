@@ -14,7 +14,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package org.wikipathways.cytoscapeapp.internal.io;
+package org.wikipathways.cytoscapeapp.impl;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -29,7 +29,6 @@ import org.cytoscape.model.CyIdentifiable;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyTable;
-import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.VisualProperty;
 import org.cytoscape.view.presentation.property.ArrowShapeVisualProperty;
 import org.cytoscape.view.presentation.property.BasicVisualLexicon;
@@ -72,7 +71,6 @@ public class GpmlToNetwork {
 
   final CyEventHelper eventHelper;
 	final Pathway pathway;
-	final CyNetworkView networkView;
 	final CyNetwork network;
 	
 	private List<PathwayElement> edges;
@@ -83,19 +81,18 @@ public class GpmlToNetwork {
 	 * network. Constructing this object will not start the conversion and will
 	 * not modify the given network in any way.
 	 */
-	public GpmlToNetwork(final CyEventHelper eventHelper, final Pathway pathway, final CyNetworkView networkView) {
+	public GpmlToNetwork(final CyEventHelper eventHelper, final Pathway pathway, final CyNetwork network) {
 		this.eventHelper = eventHelper;
 		this.pathway = pathway;
-		this.networkView = networkView;
-		this.network = networkView.getModel();
+		this.network = network;
 	}
-	
-	private Boolean unconnectedLines = false;
+	boolean verbose = false;
+//	private Boolean unconnectedLines = false;
 
 	/**
 	 * Convert the pathway given in the constructor.
 	 */
-	public Boolean convert() {
+	public List<DelayedVizProp> convert() {
 		network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS).createColumn("GraphID", String.class, false);
 		network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS).createColumn("GeneID", String.class, false);
 		network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS).createColumn("Datasource", String.class, false);
@@ -103,30 +100,25 @@ public class GpmlToNetwork {
 		network.getTable(CyEdge.class, CyNetwork.DEFAULT_ATTRS).createColumn("WP.type", String.class, false);
 
 		// convert by each pathway element type
-		System.out.println("convert data nodes");
+		if (verbose) System.out.println("convert data nodes");
 		convertDataNodes();
-		System.out.println("convert groups");
+		if (verbose) System.out.println("convert groups");
 		convertGroups();
-		System.out.println("convert labels");
+		if (verbose) System.out.println("convert labels");
 		convertLabels();
 		
-		System.out.println("find edges");
+		if (verbose) System.out.println("find edges");
 		findEdges();
-		System.out.println("convert anchors");
+		if (verbose) System.out.println("convert anchors");
 		convertAnchors();
-		System.out.println("convert lines");
+		if (verbose) System.out.println("convert lines");
 		convertLines();
 
-		eventHelper.flushPayloadEvents(); // guarantee that all node
-														// and edge views have
-														// been created
-		DelayedVizProp.applyAll(networkView, delayedVizProps); // apply our
-																// visual style
 
 		// clear our data structures just to be nice to the GC
 		nodes.clear();
-		delayedVizProps.clear();
-		return unconnectedLines;
+
+		return delayedVizProps;
 	}
 
 	/**
@@ -148,7 +140,7 @@ public class GpmlToNetwork {
 					map.put(startRef, line);
 					map.put(endRef, line);
 				} else {
-					unconnectedLines = true;
+//					unconnectedLines = true;
 				}
 			}
 		}
@@ -309,6 +301,7 @@ public class GpmlToNetwork {
 	private void convertShapeTypeNone(final CyNode node, final PathwayElement elem) {
 		if (ShapeType.NONE.equals(elem.getShapeType())) {
 			delayedVizProps.add(new DelayedVizProp(node,BasicVisualLexicon.NODE_BORDER_WIDTH, 0.0, true));
+			delayedVizProps.add(new DelayedVizProp(node,BasicVisualLexicon.NODE_BORDER_TRANSPARENCY, 0.0, true));
 		}
 	}
 
@@ -489,13 +482,13 @@ public class GpmlToNetwork {
 		if (createLine) {
 			CyNode startNode = nodes.get(pathway.getGraphIdContainer(startRef));
 			if (startNode == null) {
-				System.out.println("ERROR");
+				System.err.println("startNode == null");
 				startNode = network.addNode();
 				assignAnchorVizStyle(startNode, Color.white);
 			}
 			CyNode endNode = nodes.get(pathway.getGraphIdContainer(endRef));
 			if (endNode == null) {
-				System.out.println("ERROR");
+				System.err.println("ERROR: endNode == null");
 				endNode = network.addNode();
 				assignAnchorVizStyle(endNode, Color.white);
 			}
