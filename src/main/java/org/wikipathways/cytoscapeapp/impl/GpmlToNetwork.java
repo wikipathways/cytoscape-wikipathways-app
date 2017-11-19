@@ -70,7 +70,7 @@ public class GpmlToNetwork {
 		this.pathway = pathway;
 		this.network = network;
 	}
-	
+	boolean verbose = false;
 //	private Boolean unconnectedLines = false;
 
 	/**
@@ -84,18 +84,18 @@ public class GpmlToNetwork {
 		network.getTable(CyEdge.class, CyNetwork.DEFAULT_ATTRS).createColumn("WP.type", String.class, false);
 
 		// convert by each pathway element type
-		System.out.println("convert data nodes");
+		if (verbose) System.out.println("convert data nodes");
 		convertDataNodes();
-		System.out.println("convert groups");
+		if (verbose) System.out.println("convert groups");
 		convertGroups();
-		System.out.println("convert labels");
+		if (verbose) System.out.println("convert labels");
 		convertLabels();
 		
-		System.out.println("find edges");
+		if (verbose) System.out.println("find edges");
 		findEdges();
-		System.out.println("convert anchors");
+		if (verbose) System.out.println("convert anchors");
 		convertAnchors();
-		System.out.println("convert lines");
+		if (verbose) System.out.println("convert lines");
 		convertLines();
 
 
@@ -466,13 +466,13 @@ public class GpmlToNetwork {
 		if (createLine) {
 			CyNode startNode = nodes.get(pathway.getGraphIdContainer(startRef));
 			if (startNode == null) {
-				System.out.println("ERROR");
+				System.err.println("startNode == null");
 				startNode = network.addNode();
 				assignAnchorVizStyle(startNode, Color.white);
 			}
 			CyNode endNode = nodes.get(pathway.getGraphIdContainer(endRef));
 			if (endNode == null) {
-				System.out.println("ERROR");
+				System.err.println("ERROR: endNode == null");
 				endNode = network.addNode();
 				assignAnchorVizStyle(endNode, Color.white);
 			}

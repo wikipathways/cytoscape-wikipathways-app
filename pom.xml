@@ -4,16 +4,16 @@
 	<properties>
 		<bundle.symbolicName>org.wikipathways.cytoscapeapp</bundle.symbolicName>
 		<bundle.namespace>org.wikipathways.cytoscapeapp</bundle.namespace>
-		<cytoscape.api.version>3.6.0-SNAPSHOT</cytoscape.api.version>
+		<cytoscape.api.version>3.6.0</cytoscape.api.version>
 	</properties>
 	<packaging>bundle</packaging>
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.wikipathways</groupId>
 	<artifactId>cytoscapeapp</artifactId>
-	<version>3.3.beta9</version>
+	<version>3.3.1</version>
 
-	<name>WikiPathways Cytoscape App</name>
+	<name>WikiPathways App</name>
 	
 
 	<build>
@@ -116,7 +116,7 @@
 	</build>
 
 	<repositories>
-  <!--            <repository>
+            <repository>
 			<id>cytoscape_snapshots</id>
 			<snapshots>
 			</snapshots>
@@ -126,8 +126,8 @@
 			<name>Cytoscape Snapshots</name>
 			<url>http://code.cytoscape.org/nexus/content/repositories/snapshots/</url>
 		</repository>
- -->
-<!--  		<repository>
+
+  		<repository>
 			<id>cytoscape_releases</id>
 			<snapshots>
 				<enabled>false</enabled>
@@ -137,12 +137,38 @@
 			<name>Cytoscape Releases</name>
 			<url>http://code.cytoscape.org/nexus/content/repositories/releases/</url>
 		</repository>
-         <repository> <id>com.springsource.repository.bundles.release</id> <name>SpringSource Enterprise Bundle Repository - SpringSource Bundle Releases</name> <url>http://repository.springsource.com/maven/bundles/release</url> </repository> <repository> <id>com.springsource.repository.bundles.external</id> <name>SpringSource Enterprise Bundle Repository - External Bundle Releases</name> <url>http://repository.springsource.com/maven/bundles/external</url> </repository>
- -->   
+     <repository>
+      <id>apache-repo-releases</id>
+      <url>https://repository.apache.org/content/repositories/</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+    </repository>
+    <repository>
+      <id>apache_maven2</id>
+      <url>http://repo.maven.apache.org/maven2/</url>
+      <releases><enabled>true</enabled></releases>
+    </repository>
+          <repository> <id>com.springsource.repository.bundles.release</id> 
+          <name>SpringSource Enterprise Bundle Repository - SpringSource Bundle Releases</name>
+           <url>http://repository.springsource.com/maven/bundles/release</url>
+           </repository> 
+           <repository> <id>com.springsource.repository.bundles.external</id> 
+           <name>SpringSource Enterprise Bundle Repository - External Bundle Releases</name> 
+           <url>http://repository.springsource.com/maven/bundles/external</url> 
+           </repository>
+  
   </repositories>
 
 	<!-- Dependencies needed to compile this project. -->
 	<dependencies>
+
+		<dependency>
+			<groupId>org.cytoscape</groupId>
+			<artifactId>core-task-api</artifactId>
+			<version>${cytoscape.api.version}</version>
+			<scope>provided</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.core</artifactId>
@@ -151,12 +177,6 @@
 		</dependency>
 		
 
-		<dependency>
-			<groupId>org.cytoscape</groupId>
-			<artifactId>core-task-api</artifactId>
-			<version>${cytoscape.api.version}</version>
-			<scope>provided</scope>
-		</dependency>
 	 	 <dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>swing-application-api</artifactId>
@@ -191,7 +211,7 @@
  		<dependency>
     		<groupId>org.cytoscape</groupId>
     		<artifactId>swing-app-api</artifactId>
-    	<version>${cytoscape.api.version}</version>
+ 	   	<version>${cytoscape.api.version}</version>
 		<scope>provided</scope>
 		</dependency>  
  		<dependency>

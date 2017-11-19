@@ -284,7 +284,8 @@ public class WPClientRESTImpl implements WPClient {
 				}
 			} finally {
 				request.releaseConnection();
-				resp.close();
+				if (resp != null) 
+					resp.close();
 				request = null;
 				resp = null;
 				stream = null;

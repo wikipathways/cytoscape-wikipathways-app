@@ -273,7 +273,7 @@ public class DelayedVizProp {
 		}
 		else
 		{
-			System.out.println("propvalue: "+propvalue);
+			if (verbose) System.out.println("propvalue: "+propvalue);
 			GeneralPath path = getPath(propvalue);
 			if (path != null)
 			{
@@ -421,10 +421,12 @@ public class DelayedVizProp {
 					List<Handle> handles = bend.getAllHandles();
 					if (handles.size() > 0) {
 						try {
+							
 							for (Handle h : handles)
 							{
+								String s = h.getSerializableString();
 								h.defineHandle(netView, edgeView, elbow.getX(), elbow.getY());
-								System.out.println("Handle at: " + h.getSerializableString());
+								System.out.println("Handle at: " + s + " setting to (" + (int) elbow.getX()  + ", " + (int) elbow.getY() + ")");
 							}
 						} 
 						catch (IllegalStateException ex) {
@@ -452,7 +454,7 @@ public class DelayedVizProp {
 		return null;
 	}
 	private static Shape getShape(String propvalue) {
-		System.out.println("getShapePath: " + propvalue);
+		if (verbose) System.out.println("getShapePath: " + propvalue);
 		if ("Rounded Rectangle".equals(propvalue)) 			  	return makeRoundRect();
 		if ("Round Rectangle".equals(propvalue)) 			  	return makeRoundRect();
 		if ("Organelle".equals(propvalue)) 					  	return makeRoundRect();
