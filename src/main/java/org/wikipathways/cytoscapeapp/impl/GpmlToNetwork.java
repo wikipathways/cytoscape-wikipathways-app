@@ -348,14 +348,17 @@ public class GpmlToNetwork {
 		final CyNode groupNode = network.addNode();
 		nodes.put(group, groupNode);
 
+		String groupName = "group";
 		for (final PathwayElement elem : pathway.getGroupElements(group.getGroupId())) {
 			final CyNode node = nodes.get(elem);
 			if (node == null)
 				continue;
 			network.addEdge(node, groupNode, false);
+			groupName = groupName + "_" + elem.getTextLabel();
 		}
 		network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS).getRow(groupNode.getSUID()).set("WP.type", "Group");
 		network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS).getRow(groupNode.getSUID()).set("GraphID", group.getGraphId());
+		network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS).getRow(groupNode.getSUID()).set("name", groupName);
 
 		delayedVizProps.add(new DelayedVizProp(groupNode,BasicVisualLexicon.NODE_FILL_COLOR, Color.blue, true));
 		delayedVizProps.add(new DelayedVizProp(groupNode,BasicVisualLexicon.NODE_BORDER_WIDTH, 0.0, true));
