@@ -27,7 +27,6 @@ import org.cytoscape.io.util.StreamUtil;
 import org.cytoscape.service.util.AbstractCyActivator;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.task.NetworkViewTaskFactory;
-import org.cytoscape.task.NodeViewTaskFactory;
 import org.cytoscape.util.swing.OpenBrowser;
 import org.cytoscape.work.ServiceProperties;
 import org.cytoscape.work.TaskFactory;
@@ -42,7 +41,7 @@ import org.wikipathways.cytoscapeapp.impl.WPClient;
 import org.wikipathways.cytoscapeapp.impl.WPClientFactory;
 import org.wikipathways.cytoscapeapp.impl.WPClientRESTFactoryImpl;
 import org.wikipathways.cytoscapeapp.impl.search.WPNetworkSearchTaskFactory;
-import org.wikipathways.cytoscapeapp.internal.OpenLinkedPathwayAsNewTaskFactory;
+//import org.wikipathways.cytoscapeapp.internal.OpenLinkedPathwayAsNewTaskFactory;
 import org.wikipathways.cytoscapeapp.internal.ToggleShapesTaskFactory;
 import org.wikipathways.cytoscapeapp.internal.cmd.GpmlImportCmdTaskFactory;
 import org.wikipathways.cytoscapeapp.internal.cmd.WPImportCmdTaskFactory;
@@ -72,55 +71,48 @@ public class CyActivator extends AbstractCyActivator {
      
 	MIMShapes.registerShapes();
 
-		// ---- get all the services necessary to build the GUI and then build and register it
-		final CyApplicationConfiguration appConf = getService(context, CyApplicationConfiguration.class);
-		final WPClientFactory clientFactory = new WPClientRESTFactoryImpl(appConf, gpmlReaderFactory.getWPManager());
-		registerService(context, clientFactory, WPClientFactory.class);
-		final TaskManager<?, ?> taskMgr = getService(context, DialogTaskManager.class);
-		final WPClient client = clientFactory.create();
-		gpmlReaderFactory.setClient(client);
-		final OpenBrowser openBrowser = getService(context, OpenBrowser.class);
-		final GUI guiClient = new GUI(taskMgr, client, openBrowser, gpmlReaderFactory);
-		registerAllServices(context, guiClient);
+	// ---- get all the services necessary to build the GUI and then build and register it
+	final CyApplicationConfiguration appConf = getService(context, CyApplicationConfiguration.class);
+	final WPClientFactory clientFactory = new WPClientRESTFactoryImpl(appConf, gpmlReaderFactory.getWPManager());
+	registerService(context, clientFactory, WPClientFactory.class);
+	final TaskManager<?, ?> taskMgr = getService(context, DialogTaskManager.class);
+	final WPClient client = clientFactory.create();
+	gpmlReaderFactory.setClient(client);
+	final OpenBrowser openBrowser = getService(context, OpenBrowser.class);
+	final GUI guiClient = new GUI(taskMgr, client, openBrowser, gpmlReaderFactory);
+	registerAllServices(context, guiClient);
 
 		// ---- create and register a bunch of CommandTaskFactories
-//		reg(context,  new WPSpeciesCmdTaskFactory(client), "get-species", "wikipathways");
-//    reg(context,  new WPSearchCmdTaskFactory(client, registrar, guiClient), "search", "wikipathways");
+//	reg(context,  new WPSpeciesCmdTaskFactory(client), "get-species", "wikipathways");
+//  reg(context,  new WPSearchCmdTaskFactory(client, registrar, guiClient), "search", "wikipathways");
     reg(context,  new GpmlImportCmdTaskFactory(gpmlReaderFactory, GpmlConversionMethod.PATHWAY),"import-as-pathway", "gpml");
-//    reg(context,  new GpmlImportCmdTaskFactory(gpmlReaderFactory, GpmlConversionMethod.NETWORK),"import-as-network", "gpml");
+    reg(context,  new GpmlImportCmdTaskFactory(gpmlReaderFactory, GpmlConversionMethod.NETWORK),"import-as-network", "gpml");
     reg(context,  new WPImportCmdTaskFactory(client, gpmlReaderFactory, GpmlConversionMethod.PATHWAY, taskMgr),"import-as-pathway", "wikipathways");
-//    reg(context,  new WPImportCmdTaskFactory(client, gpmlReaderFactory, GpmlConversionMethod.NETWORK, taskMgr),"import-as-network", "wikipathways");
+    reg(context,  new WPImportCmdTaskFactory(client, gpmlReaderFactory, GpmlConversionMethod.NETWORK, taskMgr),"import-as-network", "wikipathways");
 
     // --- analogous export commands go here   TODO
 
     final ToggleShapesTaskFactory toggleShapesTF = new ToggleShapesTaskFactory();
     registerService(context, toggleShapesTF, NetworkViewTaskFactory.class, ezProps(
-      ServiceProperties.TITLE, "Toggle Pathway Shapes",
-      ServiceProperties.PREFERRED_MENU, "View" ));
+    			ServiceProperties.TITLE, "Toggle Pathway Shapes",  ServiceProperties.PREFERRED_MENU, "View" ));
 
-    final OpenLinkedPathwayAsNewTaskFactory openLinkedPathwayAsNewTF = new OpenLinkedPathwayAsNewTaskFactory(client, gpmlReaderFactory);
-    registerService(context, openLinkedPathwayAsNewTF, NodeViewTaskFactory.class, ezProps(
-      ServiceProperties.TITLE, "Open Linked Pathway",
-      ServiceProperties.PREFERRED_MENU, "Apps.WikiPathways",
-      ServiceProperties.IN_MENU_BAR, "false"  ));
+//    final OpenLinkedPathwayAsNewTaskFactory openLinkedPathwayAsNewTF = new OpenLinkedPathwayAsNewTaskFactory(client, gpmlReaderFactory);
+//    registerService(context, openLinkedPathwayAsNewTF, NodeViewTaskFactory.class, ezProps(
+//      ServiceProperties.TITLE, "Open Linked Pathway",
+//      ServiceProperties.PREFERRED_MENU, "Apps.WikiPathways",
+//      ServiceProperties.IN_MENU_BAR, "false"  ));
 
     //  ----- support NetworkSearchBar
     ImageIcon icon = null;
  	try
  	{
- 		  icon = new ImageIcon(getClass().getClassLoader().getResource("logo_150.png"));
+ 		icon = new ImageIcon(getClass().getClassLoader().getResource("logo_150.png"));
  	}
- 	catch (NullPointerException e)			// icon with that name not found, null is okay
+ 	catch (NullPointerException e)			// report icon with that name not found, but null is okay
  	{
  		System.err.println("Icon not found"); 
  	}
- 	
-
-// These are additional sample classes that you could mock up as other services
-// I comment some in and out every version to make sure my latest has been loaded!
-//	registerAllServices(context, new TunableOptionsTaskFactory(1));
-//	registerAllServices(context, new CustomOptionsTaskFactory());
-//	registerAllServices(context, new CustomQueryTaskFactory(registrar));
+ 	 
  	registerAllServices(context, new WPNetworkSearchTaskFactory(registrar, client, icon, guiClient));		
  
  }
@@ -129,12 +121,9 @@ public class CyActivator extends AbstractCyActivator {
 
 	private void reg(BundleContext context, Object service, String cmd, String namespace)
     {
-        registerService(context, service,
-        	 TaskFactory.class, ezProps( 
-			 ServiceProperties.COMMAND,cmd,  
-			 ServiceProperties.COMMAND_NAMESPACE, namespace, 
-			 ServiceProperties.COMMAND_SUPPORTS_JSON, "true", 
-			 ServiceProperties.COMMAND_EXAMPLE_JSON, JSON_EXAMPLE 
+        registerService(context, service, TaskFactory.class, ezProps( 
+			 ServiceProperties.COMMAND,cmd,  ServiceProperties.COMMAND_NAMESPACE, namespace, 
+			 ServiceProperties.COMMAND_SUPPORTS_JSON, "true",  ServiceProperties.COMMAND_EXAMPLE_JSON, JSON_EXAMPLE 
 		 ));
  }
 

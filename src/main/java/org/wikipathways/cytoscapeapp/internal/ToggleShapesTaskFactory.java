@@ -31,11 +31,9 @@ public class ToggleShapesTaskFactory implements NetworkViewTaskFactory {
   }
 
   public boolean isReady(final CyNetworkView netView) {
-    if (netView == null)
-      return false;
+    if (netView == null) 	return false;
     final CyNetwork network = netView.getModel();
-    if (network == null)
-      return false;
+    if (network == null) 	return false;
     return network.getDefaultNodeTable().getColumn("IsGPMLShape") != null;
   }
 }

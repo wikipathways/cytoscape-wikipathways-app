@@ -38,7 +38,7 @@ public class WPManager {
 		gpmlReader = gpml;
 	}
 	public CyNetworkViewManager getNetworkViewMgr() 	{	return viewMgr;	}
-	public CyServiceRegistrar getRegistrar() 		{	return registrar;	}
+	public CyServiceRegistrar getRegistrar() 			{	return registrar;	}
 	public BendFactory getBendFactory() 				{	return registrar.getService(BendFactory.class);	}
 	public Annots getAnnots() 						{	return annots;	}
 	public HandleFactory getHandleFactory() 			{ 	return registrar.getService(HandleFactory.class);  }
@@ -47,7 +47,7 @@ public class WPManager {
 
 	//-----------------------------------------------------
 	private Object networkView;
-	Map<String,CyTable> tables;
+	private Map<String,CyTable> tables;
 	
 	public void setUpTableRefs(CyNetwork cyNet) {
 		if (networkView == null)
@@ -57,6 +57,7 @@ public class WPManager {
 			tables = netTablMgr.getTables(cyNet, CyNode.class);		
 		}
 	}
+	//-----------------------------------------------------
 	// this code SHOULD disable event processing during a lengthy import.  Not sure it works!
 	boolean bypass = true;
 
@@ -68,6 +69,7 @@ public class WPManager {
 			eventHelper.unsilenceEventSource(table);
 		eventHelper.flushPayloadEvents();
 	}
+	
 	public void turnOffEvents() {
 	if (bypass) return;
 	System.out.println("turnOffEvents");
@@ -76,7 +78,7 @@ public class WPManager {
 			eventHelper.silenceEventSource(table);
 	}
 	
-	
+	//-----------------------------------------------------
 	// Do the work:  fetch , read and display GPML
 	public void loadPathway(GpmlConversionMethod method, WPPathway pathway, TaskManager<?, ?> taskMgr) {
 		  final ResultTask<Reader> loadPathwayTask = client.gpmlContentsTask(pathway);

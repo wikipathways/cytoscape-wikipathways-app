@@ -59,18 +59,16 @@ public class ToggleShapesTask extends AbstractTask {
   boolean areGPMLShapesShown() {
     final CyNetwork net = netView.getModel();
     final CyTable nodeTbl = net.getDefaultNodeTable();
-    int shownCount = 0;
-    int hiddenCount = 0;
+    int shownCount = 0, hiddenCount = 0;
+    
     for (final View<CyNode> nodeView : netView.getNodeViews()) {
       final CyNode node = nodeView.getModel();
       final Boolean isShape = nodeTbl.getRow(node.getSUID()).get("IsGPMLShape", Boolean.class);
-      if (!Boolean.TRUE.equals(isShape))
-        continue;
-      if (Boolean.FALSE.equals(nodeView.getVisualProperty(BasicVisualLexicon.NODE_VISIBLE))) {
+      if (!Boolean.TRUE.equals(isShape)) continue;
+      if (Boolean.FALSE.equals(nodeView.getVisualProperty(BasicVisualLexicon.NODE_VISIBLE)))
         hiddenCount++;
-      } else {
-        shownCount++;
-      }
+      else  shownCount++;
+      
     }
     return shownCount > hiddenCount;
   }

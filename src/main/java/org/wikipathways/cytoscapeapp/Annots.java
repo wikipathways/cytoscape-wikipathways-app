@@ -19,6 +19,7 @@ package org.wikipathways.cytoscapeapp;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.presentation.annotations.AnnotationFactory;
 import org.cytoscape.view.presentation.annotations.AnnotationManager;
@@ -35,15 +36,13 @@ public class Annots {
   final AnnotationFactory<ShapeAnnotation> shapeFct;
   final AnnotationFactory<TextAnnotation> textFct;
 
-  public Annots(
-      final AnnotationManager mgr,
-      final AnnotationFactory<ArrowAnnotation> arrowFct,
-      final AnnotationFactory<ShapeAnnotation> shapeFct,
-      final AnnotationFactory<TextAnnotation> textFct) {
-    this.mgr = mgr;
-    this.arrowFct = arrowFct;
-    this.shapeFct = shapeFct;
-    this.textFct = textFct;
+  public Annots(CyServiceRegistrar registrar)
+   {
+	  mgr =   registrar.getService(AnnotationManager.class);
+	  arrowFct =  (AnnotationFactory<ArrowAnnotation>) registrar.getService(AnnotationFactory.class,"(type=ArrowAnnotation.class)");
+	  shapeFct =(AnnotationFactory<ShapeAnnotation>)registrar.getService( AnnotationFactory.class,"(type=ShapeAnnotation.class)");
+	  textFct = (AnnotationFactory<TextAnnotation>) registrar.getService( AnnotationFactory.class,"(type=TextAnnotation.class)");
+  
   }
 
   static Map<String,String> ezMap(Object[] elems) {

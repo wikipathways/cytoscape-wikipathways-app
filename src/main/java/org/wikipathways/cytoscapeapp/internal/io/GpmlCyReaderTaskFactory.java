@@ -44,9 +44,6 @@ public class GpmlCyReaderTaskFactory extends AbstractInputStreamTaskFactory {
   }
 	
 	public TaskIterator createTaskIterator(InputStream inputStream, String fileName) {
-		return new TaskIterator(new GpmlCyReaderTask(
-      gpmlReaderFactory,
-      inputStream,
-      fileName));
+		return new TaskIterator(new GpmlCyReaderTask( gpmlReaderFactory, inputStream, fileName));
 	}
 }

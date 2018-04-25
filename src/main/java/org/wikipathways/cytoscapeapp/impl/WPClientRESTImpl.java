@@ -241,9 +241,8 @@ public class WPClientRESTImpl implements WPClient {
 
 	private List<String> retrieveSpeciesFromCache() {
 		final File speciesCacheFile = getSpeciesCacheFile();
-		if (speciesCacheFile == null || !speciesCacheFile.exists()) {
+		if (speciesCacheFile == null || !speciesCacheFile.exists()) 
 			return null;
-		}
 
 		try {
 			final FileInputStream inStream = new FileInputStream(speciesCacheFile);

@@ -11,9 +11,8 @@ import org.wikipathways.cytoscapeapp.impl.WPClient;
 
 public class WPSpeciesCmdTaskFactory extends AbstractTaskFactory {
   final WPClient client;
-  public WPSpeciesCmdTaskFactory(
-      final WPClient client
-    ) {
+ 
+  public WPSpeciesCmdTaskFactory(final WPClient client) {
     this.client = client;
   }
 
@@ -23,14 +22,9 @@ public class WPSpeciesCmdTaskFactory extends AbstractTaskFactory {
       public void run(TaskMonitor monitor) {}
       public void cancel() {}
       public <R> R getResults(Class<? extends R> type) {
-        if (List.class.equals(type)) {
-          return (R) speciesTask.get();
-        } else if (String.class.equals(type)) {
-          return (R) speciesTask.get().toString();
-        } else {
-          return null;
-        }
-      }
-    });
+        if (List.class.equals(type))           return (R) speciesTask.get();
+        if (String.class.equals(type))         return (R) speciesTask.get().toString();
+       return null;
+      }  });
   }
 }

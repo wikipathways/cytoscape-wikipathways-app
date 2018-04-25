@@ -187,15 +187,7 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
   }
   static String speciesCache = null;
 //----------------------------------------------------------------------
-  	public void setCurrentDialog(JDialog dlog, String query)	
-  	{ 
-	 	dlogCache = dlog;	   
-	 	searchField.setText(query);
-	 	noResultsLabel.setVisible(false); 
-	 	if(speciesCache != null)
-	 		speciesComboBox.setSelectedItem(speciesCache);
-  	}
-  private JDialog dlogCache = null;
+   private JDialog dlogCache = null;
   private void closeDialog()
   {
 	  speciesCache = getSpecies();
@@ -240,10 +232,10 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
     leftButtonsPanel.add(openUrlButton);
 
     final JPanel rightButtonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-    rightButtonsPanel.add(previewButton);
+//    rightButtonsPanel.add(previewButton);
 
     imagePreview.setVisible(false);
-
+    imagePreview.setBorder(BorderFactory.createLineBorder(Color.green));
     final JPanel buttonsPanel = new JPanel(new GridBagLayout());
     buttonsPanel.add(leftButtonsPanel, c.reset().expandHoriz());
     buttonsPanel.add(rightButtonsPanel, c.right());
@@ -325,7 +317,7 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
   }
 
 //----------------------------------------------------------------------
-public String getSpecies()
+  public String getSpecies()
   {
 	  return speciesCheckBox.isSelected() ? speciesComboBox.getSelectedItem().toString() : null;
   }
@@ -345,26 +337,26 @@ public String getSpecies()
   			previewButton.setSelected(false);
   		else 
   		{
-	    	resultsTable.setRowSelectionInterval(0, 0);
-	    	if (previewButton.isSelected()) 
-	    		updatePreview();
+  			resultsTable.setRowSelectionInterval(0, 0);
+  			if (previewButton.isSelected()) 
+  				updatePreview();
   		}
   }
-  private void setButtonStates(boolean anySelection)
-  {
-  	importPathwayButton.setEnabled(anySelection);
-  	importNetworkButton.setEnabled(anySelection);
-  	openUrlButton.setEnabled(anySelection);
-  	previewButton.setEnabled(anySelection);
-  	speciesComboBox.setEnabled(speciesCheckBox.isSelected());
-  }
+
+	private void setButtonStates(boolean anySelection) {
+		importPathwayButton.setEnabled(anySelection);
+		importNetworkButton.setEnabled(anySelection);
+		openUrlButton.setEnabled(anySelection);
+		previewButton.setEnabled(anySelection);
+		speciesComboBox.setEnabled(speciesCheckBox.isSelected());
+	}
 
 //----------------------------------------------------------------------
   void performSearch()
   {
-	     final String species = getSpecies();
-	     final String query = searchField.getText();
-	     performSearch(query, species);
+     final String species = getSpecies();
+     final String query = searchField.getText();
+     performSearch(query, species);
   }
   
   void performSearch(final String query, final String species) {
@@ -423,24 +415,24 @@ public String getSpecies()
   public void bringToFront() {
     Container parent = gui.getParent();
     while (parent != null & !(parent instanceof JRootPane))
-    	parent = parent.getParent();
+    		parent = parent.getParent();
     if (parent instanceof JRootPane)
     {
-    	Container contain = ((JRootPane)parent).getParent();
-    	if (contain instanceof JFrame)
-    	parent.setVisible(true);
-    	((JFrame) parent).toFront();
+    		Container contain = ((JRootPane)parent).getParent();
+    		if (contain instanceof JFrame)
+    			parent.setVisible(true);
+    		((JFrame) parent).toFront();
     }
     else System.err.println("Parent not found");
   }
   //----------------------------------------------------------------------
   void openPreview() {
-//	  System.out.println("lastDividerPosition read as: " + (int) (100 * lastDividerPosition));
-    resultsPreviewPane.setEnabled(true);
-    resultsPreviewPane.setDividerLocation(0.25);			//
-    previewButton.setText("Preview \u2190");
-    imagePreview.setVisible(true);
-    updatePreview();
+////	  System.out.println("lastDividerPosition read as: " + (int) (100 * lastDividerPosition));
+//    resultsPreviewPane.setEnabled(true);
+//    resultsPreviewPane.setDividerLocation(0.25);			//
+//    previewButton.setText("Preview \u2190");
+//    imagePreview.setVisible(true);
+//    updatePreview();
   }
 
   void closePreview() {
@@ -454,11 +446,20 @@ public String getSpecies()
   }
 
   void updatePreview() {
+	  	System.out.println("updatePreview");
     final WPPathway pathway = tableModel.getSelectedPathwayRef();
+  	System.out.println("selected Pathway is " + pathway);
+
     if (pathway == null) 
       imagePreview.clearImage();
      else 
-      imagePreview.setImage("http://www.wikipathways.org//wpi/wpi.php?action=downloadFile&type=png&pwTitle=Pathway:" + pathway.getId());
+     {
+    	  	String url = "http://www.wikipathways.org//wpi/wpi.php?action=downloadFile&type=png&pwTitle=Pathway:" + pathway.getId();
+    	  	System.out.println(url);
+    	  	Rectangle bounds = imagePreview.getBounds();
+    	  	System.out.println(bounds.width + " x " + bounds.height );
+    	  	imagePreview.setImage(url);
+     }
 
   }
 
@@ -537,9 +538,13 @@ class PathwayRefsTableModel extends AbstractTableModel {
 			gui.add(resultsPanel, c.down().expandBoth().insets(0, 10, 10, 10));
 		}
 
-		setCurrentDialog(dlog, query);
+	 	dlogCache = dlog;	   
+	 	searchField.setText(query);
+	 	noResultsLabel.setVisible(false); 
+	 	if(speciesCache != null)
+	 		speciesComboBox.setSelectedItem(speciesCache);
 		setPathwaysInResultsTable(pathways);
-		dlog.setBounds(new Rectangle(200, 100, 700, 500));
+		dlog.setSize(700, 500);
 		dlog.setVisible(true); 
 		
 	}

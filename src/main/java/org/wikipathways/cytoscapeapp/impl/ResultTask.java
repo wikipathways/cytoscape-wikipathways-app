@@ -14,17 +14,12 @@ public abstract class ResultTask<T> implements Task {
    * Run the task and return its result.
    */
   protected abstract T checkedRun(TaskMonitor monitor) throws Exception;
-
   protected T result = null;
 
-  public void run(TaskMonitor monitor) throws Exception {
-    result = checkedRun(monitor);
-  }
+  public void run(TaskMonitor monitor) throws Exception {    result = checkedRun(monitor);  }
 
   /**
    * Return the result that {@code checkedRun} returned.
    */
-  public T get() {
-    return result;
-  }
+  public T get() {   return result;  }
 }

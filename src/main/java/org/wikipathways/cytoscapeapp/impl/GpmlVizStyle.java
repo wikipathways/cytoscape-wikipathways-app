@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.VisualProperty;
 import org.cytoscape.view.presentation.property.BasicVisualLexicon;
@@ -27,17 +28,12 @@ public class GpmlVizStyle {
   final VisualMappingFunctionFactory passFnFactory;
   VisualStyle vizStyle = null;
 
-  public GpmlVizStyle(
-      final VisualStyleFactory vizStyleFactory,
-      final VisualMappingManager vizMapMgr,
-      final VisualMappingFunctionFactory contFnFactory,
-      final VisualMappingFunctionFactory discFnFactory,
-      final VisualMappingFunctionFactory passFnFactory) {
-    this.vizStyleFactory = vizStyleFactory;
-    this.vizMapMgr = vizMapMgr;
-    this.contFnFactory = contFnFactory;
-    this.discFnFactory = discFnFactory;
-    this.passFnFactory = passFnFactory;
+  public GpmlVizStyle(CyServiceRegistrar registrar) {
+    vizStyleFactory = registrar.getService( VisualStyleFactory.class);
+    vizMapMgr = registrar.getService( VisualMappingManager.class);
+    contFnFactory = registrar.getService( VisualMappingFunctionFactory.class, "(mapping.type=continuous)");
+    discFnFactory = registrar.getService( VisualMappingFunctionFactory.class, "(mapping.type=discrete)");
+    passFnFactory = registrar.getService( VisualMappingFunctionFactory.class, "(mapping.type=passthrough)");
   }
 
   private void removeOldVizStyle() {
@@ -52,7 +48,7 @@ public class GpmlVizStyle {
   private VisualStyle create() {
     removeOldVizStyle();
 
-    final VisualStyle vizStyle = vizStyleFactory.createVisualStyle(vizMapMgr.getDefaultVisualStyle());
+    final VisualStyle vizStyle = vizStyleFactory.createVisualStyle(vizMapMgr.getDefaultVisualStyle());			//vizMapMgr.getDefaultVisualStyle()
 
     // set up viz style dependencies
     for (final VisualPropertyDependency<?> dep : vizStyle.getAllVisualPropertyDependencies()) {
@@ -70,6 +66,7 @@ public class GpmlVizStyle {
     vizStyle.setDefaultValue(BasicVisualLexicon.NODE_FILL_COLOR, Color.WHITE);
     vizStyle.setDefaultValue(BasicVisualLexicon.NODE_LABEL_COLOR, Color.BLACK);
     vizStyle.setDefaultValue(BasicVisualLexicon.NODE_BORDER_WIDTH, new Double(1.0));
+    vizStyle.setDefaultValue(BasicVisualLexicon.EDGE_BEND, null);
 
     // create viz mappings
     for (final GpmlToPathway.VizTableStore vizTableStore : GpmlToPathway.getAllVizTableStores()) {

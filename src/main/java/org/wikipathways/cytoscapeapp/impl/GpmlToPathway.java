@@ -562,28 +562,28 @@ public class GpmlToPathway {
   static {
     PV_SHAPE_MAP.put("Rectangle",        NodeShapeVisualProperty.RECTANGLE);
     PV_SHAPE_MAP.put("Triangle",         NodeShapeVisualProperty.TRIANGLE);			// Note: triangle is different shape than PV's
-    PV_SHAPE_MAP.put("RoundRectangle", NodeShapeVisualProperty.ROUND_RECTANGLE);
+    PV_SHAPE_MAP.put("RoundRectangle", 	NodeShapeVisualProperty.ROUND_RECTANGLE);
     PV_SHAPE_MAP.put("RoundedRectangle", NodeShapeVisualProperty.ROUND_RECTANGLE);
     PV_SHAPE_MAP.put("Hexagon",          NodeShapeVisualProperty.HEXAGON);
     PV_SHAPE_MAP.put("Pentagon",         NodeShapeVisualProperty.HEXAGON);			// TODO
-    PV_SHAPE_MAP.put("Ellipse",             NodeShapeVisualProperty.ELLIPSE);
+    PV_SHAPE_MAP.put("Ellipse",          NodeShapeVisualProperty.ELLIPSE);
     PV_SHAPE_MAP.put("Oval",             NodeShapeVisualProperty.ELLIPSE);
     PV_SHAPE_MAP.put("Octagon",          NodeShapeVisualProperty.OCTAGON);
-    PV_SHAPE_MAP.put("Cell",          new NodeShapeImpl("Cell", "Cell")); 
-    PV_SHAPE_MAP.put("Nucleus",           new NodeShapeImpl("Nucleus", "Nucleus"));
-    PV_SHAPE_MAP.put("Organelle",          NodeShapeVisualProperty.ROUND_RECTANGLE);
-    PV_SHAPE_MAP.put("Mitochondria",     new NodeShapeImpl("Mitochondria", "Mitochondria"));	
-    PV_SHAPE_MAP.put("Sarcoplasmic Reticulum", new NodeShapeImpl("Sarcoplasmic Reticulum", "Sarcoplasmic Reticulum"));	
-    PV_SHAPE_MAP.put("Endoplasmic Reticulum", new NodeShapeImpl("Endoplasmic Reticulum", "Endoplasmic Reticulum"));	
-    PV_SHAPE_MAP.put("Golgi Apparatus", new NodeShapeImpl("Golgi Apparatus", "Golgi Apparatus"));	
-    PV_SHAPE_MAP.put("Brace",     		new NodeShapeImpl("Brace", "Brace"));		
-    PV_SHAPE_MAP.put("Arc",     		new NodeShapeImpl("Arc", "Arc"));		
+    PV_SHAPE_MAP.put("Cell",          	new NodeShapeImpl("Cell")); 
+    PV_SHAPE_MAP.put("Nucleus",          new NodeShapeImpl("Nucleus"));
+    PV_SHAPE_MAP.put("Organelle",        NodeShapeVisualProperty.ROUND_RECTANGLE);
+    PV_SHAPE_MAP.put("Mitochondria",     new NodeShapeImpl("Mitochondria"));	
+    PV_SHAPE_MAP.put("Sarcoplasmic Reticulum", new NodeShapeImpl("Sarcoplasmic Reticulum"));	
+    PV_SHAPE_MAP.put("Endoplasmic Reticulum", new NodeShapeImpl("Endoplasmic Reticulum"));	
+    PV_SHAPE_MAP.put("Golgi Apparatus", new NodeShapeImpl("Golgi Apparatus"));	
+    PV_SHAPE_MAP.put("Brace",     		new NodeShapeImpl("Brace"));		
+    PV_SHAPE_MAP.put("Arc",     			new NodeShapeImpl("Arc"));		
     
 
   }
 	private static final class NodeShapeImpl extends AbstractVisualPropertyValue implements NodeShape {
-		public NodeShapeImpl(final String displayName, final String serializableString) {
-			super(displayName, serializableString);
+		public NodeShapeImpl(final String displayName) {
+			super(displayName, displayName);
 		}
 	}
 
@@ -658,24 +658,24 @@ public class GpmlToPathway {
       this.mapping = mapping;
     }
 
-    public String getCyColumnName() 			{      return super.cyColName;    }
+    public String getCyColumnName() 				{      return super.cyColName;    }
     public Class<?> getCyColumnType() 			{      return super.cyColType;    }
     public VisualProperty<?>[] getCyVizProps() 	{      return vizProps;    }
     public Map<?,?> getMapping() 				{      return mapping;    }
   }
 
-  /**
-   * Overrides the extractor of an existing {@code VizTableStore}.
-   */
-  static class OverrideVizTableStore extends BasicVizTableStore {
-    /**
-     * @param store Use this {@code store}'s Cytoscape column, visual property, and mapping.
-     * @param extracter Use this {@code Extracter} instead of the one provided by {@code store}.
-     */
-    public OverrideVizTableStore(final VizTableStore store, final Extracter extracter) {
-      super(store.getCyColumnName(), store.getCyColumnType(), extracter, store.getMapping(), store.getCyVizProps());
-    }
-  }
+//  /**
+//   * Overrides the extractor of an existing {@code VizTableStore}.
+//   */
+//  static class OverrideVizTableStore extends BasicVizTableStore {
+//    /**
+//     * @param store Use this {@code store}'s Cytoscape column, visual property, and mapping.
+//     * @param extracter Use this {@code Extracter} instead of the one provided by {@code store}.
+//     */
+//    public OverrideVizTableStore(final VizTableStore store, final Extracter extracter) {
+//      super(store.getCyColumnName(), store.getCyColumnType(), extracter, store.getMapping(), store.getCyVizProps());
+//    }
+//  }
 
   public static List<VizTableStore> getAllVizTableStores() {
     return Arrays.asList(
@@ -746,15 +746,17 @@ public class GpmlToPathway {
     }
 
     public DelayedVizProp[] store(final CyIdentifiable cyNetObj, final PathwayElement pvElem) {
-      Object cyValue = extracter.extract(pvElem);
-      if (map != null) {
-        cyValue = map.get(cyValue);
-      }
-      final DelayedVizProp[] props = new DelayedVizProp[cyVizProps.length];
-      for (int i = 0; i < cyVizProps.length; i++) {
-        props[i] = new DelayedVizProp(cyNetObj, cyVizProps[i], cyValue, true);
-      }
-      return props;
+			final DelayedVizProp[] props = new DelayedVizProp[cyVizProps.length];
+			if (extracter != null) {
+				Object cyValue = extracter.extract(pvElem);
+				if (map != null) {
+					cyValue = map.get(cyValue);
+				}
+				for (int i = 0; i < cyVizProps.length; i++) {
+					props[i] = new DelayedVizProp(cyNetObj, cyVizProps[i], cyValue, true);
+				}
+			}
+			return props;
     }
   }
 
@@ -803,16 +805,14 @@ public class GpmlToPathway {
     }
   }
 
-  static final Double ZERO = new Double(0.0);
+//  static final Double ZERO = new Double(0.0);
 
   private void convertDataNode(final PathwayElement pvDataNode) {
     final CyNode cyNode = cyNet.addNode();
     pvToCyNodes.put(pvDataNode, cyNode);
     store(cyNodeTbl, cyNode, pvDataNode,
-      BasicTableStore.GRAPH_ID,
-      XREF_ID_STORE,
-      XREF_DATA_SOURCE_STORE,
-      BasicTableStore.TEXT_LABEL,
+      BasicTableStore.GRAPH_ID, XREF_ID_STORE, XREF_DATA_SOURCE_STORE,
+     BasicTableStore.TEXT_LABEL,
       BasicVizTableStore.NODE_WIDTH,
       BasicVizTableStore.NODE_HEIGHT,
       BasicVizTableStore.NODE_FILL_COLOR,
@@ -824,13 +824,10 @@ public class GpmlToPathway {
       BasicVizTableStore.NODE_BORDER_THICKNESS,
       BasicVizTableStore.NODE_SHAPE
     );
-    store(cyNode, pvDataNode,
-      BasicVizPropStore.NODE_X,
-      BasicVizPropStore.NODE_Y,
-      BasicVizPropStore.NODE_Z
-    );
-    if (ZERO.equals(BasicExtracter.NODE_LINE_THICKNESS.extract(pvDataNode))) 			// already done above!
-      store(cyNode, pvDataNode,  BasicVizPropStore.NODE_BORDER_THICKNESS );
+    store(cyNode, pvDataNode, BasicVizPropStore.NODE_X,  BasicVizPropStore.NODE_Y,      BasicVizPropStore.NODE_Z );
+    
+//    if (ZERO.equals(BasicExtracter.NODE_LINE_THICKNESS.extract(pvDataNode))) 			// already done above!
+//      store(cyNode, pvDataNode,  BasicVizPropStore.NODE_BORDER_THICKNESS );
     
   }
 
@@ -1216,15 +1213,7 @@ public class GpmlToPathway {
       cyEndNode = cyNet.addNode();
       assignAnchorVizStyle(cyEndNode, endPt);
     }    
-//    if (pvAnchors.isEmpty()) 
       newEdge(pvLine, cyStartNode, cyEndNode, true, true);
-//    else
-//    {
-//      newEdge(pvLine, cyStartNode, pvToCyNodes.get(pvAnchors.get(0)), true, false);
-//      for (int i = 1; i < pvAnchors.size(); i++) 
-//        newEdge(pvLine, pvToCyNodes.get(pvAnchors.get(i - 1)), pvToCyNodes.get(pvAnchors.get(i)), false, false);
-//      newEdge(pvLine, pvToCyNodes.get(pvAnchors.get(pvAnchors.size() - 1)), cyEndNode, false, true);
-//    }
   }
 //------------------------------------------
   
@@ -1258,14 +1247,6 @@ public class GpmlToPathway {
 	private void storeEdgeBend(final CyEdge cyEdge, final PathwayElement pvLine) 
 	{
 		String connectorType = pvLine.getConnectorType().toString();
-//		org.pathvisio.core.model.LineType endLineType = pvLine.getEndLineType();
-//		org.pathvisio.core.model.LineType startLineType = pvLine.getStartLineType();
-//		if (verbose)
-//		{
-//			System.out.println(connectorType + " from: " + getNodeNameWithId(cyEdge.getSource()) + "[" + startLineType.getMappName() + "] " + pvLine.getStartGraphRef() + 
-//					" to: " + getNodeNameWithId(cyEdge.getTarget()) + "[" + endLineType.getMappName() + "] " + pvLine.getEndGraphRef());
-//		}
-
 		makeSegments(pvLine, cyEdge);
 		Bend bend = EdgeBendVisualProperty.DEFAULT_EDGE_BEND;
 		if ("Curved".equals(connectorType))
@@ -1387,10 +1368,6 @@ static boolean verbose = true;
 		return manager.getNetworkViewMgr().getNetworkViews(cyNet).iterator().next();
 	}
 	
-//	private View<CyNode> getNodeView(CyNetworkView networkView, CyNode source) {
-//		return networkView.getNodeView(source);
-//}
-	
 	private String getNodeName(CyNode source) {
 		CyTable nodeTable = networkView.getModel().getDefaultNodeTable();
 		CyRow row = nodeTable.getRow(source.getSUID());
@@ -1398,13 +1375,9 @@ static boolean verbose = true;
 		return name;
 }
 	private String getNodeNameWithId(CyNode source) {
-//		CyTable nodeTable = networkView.getModel().getDefaultNodeTable();
-//		CyRow row = nodeTable.getRow(source.getSUID());
-//		String name = row.get("name", String.class);
 		return getNodeName(source) + " (" + source.getSUID() + ")";
 }
 	 
-//	
 	private String printPoint(Point2D pt)
 	{
 		return ("(" + (int) pt.getX() + ", " + (int) pt.getY() + ")");
@@ -1415,11 +1388,6 @@ static boolean verbose = true;
 		return ("(" + (int) pt.getX() + ", " + (int) pt.getY() + ")");
 	}
 	
-//	private Point2D.Double getNodePosition(View<CyNode> nodeView) {
-//	    Double x = nodeView.getVisualProperty(BasicVisualLexicon.NODE_X_LOCATION);
-//	    Double y = nodeView.getVisualProperty(BasicVisualLexicon.NODE_Y_LOCATION);
-//		return new Point2D.Double(x,y);
-//	}
 //=================================================================================
 	// EDGES
 	
@@ -1695,7 +1663,7 @@ BUG:  	There should be some cases where 4 is returned !!
 	{
 		double dx = a.getX() - b.getX();
 		double dy = a.getY() - b.getY();
-		return (Math.sqrt(dx*dx + dy* dy));
+		return (Math.sqrt(dx*dx + dy*dy));
 	}
 
 }

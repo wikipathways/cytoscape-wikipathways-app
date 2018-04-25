@@ -8,10 +8,7 @@ import org.wikipathways.cytoscapeapp.impl.GpmlReaderFactory;
 public class GpmlImportCmdTaskFactory extends AbstractTaskFactory {
   final GpmlReaderFactory factory;
   final GpmlConversionMethod method;
-  public GpmlImportCmdTaskFactory(
-      final GpmlReaderFactory factory,
-      final GpmlConversionMethod method
-    ) {
+  public GpmlImportCmdTaskFactory( final GpmlReaderFactory factory, final GpmlConversionMethod method ) {
     this.factory = factory;
     this.method = method;
   }

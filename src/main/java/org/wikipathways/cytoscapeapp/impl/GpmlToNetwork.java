@@ -1,23 +1,8 @@
-// WikiPathways App for Cytoscape
-//
-// Copyright 2013-2014 WikiPathways
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//    http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 package org.wikipathways.cytoscapeapp.impl;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,11 +13,14 @@ import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyIdentifiable;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
+import org.cytoscape.model.CyRow;
 import org.cytoscape.model.CyTable;
+import org.cytoscape.view.model.DiscreteRange;
 import org.cytoscape.view.model.VisualProperty;
 import org.cytoscape.view.presentation.property.ArrowShapeVisualProperty;
 import org.cytoscape.view.presentation.property.BasicVisualLexicon;
 import org.cytoscape.view.presentation.property.values.ArrowShape;
+import org.cytoscape.view.presentation.property.values.LineType;
 import org.pathvisio.core.model.GraphLink;
 import org.pathvisio.core.model.GraphLink.GraphIdContainer;
 import org.pathvisio.core.model.MLine;
@@ -42,31 +30,17 @@ import org.pathvisio.core.model.PathwayElement;
 import org.pathvisio.core.model.PathwayElement.MAnchor;
 import org.pathvisio.core.model.ShapeType;
 import org.pathvisio.core.model.StaticProperty;
+import org.wikipathways.cytoscapeapp.impl.GpmlToPathway.BasicExtracter;
+import org.wikipathways.cytoscapeapp.impl.GpmlToPathway.BasicTableStore;
+import org.wikipathways.cytoscapeapp.impl.GpmlToPathway.Extracter;
+import org.wikipathways.cytoscapeapp.impl.GpmlToPathway.TableStore;
 
 public class GpmlToNetwork {
 	/**
 	 * Maps a GPML pathway element to its representative CyNode in the network.
 	 */
 	final Map<GraphLink.GraphIdContainer, CyNode> nodes = new HashMap<GraphLink.GraphIdContainer, CyNode>();
-	
-	/**
-	 * In Cytoscape, first the network topology is created (via
-	 * CyNetwork.add{Node|Edge}), then the view objects are created. Once that's
-	 * done, the network's visual style can be created (via
-	 * View.setVisualProperty) once all the view objects exist (ensured by
-	 * CyEventHelper.flushPayloadEvents).
-	 * 
-	 * However, while we're reading GPML, we need to create the network's visual
-	 * style while we are creating the network toplogy. Otherwise we'd have to
-	 * read the GPML twice, once for topology and again for the visual style.
-	 * 
-	 * How do we get around this problem? While we're reading GPML, we create
-	 * the network topology and store our desired visual style in DelayedVizProp
-	 * objects (defined below). After we finish reading GPML, we ensure that
-	 * view objects have been created for all our new nodes and edges (via
-	 * CyEventHelper.flushPayloadEvents). Finally we apply the visual style
-	 * stored in the DelayedVizProp objects.
-	 */
+
 	final List<DelayedVizProp> delayedVizProps = new ArrayList<DelayedVizProp>();
 
   final CyEventHelper eventHelper;
@@ -75,7 +49,8 @@ public class GpmlToNetwork {
 	
 	private List<PathwayElement> edges;
 	private List<MAnchor> anchors;
-	
+	private CyTable nodeTable;
+	private CyTable edgeTable;
 	/**
 	 * Create a converter from the given pathway and store it in the given
 	 * network. Constructing this object will not start the conversion and will
@@ -85,33 +60,38 @@ public class GpmlToNetwork {
 		this.eventHelper = eventHelper;
 		this.pathway = pathway;
 		this.network = network;
+		nodeTable = network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS);
+		edgeTable = network.getTable(CyEdge.class, CyNetwork.DEFAULT_ATTRS);
 	}
-	boolean verbose = false;
-//	private Boolean unconnectedLines = false;
-
 	/**
 	 * Convert the pathway given in the constructor.
 	 */
 	public List<DelayedVizProp> convert() {
-		network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS).createColumn("GraphID", String.class, false);
-		network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS).createColumn("GeneID", String.class, false);
-		network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS).createColumn("Datasource", String.class, false);
-		network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS).createColumn("WP.type", String.class, false);
-		network.getTable(CyEdge.class, CyNetwork.DEFAULT_ATTRS).createColumn("WP.type", String.class, false);
+		nodeTable.createColumn("GraphID", String.class, false);
+		nodeTable.createColumn("XrefId", String.class, false);
+		nodeTable.createColumn("XrefDatasource", String.class, false);
+		nodeTable.createColumn("WP.type", String.class, false);
+		nodeTable.createColumn("Fill Color", String.class, false);
+		nodeTable.createColumn("Border Width", String.class, false);
+
+		edgeTable.createColumn("WP.type", String.class, false);
+		edgeTable.createColumn("Line Thickness", String.class, false);
+		edgeTable.createColumn("Line Style", String.class, false);
+		edgeTable.createColumn("Color", String.class, false);
 
 		// convert by each pathway element type
-		if (verbose) System.out.println("convert data nodes");
+		System.out.println("convert data nodes");
 		convertDataNodes();
-		if (verbose) System.out.println("convert groups");
+		System.out.println("convert groups");
 		convertGroups();
-		if (verbose) System.out.println("convert labels");
+		System.out.println("convert labels");
 		convertLabels();
 		
-		if (verbose) System.out.println("find edges");
+		System.out.println("find edges");
 		findEdges();
-		if (verbose) System.out.println("convert anchors");
+		System.out.println("convert anchors");
 		convertAnchors();
-		if (verbose) System.out.println("convert lines");
+		System.out.println("convert lines");
 		convertLines();
 
 
@@ -181,8 +161,7 @@ public class GpmlToNetwork {
 	}
 
 	/*
-	 * ======================================================== Static property
-	 * conversion ========================================================
+	 * ================================ Static property conversion =====================
 	 */
 
 	/**
@@ -228,14 +207,22 @@ public class GpmlToNetwork {
 	static {
 		GPML_ARROW_SHAPES.put("Arrow", ArrowShapeVisualProperty.DELTA);
 		GPML_ARROW_SHAPES.put("TBar", ArrowShapeVisualProperty.T);
+		GPML_ARROW_SHAPES.put("Line", ArrowShapeVisualProperty.NONE);
 		GPML_ARROW_SHAPES.put("mim-binding", ArrowShapeVisualProperty.ARROW);
 		GPML_ARROW_SHAPES.put("mim-conversion", ArrowShapeVisualProperty.ARROW);
 		GPML_ARROW_SHAPES.put("mim-modification",ArrowShapeVisualProperty.ARROW);
 		GPML_ARROW_SHAPES.put("mim-catalysis", ArrowShapeVisualProperty.CIRCLE);
 		GPML_ARROW_SHAPES.put("mim-inhibition", ArrowShapeVisualProperty.T);
-		GPML_ARROW_SHAPES.put("mim-covalent-bond", ArrowShapeVisualProperty.T);
+		GPML_ARROW_SHAPES.put("mim-covalent-bond", ArrowShapeVisualProperty.CROSS_DELTA);
+		GPML_ARROW_SHAPES.put("mim-branching-right", ArrowShapeVisualProperty.CROSS_OPEN_DELTA);
+		GPML_ARROW_SHAPES.put("mim-transcription-translation", ArrowShapeVisualProperty.DELTA);
+		GPML_ARROW_SHAPES.put("mim-cleavage", ArrowShapeVisualProperty.DIAMOND);
+		GPML_ARROW_SHAPES.put("mim-gap", ArrowShapeVisualProperty.DELTA);
+		GPML_ARROW_SHAPES.put("mim-modification", ArrowShapeVisualProperty.DELTA);
+		GPML_ARROW_SHAPES.put("mim-conversion", ArrowShapeVisualProperty.DELTA);
+		GPML_ARROW_SHAPES.put("mim-necessary-stimulation", ArrowShapeVisualProperty.CROSS_OPEN_DELTA);
 	}
-
+ 
 	/**
 	 * Converts a GPML start/end line type to a Cytoscape ArrowShape object.
 	 * This uses the {@code GPML_ARROW_NAME_TO_CYTOSCAPE} map to do the
@@ -300,14 +287,136 @@ public class GpmlToNetwork {
 	 */
 	private void convertShapeTypeNone(final CyNode node, final PathwayElement elem) {
 		if (ShapeType.NONE.equals(elem.getShapeType())) {
-			delayedVizProps.add(new DelayedVizProp(node,BasicVisualLexicon.NODE_BORDER_WIDTH, 0.0, true));
+			delayedVizProps.add(new DelayedVizProp(node,BasicVisualLexicon.NODE_BORDER_WIDTH, 2.0, true));
 			delayedVizProps.add(new DelayedVizProp(node,BasicVisualLexicon.NODE_BORDER_TRANSPARENCY, 0.0, true));
 		}
 	}
 
+
+	  /**
+	   * A specific kind of {@code TableStore} whose column stores
+	   * visual property values. The WikiPathways visual style,
+	   * specified in {@code GpmlVizStyle}, looks at known {@code VizTableStore}s
+	   * (as returned by {@code getAllVizPropStores()})
+	   * to create a series of discrete and passthrough mappings for all 
+	   * {@code VizTableStore} columns.
+	   */
+	  public static interface VizTableStore extends TableStore {
+	    /**
+	     * Return the name of the column that contains the visual property value.
+	     */
+	    String getCyColumnName();
+
+	    /**
+	     * Return the type of the column that contains the visual property value.
+	     */
+	    Class<?> getCyColumnType();
+
+	    /**
+	     * Return the Cytoscape visual properties that should read from the column
+	     * returned by {@getCyColumnName()}.
+	     */
+	    VisualProperty<?>[] getCyVizProps();
+
+	    /**
+	     * Return a map containing the key-value pairs for
+	     * the discrete mapping; return null for a passthrough mapping.
+	     */
+	    Map<?,?> getMapping();
+	  }
+
+	  static LineType getCyNodeLineType(final String displayName) {
+	    for (final LineType lineType : ((DiscreteRange<LineType>) BasicVisualLexicon.NODE_BORDER_LINE_TYPE.getRange()).values()) 
+	    {
+	      final String lineTypeName = lineType.getDisplayName();
+	      if (displayName.equals(lineTypeName)) 
+	        return lineType;
+	    }
+	    return null;
+	  }
+	  static Map<String,LineType> PV_LINE_STYLE_MAP = new HashMap<String,LineType>();
+	  static {
+	    PV_LINE_STYLE_MAP.put("Solid",  getCyNodeLineType("Solid"));
+	    PV_LINE_STYLE_MAP.put("Double", getCyNodeLineType("Parallel Lines"));
+	    PV_LINE_STYLE_MAP.put("Dashed", getCyNodeLineType("Dash"));
+	    PV_LINE_STYLE_MAP.put("Dots",   getCyNodeLineType("Dots"));
+	  }
+	  static Map<String,ArrowShape> PV_ARROW_MAP = new HashMap<String,ArrowShape>();
+	  static {
+	    PV_ARROW_MAP.put("Arrow",              ArrowShapeVisualProperty.DELTA);	
+	    PV_ARROW_MAP.put("Line",               ArrowShapeVisualProperty.NONE);
+	    PV_ARROW_MAP.put("TBar",               ArrowShapeVisualProperty.T);
+	    PV_ARROW_MAP.put("mim-binding",        ArrowShapeVisualProperty.ARROW);
+	    PV_ARROW_MAP.put("mim-conversion",     ArrowShapeVisualProperty.DELTA);
+	    PV_ARROW_MAP.put("mim-modification",   ArrowShapeVisualProperty.DELTA);
+	    PV_ARROW_MAP.put("mim-catalysis",      ArrowShapeVisualProperty.OPEN_CIRCLE);
+	    PV_ARROW_MAP.put("mim-inhibition",     ArrowShapeVisualProperty.T);
+	    PV_ARROW_MAP.put("mim-necessary-stimulation",     ArrowShapeVisualProperty.CROSS_OPEN_DELTA);
+	    PV_ARROW_MAP.put("mim-stimulation",     ArrowShapeVisualProperty.OPEN_DELTA);
+	    PV_ARROW_MAP.put("mim-cleavage",     	ArrowShapeVisualProperty.DIAMOND);
+	    PV_ARROW_MAP.put("mim-branching-left",  ArrowShapeVisualProperty.CROSS_DELTA);
+	    PV_ARROW_MAP.put("mim-branching-right", ArrowShapeVisualProperty.CROSS_OPEN_DELTA);
+	    PV_ARROW_MAP.put("mim-transcription-translation",     ArrowShapeVisualProperty.DELTA);
+	    PV_ARROW_MAP.put("mim-gap",    			ArrowShapeVisualProperty.DELTA);
+	    PV_ARROW_MAP.put("mim-covalent-bond",  	ArrowShapeVisualProperty.CROSS_DELTA);
+	  }
+	  static class BasicVizTableStore extends BasicTableStore implements VizTableStore {
+//	    public static final VizTableStore NODE_ROTATION         = new BasicVizTableStore("Rotation", Double.class,        BasicExtracter.ROTATION,                        BasicVisualLexicon.NODE_ROTATION);
+
+		public static final VizTableStore NODE_SIZE            = new BasicVizTableStore("Size", Double.class,           BasicExtracter.WIDTH,                           BasicVisualLexicon.NODE_WIDTH);
+	    public static final VizTableStore NODE_FILL_COLOR       = new BasicVizTableStore("FillColor",                     BasicExtracter.FILL_COLOR_STRING,               BasicVisualLexicon.NODE_FILL_COLOR);
+//	    public static final VizTableStore NODE_COLOR            = new BasicVizTableStore("Color",                         BasicExtracter.COLOR_STRING,                    BasicVisualLexicon.NODE_LABEL_COLOR, BasicVisualLexicon.NODE_BORDER_PAINT);
+	    public static final VizTableStore NODE_BORDER_STYLE     = new BasicVizTableStore("BorderStyle",                   BasicExtracter.LINE_STYLE_NAME, PV_LINE_STYLE_MAP, BasicVisualLexicon.NODE_BORDER_LINE_TYPE);
+	    public static final VizTableStore NODE_LABEL_SIZE       = new BasicVizTableStore("LabelSize", Double.class,       BasicExtracter.FONT_SIZE,                       BasicVisualLexicon.NODE_LABEL_FONT_SIZE);
+	    public static final VizTableStore NODE_BORDER_THICKNESS = new BasicVizTableStore("BorderThickness", Double.class, BasicExtracter.NODE_LINE_THICKNESS,             BasicVisualLexicon.NODE_BORDER_WIDTH);
+	    
+	    public static final VizTableStore EDGE_COLOR            = new BasicVizTableStore("Color",                         BasicExtracter.COLOR_STRING,                    BasicVisualLexicon.EDGE_UNSELECTED_PAINT);
+	    public static final VizTableStore EDGE_LINE_STYLE       = new BasicVizTableStore("LineStyle",                     BasicExtracter.LINE_STYLE_NAME, PV_LINE_STYLE_MAP, BasicVisualLexicon.EDGE_LINE_TYPE);
+	    public static final VizTableStore EDGE_LINE_THICKNESS   = new BasicVizTableStore("LineThickness", Double.class,   BasicExtracter.EDGE_LINE_THICKNESS,             BasicVisualLexicon.EDGE_WIDTH);
+	    public static final VizTableStore EDGE_END_ARROW        = new BasicVizTableStore("EndArrow",                      BasicExtracter.END_ARROW_STYLE, PV_ARROW_MAP,   BasicVisualLexicon.EDGE_TARGET_ARROW_SHAPE);
+	    
+
+	    final VisualProperty<?>[] vizProps;
+	    final Map<?,?> mapping; // null means passthru
+
+	    BasicVizTableStore(final String cyColName, final Extracter extracter, final VisualProperty<?> ... vizProps) {
+	      this(cyColName, String.class, extracter, vizProps);
+	    }
+
+	    BasicVizTableStore(final String cyColName, final Class<?> cyColType, final Extracter extracter, final VisualProperty<?> ... vizProps) {
+	      this(cyColName, cyColType, extracter, null, vizProps);
+	    }
+
+	    BasicVizTableStore(final String cyColName, final Extracter extracter, final Map<?,?> mapping, final VisualProperty<?> ... vizProps) {
+	      this(cyColName, String.class, extracter, mapping, vizProps);
+	    }
+
+	    BasicVizTableStore(final String cyColName, final Class<?> cyColType, final Extracter extracter, final Map<?,?> mapping, final VisualProperty<?> ... vizProps) {
+	      super(cyColName, cyColType, extracter);
+	      this.vizProps = vizProps;
+	      this.mapping = mapping;
+	    }
+
+	    public String getCyColumnName() 				{      return super.cyColName;    }
+	    public Class<?> getCyColumnType() 			{      return super.cyColType;    }
+	    public VisualProperty<?>[] getCyVizProps() 	{      return vizProps;    }
+	    public Map<?,?> getMapping() 				{      return mapping;    }
+	  }	  public static List<VizTableStore> getAllVizTableStores() {
+	    return Arrays.asList(
+//	    	      BasicVizTableStore.NODE_ROTATION,
+	      BasicVizTableStore.NODE_SIZE,
+	      BasicVizTableStore.NODE_FILL_COLOR,
+	      BasicVizTableStore.NODE_LABEL_SIZE,
+//	      BasicVizTableStore.NODE_COLOR,
+	      BasicVizTableStore.NODE_BORDER_THICKNESS,
+	      BasicVizTableStore.EDGE_COLOR,
+	      BasicVizTableStore.EDGE_LINE_STYLE,
+	      BasicVizTableStore.EDGE_LINE_THICKNESS,
+	      BasicVizTableStore.EDGE_END_ARROW
+	      );
+	  }
 	/*
-	 * ======================================================== Data nodes
-	 * ========================================================
+	 * ================================== Data nodes =====================================
 	 */
 
 	private static Map<StaticProperty, String> dataNodeStaticProps = new HashMap<StaticProperty, String>();
@@ -315,12 +424,15 @@ public class GpmlToNetwork {
 		dataNodeStaticProps.put(StaticProperty.GRAPHID, "GraphID");
 		dataNodeStaticProps.put(StaticProperty.TEXTLABEL, CyNetwork.NAME);
 		dataNodeStaticProps.put(StaticProperty.TYPE, "WP.type");
+		dataNodeStaticProps.put(StaticProperty.FILLCOLOR, "Fill Color");
+		dataNodeStaticProps.put(StaticProperty.WIDTH, "Node Size");
+		dataNodeStaticProps.put(StaticProperty.LINETHICKNESS, "Border Width");
 	}
 
 	private Map<Xref, PathwayElement> elements;
 
 	private void convertDataNodes() {
-		dataNodeStaticProps.put(StaticProperty.GENEID, "GeneID");
+		dataNodeStaticProps.put(StaticProperty.GENEID, "XrefId");
 		elements = new HashMap<Xref, PathwayElement>();
 		for (final PathwayElement elem : pathway.getDataObjects()) {
 			if (elem.getObjectType().equals(ObjectType.DATANODE)) {
@@ -340,16 +452,15 @@ public class GpmlToNetwork {
 	private void convertDataNode(final PathwayElement dataNode) {
 		final CyNode node = network.addNode();
 		if (dataNode.getDataSource() != null && dataNode.getDataSource().getFullName() != null) {
-			network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS).getRow(node.getSUID()).set("Datasource", dataNode.getDataSource().getFullName());
+			nodeTable.getRow(node.getSUID()).set("XrefDatasource", dataNode.getDataSource().getFullName());
 		}
-		convertStaticProps(dataNode, dataNodeStaticProps,network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS),node.getSUID());
+		convertStaticProps(dataNode, dataNodeStaticProps,nodeTable,node.getSUID());
 		convertShapeTypeNone(node, dataNode);
 		nodes.put(dataNode, node);
 	}
 
 	/*
-	 * ======================================================== Groups
-	 * ========================================================
+	 * ==================================== Groups  ==================================
 	 */
 	
 	private void convertGroups() {
@@ -364,25 +475,27 @@ public class GpmlToNetwork {
 		final CyNode groupNode = network.addNode();
 		nodes.put(group, groupNode);
 
+		String groupName = "group";
 		for (final PathwayElement elem : pathway.getGroupElements(group.getGroupId())) {
 			final CyNode node = nodes.get(elem);
 			if (node == null)
 				continue;
 			network.addEdge(node, groupNode, false);
+			groupName = groupName + "_" + elem.getTextLabel();
 		}
-		network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS).getRow(groupNode.getSUID()).set("WP.type", "Group");
-		network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS).getRow(groupNode.getSUID()).set("GraphID", group.getGraphId());
+		nodeTable.getRow(groupNode.getSUID()).set("WP.type", "Group");
+		nodeTable.getRow(groupNode.getSUID()).set("GraphID", group.getGraphId());
+		nodeTable.getRow(groupNode.getSUID()).set("name", groupName);
 
 		delayedVizProps.add(new DelayedVizProp(groupNode,BasicVisualLexicon.NODE_FILL_COLOR, Color.blue, true));
-		delayedVizProps.add(new DelayedVizProp(groupNode,BasicVisualLexicon.NODE_BORDER_WIDTH, 0.0, true));
-		delayedVizProps.add(new DelayedVizProp(groupNode,BasicVisualLexicon.NODE_WIDTH, 5.0, true));
-		delayedVizProps.add(new DelayedVizProp(groupNode,BasicVisualLexicon.NODE_HEIGHT, 5.0, true));
+		delayedVizProps.add(new DelayedVizProp(groupNode,BasicVisualLexicon.NODE_BORDER_WIDTH, 1.0, true));
+		delayedVizProps.add(new DelayedVizProp(groupNode,BasicVisualLexicon.NODE_WIDTH, 10.0, true));
+		delayedVizProps.add(new DelayedVizProp(groupNode,BasicVisualLexicon.NODE_HEIGHT, 10.0, true));
 		
 	}
 
 	/*
-	 * ======================================================== Labels
-	 * ========================================================
+	 * ============================================= Labels  =============================================
 	 */
 
 	private static Map<StaticProperty, String> labelStaticProps = new HashMap<StaticProperty, String>();
@@ -417,18 +530,16 @@ public class GpmlToNetwork {
 		// TODO: refactor this as an annotation 
 		// comment Tina: not sure if they can all be replaced by annotations because they are often connected with data nodes
 		final CyNode node = network.addNode();
-		network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS).getRow(node.getSUID()).set("WP.type", "Label");
+		nodeTable.getRow(node.getSUID()).set("WP.type", "Label");
 
-		convertStaticProps(label, labelStaticProps, network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS), node.getSUID());
+		convertStaticProps(label, labelStaticProps, nodeTable, node.getSUID());
 		convertShapeTypeNone(node, label);
 		nodes.put(label, node);
 	}
 
 	/*
-	 * ======================================================== Anchors
-	 * ========================================================
+	 * =================================== Anchors==========================================
 	 */
-	
 	private void convertAnchors() {
 		for(MAnchor anchor : anchors) {
 			convertAnchor(anchor);
@@ -446,13 +557,12 @@ public class GpmlToNetwork {
 		final CyNode node = network.addNode();
 		nodes.put(anchor, node);
 		assignAnchorVizStyle(node, Color.gray);
-		network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS).getRow(node.getSUID()).set("GraphID", anchor.getGraphId());
-		network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS).getRow(node.getSUID()).set("WP.type", "Anchor");
+		nodeTable.getRow(node.getSUID()).set("GraphID", anchor.getGraphId());
+		nodeTable.getRow(node.getSUID()).set("WP.type", "Anchor");
 	}
 
 	/*
-	 * ======================================================== Lines
-	 * ========================================================
+	 * =========================== Lines ================================
 	 */
 
 	private static Map<StaticProperty, String> lineStaticProps = new HashMap<StaticProperty, String>();
@@ -482,13 +592,13 @@ public class GpmlToNetwork {
 		if (createLine) {
 			CyNode startNode = nodes.get(pathway.getGraphIdContainer(startRef));
 			if (startNode == null) {
-				System.err.println("startNode == null");
+				System.out.println("ERROR");
 				startNode = network.addNode();
 				assignAnchorVizStyle(startNode, Color.white);
 			}
 			CyNode endNode = nodes.get(pathway.getGraphIdContainer(endRef));
 			if (endNode == null) {
-				System.err.println("ERROR: endNode == null");
+				System.out.println("ERROR");
 				endNode = network.addNode();
 				assignAnchorVizStyle(endNode, Color.white);
 			}
@@ -521,11 +631,14 @@ public class GpmlToNetwork {
 
 	}
 
-	private void assignEdgeVizStyle(final CyEdge edge, final PathwayElement line, final boolean isFirst, final boolean isLast) {
-		if (edge == null)
-			return;
-
-		network.getTable(CyEdge.class, CyNetwork.DEFAULT_ATTRS).getRow(edge.getSUID()).set("WP.type", "Line");
+	private void assignEdgeVizStyle(final CyEdge edge, final PathwayElement line, final boolean isFirst, final boolean isLast) 
+	{
+		if (edge == null)  return;
+		CyRow edgeRow = edgeTable.getRow(edge.getSUID());
+		edgeRow.set("WP.type", "" + line.getEndLineType());
+		edgeRow.set("Line Thickness", "" + line.getLineThickness());
+		edgeRow.set("Line Style", "" + line.getLineStyle());
+		edgeRow.set("Color", "" + line.getColor());
 
 		if (isFirst)
 			convertViewStaticProp(line, edge, StaticProperty.STARTLINETYPE, BasicVisualLexicon.EDGE_SOURCE_ARROW_SHAPE);

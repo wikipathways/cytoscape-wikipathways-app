@@ -28,12 +28,7 @@ public class WPImportCmdTask extends AbstractTask {
   final GpmlConversionMethod method;
   TaskManager<?,?> taskMgr;
 
-  public WPImportCmdTask(
-      final WPClient client,
-      final GpmlReaderFactory factory,
-      final GpmlConversionMethod method,
-      TaskManager<?,?> inTaskMgr
-    ) {
+  public WPImportCmdTask( final WPClient client, final GpmlReaderFactory factory,  final GpmlConversionMethod method,  TaskManager<?,?> inTaskMgr) {
     this.client = client;
     this.factory = factory;
     this.method = method;
@@ -62,43 +57,23 @@ public class WPImportCmdTask extends AbstractTask {
         		System.err.println("Something went wrong...");
         		return;
         }
-     taskIterator.append(new AbstractTask() {
+        	taskIterator.append(new AbstractTask() {
               public void run(TaskMonitor monitor) {
           		System.out.println("loading!");
               	factory.getWPManager().loadPathway(method, pathway, taskMgr);
               }
            });
-     taskMgr.execute(taskIterator, new TaskObserver() {
-        public void taskFinished(ObservableTask t) { System.out.println("inner task finished " + t);}
-        public void allFinished(FinishStatus status) {  System.out.println("inner all done");}
- });
+	     taskMgr.execute(taskIterator, new TaskObserver() {
+	        public void taskFinished(ObservableTask t) { System.out.println("inner task finished " + t);}
+	        public void allFinished(FinishStatus status) {  System.out.println("inner all done");}
+	     });
 
 
-  } });
+        } });
       taskMgr.execute(taskIterator, new TaskObserver() {
           public void taskFinished(ObservableTask t) { System.err.println("outer finished! " + t);}
           public void allFinished(FinishStatus status) {  System.out.println("outer all done");}
    });
 
-//  }
-//});
   }
 }
-
-
-//WPPathway pathway = infoTask.get();
-//if (pathway == null)
-//{
-//	System.err.println("Shit!");
-//	return;
-//}
-//taskIterator.append(new AbstractTask() {
-//public void run(TaskMonitor monitor) {
-//	System.out.println("loading!");
-//	factory.getWPManager().loadPathway(method, pathway, taskMgr);
-//}
-//});
-//taskMgr.execute(taskIterator, new TaskObserver() {
-//public void taskFinished(ObservableTask t) { }
-//public void allFinished(FinishStatus status) { 	System.out.println("done!");}
-//});
