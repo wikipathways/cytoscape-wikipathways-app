@@ -105,12 +105,12 @@ public class GpmlNetworkStyle {
     vizStyle.setDefaultValue(BasicVisualLexicon.EDGE_STROKE_UNSELECTED_PAINT, Color.GRAY);
     vizStyle.setDefaultValue(BasicVisualLexicon.EDGE_LABEL_COLOR, Color.BLACK);
     vizStyle.setDefaultValue(BasicVisualLexicon.EDGE_UNSELECTED_PAINT, Color.BLACK);
-    
-
     vizStyle.setDefaultValue(BasicVisualLexicon.EDGE_PAINT, Color.BLACK);
-    vizStyle.setDefaultValue(BasicVisualLexicon.EDGE_LABEL_TRANSPARENCY, 255);
+//    vizStyle.setDefaultValue(BasicVisualLexicon.EDGE_LABEL_TRANSPARENCY, 255);
     vizStyle.setDefaultValue(BasicVisualLexicon.EDGE_BEND, null);
-   // create viz mappings
+   
+    
+    // create viz mappings
     for (final GpmlToNetwork.VizTableStore vizTableStore : GpmlToNetwork.getAllVizTableStores()) 
     {
       final Map<?,?> mapping = vizTableStore.getMapping();
@@ -120,22 +120,19 @@ public class GpmlNetworkStyle {
       for (final VisualProperty<?> vizProp : vizTableStore.getCyVizProps()) 
       {
         final VisualMappingFunction<?,?> fn = fnFactory.createVisualMappingFunction( colName, colType, vizProp);
-        if (mapping != null && fn instanceof DiscreteMapping  ) {
-          final DiscreteMapping discreteFn = (DiscreteMapping) fn;
-          discreteFn.putAll(mapping);
-        }
+        if (mapping != null && fn instanceof DiscreteMapping  ) 
+          ((DiscreteMapping) fn).putAll(mapping);
         vizStyle.addVisualMappingFunction(fn);
       }
     }
-
     vizMapMgr.addVisualStyle(vizStyle);
     return vizStyle;
   }
 
   public void apply(final CyNetworkView view) {
-    if (vizStyle == null || !vizMapMgr.getAllVisualStyles().contains(vizStyle)) {
+    if (vizStyle == null || !vizMapMgr.getAllVisualStyles().contains(vizStyle)) 
       vizStyle = create();
-    }
+    
     vizMapMgr.setVisualStyle(vizStyle, view);
     vizStyle.apply(view);
   }

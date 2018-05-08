@@ -19,6 +19,7 @@ import org.cytoscape.view.model.DiscreteRange;
 import org.cytoscape.view.model.VisualProperty;
 import org.cytoscape.view.presentation.property.ArrowShapeVisualProperty;
 import org.cytoscape.view.presentation.property.BasicVisualLexicon;
+import org.cytoscape.view.presentation.property.LineTypeVisualProperty;
 import org.cytoscape.view.presentation.property.values.ArrowShape;
 import org.cytoscape.view.presentation.property.values.LineType;
 import org.pathvisio.core.model.GraphLink;
@@ -68,15 +69,18 @@ public class GpmlToNetwork {
 	 */
 	public List<DelayedVizProp> convert() {
 		nodeTable.createColumn("GraphID", String.class, false);
+		nodeTable.createColumn("WP.type", String.class, false);
 		nodeTable.createColumn("XrefId", String.class, false);
 		nodeTable.createColumn("XrefDatasource", String.class, false);
-		nodeTable.createColumn("WP.type", String.class, false);
-		nodeTable.createColumn("Fill Color", String.class, false);
-		nodeTable.createColumn("Border Width", String.class, false);
-
+		nodeTable.createColumn("Color", String.class, false);
+		nodeTable.createColumn("Border Width", Double.class, false);
+		nodeTable.createColumn("Node Size", Double.class, false);
+		nodeTable.createColumn("Label Font Size", Double.class, false);
+		
 		edgeTable.createColumn("WP.type", String.class, false);
-		edgeTable.createColumn("Line Thickness", String.class, false);
-		edgeTable.createColumn("Line Style", String.class, false);
+		edgeTable.createColumn("Width", Double.class, false);
+		edgeTable.createColumn("LineStyle", String.class, false);
+		edgeTable.createColumn("Target Arrow Shape", String.class, false);
 		edgeTable.createColumn("Color", String.class, false);
 
 		// convert by each pathway element type
@@ -194,6 +198,8 @@ public class GpmlToNetwork {
 			Object value = elem.getStaticProperty(staticProp);
 			if (value == null)
 				continue;
+			if (value instanceof Color)
+				value = colorToString((Color)value);
 			final String column = staticPropEntry.getValue();
 			table.getRow(key).set(column, value);
 		}
@@ -363,17 +369,17 @@ public class GpmlToNetwork {
 	  static class BasicVizTableStore extends BasicTableStore implements VizTableStore {
 //	    public static final VizTableStore NODE_ROTATION         = new BasicVizTableStore("Rotation", Double.class,        BasicExtracter.ROTATION,                        BasicVisualLexicon.NODE_ROTATION);
 
-		public static final VizTableStore NODE_SIZE            = new BasicVizTableStore("Size", Double.class,           BasicExtracter.WIDTH,                           BasicVisualLexicon.NODE_WIDTH);
-	    public static final VizTableStore NODE_FILL_COLOR       = new BasicVizTableStore("FillColor",                     BasicExtracter.FILL_COLOR_STRING,               BasicVisualLexicon.NODE_FILL_COLOR);
-//	    public static final VizTableStore NODE_COLOR            = new BasicVizTableStore("Color",                         BasicExtracter.COLOR_STRING,                    BasicVisualLexicon.NODE_LABEL_COLOR, BasicVisualLexicon.NODE_BORDER_PAINT);
-	    public static final VizTableStore NODE_BORDER_STYLE     = new BasicVizTableStore("BorderStyle",                   BasicExtracter.LINE_STYLE_NAME, PV_LINE_STYLE_MAP, BasicVisualLexicon.NODE_BORDER_LINE_TYPE);
-	    public static final VizTableStore NODE_LABEL_SIZE       = new BasicVizTableStore("LabelSize", Double.class,       BasicExtracter.FONT_SIZE,                       BasicVisualLexicon.NODE_LABEL_FONT_SIZE);
-	    public static final VizTableStore NODE_BORDER_THICKNESS = new BasicVizTableStore("BorderThickness", Double.class, BasicExtracter.NODE_LINE_THICKNESS,             BasicVisualLexicon.NODE_BORDER_WIDTH);
+		public static final VizTableStore NODE_SIZE            = new BasicVizTableStore("Size", Double.class,     BasicExtracter.WIDTH,                           BasicVisualLexicon.NODE_WIDTH);
+	    public static final VizTableStore NODE_FILL_COLOR       = new BasicVizTableStore("FillColor",             BasicExtracter.FILL_COLOR_STRING,               BasicVisualLexicon.NODE_FILL_COLOR);
+	    public static final VizTableStore NODE_COLOR            = new BasicVizTableStore("Color",                 BasicExtracter.COLOR_STRING,                    BasicVisualLexicon.NODE_LABEL_COLOR, BasicVisualLexicon.NODE_BORDER_PAINT);
+	    public static final VizTableStore NODE_BORDER_STYLE     = new BasicVizTableStore("BorderStyle",           BasicExtracter.LINE_STYLE_NAME, PV_LINE_STYLE_MAP, BasicVisualLexicon.NODE_BORDER_LINE_TYPE);
+	    public static final VizTableStore NODE_LABEL_SIZE       = new BasicVizTableStore("Label Font Size", Double.class, BasicExtracter.FONT_SIZE,                       BasicVisualLexicon.NODE_LABEL_FONT_SIZE);
+	    public static final VizTableStore NODE_BORDER_THICKNESS = new BasicVizTableStore("Border Width", Double.class, BasicExtracter.NODE_LINE_THICKNESS,             BasicVisualLexicon.NODE_BORDER_WIDTH);
 	    
-	    public static final VizTableStore EDGE_COLOR            = new BasicVizTableStore("Color",                         BasicExtracter.COLOR_STRING,                    BasicVisualLexicon.EDGE_UNSELECTED_PAINT);
-	    public static final VizTableStore EDGE_LINE_STYLE       = new BasicVizTableStore("LineStyle",                     BasicExtracter.LINE_STYLE_NAME, PV_LINE_STYLE_MAP, BasicVisualLexicon.EDGE_LINE_TYPE);
-	    public static final VizTableStore EDGE_LINE_THICKNESS   = new BasicVizTableStore("LineThickness", Double.class,   BasicExtracter.EDGE_LINE_THICKNESS,             BasicVisualLexicon.EDGE_WIDTH);
-	    public static final VizTableStore EDGE_END_ARROW        = new BasicVizTableStore("EndArrow",                      BasicExtracter.END_ARROW_STYLE, PV_ARROW_MAP,   BasicVisualLexicon.EDGE_TARGET_ARROW_SHAPE);
+	    public static final VizTableStore EDGE_COLOR            = new BasicVizTableStore("Color",                 BasicExtracter.COLOR_STRING,                    BasicVisualLexicon.EDGE_UNSELECTED_PAINT);
+	    public static final VizTableStore EDGE_LINE_STYLE       = new BasicVizTableStore("LineStyle",             BasicExtracter.LINE_STYLE_NAME, PV_LINE_STYLE_MAP, BasicVisualLexicon.EDGE_LINE_TYPE);
+	    public static final VizTableStore EDGE_LINE_THICKNESS   = new BasicVizTableStore("Width", Double.class,   BasicExtracter.EDGE_LINE_THICKNESS,             BasicVisualLexicon.EDGE_WIDTH);
+	    public static final VizTableStore EDGE_END_ARROW        = new BasicVizTableStore("Target Arrow Shape",    BasicExtracter.END_ARROW_STYLE, PV_ARROW_MAP,   BasicVisualLexicon.EDGE_TARGET_ARROW_SHAPE);
 	    
 
 	    final VisualProperty<?>[] vizProps;
@@ -397,17 +403,20 @@ public class GpmlToNetwork {
 	      this.mapping = mapping;
 	    }
 
-	    public String getCyColumnName() 				{      return super.cyColName;    }
+	    public String getCyColumnName() 			{      return super.cyColName;    }
 	    public Class<?> getCyColumnType() 			{      return super.cyColType;    }
 	    public VisualProperty<?>[] getCyVizProps() 	{      return vizProps;    }
 	    public Map<?,?> getMapping() 				{      return mapping;    }
-	  }	  public static List<VizTableStore> getAllVizTableStores() {
+	  }	 
+	  
+	  // this is the list of properties that will be pass thru maps in our defined style
+	  public static List<VizTableStore> getAllVizTableStores() {
 	    return Arrays.asList(
 //	    	      BasicVizTableStore.NODE_ROTATION,
 	      BasicVizTableStore.NODE_SIZE,
-	      BasicVizTableStore.NODE_FILL_COLOR,
+//	      BasicVizTableStore.NODE_FILL_COLOR,
 	      BasicVizTableStore.NODE_LABEL_SIZE,
-//	      BasicVizTableStore.NODE_COLOR,
+	      BasicVizTableStore.NODE_COLOR,
 	      BasicVizTableStore.NODE_BORDER_THICKNESS,
 	      BasicVizTableStore.EDGE_COLOR,
 	      BasicVizTableStore.EDGE_LINE_STYLE,
@@ -424,7 +433,7 @@ public class GpmlToNetwork {
 		dataNodeStaticProps.put(StaticProperty.GRAPHID, "GraphID");
 		dataNodeStaticProps.put(StaticProperty.TEXTLABEL, CyNetwork.NAME);
 		dataNodeStaticProps.put(StaticProperty.TYPE, "WP.type");
-		dataNodeStaticProps.put(StaticProperty.FILLCOLOR, "Fill Color");
+		dataNodeStaticProps.put(StaticProperty.COLOR, "Color");
 		dataNodeStaticProps.put(StaticProperty.WIDTH, "Node Size");
 		dataNodeStaticProps.put(StaticProperty.LINETHICKNESS, "Border Width");
 	}
@@ -454,7 +463,7 @@ public class GpmlToNetwork {
 		if (dataNode.getDataSource() != null && dataNode.getDataSource().getFullName() != null) {
 			nodeTable.getRow(node.getSUID()).set("XrefDatasource", dataNode.getDataSource().getFullName());
 		}
-		convertStaticProps(dataNode, dataNodeStaticProps,nodeTable,node.getSUID());
+		convertStaticProps(dataNode, dataNodeStaticProps, nodeTable, node.getSUID());
 		convertShapeTypeNone(node, dataNode);
 		nodes.put(dataNode, node);
 	}
@@ -464,11 +473,9 @@ public class GpmlToNetwork {
 	 */
 	
 	private void convertGroups() {
-		for (final PathwayElement elem : pathway.getDataObjects()) {
-			if (!elem.getObjectType().equals(ObjectType.GROUP))
-				continue;
-			convertGroup(elem);
-		}
+		for (final PathwayElement elem : pathway.getDataObjects()) 
+			if (elem.getObjectType().equals(ObjectType.GROUP))
+				convertGroup(elem);
 	}
 
 	private void convertGroup(final PathwayElement group) {
@@ -491,7 +498,6 @@ public class GpmlToNetwork {
 		delayedVizProps.add(new DelayedVizProp(groupNode,BasicVisualLexicon.NODE_BORDER_WIDTH, 1.0, true));
 		delayedVizProps.add(new DelayedVizProp(groupNode,BasicVisualLexicon.NODE_WIDTH, 10.0, true));
 		delayedVizProps.add(new DelayedVizProp(groupNode,BasicVisualLexicon.NODE_HEIGHT, 10.0, true));
-		
 	}
 
 	/*
@@ -527,11 +533,8 @@ public class GpmlToNetwork {
 	}
 
 	private void convertLabel(final PathwayElement label) {
-		// TODO: refactor this as an annotation 
-		// comment Tina: not sure if they can all be replaced by annotations because they are often connected with data nodes
 		final CyNode node = network.addNode();
 		nodeTable.getRow(node.getSUID()).set("WP.type", "Label");
-
 		convertStaticProps(label, labelStaticProps, nodeTable, node.getSUID());
 		convertShapeTypeNone(node, label);
 		nodes.put(label, node);
@@ -636,13 +639,19 @@ public class GpmlToNetwork {
 		if (edge == null)  return;
 		CyRow edgeRow = edgeTable.getRow(edge.getSUID());
 		edgeRow.set("WP.type", "" + line.getEndLineType());
-		edgeRow.set("Line Thickness", "" + line.getLineThickness());
-		edgeRow.set("Line Style", "" + line.getLineStyle());
-		edgeRow.set("Color", "" + line.getColor());
+		edgeRow.set("Target Arrow Shape", "" + line.getEndLineType());
+		edgeRow.set("Width", (line.getLineThickness() + 0.01 * Math.random()));  // TODO hack to give a sortable value
+		edgeRow.set("LineStyle", line.getLineStyle() == 0 ? "Solid" : "Dots");
+		edgeRow.set("Color", colorToString(line.getColor()));
 
 		if (isFirst)
 			convertViewStaticProp(line, edge, StaticProperty.STARTLINETYPE, BasicVisualLexicon.EDGE_SOURCE_ARROW_SHAPE);
 		if (isLast)
 			convertViewStaticProp(line, edge, StaticProperty.ENDLINETYPE, BasicVisualLexicon.EDGE_TARGET_ARROW_SHAPE);
+	}
+	private Object colorToString(Color color) {
+		String str = String.format("#%02x%02x%02x", color.getRed(), color.getGreen(), color.getBlue());
+		
+		return str;
 	}
 }

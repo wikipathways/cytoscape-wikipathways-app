@@ -821,7 +821,7 @@ public class GpmlToPathway {
       BasicVizTableStore.NODE_LABEL_SIZE,
       BasicVizTableStore.NODE_TRANSPARENT,
       BasicVizTableStore.NODE_BORDER_STYLE,
-      BasicVizTableStore.NODE_BORDER_THICKNESS,
+//      BasicVizTableStore.NODE_BORDER_THICKNESS,
       BasicVizTableStore.NODE_SHAPE
     );
     store(cyNode, pvDataNode, BasicVizPropStore.NODE_X,  BasicVizPropStore.NODE_Y,      BasicVizPropStore.NODE_Z );
@@ -916,8 +916,10 @@ public class GpmlToPathway {
 //	System.out.println("stored: " + row0.get("name", String.class));
 
     store(cyNode, pvState,
-      STATE_X_STORE,
-      STATE_Y_STORE,
+//    		BasicVizPropStore.NODE_X,
+//    		BasicVizPropStore.NODE_Y,
+    	      STATE_X_STORE,
+    	      STATE_Y_STORE,
       BasicVizPropStore.NODE_Z,
       BasicVizPropStore.NODE_WIDTH,
       BasicVizPropStore.NODE_HEIGHT,

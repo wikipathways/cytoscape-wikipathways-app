@@ -235,7 +235,7 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
 //    rightButtonsPanel.add(previewButton);
 
     imagePreview.setVisible(false);
-    imagePreview.setBorder(BorderFactory.createLineBorder(Color.green));
+//    imagePreview.setBorder(BorderFactory.createLineBorder(Color.green));
     final JPanel buttonsPanel = new JPanel(new GridBagLayout());
     buttonsPanel.add(leftButtonsPanel, c.reset().expandHoriz());
     buttonsPanel.add(rightButtonsPanel, c.right());
@@ -427,12 +427,12 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
   }
   //----------------------------------------------------------------------
   void openPreview() {
-////	  System.out.println("lastDividerPosition read as: " + (int) (100 * lastDividerPosition));
-//    resultsPreviewPane.setEnabled(true);
-//    resultsPreviewPane.setDividerLocation(0.25);			//
-//    previewButton.setText("Preview \u2190");
-//    imagePreview.setVisible(true);
-//    updatePreview();
+//	  System.out.println("lastDividerPosition read as: " + (int) (100 * lastDividerPosition));
+    resultsPreviewPane.setEnabled(true);
+    resultsPreviewPane.setDividerLocation(0.25);			//
+    previewButton.setText("Preview \u2190");
+    imagePreview.setVisible(true);
+    updatePreview();
   }
 
   void closePreview() {
