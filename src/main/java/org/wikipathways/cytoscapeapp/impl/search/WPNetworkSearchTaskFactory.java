@@ -19,7 +19,7 @@ public class WPNetworkSearchTaskFactory extends AbstractNetworkSearchTaskFactory
 
 	
 	static String ID = "org.wikipathways.3";
-	static String URL = "http://wikipathways.org";
+	static String URL = "https://wikipathways.org";
 	static String NAME = "WikiPathways";
 	static String DESC = "A user-curated pathway collection";
 	static String DESC_LONG = "<html>"+

@@ -805,30 +805,25 @@ public class GpmlToPathway {
     }
   }
 
-//  static final Double ZERO = new Double(0.0);
-
   private void convertDataNode(final PathwayElement pvDataNode) {
     final CyNode cyNode = cyNet.addNode();
     pvToCyNodes.put(pvDataNode, cyNode);
-    store(cyNodeTbl, cyNode, pvDataNode,
-      BasicTableStore.GRAPH_ID, XREF_ID_STORE, XREF_DATA_SOURCE_STORE,
-     BasicTableStore.TEXT_LABEL,
-      BasicVizTableStore.NODE_WIDTH,
-      BasicVizTableStore.NODE_HEIGHT,
-      BasicVizTableStore.NODE_FILL_COLOR,
-      BasicVizTableStore.NODE_COLOR,
-      BasicVizTableStore.NODE_LABEL_FONT,
-      BasicVizTableStore.NODE_LABEL_SIZE,
-      BasicVizTableStore.NODE_TRANSPARENT,
-      BasicVizTableStore.NODE_BORDER_STYLE,
-//      BasicVizTableStore.NODE_BORDER_THICKNESS,
-      BasicVizTableStore.NODE_SHAPE
-    );
-    store(cyNode, pvDataNode, BasicVizPropStore.NODE_X,  BasicVizPropStore.NODE_Y,      BasicVizPropStore.NODE_Z );
-    
-//    if (ZERO.equals(BasicExtracter.NODE_LINE_THICKNESS.extract(pvDataNode))) 			// already done above!
-//      store(cyNode, pvDataNode,  BasicVizPropStore.NODE_BORDER_THICKNESS );
-    
+		store(cyNodeTbl, cyNode, pvDataNode, 
+				BasicTableStore.GRAPH_ID, 
+				XREF_ID_STORE, 
+				XREF_DATA_SOURCE_STORE,
+				BasicTableStore.TEXT_LABEL, 
+				BasicVizTableStore.NODE_WIDTH, 
+				BasicVizTableStore.NODE_HEIGHT,
+				BasicVizTableStore.NODE_FILL_COLOR, 
+				BasicVizTableStore.NODE_COLOR, 
+				BasicVizTableStore.NODE_LABEL_FONT,
+				BasicVizTableStore.NODE_LABEL_SIZE, 
+				BasicVizTableStore.NODE_TRANSPARENT,
+				BasicVizTableStore.NODE_BORDER_STYLE,
+				// BasicVizTableStore.NODE_BORDER_THICKNESS,
+				BasicVizTableStore.NODE_SHAPE);
+		store(cyNode, pvDataNode, BasicVizPropStore.NODE_X, BasicVizPropStore.NODE_Y, BasicVizPropStore.NODE_Z);
   }
 
   /*

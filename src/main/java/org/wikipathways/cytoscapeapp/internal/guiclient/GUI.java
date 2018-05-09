@@ -107,7 +107,7 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
       final WPClient client,
       final OpenBrowser openBrowser,
       final GpmlReaderFactory gpmlReaderFactory) {
-    super("http://www.wikipathways.org", "WikiPathways", APP_DESCRIPTION);
+    super("https://www.wikipathways.org", "WikiPathways", APP_DESCRIPTION);
     this.taskMgr = taskMgr;
     this.client = client;
     this.openBrowser = openBrowser;
@@ -232,7 +232,7 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
     leftButtonsPanel.add(openUrlButton);
 
     final JPanel rightButtonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-//    rightButtonsPanel.add(previewButton);
+    rightButtonsPanel.add(previewButton);
 
     imagePreview.setVisible(false);
 //    imagePreview.setBorder(BorderFactory.createLineBorder(Color.green));
@@ -454,7 +454,7 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
       imagePreview.clearImage();
      else 
      {
-    	  	String url = "http://www.wikipathways.org//wpi/wpi.php?action=downloadFile&type=png&pwTitle=Pathway:" + pathway.getId();
+    	  	String url = "https://www.wikipathways.org//wpi/wpi.php?action=downloadFile&type=png&pwTitle=Pathway:" + pathway.getId();
     	  	System.out.println(url);
     	  	Rectangle bounds = imagePreview.getBounds();
     	  	System.out.println(bounds.width + " x " + bounds.height );
