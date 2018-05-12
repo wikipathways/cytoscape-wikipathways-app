@@ -25,7 +25,13 @@ public class WPImportCmdTask extends AbstractTask {
 
   final WPClient client;
   final GpmlReaderFactory factory;
-  final GpmlConversionMethod method;
+	@Tunable(
+			description = "GPML Conversion Method",
+			gravity = 2.0,
+			longDescription="Whether the import produces a pathway or network ", 
+			exampleStringValue = "\"Pathway\""
+	)
+	  final GpmlConversionMethod method;
   TaskManager<?,?> taskMgr;
 
   public WPImportCmdTask( final WPClient client, final GpmlReaderFactory factory,  final GpmlConversionMethod method,  TaskManager<?,?> inTaskMgr) {

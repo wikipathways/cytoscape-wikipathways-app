@@ -16,6 +16,12 @@ public class GpmlImportCmdTask extends AbstractTask {
   public File file;
 
   final GpmlReaderFactory factory;
+	@Tunable(
+			description = "GPML Conversion Method",
+			gravity = 2.0,
+			longDescription="Whether the import produces a pathway or network ", 
+			exampleStringValue = "\"Pathway\""
+	)
   final GpmlConversionMethod method;
 
   public GpmlImportCmdTask(

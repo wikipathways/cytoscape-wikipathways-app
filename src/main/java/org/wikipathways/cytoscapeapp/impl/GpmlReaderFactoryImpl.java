@@ -3,6 +3,7 @@ package org.wikipathways.cytoscapeapp.impl;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -271,26 +272,26 @@ class EnsemblIdColumnTask extends AbstractTask {
 			String id = row.get("XRefId", String.class);
 			String src = row.get("XRefDataSource", String.class);
 			String name = row.get("name", String.class);
-			String type = row.get("WP.type", String.class);
+			String wptype = row.get("WP.type", String.class);
+			String type = row.get("Type", String.class);
 			
 			if (suid == null || id == null || src == null) continue;
 			if (map.get(suid) != null) continue;
+			
+			String[] goodTypeArray = { "Gene", "RNA", "Protein" };
+			List<String> goodTypes = Arrays.asList(goodTypeArray);
+			if (!goodTypes.contains("x")) continue;
 			
 			monoSourced &= src.equals(firstSource);
 			String record = id + "\t" + src + "\t" + name;
 			map.put(suid, record);
 			if (!sources.contains(src))
 				sources.add(src);
-			System.out.println(suid + ": " + id + "  \t" + src + "\t" + name + "\t" + type);
+			System.out.println(suid + ": " + id + "  \t" + src + "\t" + name + "\t" + type + "\t" + wptype);
 		}
 		System.out.println("Mono: " + monoSourced + "\n\n");
-		int i = 1;
 		if (!monoSourced)
 		{
-//			for (String s : sources)
-//				System.out.println(i++ + " " + s);
-//			
-			int j = 1;
 			for (String s : sources)
 			{
 				System.out.println(s);

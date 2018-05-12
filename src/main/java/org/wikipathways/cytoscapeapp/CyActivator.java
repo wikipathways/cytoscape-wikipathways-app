@@ -51,7 +51,7 @@ import org.wikipathways.cytoscapeapp.internal.io.GpmlCyReaderTaskFactory;
  * 
  * @author martinakutmon
  * @author adamtreister
- * gets all required services provided by Cytoscape
+ * gets the required services provided by Cytoscape
  * initializes the GpmlReaderFactory, WPCyGUIClient and Network Search Bar
  *
  */
