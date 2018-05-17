@@ -278,9 +278,9 @@ class EnsemblIdColumnTask extends AbstractTask {
 			if (suid == null || id == null || src == null) continue;
 			if (map.get(suid) != null) continue;
 			
-			String[] goodTypeArray = { "Gene", "RNA", "Protein" };
+			String[] goodTypeArray = { "Gene", "GeneProduct", "RNA", "Protein" };
 			List<String> goodTypes = Arrays.asList(goodTypeArray);
-			if (!goodTypes.contains("x")) continue;
+//			if (!goodTypes.contains(wptype)) continue;
 			
 			monoSourced &= src.equals(firstSource);
 			String record = id + "\t" + src + "\t" + name;

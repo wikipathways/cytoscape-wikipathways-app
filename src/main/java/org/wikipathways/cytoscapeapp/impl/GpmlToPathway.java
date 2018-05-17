@@ -146,7 +146,8 @@ public class GpmlToPathway {
         BasicTableStore.GRAPH_ID,
         XREF_ID_STORE,
         XREF_DATA_SOURCE_STORE,
-        IS_GPML_SHAPE,
+        TYPE_STORE,
+       IS_GPML_SHAPE,
         BasicVizTableStore.NODE_WIDTH,
         BasicVizTableStore.NODE_HEIGHT,
         BasicVizTableStore.NODE_FILL_COLOR,
@@ -359,6 +360,7 @@ public class GpmlToPathway {
     public static final Extracter X                   = new BasicExtracter(StaticProperty.CENTERX);
     public static final Extracter Y                   = new BasicExtracter(StaticProperty.CENTERY);
     public static final Extracter Z                   = new BasicExtracter(Z_CONVERT, StaticProperty.ZORDER);
+    public static final Extracter NODE_TYPE           = new BasicExtracter(StaticProperty.TYPE);
     public static final Extracter WIDTH               = new BasicExtracter(StaticProperty.WIDTH);
     public static final Extracter HEIGHT              = new BasicExtracter(StaticProperty.HEIGHT);
     public static final Extracter COLOR_STRING        = new BasicExtracter(PV_COLOR_STRING_CONVERTER, StaticProperty.COLOR);
@@ -412,7 +414,7 @@ public class GpmlToPathway {
 			else if (pvElem.getPropertyEx("org.pathvisio.CellularComponentProperty").toString().equals("Nucleus"))
 				pvValues[i] = (IShape) ShapeType.NUCLEUS;
 
-//        System.out.println("Extracting..." + pvProps[i] + " = " + pvValues[i]);
+        System.out.println("Extracting..." + pvProps[i] + " = " + pvValues[i]);
       }
       if (pvValues.length == 1 && pvValues[0] == null)
         return null;
@@ -720,6 +722,7 @@ public class GpmlToPathway {
     public static final VizPropStore NODE_LABEL    = new BasicVizPropStore(BasicExtracter.TEXT_LABEL,   BasicVisualLexicon.NODE_LABEL);
     public static final VizPropStore NODE_WIDTH    = new BasicVizPropStore(BasicExtracter.WIDTH,   BasicVisualLexicon.NODE_WIDTH);
     public static final VizPropStore NODE_HEIGHT   = new BasicVizPropStore(BasicExtracter.HEIGHT,  BasicVisualLexicon.NODE_HEIGHT);
+    public static final VizPropStore NODE_TYPE   = new BasicVizPropStore(BasicExtracter.NODE_TYPE,  BasicVisualLexicon.NODE_WIDTH);					// HACK
     public static final VizPropStore NODE_FILL_COLOR  = new BasicVizPropStore(BasicExtracter.FILL_COLOR,  BasicVisualLexicon.NODE_FILL_COLOR);
     public static final VizPropStore NODE_COLOR       = new BasicVizPropStore(BasicExtracter.COLOR,       BasicVisualLexicon.NODE_LABEL_COLOR, BasicVisualLexicon.NODE_BORDER_PAINT);
     public static final VizPropStore NODE_LABEL_FONT  = new BasicVizPropStore(BasicExtracter.FONT,        BasicVisualLexicon.NODE_LABEL_FONT_FACE);
@@ -777,25 +780,29 @@ public class GpmlToPathway {
 
   static final Extracter XREF_DATA_SOURCE_EXTRACTER = new Extracter() {
     public Object extract(final PathwayElement pvElem) {
-      if(pvElem.getDataSource() == null)
-        return null;
-      else
+      if(pvElem.getDataSource() == null)     return null;
         return pvElem.getDataSource().getFullName();
     }
   };
 
   static final Extracter XREF_ID_EXTRACTER = new Extracter() {
     public Object extract(final PathwayElement pvElem) {
-      if(pvElem.getXref() == null)
-        return null;
-      else
+      if(pvElem.getXref() == null)     return null;
         return pvElem.getXref().getId();
+    }
+  };
+
+  static final Extracter TYPE_EXTRACTER = new Extracter() {
+    public Object extract(final PathwayElement pvElem) {
+      if(pvElem == null)      return null;
+        return pvElem.getDataNodeType();
     }
   };
 
 
   static final TableStore XREF_ID_STORE = new BasicTableStore("XrefId", XREF_ID_EXTRACTER);
   static final TableStore XREF_DATA_SOURCE_STORE = new BasicTableStore("XrefDatasource", XREF_DATA_SOURCE_EXTRACTER);
+  static final TableStore TYPE_STORE = new BasicTableStore("Type", TYPE_EXTRACTER);
 
   private void convertDataNodes() {
     for (final PathwayElement pvElem : pvPathway.getDataObjects()) {
@@ -805,6 +812,7 @@ public class GpmlToPathway {
     }
   }
 
+
   private void convertDataNode(final PathwayElement pvDataNode) {
     final CyNode cyNode = cyNet.addNode();
     pvToCyNodes.put(pvDataNode, cyNode);
@@ -812,6 +820,7 @@ public class GpmlToPathway {
 				BasicTableStore.GRAPH_ID, 
 				XREF_ID_STORE, 
 				XREF_DATA_SOURCE_STORE,
+				TYPE_STORE, 
 				BasicTableStore.TEXT_LABEL, 
 				BasicVizTableStore.NODE_WIDTH, 
 				BasicVizTableStore.NODE_HEIGHT,
@@ -922,9 +931,10 @@ public class GpmlToPathway {
       BasicVizPropStore.NODE_COLOR,
       BasicVizPropStore.NODE_LABEL,
       BasicVizPropStore.NODE_LABEL_FONT,
-      BasicVizPropStore.NODE_LABEL_SIZE,
+      BasicVizPropStore.NODE_LABEL_SIZE, 
       BasicVizPropStore.NODE_TRANSPARENT,
       BasicVizPropStore.NODE_BORDER_STYLE,
+      BasicVizPropStore.NODE_TYPE,
       BasicVizPropStore.NODE_BORDER_THICKNESS,
       BasicVizPropStore.NODE_SHAPE
     );
