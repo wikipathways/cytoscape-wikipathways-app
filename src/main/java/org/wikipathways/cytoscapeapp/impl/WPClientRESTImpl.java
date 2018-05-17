@@ -54,7 +54,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
 public class WPClientRESTImpl implements WPClient {
-	protected static final String BASE_URL = "https://webservice.wikipathways.org/";
+	protected static final String BASE_URL = "http://webservice.wikipathways.org/";
 
 	final private CyApplicationConfiguration appConf;		//  gives access to a species cache file
 	final private DocumentBuilder xmlParser;
