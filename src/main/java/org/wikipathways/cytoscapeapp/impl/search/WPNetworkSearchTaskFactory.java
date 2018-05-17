@@ -30,6 +30,7 @@ public class WPNetworkSearchTaskFactory extends AbstractNetworkSearchTaskFactory
 		"<li>Use ? and * for one or more wildcard characters</li>"+
 				"</html>";       
 	private final static ImageIcon ICON = new ImageIcon(WPNetworkSearchTaskFactory.class.getClassLoader().getResource("logo_150.png"));
+	private static final boolean VERBOSE = false;
 
 
 	private final WPClient client;
@@ -85,7 +86,7 @@ public class WPNetworkSearchTaskFactory extends AbstractNetworkSearchTaskFactory
 	@Override public TaskObserver getTaskObserver() { return this; }
 	
 	@Override public void taskFinished(ObservableTask task) {
-		System.out.println("taskFinished - " + task.getClass());
+//		if (VERBOSE) System.out.println("taskFinished - " + task.getClass());			// not called (?)
 //		if (!(task instanceof WPSearchCmdTask)) 
 //			return;
 //		WPSearchCmdTask searchTask = (WPSearchCmdTask) task;
@@ -97,7 +98,7 @@ public class WPNetworkSearchTaskFactory extends AbstractNetworkSearchTaskFactory
 }
 
 	@Override public void allFinished(FinishStatus finishStatus) {
-//		System.out.println("allFinished: " + finishStatus.getType().toString());
+//		if (VERBOSE) System.out.println("allFinished: " + finishStatus.getType().toString());
 	}
 
 	// this is the panel that contains a search text field			(used to have a species pop-up too )
