@@ -75,6 +75,8 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
     + "WikiPathways or PathVisio into Cytoscape."
     + "</html>";
 
+private static final boolean VERBOSE = false;
+
   final String PATHWAY_IMG = getClass().getResource("/pathway.png").toString();
   final String NETWORK_IMG = getClass().getResource("/network.png").toString();
 
@@ -446,26 +448,24 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
   }
 
   void updatePreview() {
-	  	System.out.println("updatePreview");
     final WPPathway pathway = tableModel.getSelectedPathwayRef();
-  	System.out.println("selected Pathway is " + pathway);
 
     if (pathway == null) 
       imagePreview.clearImage();
      else 
      {
-    	  	String url = "https://www.wikipathways.org//wpi/wpi.php?action=downloadFile&type=png&pwTitle=Pathway:" + pathway.getId();
-    	  	System.out.println(url);
-    	  	Rectangle bounds = imagePreview.getBounds();
-    	  	System.out.println(bounds.width + " x " + bounds.height );
-    	  	imagePreview.setImage(url);
+   	  	String url = "https://www.wikipathways.org//wpi/wpi.php?action=downloadFile&type=png&pwTitle=Pathway:" + pathway.getId();
+   	  	if (VERBOSE) System.out.println("GUI: updatePreview: selected Pathway is " + pathway + ": " + url);
+    	Rectangle bounds = imagePreview.getBounds();
+    	if (VERBOSE) System.out.println(bounds.width + " x " + bounds.height );
+    	imagePreview.setImage(url);
      }
 
   }
 
   //----------------------------------------------------------------------
   void loadSelectedPathway(final GpmlConversionMethod method) {
-	  	System.out.println("execute loadSelectedPathway");
+	  	if (VERBOSE) System.out.println("execute loadSelectedPathway");
       final WPPathway pathway = tableModel.getSelectedPathwayRef();
       loadSelectedPathway(method, pathway);
   }     

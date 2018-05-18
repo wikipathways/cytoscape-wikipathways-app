@@ -20,12 +20,14 @@ import org.cytoscape.model.CyRow;
 import org.cytoscape.model.CyTable;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.DiscreteRange;
+import org.cytoscape.view.model.Range;
 import org.cytoscape.view.model.View;
 import org.cytoscape.view.model.VisualProperty;
 import org.cytoscape.view.presentation.property.ArrowShapeVisualProperty;
 import org.cytoscape.view.presentation.property.BasicVisualLexicon;
 import org.cytoscape.view.presentation.property.EdgeBendVisualProperty;
 import org.cytoscape.view.presentation.property.NodeShapeVisualProperty;
+import org.cytoscape.view.presentation.property.StringVisualProperty;
 import org.cytoscape.view.presentation.property.values.AbstractVisualPropertyValue;
 import org.cytoscape.view.presentation.property.values.ArrowShape;
 import org.cytoscape.view.presentation.property.values.Bend;
@@ -404,7 +406,15 @@ public class GpmlToPathway {
     public Object extract(final PathwayElement pvElem) {
 //      System.out.println("Extracting...");
       for (int i = 0; i < pvValues.length; i++) {
-	pvValues[i] = pvElem.getStaticProperty(pvProps[i]);
+	try
+	{
+		pvValues[i] = pvElem.getStaticProperty(pvProps[i]);
+	}
+	catch (IllegalArgumentException ex)
+	{
+		ex.printStackTrace();
+		continue;
+	}
 
 	//check for cellular compartments
 	if (pvProps[i] == StaticProperty.SHAPETYPE)
@@ -464,6 +474,7 @@ public class GpmlToPathway {
   static class BasicTableStore implements TableStore {
     public static final TableStore GRAPH_ID = new BasicTableStore("GraphID", BasicExtracter.GRAPH_ID);
     public static final TableStore TEXT_LABEL = new BasicTableStore(CyNetwork.NAME, BasicExtracter.TEXT_LABEL);
+    public static final TableStore NODE_TYPE = new BasicTableStore(CyNetwork.NAME, BasicExtracter.NODE_TYPE);
 
     final String cyColName;
     final Class<?> cyColType;
@@ -614,6 +625,7 @@ public class GpmlToPathway {
 	  PV_CONNECTORTYPE_MAP.put("Elbow", "Elbow");
 	  PV_CONNECTORTYPE_MAP.put("Segmented",  "Segmented");
   }
+
 
   static class BasicVizTableStore extends BasicTableStore implements VizTableStore {
 //    public static final VizTableStore NODE_ROTATION         = new BasicVizTableStore("Rotation", Double.class,        BasicExtracter.ROTATION,                        BasicVisualLexicon.NODE_ROTATION);
@@ -795,7 +807,8 @@ public class GpmlToPathway {
   static final Extracter TYPE_EXTRACTER = new Extracter() {
     public Object extract(final PathwayElement pvElem) {
       if(pvElem == null)      return null;
-        return pvElem.getDataNodeType();
+       System.out.println("" + pvElem.getDataNodeType()); 
+       return pvElem.getDataNodeType();
     }
   };
 
@@ -841,7 +854,6 @@ public class GpmlToPathway {
    ========================================================
   */
   static final TableStore IS_GPML_SHAPE = new BasicTableStore("IsGPMLShape", Boolean.class, new DefaultExtracter(true));
-  // TODO: refactor this as an annotation
 
   private void convertShapes() {
     for (final PathwayElement pvElem : pvPathway.getDataObjects()) 
@@ -860,7 +872,7 @@ public class GpmlToPathway {
 //    	System.out.println("convertShape: " + (shtype == null ? "NONE" : shtype.getName()) + " " + id + " " + pvShape.getFillColor());
 //    	System.out.println("at: " + (int) pvShape.getMCenterX() + ", " +  (int) pvShape.getMCenterY());
 //    }
-    store(cyNodeTbl, cyNode, pvShape, BasicTableStore.GRAPH_ID, BasicTableStore.TEXT_LABEL, IS_GPML_SHAPE);
+    store(cyNodeTbl, cyNode, pvShape, BasicTableStore.GRAPH_ID, BasicTableStore.TEXT_LABEL, BasicTableStore.NODE_TYPE, IS_GPML_SHAPE);
     store(cyNode, pvShape,
       BasicVizPropStore.NODE_X, BasicVizPropStore.NODE_Y, BasicVizPropStore.NODE_Z,
       BasicVizPropStore.NODE_WIDTH, 
