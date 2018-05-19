@@ -5,8 +5,10 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.swing.SwingUtilities;
 
@@ -33,6 +35,9 @@ import org.cytoscape.work.TaskMonitor;
 import org.pathvisio.core.model.Pathway;
 import org.pathvisio.core.model.PathwayElement;
 import org.wikipathways.cytoscapeapp.Annots;
+import org.wikipathways.cytoscapeapp.internal.BridgeDbIdMapper;
+import org.wikipathways.cytoscapeapp.internal.IdMapping;
+import org.wikipathways.cytoscapeapp.internal.MappingSource;
 
 public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
 
@@ -227,6 +232,7 @@ static String ENSEMBL_COLUMN = "Ensembl";
 
 class EnsemblIdColumnTask extends AbstractTask {
     final CyNetwork network;
+    final String species;
     final CyServiceRegistrar registrar;
     final CyTable table;
     
@@ -234,6 +240,7 @@ class EnsemblIdColumnTask extends AbstractTask {
         this.network = network;
         table = network.getDefaultNodeTable();
        this.registrar = reg;
+       species = organism;
     }
 
     public void run(TaskMonitor monitor) 
@@ -251,6 +258,7 @@ class EnsemblIdColumnTask extends AbstractTask {
 
 	private void buildIdMapBatch() {
 		HashMap<Long, String> map = new HashMap<Long, String>();
+		HashMap<Long, String> map2 = new HashMap<Long, String>();
 		List<String> sources = new ArrayList<String>();
 		CyColumn ensemblColumn  = table.getColumn(ENSEMBL_COLUMN);
 		if  (ensemblColumn == null)
@@ -265,46 +273,75 @@ class EnsemblIdColumnTask extends AbstractTask {
 		CyRow first = rows.get(0);
 		String firstSource = first.get("XRefDataSource", String.class);
 		System.out.println("firstXRefDataSource: " + firstSource);
-		boolean monoSourced = true;
+		boolean homogenousSourced = true;
 		for (CyRow row : table.getAllRows())
 		{
 			Long suid = row.get("SUID", Long.class);
 			String id = row.get("XRefId", String.class);
 			String src = row.get("XRefDataSource", String.class);
 			String name = row.get("name", String.class);
-			String wptype = row.get("WP.type", String.class);
+//			String wptype = row.get("WP.type", String.class);
 			String type = row.get("Type", String.class);
 			
 			if (suid == null || id == null || src == null) continue;
 			if (map.get(suid) != null) continue;
 			
-			String[] goodTypeArray = { "Gene", "GeneProduct", "RNA", "Protein" };
-			List<String> goodTypes = Arrays.asList(goodTypeArray);
 //			if (!goodTypes.contains(wptype)) continue;
 			
-			monoSourced &= src.equals(firstSource);
-			String record = id + "\t" + src + "\t" + name;
+			homogenousSourced &= src.equals(firstSource);
+			String record = id + "\t" + src + "\t" + type  + "\t" + name;
 			map.put(suid, record);
+			map2.put(suid, type);
 			if (!sources.contains(src))
 				sources.add(src);
-			System.out.println(suid + ": " + id + "  \t" + src + "\t" + name + "\t" + type + "\t" + wptype);
+			System.out.println(suid + ": " + id + "  \t" + src + "\t" + type + "\t" + name);
 		}
-		System.out.println("Mono: " + monoSourced + "\n\n");
-		if (!monoSourced)
+		String[] goodTypeArray = { "Gene", "GeneProduct", "RNA", "Protein" };
+		List<String> goodTypes = Arrays.asList(goodTypeArray);
+		System.out.println("Mono: " + homogenousSourced + "\n\n");
+		if (!homogenousSourced)
 		{
 			for (String s : sources)
 			{
-				System.out.println(s);
+				if (s.equals("Ensembl")) continue;   // no need to translate those
+				Set<String> builder = new HashSet<String>();
+				boolean isEmpty = true;
+//				System.out.println(s);
 				for (Long suid : map.keySet())
 				{
 					String fields = map.get(suid);
+					String wpType = map2.get(suid);
 					if (fields.contains(s))
 					{
-						System.out.println("\t\t" + fields);
+						if (!goodTypes.contains(wpType)) 		continue;
+						String[] flds = fields.split("\t");
+						builder.add(flds[0]);
+						isEmpty = false;
 					}
 				}
-				System.out.println();
+				if (!isEmpty)
+				{
+					System.out.println(s + " " + species);
+					 for (String a : builder)
+						 System.out.println(a);					
+					try
+					{
+						final BridgeDbIdMapper mapp = new BridgeDbIdMapper();
+						 Map<String, IdMapping>  res = mapp.map(builder, s, MappingSource.Ensembl.name(), species, species);
+						 System.out.println("Results");
+						 for (String a : res.keySet())
+							 System.out.println(a + ": " + res.get(a));					
+						 Set<String> matched_ids = mapp.getMatchedIds();
+						Set<String> unmatched_ids = mapp.getUnmatchedIds();
+					}
+					catch (Exception e)
+					{
+						e.printStackTrace();
+					}
+				}
 			}
+			
+
 		}
 	}
     

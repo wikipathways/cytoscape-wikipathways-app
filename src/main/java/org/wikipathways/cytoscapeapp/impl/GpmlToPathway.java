@@ -424,7 +424,7 @@ public class GpmlToPathway {
 			else if (pvElem.getPropertyEx("org.pathvisio.CellularComponentProperty").toString().equals("Nucleus"))
 				pvValues[i] = (IShape) ShapeType.NUCLEUS;
 
-        System.out.println("Extracting..." + pvProps[i] + " = " + pvValues[i]);
+//        System.out.println("Extracting..." + pvProps[i] + " = " + pvValues[i]);
       }
       if (pvValues.length == 1 && pvValues[0] == null)
         return null;
@@ -1100,7 +1100,7 @@ public class GpmlToPathway {
   private void convertGroup(final PathwayElement pvGroup) {
     final CyNode cyGroupNode = cyNet.addNode();
     pvToCyNodes.put(pvGroup, cyGroupNode);
-    if (verbose)  System.out.println("convertGroup: " + pvGroup.getGroupStyle());
+//    if (verbose)  System.out.println("convertGroup: " + pvGroup.getGroupStyle());
 //    cyGroupNode.pvGroup.getGroupStyle();
     store(cyGroupNode, pvGroup,
       GROUP_X,
