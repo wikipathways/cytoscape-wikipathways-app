@@ -404,7 +404,8 @@ public class GpmlToPathway {
     public Object extract(final PathwayElement pvElem) {
 //      System.out.println("Extracting...");
       for (int i = 0; i < pvValues.length; i++) {
-	pvValues[i] = pvElem.getStaticProperty(pvProps[i]);
+    	  StaticProperty prop = pvProps[i];
+    	  pvValues[i] = pvElem.getStaticProperty(prop);
 
 	//check for cellular compartments
 	if (pvProps[i] == StaticProperty.SHAPETYPE)
@@ -722,7 +723,6 @@ public class GpmlToPathway {
     public static final VizPropStore NODE_LABEL    = new BasicVizPropStore(BasicExtracter.TEXT_LABEL,   BasicVisualLexicon.NODE_LABEL);
     public static final VizPropStore NODE_WIDTH    = new BasicVizPropStore(BasicExtracter.WIDTH,   BasicVisualLexicon.NODE_WIDTH);
     public static final VizPropStore NODE_HEIGHT   = new BasicVizPropStore(BasicExtracter.HEIGHT,  BasicVisualLexicon.NODE_HEIGHT);
-    public static final VizPropStore NODE_TYPE   = new BasicVizPropStore(BasicExtracter.NODE_TYPE,  BasicVisualLexicon.NODE_WIDTH);					// HACK
     public static final VizPropStore NODE_FILL_COLOR  = new BasicVizPropStore(BasicExtracter.FILL_COLOR,  BasicVisualLexicon.NODE_FILL_COLOR);
     public static final VizPropStore NODE_COLOR       = new BasicVizPropStore(BasicExtracter.COLOR,       BasicVisualLexicon.NODE_LABEL_COLOR, BasicVisualLexicon.NODE_BORDER_PAINT);
     public static final VizPropStore NODE_LABEL_FONT  = new BasicVizPropStore(BasicExtracter.FONT,        BasicVisualLexicon.NODE_LABEL_FONT_FACE);
@@ -733,6 +733,7 @@ public class GpmlToPathway {
     public static final VizPropStore NODE_BORDER_STYLE = new BasicVizPropStore(BasicExtracter.LINE_STYLE_NAME, PV_LINE_STYLE_MAP, BasicVisualLexicon.NODE_BORDER_LINE_TYPE);
     public static final VizPropStore NODE_BORDER_THICKNESS  = new BasicVizPropStore(BasicExtracter.NODE_LINE_THICKNESS,             BasicVisualLexicon.NODE_BORDER_WIDTH);
     public static final VizPropStore NODE_SHAPE       = new BasicVizPropStore(BasicExtracter.SHAPE, PV_SHAPE_MAP, BasicVisualLexicon.NODE_SHAPE);
+    public static final VizPropStore NODE_TYPE   = new BasicVizPropStore(BasicExtracter.NODE_TYPE,  BasicVisualLexicon.NODE_WIDTH);					// HACK
 
     final VisualProperty<?>[] cyVizProps;
     final Extracter extracter;

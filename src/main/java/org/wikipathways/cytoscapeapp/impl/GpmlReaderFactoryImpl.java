@@ -226,7 +226,8 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
 static String ENSEMBL_COLUMN = "Ensembl";
 
 class EnsemblIdColumnTask extends AbstractTask {
-    final CyNetwork network;
+    private static final boolean VERBOSE = false;
+	final CyNetwork network;
     final CyServiceRegistrar registrar;
     final CyTable table;
     
@@ -278,16 +279,18 @@ class EnsemblIdColumnTask extends AbstractTask {
 			if (suid == null || id == null || src == null) continue;
 			if (map.get(suid) != null) continue;
 			
+			if (VERBOSE) System.out.print(suid + ": " + id + "  \t" + src + "\t" + name + "\t" + type + "\t" + wptype);
 			String[] goodTypeArray = { "Gene", "GeneProduct", "RNA", "Protein" };
 			List<String> goodTypes = Arrays.asList(goodTypeArray);
-//			if (!goodTypes.contains(wptype)) continue;
-			
+			boolean good = goodTypes.contains(wptype);
+			if (VERBOSE) System.out.println("\t" + (good ? "Y" : "N"));
+
+			if (!good) continue;
 			monoSourced &= src.equals(firstSource);
 			String record = id + "\t" + src + "\t" + name;
 			map.put(suid, record);
 			if (!sources.contains(src))
 				sources.add(src);
-			System.out.println(suid + ": " + id + "  \t" + src + "\t" + name + "\t" + type + "\t" + wptype);
 		}
 		System.out.println("Mono: " + monoSourced + "\n\n");
 		if (!monoSourced)
