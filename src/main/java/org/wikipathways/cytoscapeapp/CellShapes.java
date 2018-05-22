@@ -1,4 +1,4 @@
-package org.wikipathways.cytoscapeapp.impl;
+package org.wikipathways.cytoscapeapp;
 
 import java.awt.Shape;
 import java.awt.geom.Arc2D;

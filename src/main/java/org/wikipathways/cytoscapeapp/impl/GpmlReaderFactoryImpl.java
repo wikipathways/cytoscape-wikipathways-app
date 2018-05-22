@@ -2,23 +2,16 @@ package org.wikipathways.cytoscapeapp.impl;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.swing.SwingUtilities;
 
 import org.cytoscape.event.CyEventHelper;
-import org.cytoscape.model.CyColumn;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNetworkFactory;
 import org.cytoscape.model.CyNetworkManager;
-import org.cytoscape.model.CyRow;
-import org.cytoscape.model.CyTable;
 import org.cytoscape.model.subnetwork.CyRootNetwork;
 import org.cytoscape.model.subnetwork.CySubNetwork;
 import org.cytoscape.service.util.CyServiceRegistrar;
@@ -35,9 +28,9 @@ import org.cytoscape.work.TaskMonitor;
 import org.pathvisio.core.model.Pathway;
 import org.pathvisio.core.model.PathwayElement;
 import org.wikipathways.cytoscapeapp.Annots;
-import org.wikipathways.cytoscapeapp.internal.BridgeDbIdMapper;
-import org.wikipathways.cytoscapeapp.internal.IdMapping;
-import org.wikipathways.cytoscapeapp.internal.MappingSource;
+import org.wikipathways.cytoscapeapp.WPClient;
+import org.wikipathways.cytoscapeapp.internal.cmd.EnsemblIdTask;
+
 
 public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
 
@@ -135,7 +128,34 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
 	    final CyNetwork network = networkView.getModel();
 	    iterator.append(createReader(id, gpmlContents, network, conversionMethod, setNetworkName));
 	    iterator.append(createViewBuilder(id, network, networkView));
-	    iterator.append(new EnsemblIdColumnTask(network, registrar, organism));
+	    if (organism == null)		// HACK -- read organsim out of the raw xml
+	    {
+	    	try 
+	    	
+	    	{ 
+	    	char[] chs = new char[3000];
+	    	gpmlContents.read(chs, 0, 2000);
+	    	gpmlContents.reset();
+	    	String str = new String(chs);
+	    	int idx = str.indexOf("Organism=");
+	    	if (idx > 0)
+	    	{
+	    		int start = idx + "Organism=".length();
+	    		if (str.charAt(start) == '"')
+	    		{
+	    			String tail = str.substring(start + 1);
+	    			int end = tail.indexOf('"');
+	    			organism = tail.substring(0,end);
+	    			System.out.println(organism);
+	    			
+	    		}
+	    	}
+	    	}
+	    	catch (Exception e) {}
+	    }
+//	    	System.err.println("No Species Defined");
+//	    else
+	    	iterator.append(new EnsemblIdTask(network, registrar, organism));
 	    return iterator;
 	  }
 //-----------------------------------------------------------------------
@@ -227,125 +247,6 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
     }
   }
 
-//-----------------------------------------------------------------------
-static String ENSEMBL_COLUMN = "Ensembl";
-
-class EnsemblIdColumnTask extends AbstractTask {
-    final CyNetwork network;
-    final String species;
-    final CyServiceRegistrar registrar;
-    final CyTable table;
-    
-    public EnsemblIdColumnTask(final CyNetwork network, final CyServiceRegistrar reg, String organism) {
-        this.network = network;
-        table = network.getDefaultNodeTable();
-       this.registrar = reg;
-       species = organism;
-    }
-
-    public void run(TaskMonitor monitor) 
-    {
-    		System.out.println("running EnsemblIdColumnTask " + organism);
-    		if (bridgeDbAvailable())			//ensemblColumn == null && 
-   			buildIdMapBatch();
-    }
-
-	private boolean bridgeDbAvailable() {
-		
-//		registrar.getService(null, "");
-		return true;
-	}
-
-	private void buildIdMapBatch() {
-		HashMap<Long, String> map = new HashMap<Long, String>();
-		HashMap<Long, String> map2 = new HashMap<Long, String>();
-		List<String> sources = new ArrayList<String>();
-		CyColumn ensemblColumn  = table.getColumn(ENSEMBL_COLUMN);
-		if  (ensemblColumn == null)
-			table.createColumn(ENSEMBL_COLUMN, String.class, true);
-		System.out.println("\nbuildIdMapBatch\n");
-		List<CyRow> rows = table.getAllRows();
-		if (rows.isEmpty()) 
-			{
-			System.out.println("rows.isEmpty() ");
-			return;
-			}
-		CyRow first = rows.get(0);
-		String firstSource = first.get("XRefDataSource", String.class);
-		System.out.println("firstXRefDataSource: " + firstSource);
-		boolean homogenousSourced = true;
-		for (CyRow row : table.getAllRows())
-		{
-			Long suid = row.get("SUID", Long.class);
-			String id = row.get("XRefId", String.class);
-			String src = row.get("XRefDataSource", String.class);
-			String name = row.get("name", String.class);
-//			String wptype = row.get("WP.type", String.class);
-			String type = row.get("Type", String.class);
-			
-			if (suid == null || id == null || src == null) continue;
-			if (map.get(suid) != null) continue;
-			
-//			if (!goodTypes.contains(wptype)) continue;
-			
-			homogenousSourced &= src.equals(firstSource);
-			String record = id + "\t" + src + "\t" + type  + "\t" + name;
-			map.put(suid, record);
-			map2.put(suid, type);
-			if (!sources.contains(src))
-				sources.add(src);
-			System.out.println(suid + ": " + id + "  \t" + src + "\t" + type + "\t" + name);
-		}
-		String[] goodTypeArray = { "Gene", "GeneProduct", "RNA", "Protein" };
-		List<String> goodTypes = Arrays.asList(goodTypeArray);
-		System.out.println("Mono: " + homogenousSourced + "\n\n");
-		if (!homogenousSourced)
-		{
-			for (String s : sources)
-			{
-				if (s.equals("Ensembl")) continue;   // no need to translate those
-				Set<String> builder = new HashSet<String>();
-				boolean isEmpty = true;
-//				System.out.println(s);
-				for (Long suid : map.keySet())
-				{
-					String fields = map.get(suid);
-					String wpType = map2.get(suid);
-					if (fields.contains(s))
-					{
-						if (!goodTypes.contains(wpType)) 		continue;
-						String[] flds = fields.split("\t");
-						builder.add(flds[0]);
-						isEmpty = false;
-					}
-				}
-				if (!isEmpty)
-				{
-					System.out.println(s + " " + species);
-					 for (String a : builder)
-						 System.out.println(a);					
-					try
-					{
-						final BridgeDbIdMapper mapp = new BridgeDbIdMapper();
-						 Map<String, IdMapping>  res = mapp.map(builder, s, MappingSource.Ensembl.name(), species, species);
-						 System.out.println("Results");
-						 for (String a : res.keySet())
-							 System.out.println(a + ": " + res.get(a));					
-						 Set<String> matched_ids = mapp.getMatchedIds();
-						Set<String> unmatched_ids = mapp.getUnmatchedIds();
-					}
-					catch (Exception e)
-					{
-						e.printStackTrace();
-					}
-				}
-			}
-			
-
-		}
-	}
-    
-  }
 
 //-----------------------------------------------------------------------
   class UpdateViewTask extends AbstractTask implements ObservableTask {

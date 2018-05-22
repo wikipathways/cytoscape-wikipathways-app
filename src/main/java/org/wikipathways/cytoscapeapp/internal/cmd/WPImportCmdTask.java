@@ -11,10 +11,10 @@ import org.cytoscape.work.TaskManager;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.TaskObserver;
 import org.cytoscape.work.Tunable;
+import org.wikipathways.cytoscapeapp.WPClient;
 import org.wikipathways.cytoscapeapp.impl.GpmlConversionMethod;
 import org.wikipathways.cytoscapeapp.impl.GpmlReaderFactory;
 import org.wikipathways.cytoscapeapp.impl.ResultTask;
-import org.wikipathways.cytoscapeapp.impl.WPClient;
 import org.wikipathways.cytoscapeapp.impl.WPPathway;
 
 public class WPImportCmdTask extends AbstractTask {

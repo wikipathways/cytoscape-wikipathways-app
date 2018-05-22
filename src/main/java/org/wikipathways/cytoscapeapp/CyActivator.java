@@ -37,8 +37,6 @@ import org.pathvisio.core.view.MIMShapes;
 import org.wikipathways.cytoscapeapp.impl.GpmlConversionMethod;
 import org.wikipathways.cytoscapeapp.impl.GpmlReaderFactory;
 import org.wikipathways.cytoscapeapp.impl.GpmlReaderFactoryImpl;
-import org.wikipathways.cytoscapeapp.impl.WPClient;
-import org.wikipathways.cytoscapeapp.impl.WPClientFactory;
 import org.wikipathways.cytoscapeapp.impl.WPClientRESTFactoryImpl;
 import org.wikipathways.cytoscapeapp.impl.search.WPNetworkSearchTaskFactory;
 //import org.wikipathways.cytoscapeapp.internal.OpenLinkedPathwayAsNewTaskFactory;

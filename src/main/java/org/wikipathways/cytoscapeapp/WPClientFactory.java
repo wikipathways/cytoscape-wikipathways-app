@@ -1,4 +1,4 @@
-package org.wikipathways.cytoscapeapp.impl;
+package org.wikipathways.cytoscapeapp;
 
 /**
  * Used as an OSGi service to create new WikiPathways clients.

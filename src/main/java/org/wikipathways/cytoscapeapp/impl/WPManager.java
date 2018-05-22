@@ -20,6 +20,7 @@ import org.cytoscape.work.TaskManager;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.TaskObserver;
 import org.wikipathways.cytoscapeapp.Annots;
+import org.wikipathways.cytoscapeapp.WPClient;
 
 public class WPManager {
 

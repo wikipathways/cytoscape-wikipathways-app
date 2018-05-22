@@ -30,6 +30,7 @@ import org.cytoscape.view.presentation.property.values.Bend;
 import org.cytoscape.view.presentation.property.values.Handle;
 import org.cytoscape.view.presentation.property.values.HandleFactory;
 import org.pathvisio.core.model.PathwayElement;
+import org.wikipathways.cytoscapeapp.CellShapes;
 
 
 /**
@@ -243,7 +244,7 @@ public class DelayedVizProp {
 		}
 		else
 		{
-			if (verbose) System.out.println("propvalue: "+propvalue);
+//			if (verbose) System.out.println("propvalue: "+propvalue);
 			GeneralPath path = CellShapes.getPath(propvalue);
 			if (path != null)
 			{

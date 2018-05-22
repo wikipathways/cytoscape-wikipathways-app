@@ -807,7 +807,7 @@ public class GpmlToPathway {
   static final Extracter TYPE_EXTRACTER = new Extracter() {
     public Object extract(final PathwayElement pvElem) {
       if(pvElem == null)      return null;
-       System.out.println("" + pvElem.getDataNodeType()); 
+//       System.out.println("" + pvElem.getDataNodeType()); 
        return pvElem.getDataNodeType();
     }
   };
@@ -861,7 +861,7 @@ public class GpmlToPathway {
     	  convertShape(pvElem);
   }
   private void convertShape(final PathwayElement pvShape) {
-    System.out.println("convertShape: " + pvShape.getShapeType()+", "+pvShape.getPropertyEx("org.pathvisio.CellularComponentProperty"));
+//    System.out.println("convertShape: " + pvShape.getShapeType()+", "+pvShape.getPropertyEx("org.pathvisio.CellularComponentProperty"));
     final CyNode cyNode = cyNet.addNode();
     pvToCyNodes.put(pvShape, cyNode);
     IShape shtype = pvShape.getShapeType();
@@ -872,9 +872,10 @@ public class GpmlToPathway {
 //    	System.out.println("convertShape: " + (shtype == null ? "NONE" : shtype.getName()) + " " + id + " " + pvShape.getFillColor());
 //    	System.out.println("at: " + (int) pvShape.getMCenterX() + ", " +  (int) pvShape.getMCenterY());
 //    }
-    store(cyNodeTbl, cyNode, pvShape, BasicTableStore.GRAPH_ID, BasicTableStore.TEXT_LABEL, BasicTableStore.NODE_TYPE, IS_GPML_SHAPE);
+    store(cyNodeTbl, cyNode, pvShape, BasicTableStore.GRAPH_ID, BasicTableStore.TEXT_LABEL, IS_GPML_SHAPE);
     store(cyNode, pvShape,
       BasicVizPropStore.NODE_X, BasicVizPropStore.NODE_Y, BasicVizPropStore.NODE_Z,
+//      BasicTableStore.NODE_TYPE, 
       BasicVizPropStore.NODE_WIDTH, 
       BasicVizPropStore.NODE_HEIGHT,
       BasicVizPropStore.NODE_FILL_COLOR,  BasicVizPropStore.NODE_COLOR,
@@ -946,7 +947,7 @@ public class GpmlToPathway {
       BasicVizPropStore.NODE_LABEL_SIZE, 
       BasicVizPropStore.NODE_TRANSPARENT,
       BasicVizPropStore.NODE_BORDER_STYLE,
-      BasicVizPropStore.NODE_TYPE,
+//      BasicVizPropStore.NODE_TYPE,
       BasicVizPropStore.NODE_BORDER_THICKNESS,
       BasicVizPropStore.NODE_SHAPE
     );
