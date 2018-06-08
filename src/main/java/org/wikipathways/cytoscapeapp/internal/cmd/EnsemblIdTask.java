@@ -93,7 +93,7 @@ public class EnsemblIdTask extends AbstractTask {
 				sources.add(src);
 			System.out.println(suid + ": " + id + "  \t" + src + "\t" + type + "\t" + name);
 		}
-		String[] goodTypeArray = { "Gene", "GeneProduct", "RNA", "Protein" };
+		String[] goodTypeArray = { "Gene", "GeneProduct", "Rna	", "Protein" };
 		List<String> goodTypes = Arrays.asList(goodTypeArray);
 		System.out.println("homogenousSourced: " + homogenousSourced + "\n\n");
 		if (!homogenousSourced)

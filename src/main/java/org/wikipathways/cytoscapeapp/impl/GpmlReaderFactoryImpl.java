@@ -58,7 +58,7 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
 
   public GpmlReaderFactoryImpl(CyServiceRegistrar registrar)
   {
-	  System.out.println("GpmlReaderFactoryImpl");
+//	  System.out.println("GpmlReaderFactoryImpl");
 	  this.registrar = registrar;
 	  eventHelper = registrar.getService(CyEventHelper.class);
       netMgr =  registrar.getService(CyNetworkManager.class);
