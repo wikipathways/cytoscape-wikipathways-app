@@ -4,6 +4,7 @@ import java.io.Reader;
 import java.util.regex.Pattern;
 
 import org.cytoscape.work.AbstractTask;
+import org.cytoscape.work.ContainsTunables;
 import org.cytoscape.work.FinishStatus;
 import org.cytoscape.work.ObservableTask;
 import org.cytoscape.work.TaskIterator;
@@ -20,6 +21,7 @@ import org.wikipathways.cytoscapeapp.impl.WPPathway;
 public class WPImportCmdTask extends AbstractTask {
   static final Pattern WP_ID_REGEX = Pattern.compile("WP\\d+");
 
+	@ContainsTunables
   @Tunable
   public String id;
 

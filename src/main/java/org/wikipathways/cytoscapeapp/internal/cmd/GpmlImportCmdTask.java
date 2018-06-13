@@ -5,6 +5,7 @@ import java.io.FileReader;
 import java.io.Reader;
 
 import org.cytoscape.work.AbstractTask;
+import org.cytoscape.work.ContainsTunables;
 import org.cytoscape.work.ObservableTask;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.Tunable;
@@ -13,6 +14,7 @@ import org.wikipathways.cytoscapeapp.impl.GpmlReaderFactory;
 
 
 public class GpmlImportCmdTask extends AbstractTask implements ObservableTask {
+	@ContainsTunables
   @Tunable(
 			longDescription="GpmlImportCmdTask placeholder, put command HERE",
 					exampleStringValue="true" )
