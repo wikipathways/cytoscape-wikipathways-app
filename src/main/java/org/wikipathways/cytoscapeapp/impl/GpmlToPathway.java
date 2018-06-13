@@ -215,29 +215,43 @@ public class GpmlToPathway {
      return name;
     }
   };
+//
+//  /** AST
+//   * Hard coded array of Connector Types because there is no StaticProperty.CONNECTORTYPE
+//   */
+//  static final Converter PV_CONNECTOR_TYPE_CONVERTER = new Converter() {
+//    final String[] PV_CONNECTOR_TYPE_NAMES ={"Straight","Curved","Elbow","Segmented"};			//
+//    public Object toCyValue(Object[] pvValues) {
+//      final int lineStyle = (Integer) pvValues[0];
+//      return PV_CONNECTOR_TYPE_NAMES[lineStyle];
+//    }
+//  };
 
-  /** AST
-   * Hard coded array of Connector Types because there is no StaticProperty.CONNECTORTYPE
-   */
-  static final Converter PV_CONNECTOR_TYPE_CONVERTER = new Converter() {
-    final String[] PV_CONNECTOR_TYPE_NAMES ={"Straight","Curved","Elbow","Segmented"};
-    public Object toCyValue(Object[] pvValues) {
-      final int lineStyle = (Integer) pvValues[0];
-      return PV_CONNECTOR_TYPE_NAMES[lineStyle];
-    }
-  };
+  	/**
+	 * AST Hard coded array of Connector Types because there is no
+	 * StaticProperty.CONNECTORTYPE
+	 */
+	static final Converter PV_CONNECTOR_TYPE_CONVERTER = new Converter() {
+		final String[] PV_CONNECTOR_TYPE_NAMES = { "Straight", "Curved", "Elbow", "Segmented" };
 
-  /**
-   * Uses PathVisio's {@code StaticProperty.LINESTYLE} to the name of
-   * a Cytoscape Border Line Type.
-   */
-  static final Converter PV_LINE_STYLE_NAME_CONVERTER = new Converter() {
-    final String[] PV_LINE_STYLE_NAMES = LineStyle.getNames();
-    public Object toCyValue(Object[] pvValues) {
-      final int lineStyle = (Integer) pvValues[0];
-      return PV_LINE_STYLE_NAMES[lineStyle];
-    }
-  };
+		public Object toCyValue(Object[] pvValues) {
+			final int lineStyle = (Integer) pvValues[0];
+			return PV_CONNECTOR_TYPE_NAMES[lineStyle];
+		}
+	};
+
+  	/**
+	 * Uses PathVisio's {@code StaticProperty.LINESTYLE} to the name of a Cytoscape
+	 * Border Line Type.
+	 */
+	static final Converter PV_LINE_STYLE_NAME_CONVERTER = new Converter() {
+		final String[] PV_LINE_STYLE_NAMES = LineStyle.getNames();
+
+		public Object toCyValue(Object[] pvValues) {
+			final int lineStyle = (Integer) pvValues[0];
+			return PV_LINE_STYLE_NAMES[lineStyle];
+		}
+	};
 
   /**
    * Uses PathVisio's {@code StaticProperty.SHAPETYPE} and returns its name.
@@ -259,10 +273,8 @@ public class GpmlToPathway {
       final Boolean bold = (Boolean) pvValues[1];
       final Boolean italic = (Boolean) pvValues[2];
       int style = Font.PLAIN;
-      if (bold)
-        style |= Font.BOLD;
-      if (italic)
-        style |= Font.ITALIC;
+      if (bold) 	style |= Font.BOLD;
+      if (italic) 	style |= Font.ITALIC;
       return new Font(fontFace, style, 12);
     }
   };
@@ -435,7 +447,9 @@ public class GpmlToPathway {
 
     	  return obj;
      }
-     catch (Exception e) { return null;	}
+     catch (Exception e) { 
+    	 System.err.println("Class Cast");
+    	 return null;	}
     }
   }
 
@@ -623,7 +637,7 @@ public class GpmlToPathway {
 	  PV_CONNECTORTYPE_MAP.put("Straight",  "Straight");
 	  PV_CONNECTORTYPE_MAP.put("Curved", "Curved");
 	  PV_CONNECTORTYPE_MAP.put("Elbow", "Elbow");
-	  PV_CONNECTORTYPE_MAP.put("Segmented",  "Segmented");
+//	  PV_CONNECTORTYPE_MAP.put("Segmented",  "Segmented");
   }
 
 
@@ -701,7 +715,7 @@ public class GpmlToPathway {
       BasicVizTableStore.NODE_LABEL_SIZE,
       BasicVizTableStore.NODE_TRANSPARENT,
       BasicVizTableStore.NODE_COLOR,
-      BasicVizTableStore.NODE_BORDER_STYLE,
+//      BasicVizTableStore.NODE_BORDER_STYLE,
       BasicVizTableStore.NODE_BORDER_THICKNESS,
       BasicVizTableStore.NODE_SHAPE,
       BasicVizTableStore.EDGE_COLOR,
@@ -742,7 +756,7 @@ public class GpmlToPathway {
     public static final VizPropStore NODE_TRANSPARENT = new BasicVizPropStore(BasicExtracter.TRANSPARENT, PV_TRANSPARENT_MAP, BasicVisualLexicon.NODE_TRANSPARENCY);
     public static final VizPropStore NODE_ALWAYS_TRANSPARENT = new BasicVizPropStore(new DefaultExtracter(0),      BasicVisualLexicon.NODE_TRANSPARENCY);
     public static final VizPropStore NODE_ALWAYS_SEMI_TRANSPARENT = new BasicVizPropStore(new DefaultExtracter(25),      BasicVisualLexicon.NODE_TRANSPARENCY);
-    public static final VizPropStore NODE_BORDER_STYLE = new BasicVizPropStore(BasicExtracter.LINE_STYLE_NAME, PV_LINE_STYLE_MAP, BasicVisualLexicon.NODE_BORDER_LINE_TYPE);
+//    public static final VizPropStore NODE_BORDER_STYLE = new BasicVizPropStore(BasicExtracter.LINE_STYLE_NAME, PV_LINE_STYLE_MAP, BasicVisualLexicon.NODE_BORDER_LINE_TYPE);
     public static final VizPropStore NODE_BORDER_THICKNESS  = new BasicVizPropStore(BasicExtracter.NODE_LINE_THICKNESS,             BasicVisualLexicon.NODE_BORDER_WIDTH);
     public static final VizPropStore NODE_SHAPE       = new BasicVizPropStore(BasicExtracter.SHAPE, PV_SHAPE_MAP, BasicVisualLexicon.NODE_SHAPE);
 
@@ -842,8 +856,8 @@ public class GpmlToPathway {
 				BasicVizTableStore.NODE_LABEL_FONT,
 				BasicVizTableStore.NODE_LABEL_SIZE, 
 				BasicVizTableStore.NODE_TRANSPARENT,
-				BasicVizTableStore.NODE_BORDER_STYLE,
-				// BasicVizTableStore.NODE_BORDER_THICKNESS,
+//				BasicVizTableStore.NODE_BORDER_STYLE,
+				 BasicVizTableStore.NODE_BORDER_THICKNESS,
 				BasicVizTableStore.NODE_SHAPE);
 		store(cyNode, pvDataNode, BasicVizPropStore.NODE_X, BasicVizPropStore.NODE_Y, BasicVizPropStore.NODE_Z);
   }
@@ -881,7 +895,7 @@ public class GpmlToPathway {
       BasicVizPropStore.NODE_FILL_COLOR,  BasicVizPropStore.NODE_COLOR,
       BasicVizPropStore.NODE_LABEL_FONT, BasicVizPropStore.NODE_LABEL_SIZE,
       BasicVizPropStore.NODE_ALWAYS_TRANSPARENT,
-      BasicVizPropStore.NODE_BORDER_STYLE,  
+//      BasicVizPropStore.NODE_BORDER_STYLE,  
       BasicVizPropStore.NODE_BORDER_THICKNESS, 
       BasicVizPropStore.NODE_SHAPE, 
       SELECTED_COLOR 
@@ -946,7 +960,7 @@ public class GpmlToPathway {
       BasicVizPropStore.NODE_LABEL_FONT,
       BasicVizPropStore.NODE_LABEL_SIZE, 
       BasicVizPropStore.NODE_TRANSPARENT,
-      BasicVizPropStore.NODE_BORDER_STYLE,
+//      BasicVizPropStore.NODE_BORDER_STYLE,
 //      BasicVizPropStore.NODE_TYPE,
       BasicVizPropStore.NODE_BORDER_THICKNESS,
       BasicVizPropStore.NODE_SHAPE
@@ -1146,7 +1160,7 @@ public class GpmlToPathway {
       BasicVizPropStore.NODE_Z,
       BasicVizPropStore.NODE_WIDTH,
       BasicVizPropStore.NODE_HEIGHT,
-      BasicVizPropStore.NODE_BORDER_STYLE,
+//      BasicVizPropStore.NODE_BORDER_STYLE,
       BasicVizPropStore.NODE_BORDER_THICKNESS,
       BasicVizPropStore.NODE_COLOR,
       BasicVizPropStore.NODE_SHAPE,
@@ -1274,7 +1288,7 @@ public class GpmlToPathway {
 		else if ("Elbow".equals(connectorType))
 			bend = makeElbowEdgeBend(networkView, cyEdge, makeSegments(pvLine, cyEdge));
 
-		DelayedVizProp prop = new DelayedVizProp(cyEdge, BasicVisualLexicon.EDGE_BEND, bend, true);
+		DelayedVizProp prop = new DelayedVizProp(cyEdge, BasicVisualLexicon.EDGE_BEND, bend, false);
 		cyDelayedVizProps.add(prop);
 	}
 	
@@ -1394,19 +1408,9 @@ static boolean verbose = true;
 		String name = row.get("name", String.class);
 		return name;
 }
-	private String getNodeNameWithId(CyNode source) {
-		return getNodeName(source) + " (" + source.getSUID() + ")";
-}
-	 
-	private String printPoint(Point2D pt)
-	{
-		return ("(" + (int) pt.getX() + ", " + (int) pt.getY() + ")");
-	}
-	
-	private String printPoint(MPoint pt)
-	{
-		return ("(" + (int) pt.getX() + ", " + (int) pt.getY() + ")");
-	}
+	private String getNodeNameWithId(CyNode source) {		return getNodeName(source) + " (" + source.getSUID() + ")";}
+	private String printPoint(Point2D pt)			{		return ("(" + (int) pt.getX() + ", " + (int) pt.getY() + ")");	}
+	private String printPoint(MPoint pt)			{		return ("(" + (int) pt.getX() + ", " + (int) pt.getY() + ")");	}
 	
 //=================================================================================
 	// EDGES

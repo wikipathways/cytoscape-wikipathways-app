@@ -11,6 +11,7 @@ import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.FinishStatus;
 import org.cytoscape.work.ObservableTask;
+import org.cytoscape.work.SynchronousTaskManager;
 import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskManager;
 import org.cytoscape.work.TaskMonitor;
@@ -34,7 +35,7 @@ public class WPSearchCmdTask extends AbstractTask {
 	    this.client = client;
 	    this.factory = factory;
 	    registrar = r;
-		dialogTaskManager = r.getService(TaskManager.class);
+		dialogTaskManager = r.getService(SynchronousTaskManager.class);
 		this.guiClient = guiClient;
 	}
   	public void setSpecies(String sp)	{ species = sp;	}

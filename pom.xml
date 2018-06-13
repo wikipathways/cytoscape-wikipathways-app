@@ -11,7 +11,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.wikipathways</groupId>
 	<artifactId>cytoscapeapp</artifactId>
-	<version>3.3.3</version>
+	<version>3.3.3e</version>
 
 	<name>WikiPathways App</name>
 	

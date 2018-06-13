@@ -123,7 +123,7 @@ public class DelayedVizProp {
 		catch (Exception e) {		} 
 		finally 
 		{
-//			mgr.turnOnEvents();
+			mgr.turnOnEvents();
 //			netView.updateView();
 		}
 
@@ -204,7 +204,7 @@ public class DelayedVizProp {
 //					propvalue1 = propvalue1.substring(0, idx);
 				map.put(lookup, propvalue1);
 				if ("Width".equals(lookup))			wid = Double.valueOf(propvalue1);
-				if ("Height".equals(lookup))			hght = Double.valueOf(propvalue1);
+				if ("Height".equals(lookup))		hght = Double.valueOf(propvalue1);
 //				if ("Style".equals(lookup))			{ System.out.println("set style to: " + style);  style = propvalue1;   }
 				if ("x".equals(lookup))				x = Double.valueOf(propvalue1);
 				if ("y".equals(lookup))				y = Double.valueOf(propvalue1);
@@ -212,7 +212,8 @@ public class DelayedVizProp {
 			}
 		}
 		String propvalue = delayedProp.value.toString();
-		
+		System.out.println(String.format("Size 0f %s: %.2f x %.2f", propvalue, wid ,hght));
+
 //		if ("Round Rectangle".equals(propvalue))
 //		{
 //			map.put("edgeThickness", "4.3");
@@ -289,14 +290,14 @@ public class DelayedVizProp {
 			List<CyEdge> edges = network.getAdjacentEdgeList(src, CyEdge.Type.ANY);
 			if (edges != null)
 				for (CyEdge edge : edges)
-			{
-				PathwayElement edgeElement = getPathwayElement(edge);
-				if (edgeElement != null)
 				{
-					relx = edgeElement.getRelX();
-					rely = edgeElement.getRelY();
+					PathwayElement edgeElement = getPathwayElement(edge);
+					if (edgeElement != null)
+					{
+						relx = edgeElement.getRelX();
+						rely = edgeElement.getRelY();
+					}
 				}
-			}
 //			Rectangle2D bounds = elem.getMBounds();
 //			double cx = bounds.getCenterX();
 //			double cy = bounds.getCenterY();

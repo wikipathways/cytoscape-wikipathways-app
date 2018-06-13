@@ -56,6 +56,24 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
   final Map<CyNetwork,GpmlConversionMethod> conversionMethods = new HashMap<CyNetwork,GpmlConversionMethod>();
   final Map<CyNetwork,List<DelayedVizProp>> pendingVizProps = new HashMap<CyNetwork,List<DelayedVizProp>>();
 
+  private boolean semaphore = false;
+  
+	public void setSemaphore()
+	{
+		  System.out.println("setSemaphore");
+		  if (semaphore)
+			  System.out.println("FAIL");
+		  else semaphore = true;
+
+		
+	}
+	public void clearSemaphore()
+	{
+		  System.out.println("clearSemaphore");
+		  semaphore = false;
+	}
+
+
   public GpmlReaderFactoryImpl(CyServiceRegistrar registrar)
   {
 //	  System.out.println("GpmlReaderFactoryImpl");
@@ -211,7 +229,7 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
 		} catch (Exception e) {
 			throw new Exception("Pathway not available -- invalid GPML", e);
 		} finally {
-			// manager.turnOnEvents();
+			 manager.turnOnEvents();
 		}
 	}
 

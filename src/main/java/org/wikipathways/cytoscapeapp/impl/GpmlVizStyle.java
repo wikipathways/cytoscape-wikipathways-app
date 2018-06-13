@@ -10,6 +10,7 @@ import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.VisualProperty;
 import org.cytoscape.view.presentation.property.BasicVisualLexicon;
+import org.cytoscape.view.presentation.property.EdgeBendVisualProperty;
 import org.cytoscape.view.vizmap.VisualMappingFunction;
 import org.cytoscape.view.vizmap.VisualMappingFunctionFactory;
 import org.cytoscape.view.vizmap.VisualMappingManager;
@@ -66,7 +67,7 @@ public class GpmlVizStyle {
     vizStyle.setDefaultValue(BasicVisualLexicon.NODE_FILL_COLOR, Color.WHITE);
     vizStyle.setDefaultValue(BasicVisualLexicon.NODE_LABEL_COLOR, Color.BLACK);
     vizStyle.setDefaultValue(BasicVisualLexicon.NODE_BORDER_WIDTH, new Double(1.0));
-    vizStyle.setDefaultValue(BasicVisualLexicon.EDGE_BEND, null);
+    vizStyle.setDefaultValue(BasicVisualLexicon.EDGE_BEND, EdgeBendVisualProperty.DEFAULT_EDGE_BEND);
 
     // create viz mappings
     for (final GpmlToPathway.VizTableStore vizTableStore : GpmlToPathway.getAllVizTableStores()) {
@@ -74,9 +75,7 @@ public class GpmlVizStyle {
       final VisualMappingFunctionFactory fnFactory = (mapping == null) ? passFnFactory : discFnFactory;
       for (final VisualProperty<?> vizProp : vizTableStore.getCyVizProps()) {
         final VisualMappingFunction<?,?> fn = fnFactory.createVisualMappingFunction(
-            vizTableStore.getCyColumnName(),
-            vizTableStore.getCyColumnType(),
-            vizProp);
+        				vizTableStore.getCyColumnName(), vizTableStore.getCyColumnType(),  vizProp);
         if (mapping != null) {
           final DiscreteMapping discreteFn = (DiscreteMapping) fn;
           discreteFn.putAll(mapping);

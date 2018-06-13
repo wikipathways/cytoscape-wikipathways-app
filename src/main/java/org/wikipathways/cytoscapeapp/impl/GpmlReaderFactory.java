@@ -147,4 +147,7 @@ public interface GpmlReaderFactory {
 
   public void setClient(WPClient client);
   public WPClient getClient();
+
+public void setSemaphore();
+public void clearSemaphore();
 }

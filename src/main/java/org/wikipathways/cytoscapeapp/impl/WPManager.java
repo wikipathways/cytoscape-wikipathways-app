@@ -41,9 +41,9 @@ public class WPManager {
 	public CyNetworkViewManager getNetworkViewMgr() 	{	return viewMgr;	}
 	public CyServiceRegistrar getRegistrar() 			{	return registrar;	}
 	public BendFactory getBendFactory() 				{	return registrar.getService(BendFactory.class);	}
-	public Annots getAnnots() 						{	return annots;	}
+	public Annots getAnnots() 							{	return annots;	}
 	public HandleFactory getHandleFactory() 			{ 	return registrar.getService(HandleFactory.class);  }
-	public CyEventHelper getEventHelper() 			{ 	return registrar.getService(CyEventHelper.class);  }
+	public CyEventHelper getEventHelper() 				{ 	return registrar.getService(CyEventHelper.class);  }
 
 
 	//-----------------------------------------------------
