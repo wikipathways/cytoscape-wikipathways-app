@@ -70,19 +70,19 @@ public class DelayedVizProp {
 	{
 		try 
 		{
-//			mgr.turnOffEvents();
+			mgr.turnOffEvents();
 			for ( DelayedVizProp delayedProp : delayedProps) 
 			{
 				final Object value = delayedProp.value;
 				if (value == null) continue;
 
 				String propName = delayedProp.prop.getDisplayName();
+//				System.out.println(propName);
 				if ("Node Shape".equals(propName))
 					applyNodeShape(netView, delayedProps, mgr, delayedProp);
 		
 				if ("Edge Bend".equals(propName))
 					applyEdgeBend(netView, mgr, delayedProp);
-					
 				
 			      View<?> view = null;
 			      if (delayedProp.netObj instanceof CyNode) 
@@ -166,8 +166,8 @@ public class DelayedVizProp {
 
 	//--------------------------------------------------------------------------------
 	static final Map<CyEdge, PathwayElement>pvEdges = new HashMap<CyEdge, PathwayElement>();
-	public static void putPathwayElement(CyEdge e, PathwayElement pv) {		pvEdges.put(e, pv);	}
-	public static PathwayElement getPathwayElement(CyEdge e)			{		return pvEdges.get(e);	}
+	public static void putPathwayElement(CyEdge e, PathwayElement pv) 		{		pvEdges.put(e, pv);	}
+	public static PathwayElement getPathwayElement(CyEdge e)				{		return pvEdges.get(e);	}
 
 	//--------------------------------------------------------------------------------
 
@@ -356,62 +356,61 @@ public class DelayedVizProp {
 			view.setLockedValue(BasicVisualLexicon.NODE_HEIGHT, 2.0);
 		}
 	}
+
 	// --------------------------------------------------------------------------------
 	private static void applyEdgeBend(final CyNetworkView netView, WPManager mgr, final DelayedVizProp delayedProp) {
-		if (delayedProp.value == EdgeBendVisualProperty.DEFAULT_EDGE_BEND)	return;
 
-		try 
-		{
-			HandleFactory handleFactory = mgr.getHandleFactory();
-			// System.out.println("handleFactory: " + handleFactory.toString());
-			if (delayedProp.netObj != null) {
-				CyEdge edge = (CyEdge) delayedProp.netObj;
-				CyNode src = edge.getSource();
-				CyNode targ = edge.getTarget();
-				// if (src == null || src != null) return;
-				View<CyNode> srcView = netView.getNodeView(src);
-				View<CyNode> targView = netView.getNodeView(targ);
-				View<CyEdge> edgeView = netView.getEdgeView(edge);
-				Point2D.Double srcCenter = getNodePosition(srcView);
-				Point2D.Double targCenter = getNodePosition(targView);
-
-				Point2D.Double elbow = new Point2D.Double(srcCenter.getX(), targCenter.getY()); // TODO -- two  choices here!
-				//
-				// showPoint("src", srcCenter);
-				// showPoint("target", targCenter);
-				// showPoint("elbow", elbow);
-				//
-
-				// boolean isCurved = 1 == EdgeView.CURVED_LINES;
-				if (edgeView != null) {
-					Bend bend = edgeView.getVisualProperty(BasicVisualLexicon.EDGE_BEND);
-					// if (verbose)
-					// System.out.println("bend: " + bend.getAllHandles().size()
-					// + " handles " + (delayedProp.isLocked ? "LOCKED" : "UNLOCKED"));
-
-					List<Handle> handles = bend.getAllHandles();
-					if (handles.size() > 0) {
-						try {
-							
-							for (Handle h : handles)
-							{
-//								String s = h.getSerializableString();
-								h.defineHandle(netView, edgeView, elbow.getX(), elbow.getY());
-//								System.out.println("Handle at: " + s + " setting to (" + (int) elbow.getX()  + ", " + (int) elbow.getY() + ")");
-							}
-						} 
-						catch (IllegalStateException ex) {
-							System.err.println( "IllegalStateException " + ex.getMessage() + "  at  " + (int) elbow.getX() + ", " + (int) elbow.getY());
-						}
-					} else
-						handles.add(handleFactory.createHandle(netView, edgeView, elbow.getX(), elbow.getY()));
-				}
-			}
-		} catch (ClassCastException ex) {
-			System.out.println("->ClassCastException: " + delayedProp.netObj.getClass());
+		if (delayedProp.netObj == null) {
+			System.out.println("delayedProp.netObj == null");
+			return;
 		}
-	}
 
+		CyEdge edge = (CyEdge) delayedProp.netObj;
+		View<CyEdge> edgeView = netView.getEdgeView(edge);
+		if (edgeView == null) return;
+		Bend bend = edgeView.getVisualProperty(BasicVisualLexicon.EDGE_BEND);
+
+		if (bend == EdgeBendVisualProperty.DEFAULT_EDGE_BEND) {
+			System.out.println("DEFAULT_EDGE_BEND");
+			return;
+		}
+		System.out.println("dont applyEdgeBend " + delayedProp.value);
+//
+//		CyNode src = edge.getSource();
+//		CyNode targ = edge.getTarget();
+//		System.out.println("src " + src);
+//		System.out.println("targ " + targ);
+//		// if (src == null || src != null) return;
+//		View<CyNode> srcView = netView.getNodeView(src);
+//		View<CyNode> targView = netView.getNodeView(targ);
+//		Point2D.Double srcCenter = getNodePosition(srcView);
+//		Point2D.Double targCenter = getNodePosition(targView);
+//
+//		Point2D.Double elbow = new Point2D.Double(srcCenter.getX(), targCenter.getY()); // TODO -- two choices here!
+//
+//		showPoint("src", srcCenter);
+//		showPoint("target", targCenter);
+//		showPoint("elbow", elbow);
+//
+//		if (verbose)
+//			System.out.println("bend: " + bend.getAllHandles().size() + " handles "
+//					+ (delayedProp.isLocked ? "LOCKED" : "UNLOCKED"));
+//
+//		HandleFactory handleFactory = mgr.getHandleFactory();
+//		List<Handle> handles = bend.getAllHandles();
+//		if (handles.size() == 0)
+//			handles.add(handleFactory.createHandle(netView, edgeView, elbow.getX(), elbow.getY()));
+//		else try {
+//
+//				for (Handle h : handles) {
+//					h.defineHandle(netView, edgeView, elbow.getX(), elbow.getY());
+//					System.out.println(" setting to (" + (int) elbow.getX() + ", " + (int) elbow.getY() + ")");
+//				}
+//			} catch (IllegalStateException ex) {
+//				System.err.println("IllegalStateException " + ex.getMessage() + "  at  " + (int) elbow.getX() + ", " + (int) elbow.getY());
+//				ex.printStackTrace();
+//			}
+		}
 
 	//--------------------------------------------------------------------------------
 	private static String propTranslator(String inName) {

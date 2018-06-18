@@ -662,7 +662,9 @@ public class GpmlToPathway {
     public static final VizTableStore EDGE_END_ARROW        = new BasicVizTableStore("EndArrow",                      BasicExtracter.END_ARROW_STYLE, PV_ARROW_MAP,   BasicVisualLexicon.EDGE_TARGET_ARROW_SHAPE);
 
     //AST
-    public static final VizTableStore EDGE_CONNECTOR_TYPE     = new BasicVizTableStore("ConnectorType",               BasicExtracter.LINE_CONNECTOR_TYPE, PV_CONNECTORTYPE_MAP,   BasicVisualLexicon.EDGE_BEND);
+    public static final VizTableStore EDGE_CONNECTOR_TYPE     = new BasicVizTableStore("ConnectorType",             
+    		BasicExtracter.LINE_CONNECTOR_TYPE, PV_CONNECTORTYPE_MAP,  
+    		BasicVisualLexicon.EDGE_TOOLTIP);
     
 
     final VisualProperty<?>[] vizProps;
@@ -832,11 +834,9 @@ public class GpmlToPathway {
   static final TableStore TYPE_STORE = new BasicTableStore("Type", TYPE_EXTRACTER);
 
   private void convertDataNodes() {
-    for (final PathwayElement pvElem : pvPathway.getDataObjects()) {
-      if (!pvElem.getObjectType().equals(ObjectType.DATANODE))
-        continue;
-      convertDataNode(pvElem);
-    }
+    for (final PathwayElement pvElem : pvPathway.getDataObjects()) 
+      if (pvElem.getObjectType().equals(ObjectType.DATANODE))
+    	  convertDataNode(pvElem);
   }
 
 
@@ -1148,8 +1148,6 @@ public class GpmlToPathway {
   }
 
   private void convertLabel(final PathwayElement pvLabel) {
-    // TODO: refactor this as an annotation
-	// comment Tina: not sure if they can all be replaced by annotations because they are often connected with data nodes
 
     final CyNode cyNode = cyNet.addNode();
     pvToCyNodes.put(pvLabel, cyNode);
@@ -1196,7 +1194,7 @@ public class GpmlToPathway {
 		for (final MAnchor pvAnchor : pvElem.getMAnchors()) {
 			final CyNode cyNode = cyNet.addNode();
 			final Point2D position = pvLine.getConnectorShape().fromLineCoordinate(pvAnchor.getPosition());
-//			System.out.println("\nAnchor at " + cyNode.getSUID() + "  --------");
+			System.out.println("\nAnchor at " + cyNode.getSUID() + "  --------");
 			pvToCyNodes.put(pvAnchor, cyNode);
 			assignAnchorVizStyle(cyNode, position, pvLine.getColor());
 //			System.out.println("--------");
@@ -1208,7 +1206,7 @@ public class GpmlToPathway {
     cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_Y_LOCATION, position.getY(), false));
     cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_Z_LOCATION, 10001.5, false));
     cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_FILL_COLOR, color, true));
-//    cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_BORDER_WIDTH, 20.0, true));
+    cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_BORDER_WIDTH, 20.0, true));
     cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_WIDTH, 1.0, true));
     cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_HEIGHT, 1.0, true));
 //    cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_TRANSPARENCY, 128, true));  // AST
@@ -1287,8 +1285,10 @@ public class GpmlToPathway {
 			bend = makeCurvedEdgeBend(networkView, cyEdge, pvLine);
 		else if ("Elbow".equals(connectorType))
 			bend = makeElbowEdgeBend(networkView, cyEdge, makeSegments(pvLine, cyEdge));
-
-		DelayedVizProp prop = new DelayedVizProp(cyEdge, BasicVisualLexicon.EDGE_BEND, bend, false);
+boolean bypass = false;
+if (bypass) return;
+System.out.println("storing " + bend);
+DelayedVizProp prop = new DelayedVizProp(cyEdge, BasicVisualLexicon.EDGE_BEND, bend, true);
 		cyDelayedVizProps.add(prop);
 	}
 	
@@ -1344,39 +1344,48 @@ public class GpmlToPathway {
 	String[] sides = {  "North", "East", "South", "West" };
 static boolean verbose = true;
 //--------------------------------------------------------------------
+// create a Bend object with a list of handles when the curve crosses
+
 	private Bend makeCurvedEdgeBend(CyNetworkView networkView, CyEdge edge, PathwayElement pvLine) {
 	    BendFactory factory = manager.getBendFactory();		
-		View<CyEdge> ev = networkView.getEdgeView(edge);
+		View<CyEdge> edgeView = networkView.getEdgeView(edge);
+		if (edgeView == null)    	{
+			System.out.println("edgeView == null"); 
+			return null;
+		}
+
 	    Bend bend = factory.createBend();
 	    HandleFactory facto = manager.getHandleFactory();
-//	    MPoint start = pvLine.getMStart();
-//	    MPoint end = pvLine.getMEnd();
-//		if (verbose)	
-//			System.out.println("makeCurvedEdgeBend start at " + printPoint(start) + ", end at " + printPoint(end));
- 
+	    MPoint start = pvLine.getMStart();
+	    MPoint end = pvLine.getMEnd();
 	    int sz = segments.size();
+		if (verbose)	
+			System.out.println("makeCurvedEdgeBend with " + sz + "handles, and start at " + printPoint(start) + ", end at " + printPoint(end));
+ 
 	    for (int i=0; i<sz; i++)
 	    {
 	    	Segment seg = segments.get(i);
 	    	Point2D centerPoint  = centerPoint(seg.start, seg.end);	
-	    	Handle h = facto.createHandle(networkView, ev,  centerPoint.getX(), centerPoint.getY());
-//		  if (verbose)	
-//			  System.out.println("adding handle at " + printPoint( centerPoint));
+	    	Handle h = facto.createHandle(networkView, edgeView,  centerPoint.getX(), centerPoint.getY());
+		  if (verbose)	
+			  System.out.println("adding handles at " + printPoint( centerPoint));
 	    	bend.getAllHandles().add(h);
 	    }
+	    edgeView.setLockedValue(BasicVisualLexicon.EDGE_BEND, bend);
+		if (verbose)	
+			System.out.println("locked ccurve bend");
 		return bend;
 	}
 
-
+// this constructs a bend with each handle in the list twice, to make the angle sharp
 
 	private Bend makeElbowEdgeBend(CyNetworkView networkView, CyEdge edge, List<Segment> segments) {
-//		System.out.println("makeElbowEdgeBend"); 
    BendFactory factory = manager.getBendFactory();	
 	if (networkView == null)    	{
 //		System.out.println("networkView == null"); 
 		return null;
 	}
-	View<CyEdge> ev = networkView.getEdgeView(edge);
+	View<CyEdge> edgeView = networkView.getEdgeView(edge);
     Bend bend = factory.createBend();
     HandleFactory facto = manager.getHandleFactory();
     
@@ -1384,13 +1393,20 @@ static boolean verbose = true;
     for (int i=0; i<sz-1; i++)
     {
     	Segment seg = segments.get(i);
-    	Handle h = facto.createHandle(networkView, ev,  seg.end.getX(), seg.end.getY());		// put in 2 handles for a angled bend
-	    Handle j = facto.createHandle(networkView, ev,  seg.end.getX(), seg.end.getY());
+    	Handle h = facto.createHandle(networkView, edgeView,  seg.end.getX(), seg.end.getY());		// put in 2 handles for a angled bend
+	    Handle j = facto.createHandle(networkView, edgeView,  seg.end.getX(), seg.end.getY());
 	    bend.getAllHandles().add(h);
 	    bend.getAllHandles().add(j);
-//	    
-//	    System.out.println("adding two handles at " + seg);
+		if (verbose)		System.out.println("makeElbowEdgeBend with 2 handles at " + seg); 
+
+//		if (verbose)	
+//			  System.out.println("adding two handles at " + seg);
     }
+	if (edgeView != null)    	{
+	    edgeView.setLockedValue(BasicVisualLexicon.EDGE_BEND, bend);
+//		System.out.println("edgeView == null"); 
+//		return null;
+	}
 	return bend;
 }
 //--------------------------------------------------------------------

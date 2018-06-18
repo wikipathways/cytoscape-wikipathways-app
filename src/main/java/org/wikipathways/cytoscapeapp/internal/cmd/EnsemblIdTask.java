@@ -30,19 +30,20 @@ public class EnsemblIdTask extends AbstractTask {
    private String species;
    private CyServiceRegistrar registrar;
    private CyTable table;
+   boolean verbose = false;
 
 	public EnsemblIdTask(final CyNetwork network, final CyServiceRegistrar reg, String organism) {
 		this.network = network;
 		table = network.getDefaultNodeTable();
 		registrar = reg;
-		  System.out.println("create EnsemblIdTask");
+		if (verbose)  System.out.println("create EnsemblIdTask");
 		species = organism;
 	}
 
 	static String ENSEMBL_COLUMN = "Ensembl";
 
 	public void run(TaskMonitor monitor) {
-		System.out.println("running EnsemblIdColumnTask " + species);
+		if (verbose) System.out.println("running EnsemblIdColumnTask " + species);
 		if (bridgeDbAvailable()) // ensemblColumn == null &&
 			buildIdMapBatch();
 	}
@@ -60,17 +61,17 @@ public class EnsemblIdTask extends AbstractTask {
 		CyColumn ensemblColumn  = table.getColumn(ENSEMBL_COLUMN);
 		if  (ensemblColumn == null)
 			table.createColumn(ENSEMBL_COLUMN, String.class, true);
-		System.out.println("\nbuildIdMapBatch\n");
+		if (verbose) System.out.println("\nbuildIdMapBatch\n");
 		List<CyRow> rows = table.getAllRows();
 		if (rows.isEmpty()) 
 		{
-			System.out.println("rows.isEmpty() ");
+			if (verbose) System.out.println("rows.isEmpty() ");
 			return;
 		}
 		CyRow first = rows.get(0);
 		String firstSource = first.get("XRefDataSource", String.class);
-		System.out.println("firstXRefDataSource: " + firstSource);
-		boolean homogenousSourced = true;
+		if (verbose) System.out.println("firstXRefDataSource: " + firstSource);
+//		boolean homogenousSourced = true;
 		for (CyRow row : table.getAllRows())
 		{
 			Long suid = row.get("SUID", Long.class);
@@ -85,19 +86,19 @@ public class EnsemblIdTask extends AbstractTask {
 			
 //			if (!goodTypes.contains(wptype)) continue;
 			
-			homogenousSourced &= src.equals(firstSource);
+//			homogenousSourced &= src.equals(firstSource);
 			String record = id + "\t" + src + "\t" + type  + "\t" + name;
 			map.put(suid, record);
 			map2.put(suid, type);
 			if (!sources.contains(src))
 				sources.add(src);
-			System.out.println(suid + ": " + id + "  \t" + src + "\t" + type + "\t" + name);
+//			System.out.println(suid + ": " + id + "  \t" + src + "\t" + type + "\t" + name);
 		}
 		String[] goodTypeArray = { "Gene", "GeneProduct", "Rna	", "Protein" };
 		List<String> goodTypes = Arrays.asList(goodTypeArray);
-		System.out.println("homogenousSourced: " + homogenousSourced + "\n\n");
-		if (!homogenousSourced)
-		{
+//		System.out.println("homogenousSourced: " + homogenousSourced + "\n\n");
+//		if (!homogenousSourced)
+//		{
 			for (String s : sources)
 			{
 				if (s.equals("Ensembl")) continue;   // no need to translate those
@@ -125,16 +126,19 @@ public class EnsemblIdTask extends AbstractTask {
 						applyIdMap(resultsmap);
 				}
 		}
-	}
-  
+//	}
+//  
 }
 //-------------------------------------------------------------------
 	private Map<String, String> translateSet(String src, Set<String> geneset) {
 		
 		Map m = new HashMap<String, String>();
-		System.out.println( "translateSet " + src + " " + species);
-		 for (String a : geneset)
-			 System.out.println(a);					
+		if (verbose) 
+		{
+			System.out.println( "translateSet " + src + " " + species);
+			 for (String a : geneset)
+				 System.out.println(a);					
+		}
 
 			Set<String> matched_ids = new TreeSet<String>();
 			Set<String> unmatched_ids = new TreeSet<String>();
@@ -155,7 +159,7 @@ public class EnsemblIdTask extends AbstractTask {
 				});
 			}
 
-			System.out.println( "translated " + src + " to Ensembl: " + matched_ids.size() + " / " + ( matched_ids.size() + unmatched_ids.size()) + " matches");			
+//			System.out.println( "translated " + src + " to Ensembl: " + matched_ids.size() + " / " + ( matched_ids.size() + unmatched_ids.size()) + " matches");			
 		try
 			{
 //these calls to registrar all work fine
@@ -194,7 +198,7 @@ public class EnsemblIdTask extends AbstractTask {
 	}
 
 	private void applyIdMap(Map<String, String> resultsmap) {
-		System.out.println( "applyIdMap " + resultsmap);
+		if (verbose) System.out.println( "applyIdMap " + resultsmap);
 		if (resultsmap.size() > 0)
 		{
 			for (CyRow row : table.getAllRows())
