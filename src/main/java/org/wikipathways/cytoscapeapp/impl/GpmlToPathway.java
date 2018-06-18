@@ -1285,10 +1285,10 @@ public class GpmlToPathway {
 			bend = makeCurvedEdgeBend(networkView, cyEdge, pvLine);
 		else if ("Elbow".equals(connectorType))
 			bend = makeElbowEdgeBend(networkView, cyEdge, makeSegments(pvLine, cyEdge));
-boolean bypass = false;
-if (bypass) return;
-System.out.println("storing " + bend);
-DelayedVizProp prop = new DelayedVizProp(cyEdge, BasicVisualLexicon.EDGE_BEND, bend, true);
+
+		if (verbose) 
+			System.out.println("storing " + bend + " with " + bend.getAllHandles().size() + "hanldes");
+		DelayedVizProp prop = new DelayedVizProp(cyEdge, BasicVisualLexicon.EDGE_BEND, bend, true);
 		cyDelayedVizProps.add(prop);
 	}
 	
@@ -1349,11 +1349,6 @@ static boolean verbose = true;
 	private Bend makeCurvedEdgeBend(CyNetworkView networkView, CyEdge edge, PathwayElement pvLine) {
 	    BendFactory factory = manager.getBendFactory();		
 		View<CyEdge> edgeView = networkView.getEdgeView(edge);
-		if (edgeView == null)    	{
-			System.out.println("edgeView == null"); 
-			return null;
-		}
-
 	    Bend bend = factory.createBend();
 	    HandleFactory facto = manager.getHandleFactory();
 	    MPoint start = pvLine.getMStart();
@@ -1371,7 +1366,7 @@ static boolean verbose = true;
 			  System.out.println("adding handles at " + printPoint( centerPoint));
 	    	bend.getAllHandles().add(h);
 	    }
-	    edgeView.setLockedValue(BasicVisualLexicon.EDGE_BEND, bend);
+	    if (edgeView != null)   edgeView.setLockedValue(BasicVisualLexicon.EDGE_BEND, bend);
 		if (verbose)	
 			System.out.println("locked ccurve bend");
 		return bend;
@@ -1382,7 +1377,7 @@ static boolean verbose = true;
 	private Bend makeElbowEdgeBend(CyNetworkView networkView, CyEdge edge, List<Segment> segments) {
    BendFactory factory = manager.getBendFactory();	
 	if (networkView == null)    	{
-//		System.out.println("networkView == null"); 
+		System.out.println("networkView == null"); 
 		return null;
 	}
 	View<CyEdge> edgeView = networkView.getEdgeView(edge);
@@ -1402,11 +1397,11 @@ static boolean verbose = true;
 //		if (verbose)	
 //			  System.out.println("adding two handles at " + seg);
     }
-	if (edgeView != null)    	{
-	    edgeView.setLockedValue(BasicVisualLexicon.EDGE_BEND, bend);
-//		System.out.println("edgeView == null"); 
-//		return null;
-	}
+//	if (edgeView != null)    	{
+//	    edgeView.setLockedValue(BasicVisualLexicon.EDGE_BEND, bend);
+////		System.out.println("edgeView == null"); 
+////		return null;
+//	}
 	return bend;
 }
 //--------------------------------------------------------------------

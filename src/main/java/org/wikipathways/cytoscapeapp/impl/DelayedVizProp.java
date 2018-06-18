@@ -368,13 +368,14 @@ public class DelayedVizProp {
 		CyEdge edge = (CyEdge) delayedProp.netObj;
 		View<CyEdge> edgeView = netView.getEdgeView(edge);
 		if (edgeView == null) return;
-		Bend bend = edgeView.getVisualProperty(BasicVisualLexicon.EDGE_BEND);
-
-		if (bend == EdgeBendVisualProperty.DEFAULT_EDGE_BEND) {
-			System.out.println("DEFAULT_EDGE_BEND");
-			return;
-		}
-		System.out.println("dont applyEdgeBend " + delayedProp.value);
+		if (!( delayedProp.value instanceof Bend))  return;
+		Bend bend = (Bend) delayedProp.value;
+		edgeView.setLockedValue(BasicVisualLexicon.EDGE_BEND, bend);
+//		if (bend == EdgeBendVisualProperty.DEFAULT_EDGE_BEND) {
+//			System.out.println("DEFAULT_EDGE_BEND");
+//			return;
+//		}
+//		System.out.println("dont applyEdgeBend " + delayedProp.value);
 //
 //		CyNode src = edge.getSource();
 //		CyNode targ = edge.getTarget();
