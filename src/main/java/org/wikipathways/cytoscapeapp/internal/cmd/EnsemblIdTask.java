@@ -26,16 +26,16 @@ import org.wikipathways.cytoscapeapp.internal.cmd.mapping.MappingSource;
 //-----------------------------------------------------------------------
 
 public class EnsemblIdTask extends AbstractTask {
-   private CyNetwork network;
+//   private CyNetwork network;
    private String species;
-   private CyServiceRegistrar registrar;
+//   private CyServiceRegistrar registrar;
    private CyTable table;
    boolean verbose = false;
 
 	public EnsemblIdTask(final CyNetwork network, final CyServiceRegistrar reg, String organism) {
-		this.network = network;
+//		this.network = network;
 		table = network.getDefaultNodeTable();
-		registrar = reg;
+//		registrar = reg;
 		if (verbose)  System.out.println("create EnsemblIdTask");
 		species = organism;
 	}
@@ -140,16 +140,16 @@ public class EnsemblIdTask extends AbstractTask {
 				 System.out.println(a);					
 		}
 
-			Set<String> matched_ids = new TreeSet<String>();
-			Set<String> unmatched_ids = new TreeSet<String>();
+//			Set<String> matched_ids = new TreeSet<String>();
+//			Set<String> unmatched_ids = new TreeSet<String>();
 			Map<String, String> res = new HashMap<String, String>();
 	 
 			try {
 				final BridgeDbIdMapper map = new BridgeDbIdMapper();
 				MappingSource source = MappingSource.nameLookup(src);
 				res = map.map(geneset, source.system(), "En", species, species);
-				matched_ids = map.getMatchedIds();
-				unmatched_ids = map.getUnmatchedIds();
+//				matched_ids = map.getMatchedIds();
+//				unmatched_ids = map.getUnmatchedIds();
 			} catch (final Exception e) {
 				SwingUtilities.invokeLater(new Runnable() {
 					@Override
