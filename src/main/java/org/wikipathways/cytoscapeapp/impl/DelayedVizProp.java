@@ -144,11 +144,17 @@ public class DelayedVizProp {
 			while (shapes.size() > 0)
 			{
 				ShapeAnnotation shape = shapes.remove(shapes.size() - 1);
-				String s = String.format("ShapeAnnotation   %s %s (%s, %s)", shape.getName(), shape.getShapeType(), shape.X, shape.Y);
-				System.out.println(s);
 				shape.setCanvas(Annotation.BACKGROUND);
-				shape.removeAnnotation();
-				wpManagerInstance.getAnnots().addShape(shape);
+				String s = String.format("ShapeAnnotation   %s %s %s", shape.getName(), shape.getShapeType(), shape.getCanvasName());
+				System.out.println(s);
+//				shape.removeAnnotation();
+//				try {
+//					Thread.sleep(500);
+//				} catch (InterruptedException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//				wpManagerInstance.getAnnots().addShape(shape);
 			}
 		}}
 				);
