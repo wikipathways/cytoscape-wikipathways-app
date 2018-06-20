@@ -145,15 +145,10 @@ public class DelayedVizProp {
 			{
 				ShapeAnnotation shape = shapes.remove(shapes.size() - 1);
 				shape.setCanvas(Annotation.BACKGROUND);
-				String s = String.format("ShapeAnnotation   %s %s %s", shape.getName(), shape.getShapeType(), shape.getCanvasName());
-				System.out.println(s);
-//				shape.removeAnnotation();
-//				try {
-//					Thread.sleep(500);
-//				} catch (InterruptedException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
+//				String s = String.format("ShapeAnnotation   %s %s %s", shape.getName(), shape.getShapeType(), shape.getCanvasName());
+//				System.out.println(s);
+				// BUG -- this causes a ~ 1" vertical offset of all shapes
+//				shape.removeAnnotation();			// remove and readd the annotation to register the canvas change 
 //				wpManagerInstance.getAnnots().addShape(shape);
 			}
 		}}
