@@ -25,10 +25,8 @@ import org.cytoscape.view.model.VisualProperty;
 import org.cytoscape.view.presentation.annotations.Annotation;
 import org.cytoscape.view.presentation.annotations.ShapeAnnotation;
 import org.cytoscape.view.presentation.property.BasicVisualLexicon;
-import org.cytoscape.view.presentation.property.EdgeBendVisualProperty;
 import org.cytoscape.view.presentation.property.values.Bend;
-import org.cytoscape.view.presentation.property.values.Handle;
-import org.cytoscape.view.presentation.property.values.HandleFactory;
+import org.pathvisio.core.model.IShape;
 import org.pathvisio.core.model.PathwayElement;
 import org.wikipathways.cytoscapeapp.CellShapes;
 
@@ -64,7 +62,7 @@ public class DelayedVizProp {
     this.value = value;
     this.isLocked = isLocked;
   }
-	static boolean verbose = true;
+	static boolean verbose = false;
 	public String toString() {  return prop.getDisplayName() + ": " + value.toString(); }
 	public static void applyAll(final CyNetworkView netView,final Iterable<DelayedVizProp> delayedProps, WPManager mgr) 
 	{
@@ -220,7 +218,7 @@ public class DelayedVizProp {
 			}
 		}
 		String propvalue = delayedProp.value.toString();
-		System.out.println(String.format("Size 0f %s: %.2f x %.2f", propvalue, wid ,hght));
+//		System.out.println(String.format("Size 0f %s: %.2f x %.2f", propvalue, wid ,hght));
 
 //		if ("Round Rectangle".equals(propvalue))
 //		{
@@ -250,6 +248,13 @@ public class DelayedVizProp {
 				wid = hght;
 				hght = t;
 			}
+//			double cx = arc.getBounds2D().getCenterX();
+//			double cy = arc.getBounds2D().getCenterY();
+////			double startRotation = getRotation(src);
+//			AffineTransform rotater = new AffineTransform();
+//			rotater.rotate(startRotation, cx, cy);
+////			arc.transform(rotater);
+//			mAnnotation.setCustomShape(arc);
 		}
 		else
 		{
@@ -290,8 +295,9 @@ public class DelayedVizProp {
 			mAnnotation.setBorderColor(stroke);
 			mAnnotation.setBorderWidth(elem.getLineThickness());
 			Color fill = elem.getFillColor(); 
+			if ("Brace".equals(propvalue))
+				fill = Color.white;
 			mAnnotation.setFillColor(fill);
-
 			double relx = 0;
 			double rely = -1;
 

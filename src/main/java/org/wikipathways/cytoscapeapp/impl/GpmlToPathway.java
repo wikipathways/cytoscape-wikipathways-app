@@ -1192,7 +1192,7 @@ public class GpmlToPathway {
 		for (final MAnchor pvAnchor : pvElem.getMAnchors()) {
 			final CyNode cyNode = cyNet.addNode();
 			final Point2D position = pvLine.getConnectorShape().fromLineCoordinate(pvAnchor.getPosition());
-			System.out.println("\nAnchor at " + cyNode.getSUID() + "  --------");
+//			System.out.println("\nAnchor at " + cyNode.getSUID() + "  --------");
 			pvToCyNodes.put(pvAnchor, cyNode);
 			assignAnchorVizStyle(cyNode, position, pvLine.getColor());
 //			System.out.println("--------");
@@ -1203,10 +1203,12 @@ public class GpmlToPathway {
     cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_X_LOCATION, position.getX(), false));
     cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_Y_LOCATION, position.getY(), false));
     cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_Z_LOCATION, 10001.5, false));
-    cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_FILL_COLOR, color, true));
-    cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_BORDER_WIDTH, 20.0, true));
+    cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_FILL_COLOR, color, false));
+    cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_BORDER_WIDTH, 2.0, false));
     cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_WIDTH, 1.0, true));
     cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_HEIGHT, 1.0, true));
+    cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_SIZE, 1.0, true));
+    cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_SHAPE, NodeShapeVisualProperty.ROUND_RECTANGLE, true));
 //    cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_TRANSPARENCY, 128, true));  // AST
   }
   
@@ -1340,7 +1342,7 @@ public class GpmlToPathway {
 	}
 
 	String[] sides = {  "North", "East", "South", "West" };
-static boolean verbose = true;
+static boolean verbose = false;
 //--------------------------------------------------------------------
 // create a Bend object with a list of handles when the curve crosses
 

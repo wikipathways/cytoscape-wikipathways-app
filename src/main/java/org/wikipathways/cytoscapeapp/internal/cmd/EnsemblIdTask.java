@@ -71,130 +71,82 @@ public class EnsemblIdTask extends AbstractTask {
 		CyRow first = rows.get(0);
 		String firstSource = first.get("XRefDataSource", String.class);
 		if (verbose) System.out.println("firstXRefDataSource: " + firstSource);
-//		boolean homogenousSourced = true;
+	
 		for (CyRow row : table.getAllRows())
 		{
 			Long suid = row.get("SUID", Long.class);
 			String id = row.get("XRefId", String.class);
 			String src = row.get("XRefDataSource", String.class);
 			String name = row.get("name", String.class);
-//			String wptype = row.get("WP.type", String.class);
+	//			String wptype = row.get("WP.type", String.class);
 			String type = row.get("Type", String.class);
 			
 			if (suid == null || id == null || src == null) continue;
 			if (map.get(suid) != null) continue;
 			
-//			if (!goodTypes.contains(wptype)) continue;
+	//			if (!goodTypes.contains(wptype)) continue;
 			
-//			homogenousSourced &= src.equals(firstSource);
+	//			homogenousSourced &= src.equals(firstSource);
 			String record = id + "\t" + src + "\t" + type  + "\t" + name;
 			map.put(suid, record);
 			map2.put(suid, type);
 			if (!sources.contains(src))
 				sources.add(src);
-//			System.out.println(suid + ": " + id + "  \t" + src + "\t" + type + "\t" + name);
+	//			System.out.println(suid + ": " + id + "  \t" + src + "\t" + type + "\t" + name);
 		}
 		String[] goodTypeArray = { "Gene", "GeneProduct", "Rna	", "Protein" };
 		List<String> goodTypes = Arrays.asList(goodTypeArray);
-//		System.out.println("homogenousSourced: " + homogenousSourced + "\n\n");
-//		if (!homogenousSourced)
-//		{
-			for (String s : sources)
+		for (String s : sources)
+		{
+//			if (s.equals("Ensembl")) continue;   // no need to translate those, but we can't ignore files that only have Ensembl
+			Set<String> geneset = new HashSet<String>();
+			boolean isEmpty = true;
+			for (Long suid : map.keySet())
 			{
-				if (s.equals("Ensembl")) continue;   // no need to translate those
-				Set<String> geneset = new HashSet<String>();
-				boolean isEmpty = true;
-//				System.out.println(s);
-				for (Long suid : map.keySet())
+				String fields = map.get(suid);
+				String wpType = map2.get(suid);
+				boolean hit = fields.contains(s) && goodTypes.contains(wpType);
+				if (hit)
 				{
-					String fields = map.get(suid);
-					String wpType = map2.get(suid);
-					boolean hit = fields.contains(s) && goodTypes.contains(wpType);
-					
-//					System.out.println((hit ? "Hit  " : "Miss ") + fields + " contains  " + s);
-					if (hit)
-					{
-						String[] flds = fields.split("\t");
-						geneset.add(flds[0]);
-						isEmpty = false;
-					}
+					String[] flds = fields.split("\t");
+					geneset.add(flds[0]);
+					isEmpty = false;
 				}
-				if (!isEmpty)
-				{
-					Map<String, String> resultsmap = translateSet(s, geneset);
-					if (resultsmap != null)
-						applyIdMap(resultsmap);
-				}
+			}
+			if (!isEmpty)
+			{
+				Map<String, String> resultsmap = translateSet(s, geneset);
+				if (resultsmap != null)
+					applyIdMap(resultsmap);
+			}
 		}
-//	}
-//  
-}
+	}
 //-------------------------------------------------------------------
 	private Map<String, String> translateSet(String src, Set<String> geneset) {
 		
-		Map m = new HashMap<String, String>();
-		if (verbose) 
-		{
-			System.out.println( "translateSet " + src + " " + species);
-			 for (String a : geneset)
-				 System.out.println(a);					
-		}
-
-//			Set<String> matched_ids = new TreeSet<String>();
-//			Set<String> unmatched_ids = new TreeSet<String>();
-			Map<String, String> res = new HashMap<String, String>();
-	 
-			try {
-				final BridgeDbIdMapper map = new BridgeDbIdMapper();
-				MappingSource source = MappingSource.nameLookup(src);
-				res = map.map(geneset, source.system(), "En", species, species);
-//				matched_ids = map.getMatchedIds();
-//				unmatched_ids = map.getUnmatchedIds();
-			} catch (final Exception e) {
-				SwingUtilities.invokeLater(new Runnable() {
-					@Override
-					public void run() {
-						JOptionPane.showMessageDialog(null, e.getMessage(), "ID Mapping Error", JOptionPane.ERROR_MESSAGE);
-					}
-				});
-			}
-
-//			System.out.println( "translated " + src + " to Ensembl: " + matched_ids.size() + " / " + ( matched_ids.size() + unmatched_ids.size()) + " matches");			
-		try
+		Map<String, String> result = new HashMap<String, String>();
+		try {
+			MappingSource source = MappingSource.nameLookup(src);
+			if ("Ensembl".equals(src))
 			{
-//these calls to registrar all work fine
-//	final Font font = registrar.getService(IconManager.class).getIconFont(18.0f);
-//	final CyNetworkManager networkManager = registrar.getService(CyNetworkManager.class);
-//	TableColumnTaskFactory  factory = registrar.getService(TableColumnTaskFactory.class);
-//	TaskFactory  factory3 = registrar.getService(TaskFactory.class);
-
-//about to throw   java.lang.NoClassDefFoundError: org/cytoscape/idmapper/task/MapColumnCommandTask
-//	MapColumnCommandTask  factory2 = registrar.getService(MapColumnCommandTask.class);
-
-			
-			
-			
-			
-			
-				
-//				 System.out.println("factory: " + factory);					
-				//						 System.out.println("factory2: " + factory2);					
-//				if (factory != null)
-				{
-//					CyColumn col = new CyColumn();
-//					factory.createTaskIterator(column)
-				}
-//				final BridgeDbIdMapper mapp = new BridgeDbIdMapper();
-//				 Map<String, IdMapping>  res = mapp.map(builder, s, MappingSource.Ensembl.name(), species, species);
-//				 System.out.println("Results");
-//				 for (String a : res.keySet())
-//					 System.out.println(a + ": " + res.get(a));					
-			// System.out.println(a + ": " + res.get(a));
-		} catch (Exception e) {
-			System.out.println("exception in EnsemblIdColumnTask: " + e.getMessage());
-			// e.printStackTrace();
+				for (String gene : geneset)
+					result.put(gene,  gene); 
+			}
+			else if (source != null)
+			{
+				final BridgeDbIdMapper map = new BridgeDbIdMapper();
+				result = map.map(geneset, source.system(), "En", species, species);
+			}
+		} catch (final NullPointerException e) {
+			SwingUtilities.invokeLater(new Runnable() {
+				@Override public void run() { 
+					String msg = e.getMessage();
+					if (msg == null || msg.length() == 0)
+						msg = "Unrecognized Source: " + src;
+					JOptionPane.showMessageDialog(null, msg, "Mapping Error", JOptionPane.ERROR_MESSAGE); }
+			});
 		}
-		return res;
+		return result;
 	}
 
 	private void applyIdMap(Map<String, String> resultsmap) {
