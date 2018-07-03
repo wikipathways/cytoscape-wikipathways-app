@@ -124,7 +124,7 @@ public class DelayedVizProp {
 				}
 			}
 			wpManagerInstance = mgr;
-			postProcessShapes();
+//			postProcessShapes();
 		}
 		catch (Exception e) {		} 
 		finally 
@@ -138,6 +138,7 @@ public class DelayedVizProp {
 
 	static private void postProcessShapes()
 	{
+		System.out.println("Postprocessing");
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
@@ -145,16 +146,12 @@ public class DelayedVizProp {
 			{
 				ShapeAnnotation shape = shapes.remove(shapes.size() - 1);
 				shape.setCanvas(Annotation.BACKGROUND);
-//				String s = String.format("ShapeAnnotation   %s %s %s", shape.getName(), shape.getShapeType(), shape.getCanvasName());
-//				System.out.println(s);
 				// BUG -- this causes a ~ 1" vertical offset of all shapes
-//				shape.removeAnnotation();			// remove and readd the annotation to register the canvas change 
-//				wpManagerInstance.getAnnots().addShape(shape);
+				shape.removeAnnotation();			// remove and readd the annotation to register the canvas change 
+				wpManagerInstance.getAnnots().addShape(shape);
 			}
 		}}
 				);
-		
-		
 	}
 	static final List<ShapeAnnotation> shapes = new ArrayList<ShapeAnnotation>();
 	//--------------------------------------------------------------------------------
@@ -336,6 +333,7 @@ public class DelayedVizProp {
 			{
 				if (verbose) System.out.println(String.format("moving annotation to : %4.1f , %4.1f", x, y));
 				mAnnotation.moveAnnotation(new Point2D.Double(x, y));
+				mAnnotation.setCanvas(Annotation.BACKGROUND);
 				shapes.add(mAnnotation);
 			}
 			// view.setLockedValue(prop, 0.);

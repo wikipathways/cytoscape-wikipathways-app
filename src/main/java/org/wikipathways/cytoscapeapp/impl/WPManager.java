@@ -60,7 +60,7 @@ public class WPManager {
 	}
 	//-----------------------------------------------------
 	// this code SHOULD disable event processing during a lengthy import.  Not sure it works!
-	boolean bypass = true;
+	boolean bypass = false;
 
 	public void turnOnEvents() {
 		if (bypass) return;
