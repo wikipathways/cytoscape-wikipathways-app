@@ -7,14 +7,14 @@ import java.awt.geom.GeneralPath;
 public class CellShapes {
 	//--------------------------------------------------------------------------------
 	static public  GeneralPath getPath(String propvalue) {
-		if ("Mitochondria".equals(propvalue)) 			  		return makeMitochondria();
+		if ("Mitochondria".equals(propvalue)) 			  			return makeMitochondria();
 		if ("Endoplasmic Reticulum".equals(propvalue))  			return makeER();
 		if ("Sarcoplasmic Reticulum".equals(propvalue)) 			return makeSR();
 		if ("Golgi Apparatus".equals(propvalue)) 					return makeGolgi();
 		if ("Brace".equals(propvalue))  							return makeBrace();
-		if ("Triangle".equals(propvalue))  						return makeTriangle();
-		if ("Cell".equals(propvalue))                             return makeCell();
-		if ("Nucleus".equals(propvalue))                          return makeNucleus();
+		if ("Triangle".equals(propvalue))  							return makeTriangle();
+		if ("Cell".equals(propvalue))                             	return makeCell();
+		if ("Nucleus".equals(propvalue))                          	return makeNucleus();
 		return null;
 	}
 	public static Shape getShape(String propvalue) {
@@ -296,12 +296,12 @@ static public GeneralPath makeBrace()
 
 static public GeneralPath makeTriangle()
 {
-//	System.out.println("--------------makeTriangle--------------" );
+	System.out.println("--------------makeTriangle--------------" );
 	GeneralPath path = new GeneralPath();
 	path.moveTo(0, 4);
 	path.lineTo(0, -4);
-	path.lineTo(16, 0);
-	path.lineTo(0, 4);
+	path.lineTo(8, 0);
+//	path.lineTo(0, 4);
 	path.closePath();
 	return path;
 }

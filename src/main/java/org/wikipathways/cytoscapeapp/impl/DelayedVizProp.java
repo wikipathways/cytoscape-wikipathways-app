@@ -6,13 +6,12 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Arc2D;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.swing.SwingUtilities;
 
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyIdentifiable;
@@ -26,7 +25,6 @@ import org.cytoscape.view.presentation.annotations.Annotation;
 import org.cytoscape.view.presentation.annotations.ShapeAnnotation;
 import org.cytoscape.view.presentation.property.BasicVisualLexicon;
 import org.cytoscape.view.presentation.property.values.Bend;
-import org.pathvisio.core.model.IShape;
 import org.pathvisio.core.model.PathwayElement;
 import org.wikipathways.cytoscapeapp.CellShapes;
 
@@ -151,7 +149,7 @@ public class DelayedVizProp {
 //		}}
 //				);
 //	}
-	static final List<ShapeAnnotation> shapes = new ArrayList<ShapeAnnotation>();
+//	static final List<ShapeAnnotation> shapes = new ArrayList<ShapeAnnotation>();
 	//--------------------------------------------------------------------------------
 	static final List<Long> states = new ArrayList<Long>();
 	public static void saveState(Long suid) 	{		states.add(suid);	}
@@ -178,6 +176,7 @@ public class DelayedVizProp {
 	//--------------------------------------------------------------------------------
 
 	private static void applyNodeShape(final CyNetworkView netView,final Iterable<DelayedVizProp> delayedProps, WPManager mgr, DelayedVizProp delayedProp) 		{
+		
 		final Map<String,String> map = new HashMap<String,String>();
 		CyNode src = (CyNode) delayedProp.netObj;
 		CyRow row = netView.getModel().getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS).getRow(src.getSUID());
@@ -193,10 +192,8 @@ public class DelayedVizProp {
 		double hght = 0;
 		double x = Double.NaN;
 		double y = Double.NaN;
-//		double z = Double.NaN;
-//		System.out.println("applyNodeShape");
+
 		View<CyNode> view = netView.getNodeView(src);
-//		String style = "";
 		for (DelayedVizProp prop : relatedProps)			// we have to rescan all properties to find other attributes for the same shape
 		{
 			String propName1 = prop.prop.getDisplayName();
@@ -218,13 +215,9 @@ public class DelayedVizProp {
 			}
 		}
 		String propvalue = delayedProp.value.toString();
-//		System.out.println(String.format("Size 0f %s: %.2f x %.2f", propvalue, wid ,hght));
+//		System.out.println(String.format("Size of %s: %.2f x %.2f", propvalue, wid ,hght));
 
-//		if ("Round Rectangle".equals(propvalue))
-//		{
-//			map.put("edgeThickness", "4.3");
-//			propvalue = "Rounded Rectangle";
-//		}
+
 		if ("Rectangle".equals(propvalue) || "Octagon".equals(propvalue))			// HACK - should look for group node
 		{
 			//Nothing to do here; Group style is set in GpmlToPathway.java
@@ -248,13 +241,6 @@ public class DelayedVizProp {
 				wid = hght;
 				hght = t;
 			}
-//			double cx = arc.getBounds2D().getCenterX();
-//			double cy = arc.getBounds2D().getCenterY();
-////			double startRotation = getRotation(src);
-//			AffineTransform rotater = new AffineTransform();
-//			rotater.rotate(startRotation, cx, cy);
-////			arc.transform(rotater);
-//			mAnnotation.setCustomShape(arc);
 		}
 		else
 		{
@@ -265,10 +251,24 @@ public class DelayedVizProp {
 				double cx = path.getBounds2D().getCenterX();
 				double cy = path.getBounds2D().getCenterY();
 				double startRotation = getRotation(src);
-				AffineTransform rotater = new AffineTransform();
+				if (Double.isNaN(startRotation) || Math.abs(startRotation) < 0.1)
+				{
+					
+				}
+				else
+				{
+					AffineTransform rotater = new AffineTransform();
 				rotater.rotate(startRotation, cx, cy);
 				path.transform(rotater);
 				mAnnotation.setCustomShape(path);
+				if ((Math.abs(startRotation - Math.PI / 2.0) < 0.1) || (Math.abs(startRotation + Math.PI / 2.0) < 0.1))  // #58 hack- just look for +/- 90 degree rotation, and switch height and width.
+				{
+					double t = wid;
+					wid = hght;
+					hght = t;
+	
+				}
+				}
 			}
 			else				
 			{
@@ -281,9 +281,11 @@ public class DelayedVizProp {
 					double cx = theShape.getBounds2D().getCenterX();
 					double cy = theShape.getBounds2D().getCenterY();
 					rotater.rotate(startRotation, cx, cy);
-//					theShape.transform(rotater);
 					mAnnotation.setCustomShape(theShape);
-				}
+//					Rectangle2D newBounds = theShape.getBounds2D();
+//					wid = newBounds.getWidth();
+//					hght = newBounds.getHeight();
+			}
 			}
 		}
 
@@ -337,10 +339,10 @@ public class DelayedVizProp {
 			y -= (hght / 2.);
 			if (mAnnotation != null) 
 			{
-				if (verbose) System.out.println(String.format("moving annotation to : %4.1f , %4.1f", x, y));
+//				if (verbose) System.out.println(String.format("moving annotation to : %4.1f , %4.1f", x, y));
 				mAnnotation.moveAnnotation(new Point2D.Double(x, y));
 				mAnnotation.setCanvas(Annotation.BACKGROUND);
-				shapes.add(mAnnotation);
+//				shapes.add(mAnnotation);
 			}
 			// view.setLockedValue(prop, 0.);
 		}

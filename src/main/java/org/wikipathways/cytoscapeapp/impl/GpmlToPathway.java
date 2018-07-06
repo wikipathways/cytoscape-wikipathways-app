@@ -928,7 +928,7 @@ public class GpmlToPathway {
   final VizPropStore STATE_Y_STORE = new BasicVizPropStore(STATE_Y_EXTRACTER, BasicVisualLexicon.NODE_Y_LOCATION);
 
   private void convertStates() {
-	  DelayedVizProp.clearStateList();
+	DelayedVizProp.clearStateList();
     for (final PathwayElement pvElem : pvPathway.getDataObjects()) 
       if (pvElem.getObjectType().equals(ObjectType.STATE))
       convertState(pvElem);
@@ -947,21 +947,15 @@ public class GpmlToPathway {
     store(cyNode, pvState,
 //    		BasicVizPropStore.NODE_X,
 //    		BasicVizPropStore.NODE_Y,
-    	      STATE_X_STORE,
-    	      STATE_Y_STORE,
+    	      STATE_X_STORE, STATE_Y_STORE,
       BasicVizPropStore.NODE_Z,
-      BasicVizPropStore.NODE_WIDTH,
-      BasicVizPropStore.NODE_HEIGHT,
-      BasicVizPropStore.NODE_FILL_COLOR,
-      BasicVizPropStore.NODE_COLOR,
-      BasicVizPropStore.NODE_LABEL,
-      BasicVizPropStore.NODE_LABEL_FONT,
-      BasicVizPropStore.NODE_LABEL_SIZE, 
+      BasicVizPropStore.NODE_WIDTH, BasicVizPropStore.NODE_HEIGHT,
+      BasicVizPropStore.NODE_FILL_COLOR, BasicVizPropStore.NODE_COLOR,
+      BasicVizPropStore.NODE_LABEL, BasicVizPropStore.NODE_LABEL_FONT, BasicVizPropStore.NODE_LABEL_SIZE, 
       BasicVizPropStore.NODE_TRANSPARENT,
-//      BasicVizPropStore.NODE_BORDER_STYLE,
-//      BasicVizPropStore.NODE_TYPE,
-      BasicVizPropStore.NODE_BORDER_THICKNESS,
-      BasicVizPropStore.NODE_SHAPE
+      BasicVizPropStore.NODE_BORDER_THICKNESS, BasicVizPropStore.NODE_SHAPE
+//    BasicVizPropStore.NODE_BORDER_STYLE,
+//    BasicVizPropStore.NODE_TYPE,
     );
 //    DelayedVizProp fillColorProp = new DelayedVizProp(cyNode,
 //    		BasicVisualLexicon.NODE_FILL_COLOR, new Color(250, 0, 0), true);
@@ -1056,8 +1050,7 @@ public class GpmlToPathway {
 	  return Color.GREEN;
       else if (GroupStyle.COMPLEX.equals(style) || GroupStyle.NONE.equals(style))
 	  return new Color(180, 180, 100);
-      else 
-      	  return Color.WHITE;
+      return Color.WHITE;
     }
   };
 
@@ -1068,9 +1061,8 @@ public class GpmlToPathway {
       final String styleName = (String) pvValues[0];
       final GroupStyle style = styleName != null ? GroupStyle.fromName(styleName) : null;
       if (GroupStyle.COMPLEX.equals(style))
-	  return getCyNodeLineType("Solid"); 
-      else
-          return getCyNodeLineType("Dash");
+    	  return getCyNodeLineType("Solid"); 
+      return getCyNodeLineType("Dash");
     }
   };
 
@@ -1080,11 +1072,7 @@ public class GpmlToPathway {
     public Object toCyValue(Object[] pvValues) {
       final String styleName = (String) pvValues[0];
       final GroupStyle style = styleName != null ? GroupStyle.fromName(styleName) : null;
-      if (GroupStyle.GROUP.equals(style))
-          return 0.0;
-      else
-	  return 1.0;
-  
+      return (GroupStyle.GROUP.equals(style))  ? 0.0 :  1.0;
     }
   };
 
@@ -1116,28 +1104,19 @@ public class GpmlToPathway {
 //    if (verbose)  System.out.println("convertGroup: " + pvGroup.getGroupStyle());
 //    cyGroupNode.pvGroup.getGroupStyle();
     store(cyGroupNode, pvGroup,
-      GROUP_X,
-      GROUP_Y,
-      BasicVizPropStore.NODE_Z,
+      GROUP_X, GROUP_Y, BasicVizPropStore.NODE_Z,
       SELECTED_COLOR,
-      GROUP_WIDTH,
-      GROUP_HEIGHT,
-      GROUP_COLOR,
-      GROUP_FILL_COLOR,
-      GROUP_BORDER_THICKNESS,
-      GROUP_BORDER_STYLE,
-      BasicVizPropStore.NODE_ALWAYS_SEMI_TRANSPARENT,
-      GROUP_SHAPE 
+      GROUP_WIDTH, GROUP_HEIGHT,
+      GROUP_COLOR, GROUP_FILL_COLOR,
+      GROUP_BORDER_THICKNESS, GROUP_BORDER_STYLE,
+      BasicVizPropStore.NODE_ALWAYS_SEMI_TRANSPARENT, GROUP_SHAPE 
     );
-    
   }
-
   /*
    ========================================================
      Labels
    ========================================================
   */
-
 
   private void convertLabels() {
     for (final PathwayElement pvElem : pvPathway.getDataObjects()) 
@@ -1151,19 +1130,13 @@ public class GpmlToPathway {
     pvToCyNodes.put(pvLabel, cyNode);
     store(cyNodeTbl, cyNode, pvLabel, BasicTableStore.TEXT_LABEL);
     store(cyNode, pvLabel,
-      BasicVizPropStore.NODE_X,
-      BasicVizPropStore.NODE_Y,
-      BasicVizPropStore.NODE_Z,
-      BasicVizPropStore.NODE_WIDTH,
-      BasicVizPropStore.NODE_HEIGHT,
+      BasicVizPropStore.NODE_X, BasicVizPropStore.NODE_Y, BasicVizPropStore.NODE_Z,
+      BasicVizPropStore.NODE_WIDTH, BasicVizPropStore.NODE_HEIGHT,
 //      BasicVizPropStore.NODE_BORDER_STYLE,
       BasicVizPropStore.NODE_BORDER_THICKNESS,
-      BasicVizPropStore.NODE_COLOR,
-      BasicVizPropStore.NODE_SHAPE,
-      BasicVizPropStore.NODE_LABEL_FONT,
-      BasicVizPropStore.NODE_LABEL_SIZE,
-      BasicVizPropStore.NODE_TRANSPARENT,
-      SELECTED_COLOR
+      BasicVizPropStore.NODE_COLOR, BasicVizPropStore.NODE_SHAPE,
+      BasicVizPropStore.NODE_LABEL_FONT, BasicVizPropStore.NODE_LABEL_SIZE,
+      BasicVizPropStore.NODE_TRANSPARENT, SELECTED_COLOR
     );
   }
   
@@ -1252,14 +1225,12 @@ public class GpmlToPathway {
   private void newEdge(final PathwayElement pvLine, final CyNode cySourceNode, 
 		  final CyNode cyTargetNode, final boolean isStart, final boolean isEnd) {
 
+	  if (cySourceNode.equals(cyTargetNode)) return;				// remove self loops????  #81
 	final CyEdge cyEdge = cyNet.addEdge(cySourceNode, cyTargetNode, true);
     
     store(cyEdgeTbl, cyEdge, pvLine, 
-        	      BasicVizTableStore.EDGE_LINE_THICKNESS,
-        	      BasicVizTableStore.EDGE_LINE_STYLE,
-        	      BasicVizTableStore.EDGE_COLOR,
-        	      BasicVizTableStore.EDGE_CONNECTOR_TYPE
-        	      );
+	      BasicVizTableStore.EDGE_LINE_THICKNESS, BasicVizTableStore.EDGE_LINE_STYLE,
+	      BasicVizTableStore.EDGE_COLOR, BasicVizTableStore.EDGE_CONNECTOR_TYPE );
     
     storeEdgeBend(cyEdge, pvLine);
 	DelayedVizProp prop = new DelayedVizProp(cyEdge, BasicVisualLexicon.EDGE_WIDTH, 1.0, true);		// #44
