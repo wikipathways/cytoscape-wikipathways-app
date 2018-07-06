@@ -134,23 +134,23 @@ public class DelayedVizProp {
   }
 	static WPManager wpManagerInstance = null;
 
-	static private void postProcessShapes()
-	{
-		System.out.println("Postprocessing");
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-			while (shapes.size() > 0)
-			{
-				ShapeAnnotation shape = shapes.remove(shapes.size() - 1);
-				shape.setCanvas(Annotation.BACKGROUND);
-				// BUG -- this causes a ~ 1" vertical offset of all shapes
-				shape.removeAnnotation();			// remove and readd the annotation to register the canvas change 
-				wpManagerInstance.getAnnots().addShape(shape);
-			}
-		}}
-				);
-	}
+//	static private void postProcessShapes()
+//	{
+//		System.out.println("Postprocessing");
+//		SwingUtilities.invokeLater(new Runnable() {
+//			@Override
+//			public void run() {
+//			while (shapes.size() > 0)
+//			{
+//				ShapeAnnotation shape = shapes.remove(shapes.size() - 1);
+//				shape.setCanvas(Annotation.BACKGROUND);
+//				// BUG -- this causes a ~ 1" vertical offset of all shapes
+//				shape.removeAnnotation();			// remove and readd the annotation to register the canvas change 
+//				wpManagerInstance.getAnnots().addShape(shape);
+//			}
+//		}}
+//				);
+//	}
 	static final List<ShapeAnnotation> shapes = new ArrayList<ShapeAnnotation>();
 	//--------------------------------------------------------------------------------
 	static final List<Long> states = new ArrayList<Long>();
