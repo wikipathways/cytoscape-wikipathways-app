@@ -3,7 +3,7 @@ package org.wikipathways.cytoscapeapp.impl.search;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.work.AbstractTaskFactory;
 import org.cytoscape.work.TaskIterator;
-import org.wikipathways.cytoscapeapp.impl.WPClient;
+import org.wikipathways.cytoscapeapp.WPClient;
 import org.wikipathways.cytoscapeapp.internal.cmd.WPSearchCmdTask;
 import org.wikipathways.cytoscapeapp.internal.guiclient.GUI;
 

@@ -3,9 +3,9 @@ package org.wikipathways.cytoscapeapp.internal.cmd;
 import org.cytoscape.work.AbstractTaskFactory;
 import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskManager;
+import org.wikipathways.cytoscapeapp.WPClient;
 import org.wikipathways.cytoscapeapp.impl.GpmlConversionMethod;
 import org.wikipathways.cytoscapeapp.impl.GpmlReaderFactory;
-import org.wikipathways.cytoscapeapp.impl.WPClient;
 
 public class WPImportCmdTaskFactory extends AbstractTaskFactory {
   final WPClient client;

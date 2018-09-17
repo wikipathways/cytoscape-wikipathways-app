@@ -126,13 +126,13 @@ class ImagePreview extends JComponent implements ImageObserver {
       final int cw = super.getWidth();
       final int ch = super.getHeight();
      final double ca = (double) ch / cw;
- 	System.out.println("paintComponent: " + imgIcon.getImage() + " "  +cw + " x " + ch);
+// 	System.out.println("paintComponent: " + imgIcon.getImage() + " "  +cw + " x " + ch);
 
       final int iw = imgIcon.getIconWidth();
       final int ih = imgIcon.getIconHeight();
       Image image = imgIcon.getImage();
       final double ia = (double) ih / iw;
-      System.out.println("icon size: " + iw + " x " + ih);
+//      System.out.println("icon size: " + iw + " x " + ih);
 
       if (cw > iw && ch > ih) {
         final int x = (cw - iw) / 2;

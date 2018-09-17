@@ -6,6 +6,7 @@ import org.cytoscape.io.read.CyNetworkReader;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.work.TaskIterator;
+import org.wikipathways.cytoscapeapp.WPClient;
 
 /**
  * Creates {@link org.cytoscape.work.TaskIterator}s for reading a GPML document
@@ -146,4 +147,7 @@ public interface GpmlReaderFactory {
 
   public void setClient(WPClient client);
   public WPClient getClient();
+
+public void setSemaphore();
+public void clearSemaphore();
 }

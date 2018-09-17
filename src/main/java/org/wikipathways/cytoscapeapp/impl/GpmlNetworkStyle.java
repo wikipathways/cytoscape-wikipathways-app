@@ -81,6 +81,7 @@ public class GpmlNetworkStyle {
     vizStyle.setDefaultValue(BasicVisualLexicon.NODE_SELECTED, true);
     vizStyle.setDefaultValue(BasicVisualLexicon.NODE_DEPTH, 0.0);
     vizStyle.setDefaultValue(BasicVisualLexicon.NODE_LABEL, "");
+    vizStyle.setDefaultValue(BasicVisualLexicon.NODE_LABEL_COLOR, new Color(153,153,153));
     vizStyle.setDefaultValue(BasicVisualLexicon.NODE_LABEL_FONT_SIZE, 12);
     vizStyle.setDefaultValue(BasicVisualLexicon.NODE_BORDER_WIDTH, 2.0);
     vizStyle.setDefaultValue(BasicVisualLexicon.NODE_SHAPE, NodeShapeVisualProperty.ELLIPSE);
@@ -104,7 +105,7 @@ public class GpmlNetworkStyle {
     vizStyle.setDefaultValue(BasicVisualLexicon.EDGE_WIDTH, 2.0);
     vizStyle.setDefaultValue(BasicVisualLexicon.EDGE_STROKE_UNSELECTED_PAINT, Color.GRAY);
     vizStyle.setDefaultValue(BasicVisualLexicon.EDGE_LABEL_COLOR, Color.BLACK);
-    vizStyle.setDefaultValue(BasicVisualLexicon.EDGE_UNSELECTED_PAINT, Color.BLACK);
+    vizStyle.setDefaultValue(BasicVisualLexicon.EDGE_UNSELECTED_PAINT, new Color(204,204,204));
     vizStyle.setDefaultValue(BasicVisualLexicon.EDGE_PAINT, Color.BLACK);
 //    vizStyle.setDefaultValue(BasicVisualLexicon.EDGE_LABEL_TRANSPARENCY, 255);
     vizStyle.setDefaultValue(BasicVisualLexicon.EDGE_BEND, null);

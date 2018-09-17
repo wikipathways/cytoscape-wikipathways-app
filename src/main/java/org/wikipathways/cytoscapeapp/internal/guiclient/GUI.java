@@ -52,10 +52,10 @@ import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskManager;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.TaskObserver;
+import org.wikipathways.cytoscapeapp.WPClient;
 import org.wikipathways.cytoscapeapp.impl.GpmlConversionMethod;
 import org.wikipathways.cytoscapeapp.impl.GpmlReaderFactory;
 import org.wikipathways.cytoscapeapp.impl.ResultTask;
-import org.wikipathways.cytoscapeapp.impl.WPClient;
 import org.wikipathways.cytoscapeapp.impl.WPPathway;
 
 public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWebServiceClient, SearchWebServiceClient {
@@ -389,29 +389,29 @@ private static final boolean VERBOSE = false;
     });
   }
   //----------------------------------------------------------------------
-  void getPathwayFromId(final String id) {
-    final ResultTask<WPPathway> infoTask = client.pathwayInfoTask(id);
-    taskMgr.execute(new TaskIterator(infoTask, new AbstractTask() {
-      public void run(final TaskMonitor monitor) {
-        final WPPathway pathway = infoTask.get();
-        if (pathway == null) {
-          noResultsLabel.setText(String.format("<html><b>No such pathway \'%s\'.</b></html>", id));
-          noResultsLabel.setVisible(true);
-          setPathwaysInResultsTable(null);
-        } else {
-          noResultsLabel.setVisible(false);
-          setPathwaysInResultsTable(Arrays.asList(pathway));
-        }
-      }
-    }), new TaskObserver() {
-      public void taskFinished(ObservableTask t) {}
-      public void allFinished(FinishStatus status) {
-        searchField.setEnabled(true);
-        searchButton.setEnabled(true);
-      }
-    });
-  }
-
+//  void getPathwayFromId(final String id) {
+//    final ResultTask<WPPathway> infoTask = client.pathwayInfoTask(id);
+//    taskMgr.execute(new TaskIterator(infoTask, new AbstractTask() {
+//      public void run(final TaskMonitor monitor) {
+//        final WPPathway pathway = infoTask.get();
+//        if (pathway == null) {
+//          noResultsLabel.setText(String.format("<html><b>No such pathway \'%s\'.</b></html>", id));
+//          noResultsLabel.setVisible(true);
+//          setPathwaysInResultsTable(null);
+//        } else {
+//          noResultsLabel.setVisible(false);
+//          setPathwaysInResultsTable(Arrays.asList(pathway));
+//        }
+//      }
+//    }), new TaskObserver() {
+//      public void taskFinished(ObservableTask t) {}
+//      public void allFinished(FinishStatus status) {
+//        searchField.setEnabled(true);
+//        searchButton.setEnabled(true);
+//      }
+//    });
+//  }
+//
   
   //----------------------------------------------------------------------
   public void bringToFront() {

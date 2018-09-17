@@ -35,6 +35,9 @@ import org.cytoscape.work.TaskMonitor;
 import org.pathvisio.core.model.Pathway;
 import org.pathvisio.core.model.PathwayElement;
 import org.wikipathways.cytoscapeapp.Annots;
+import org.wikipathways.cytoscapeapp.WPClient;
+import org.wikipathways.cytoscapeapp.internal.cmd.EnsemblIdTask;
+
 
 public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
 
@@ -60,9 +63,27 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
   final Map<CyNetwork,GpmlConversionMethod> conversionMethods = new HashMap<CyNetwork,GpmlConversionMethod>();
   final Map<CyNetwork,List<DelayedVizProp>> pendingVizProps = new HashMap<CyNetwork,List<DelayedVizProp>>();
 
+  private boolean semaphore = false;
+  
+	public void setSemaphore()
+	{
+		  System.out.println("setSemaphore");
+		  if (semaphore)
+			  System.out.println("FAIL");
+		  else semaphore = true;
+
+		
+	}
+	public void clearSemaphore()
+	{
+		  System.out.println("clearSemaphore");
+		  semaphore = false;
+	}
+
+
   public GpmlReaderFactoryImpl(CyServiceRegistrar registrar)
   {
-	  System.out.println("GpmlReaderFactoryImpl");
+//	  System.out.println("GpmlReaderFactoryImpl");
 	  this.registrar = registrar;
 	  eventHelper = registrar.getService(CyEventHelper.class);
       netMgr =  registrar.getService(CyNetworkManager.class);
@@ -132,7 +153,34 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
 	    final CyNetwork network = networkView.getModel();
 	    iterator.append(createReader(id, gpmlContents, network, conversionMethod, setNetworkName));
 	    iterator.append(createViewBuilder(id, network, networkView));
-	    iterator.append(new EnsemblIdColumnTask(network, registrar, organism));
+	    if (organism == null)		// HACK -- read organsim out of the raw xml
+	    {
+	    	try 
+	    	
+	    	{ 
+	    	char[] chs = new char[3000];
+	    	gpmlContents.read(chs, 0, 2000);
+	    	gpmlContents.reset();
+	    	String str = new String(chs);
+	    	int idx = str.indexOf("Organism=");
+	    	if (idx > 0)
+	    	{
+	    		int start = idx + "Organism=".length();
+	    		if (str.charAt(start) == '"')
+	    		{
+	    			String tail = str.substring(start + 1);
+	    			int end = tail.indexOf('"');
+	    			organism = tail.substring(0,end);
+	    			System.out.println(organism);
+	    			
+	    		}
+	    	}
+	    	}
+	    	catch (Exception e) {}
+	    }
+//	    	System.err.println("No Species Defined");
+//	    else
+	    	iterator.append(new EnsemblIdTask(network, registrar, organism));
 	    return iterator;
 	  }
 //-----------------------------------------------------------------------
@@ -188,7 +236,7 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
 		} catch (Exception e) {
 			throw new Exception("Pathway not available -- invalid GPML", e);
 		} finally {
-			// manager.turnOnEvents();
+			 manager.turnOnEvents();
 		}
 	}
 
@@ -342,7 +390,6 @@ class EnsemblIdColumnTask extends AbstractTask {
 	}
     
   }
-
 //-----------------------------------------------------------------------
   class UpdateViewTask extends AbstractTask implements ObservableTask {
     final CyNetworkView view;

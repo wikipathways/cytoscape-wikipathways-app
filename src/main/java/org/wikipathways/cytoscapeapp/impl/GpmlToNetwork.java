@@ -372,7 +372,7 @@ public class GpmlToNetwork {
 		public static final VizTableStore NODE_SIZE            = new BasicVizTableStore("Size", Double.class,     BasicExtracter.WIDTH,                           BasicVisualLexicon.NODE_WIDTH);
 	    public static final VizTableStore NODE_FILL_COLOR       = new BasicVizTableStore("FillColor",             BasicExtracter.FILL_COLOR_STRING,               BasicVisualLexicon.NODE_FILL_COLOR);
 	    public static final VizTableStore NODE_COLOR            = new BasicVizTableStore("Color",                 BasicExtracter.COLOR_STRING,                    BasicVisualLexicon.NODE_LABEL_COLOR, BasicVisualLexicon.NODE_BORDER_PAINT);
-	    public static final VizTableStore NODE_BORDER_STYLE     = new BasicVizTableStore("BorderStyle",           BasicExtracter.LINE_STYLE_NAME, PV_LINE_STYLE_MAP, BasicVisualLexicon.NODE_BORDER_LINE_TYPE);
+//	    public static final VizTableStore NODE_BORDER_STYLE     = new BasicVizTableStore("BorderStyle",           BasicExtracter.LINE_STYLE_NAME, PV_LINE_STYLE_MAP, BasicVisualLexicon.NODE_BORDER_LINE_TYPE);
 	    public static final VizTableStore NODE_LABEL_SIZE       = new BasicVizTableStore("Label Font Size", Double.class, BasicExtracter.FONT_SIZE,                       BasicVisualLexicon.NODE_LABEL_FONT_SIZE);
 	    public static final VizTableStore NODE_BORDER_THICKNESS = new BasicVizTableStore("Border Width", Double.class, BasicExtracter.NODE_LINE_THICKNESS,             BasicVisualLexicon.NODE_BORDER_WIDTH);
 	    

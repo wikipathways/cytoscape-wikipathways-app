@@ -20,6 +20,7 @@ import org.cytoscape.work.TaskManager;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.TaskObserver;
 import org.wikipathways.cytoscapeapp.Annots;
+import org.wikipathways.cytoscapeapp.WPClient;
 
 public class WPManager {
 
@@ -40,9 +41,9 @@ public class WPManager {
 	public CyNetworkViewManager getNetworkViewMgr() 	{	return viewMgr;	}
 	public CyServiceRegistrar getRegistrar() 			{	return registrar;	}
 	public BendFactory getBendFactory() 				{	return registrar.getService(BendFactory.class);	}
-	public Annots getAnnots() 						{	return annots;	}
+	public Annots getAnnots() 							{	return annots;	}
 	public HandleFactory getHandleFactory() 			{ 	return registrar.getService(HandleFactory.class);  }
-	public CyEventHelper getEventHelper() 			{ 	return registrar.getService(CyEventHelper.class);  }
+	public CyEventHelper getEventHelper() 				{ 	return registrar.getService(CyEventHelper.class);  }
 
 
 	//-----------------------------------------------------
@@ -59,7 +60,7 @@ public class WPManager {
 	}
 	//-----------------------------------------------------
 	// this code SHOULD disable event processing during a lengthy import.  Not sure it works!
-	boolean bypass = true;
+	boolean bypass = false;
 
 	public void turnOnEvents() {
 		if (bypass) return;

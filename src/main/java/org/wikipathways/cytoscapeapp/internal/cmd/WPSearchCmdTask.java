@@ -11,12 +11,13 @@ import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.FinishStatus;
 import org.cytoscape.work.ObservableTask;
+import org.cytoscape.work.SynchronousTaskManager;
 import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskManager;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.TaskObserver;
+import org.wikipathways.cytoscapeapp.WPClient;
 import org.wikipathways.cytoscapeapp.impl.ResultTask;
-import org.wikipathways.cytoscapeapp.impl.WPClient;
 import org.wikipathways.cytoscapeapp.impl.WPPathway;
 import org.wikipathways.cytoscapeapp.impl.search.WPSearchCmdTaskFactory;
 import org.wikipathways.cytoscapeapp.internal.guiclient.GUI;
@@ -34,7 +35,7 @@ public class WPSearchCmdTask extends AbstractTask {
 	    this.client = client;
 	    this.factory = factory;
 	    registrar = r;
-		dialogTaskManager = r.getService(TaskManager.class);
+		dialogTaskManager = r.getService(SynchronousTaskManager.class);
 		this.guiClient = guiClient;
 	}
   	public void setSpecies(String sp)	{ species = sp;	}

@@ -26,23 +26,18 @@ import org.cytoscape.io.read.InputStreamTaskFactory;
 import org.cytoscape.io.util.StreamUtil;
 import org.cytoscape.service.util.AbstractCyActivator;
 import org.cytoscape.service.util.CyServiceRegistrar;
-import org.cytoscape.task.NetworkViewTaskFactory;
 import org.cytoscape.util.swing.OpenBrowser;
 import org.cytoscape.work.ServiceProperties;
+import org.cytoscape.work.SynchronousTaskManager;
 import org.cytoscape.work.TaskFactory;
 import org.cytoscape.work.TaskManager;
-import org.cytoscape.work.swing.DialogTaskManager;
 import org.osgi.framework.BundleContext;
 import org.pathvisio.core.view.MIMShapes;
 import org.wikipathways.cytoscapeapp.impl.GpmlConversionMethod;
 import org.wikipathways.cytoscapeapp.impl.GpmlReaderFactory;
 import org.wikipathways.cytoscapeapp.impl.GpmlReaderFactoryImpl;
-import org.wikipathways.cytoscapeapp.impl.WPClient;
-import org.wikipathways.cytoscapeapp.impl.WPClientFactory;
 import org.wikipathways.cytoscapeapp.impl.WPClientRESTFactoryImpl;
 import org.wikipathways.cytoscapeapp.impl.search.WPNetworkSearchTaskFactory;
-//import org.wikipathways.cytoscapeapp.internal.OpenLinkedPathwayAsNewTaskFactory;
-import org.wikipathways.cytoscapeapp.internal.ToggleShapesTaskFactory;
 import org.wikipathways.cytoscapeapp.internal.cmd.GpmlImportCmdTaskFactory;
 import org.wikipathways.cytoscapeapp.internal.cmd.WPImportCmdTaskFactory;
 import org.wikipathways.cytoscapeapp.internal.guiclient.GUI;
@@ -75,7 +70,7 @@ public class CyActivator extends AbstractCyActivator {
 	final CyApplicationConfiguration appConf = getService(context, CyApplicationConfiguration.class);
 	final WPClientFactory clientFactory = new WPClientRESTFactoryImpl(appConf, gpmlReaderFactory.getWPManager());
 	registerService(context, clientFactory, WPClientFactory.class);
-	final TaskManager<?, ?> taskMgr = getService(context, DialogTaskManager.class);
+	final TaskManager<?, ?> taskMgr = getService(context, SynchronousTaskManager.class);
 	final WPClient client = clientFactory.create();
 	gpmlReaderFactory.setClient(client);
 	final OpenBrowser openBrowser = getService(context, OpenBrowser.class);
@@ -91,17 +86,7 @@ public class CyActivator extends AbstractCyActivator {
     reg(context,  new WPImportCmdTaskFactory(client, gpmlReaderFactory, GpmlConversionMethod.NETWORK, taskMgr),"import-as-network", "wikipathways");
 
     // --- analogous export commands go here   TODO
-
-    final ToggleShapesTaskFactory toggleShapesTF = new ToggleShapesTaskFactory();
-    registerService(context, toggleShapesTF, NetworkViewTaskFactory.class, ezProps(
-    			ServiceProperties.TITLE, "Toggle Pathway Shapes",  ServiceProperties.PREFERRED_MENU, "View" ));
-
-//    final OpenLinkedPathwayAsNewTaskFactory openLinkedPathwayAsNewTF = new OpenLinkedPathwayAsNewTaskFactory(client, gpmlReaderFactory);
-//    registerService(context, openLinkedPathwayAsNewTF, NodeViewTaskFactory.class, ezProps(
-//      ServiceProperties.TITLE, "Open Linked Pathway",
-//      ServiceProperties.PREFERRED_MENU, "Apps.WikiPathways",
-//      ServiceProperties.IN_MENU_BAR, "false"  ));
-
+   
     //  ----- support NetworkSearchBar
     ImageIcon icon = null;
  	try

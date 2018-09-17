@@ -20,14 +20,12 @@ import org.cytoscape.model.CyRow;
 import org.cytoscape.model.CyTable;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.DiscreteRange;
-import org.cytoscape.view.model.Range;
 import org.cytoscape.view.model.View;
 import org.cytoscape.view.model.VisualProperty;
 import org.cytoscape.view.presentation.property.ArrowShapeVisualProperty;
 import org.cytoscape.view.presentation.property.BasicVisualLexicon;
 import org.cytoscape.view.presentation.property.EdgeBendVisualProperty;
 import org.cytoscape.view.presentation.property.NodeShapeVisualProperty;
-import org.cytoscape.view.presentation.property.StringVisualProperty;
 import org.cytoscape.view.presentation.property.values.AbstractVisualPropertyValue;
 import org.cytoscape.view.presentation.property.values.ArrowShape;
 import org.cytoscape.view.presentation.property.values.Bend;
@@ -215,29 +213,43 @@ public class GpmlToPathway {
      return name;
     }
   };
+//
+//  /** AST
+//   * Hard coded array of Connector Types because there is no StaticProperty.CONNECTORTYPE
+//   */
+//  static final Converter PV_CONNECTOR_TYPE_CONVERTER = new Converter() {
+//    final String[] PV_CONNECTOR_TYPE_NAMES ={"Straight","Curved","Elbow","Segmented"};			//
+//    public Object toCyValue(Object[] pvValues) {
+//      final int lineStyle = (Integer) pvValues[0];
+//      return PV_CONNECTOR_TYPE_NAMES[lineStyle];
+//    }
+//  };
 
-  /** AST
-   * Hard coded array of Connector Types because there is no StaticProperty.CONNECTORTYPE
-   */
-  static final Converter PV_CONNECTOR_TYPE_CONVERTER = new Converter() {
-    final String[] PV_CONNECTOR_TYPE_NAMES ={"Straight","Curved","Elbow","Segmented"};
-    public Object toCyValue(Object[] pvValues) {
-      final int lineStyle = (Integer) pvValues[0];
-      return PV_CONNECTOR_TYPE_NAMES[lineStyle];
-    }
-  };
+  	/**
+	 * AST Hard coded array of Connector Types because there is no
+	 * StaticProperty.CONNECTORTYPE
+	 */
+	static final Converter PV_CONNECTOR_TYPE_CONVERTER = new Converter() {
+		final String[] PV_CONNECTOR_TYPE_NAMES = { "Straight", "Curved", "Elbow", "Segmented" };
 
-  /**
-   * Uses PathVisio's {@code StaticProperty.LINESTYLE} to the name of
-   * a Cytoscape Border Line Type.
-   */
-  static final Converter PV_LINE_STYLE_NAME_CONVERTER = new Converter() {
-    final String[] PV_LINE_STYLE_NAMES = LineStyle.getNames();
-    public Object toCyValue(Object[] pvValues) {
-      final int lineStyle = (Integer) pvValues[0];
-      return PV_LINE_STYLE_NAMES[lineStyle];
-    }
-  };
+		public Object toCyValue(Object[] pvValues) {
+			final int lineStyle = (Integer) pvValues[0];
+			return PV_CONNECTOR_TYPE_NAMES[lineStyle];
+		}
+	};
+
+  	/**
+	 * Uses PathVisio's {@code StaticProperty.LINESTYLE} to the name of a Cytoscape
+	 * Border Line Type.
+	 */
+	static final Converter PV_LINE_STYLE_NAME_CONVERTER = new Converter() {
+		final String[] PV_LINE_STYLE_NAMES = LineStyle.getNames();
+
+		public Object toCyValue(Object[] pvValues) {
+			final int lineStyle = (Integer) pvValues[0];
+			return PV_LINE_STYLE_NAMES[lineStyle];
+		}
+	};
 
   /**
    * Uses PathVisio's {@code StaticProperty.SHAPETYPE} and returns its name.
@@ -259,10 +271,8 @@ public class GpmlToPathway {
       final Boolean bold = (Boolean) pvValues[1];
       final Boolean italic = (Boolean) pvValues[2];
       int style = Font.PLAIN;
-      if (bold)
-        style |= Font.BOLD;
-      if (italic)
-        style |= Font.ITALIC;
+      if (bold) 	style |= Font.BOLD;
+      if (italic) 	style |= Font.ITALIC;
       return new Font(fontFace, style, 12);
     }
   };
@@ -435,7 +445,9 @@ public class GpmlToPathway {
 
     	  return obj;
      }
-     catch (Exception e) { return null;	}
+     catch (Exception e) { 
+    	 System.err.println("Class Cast");
+    	 return null;	}
     }
   }
 
@@ -623,7 +635,7 @@ public class GpmlToPathway {
 	  PV_CONNECTORTYPE_MAP.put("Straight",  "Straight");
 	  PV_CONNECTORTYPE_MAP.put("Curved", "Curved");
 	  PV_CONNECTORTYPE_MAP.put("Elbow", "Elbow");
-	  PV_CONNECTORTYPE_MAP.put("Segmented",  "Segmented");
+//	  PV_CONNECTORTYPE_MAP.put("Segmented",  "Segmented");
   }
 
 
@@ -648,7 +660,9 @@ public class GpmlToPathway {
     public static final VizTableStore EDGE_END_ARROW        = new BasicVizTableStore("EndArrow",                      BasicExtracter.END_ARROW_STYLE, PV_ARROW_MAP,   BasicVisualLexicon.EDGE_TARGET_ARROW_SHAPE);
 
     //AST
-    public static final VizTableStore EDGE_CONNECTOR_TYPE     = new BasicVizTableStore("ConnectorType",               BasicExtracter.LINE_CONNECTOR_TYPE, PV_CONNECTORTYPE_MAP,   BasicVisualLexicon.EDGE_BEND);
+    public static final VizTableStore EDGE_CONNECTOR_TYPE     = new BasicVizTableStore("ConnectorType",             
+    		BasicExtracter.LINE_CONNECTOR_TYPE, PV_CONNECTORTYPE_MAP,  
+    		BasicVisualLexicon.EDGE_TOOLTIP);
     
 
     final VisualProperty<?>[] vizProps;
@@ -701,7 +715,7 @@ public class GpmlToPathway {
       BasicVizTableStore.NODE_LABEL_SIZE,
       BasicVizTableStore.NODE_TRANSPARENT,
       BasicVizTableStore.NODE_COLOR,
-      BasicVizTableStore.NODE_BORDER_STYLE,
+//      BasicVizTableStore.NODE_BORDER_STYLE,
       BasicVizTableStore.NODE_BORDER_THICKNESS,
       BasicVizTableStore.NODE_SHAPE,
       BasicVizTableStore.EDGE_COLOR,
@@ -741,7 +755,7 @@ public class GpmlToPathway {
     public static final VizPropStore NODE_TRANSPARENT = new BasicVizPropStore(BasicExtracter.TRANSPARENT, PV_TRANSPARENT_MAP, BasicVisualLexicon.NODE_TRANSPARENCY);
     public static final VizPropStore NODE_ALWAYS_TRANSPARENT = new BasicVizPropStore(new DefaultExtracter(0),      BasicVisualLexicon.NODE_TRANSPARENCY);
     public static final VizPropStore NODE_ALWAYS_SEMI_TRANSPARENT = new BasicVizPropStore(new DefaultExtracter(25),      BasicVisualLexicon.NODE_TRANSPARENCY);
-    public static final VizPropStore NODE_BORDER_STYLE = new BasicVizPropStore(BasicExtracter.LINE_STYLE_NAME, PV_LINE_STYLE_MAP, BasicVisualLexicon.NODE_BORDER_LINE_TYPE);
+//    public static final VizPropStore NODE_BORDER_STYLE = new BasicVizPropStore(BasicExtracter.LINE_STYLE_NAME, PV_LINE_STYLE_MAP, BasicVisualLexicon.NODE_BORDER_LINE_TYPE);
     public static final VizPropStore NODE_BORDER_THICKNESS  = new BasicVizPropStore(BasicExtracter.NODE_LINE_THICKNESS,             BasicVisualLexicon.NODE_BORDER_WIDTH);
     public static final VizPropStore NODE_SHAPE       = new BasicVizPropStore(BasicExtracter.SHAPE, PV_SHAPE_MAP, BasicVisualLexicon.NODE_SHAPE);
     public static final VizPropStore NODE_TYPE   = new BasicVizPropStore(BasicExtracter.NODE_TYPE,  BasicVisualLexicon.NODE_WIDTH);					// HACK
@@ -807,7 +821,7 @@ public class GpmlToPathway {
   static final Extracter TYPE_EXTRACTER = new Extracter() {
     public Object extract(final PathwayElement pvElem) {
       if(pvElem == null)      return null;
-       System.out.println("" + pvElem.getDataNodeType()); 
+//       System.out.println("" + pvElem.getDataNodeType()); 
        return pvElem.getDataNodeType();
     }
   };
@@ -818,11 +832,9 @@ public class GpmlToPathway {
   static final TableStore TYPE_STORE = new BasicTableStore("Type", TYPE_EXTRACTER);
 
   private void convertDataNodes() {
-    for (final PathwayElement pvElem : pvPathway.getDataObjects()) {
-      if (!pvElem.getObjectType().equals(ObjectType.DATANODE))
-        continue;
-      convertDataNode(pvElem);
-    }
+    for (final PathwayElement pvElem : pvPathway.getDataObjects()) 
+      if (pvElem.getObjectType().equals(ObjectType.DATANODE))
+    	  convertDataNode(pvElem);
   }
 
 
@@ -842,8 +854,8 @@ public class GpmlToPathway {
 				BasicVizTableStore.NODE_LABEL_FONT,
 				BasicVizTableStore.NODE_LABEL_SIZE, 
 				BasicVizTableStore.NODE_TRANSPARENT,
-				BasicVizTableStore.NODE_BORDER_STYLE,
-				// BasicVizTableStore.NODE_BORDER_THICKNESS,
+//				BasicVizTableStore.NODE_BORDER_STYLE,
+				 BasicVizTableStore.NODE_BORDER_THICKNESS,
 				BasicVizTableStore.NODE_SHAPE);
 		store(cyNode, pvDataNode, BasicVizPropStore.NODE_X, BasicVizPropStore.NODE_Y, BasicVizPropStore.NODE_Z);
   }
@@ -861,7 +873,7 @@ public class GpmlToPathway {
     	  convertShape(pvElem);
   }
   private void convertShape(final PathwayElement pvShape) {
-    System.out.println("convertShape: " + pvShape.getShapeType()+", "+pvShape.getPropertyEx("org.pathvisio.CellularComponentProperty"));
+//    System.out.println("convertShape: " + pvShape.getShapeType()+", "+pvShape.getPropertyEx("org.pathvisio.CellularComponentProperty"));
     final CyNode cyNode = cyNet.addNode();
     pvToCyNodes.put(pvShape, cyNode);
     IShape shtype = pvShape.getShapeType();
@@ -872,15 +884,16 @@ public class GpmlToPathway {
 //    	System.out.println("convertShape: " + (shtype == null ? "NONE" : shtype.getName()) + " " + id + " " + pvShape.getFillColor());
 //    	System.out.println("at: " + (int) pvShape.getMCenterX() + ", " +  (int) pvShape.getMCenterY());
 //    }
-    store(cyNodeTbl, cyNode, pvShape, BasicTableStore.GRAPH_ID, BasicTableStore.TEXT_LABEL, BasicTableStore.NODE_TYPE, IS_GPML_SHAPE);
+    store(cyNodeTbl, cyNode, pvShape, BasicTableStore.GRAPH_ID, BasicTableStore.TEXT_LABEL, IS_GPML_SHAPE);
     store(cyNode, pvShape,
       BasicVizPropStore.NODE_X, BasicVizPropStore.NODE_Y, BasicVizPropStore.NODE_Z,
+//      BasicTableStore.NODE_TYPE, 
       BasicVizPropStore.NODE_WIDTH, 
       BasicVizPropStore.NODE_HEIGHT,
       BasicVizPropStore.NODE_FILL_COLOR,  BasicVizPropStore.NODE_COLOR,
       BasicVizPropStore.NODE_LABEL_FONT, BasicVizPropStore.NODE_LABEL_SIZE,
       BasicVizPropStore.NODE_ALWAYS_TRANSPARENT,
-      BasicVizPropStore.NODE_BORDER_STYLE,  
+//      BasicVizPropStore.NODE_BORDER_STYLE,  
       BasicVizPropStore.NODE_BORDER_THICKNESS, 
       BasicVizPropStore.NODE_SHAPE, 
       SELECTED_COLOR 
@@ -915,7 +928,7 @@ public class GpmlToPathway {
   final VizPropStore STATE_Y_STORE = new BasicVizPropStore(STATE_Y_EXTRACTER, BasicVisualLexicon.NODE_Y_LOCATION);
 
   private void convertStates() {
-	  DelayedVizProp.clearStateList();
+	DelayedVizProp.clearStateList();
     for (final PathwayElement pvElem : pvPathway.getDataObjects()) 
       if (pvElem.getObjectType().equals(ObjectType.STATE))
       convertState(pvElem);
@@ -934,21 +947,15 @@ public class GpmlToPathway {
     store(cyNode, pvState,
 //    		BasicVizPropStore.NODE_X,
 //    		BasicVizPropStore.NODE_Y,
-    	      STATE_X_STORE,
-    	      STATE_Y_STORE,
+    	      STATE_X_STORE, STATE_Y_STORE,
       BasicVizPropStore.NODE_Z,
-      BasicVizPropStore.NODE_WIDTH,
-      BasicVizPropStore.NODE_HEIGHT,
-      BasicVizPropStore.NODE_FILL_COLOR,
-      BasicVizPropStore.NODE_COLOR,
-      BasicVizPropStore.NODE_LABEL,
-      BasicVizPropStore.NODE_LABEL_FONT,
-      BasicVizPropStore.NODE_LABEL_SIZE, 
+      BasicVizPropStore.NODE_WIDTH, BasicVizPropStore.NODE_HEIGHT,
+      BasicVizPropStore.NODE_FILL_COLOR, BasicVizPropStore.NODE_COLOR,
+      BasicVizPropStore.NODE_LABEL, BasicVizPropStore.NODE_LABEL_FONT, BasicVizPropStore.NODE_LABEL_SIZE, 
       BasicVizPropStore.NODE_TRANSPARENT,
-      BasicVizPropStore.NODE_BORDER_STYLE,
-      BasicVizPropStore.NODE_TYPE,
-      BasicVizPropStore.NODE_BORDER_THICKNESS,
-      BasicVizPropStore.NODE_SHAPE
+      BasicVizPropStore.NODE_BORDER_THICKNESS, BasicVizPropStore.NODE_SHAPE
+//    BasicVizPropStore.NODE_BORDER_STYLE,
+//    BasicVizPropStore.NODE_TYPE,
     );
 //    DelayedVizProp fillColorProp = new DelayedVizProp(cyNode,
 //    		BasicVisualLexicon.NODE_FILL_COLOR, new Color(250, 0, 0), true);
@@ -1043,8 +1050,7 @@ public class GpmlToPathway {
 	  return Color.GREEN;
       else if (GroupStyle.COMPLEX.equals(style) || GroupStyle.NONE.equals(style))
 	  return new Color(180, 180, 100);
-      else 
-      	  return Color.WHITE;
+      return Color.WHITE;
     }
   };
 
@@ -1055,9 +1061,8 @@ public class GpmlToPathway {
       final String styleName = (String) pvValues[0];
       final GroupStyle style = styleName != null ? GroupStyle.fromName(styleName) : null;
       if (GroupStyle.COMPLEX.equals(style))
-	  return getCyNodeLineType("Solid"); 
-      else
-          return getCyNodeLineType("Dash");
+    	  return getCyNodeLineType("Solid"); 
+      return getCyNodeLineType("Dash");
     }
   };
 
@@ -1067,11 +1072,7 @@ public class GpmlToPathway {
     public Object toCyValue(Object[] pvValues) {
       final String styleName = (String) pvValues[0];
       final GroupStyle style = styleName != null ? GroupStyle.fromName(styleName) : null;
-      if (GroupStyle.GROUP.equals(style))
-          return 0.0;
-      else
-	  return 1.0;
-  
+      return (GroupStyle.GROUP.equals(style))  ? 0.0 :  1.0;
     }
   };
 
@@ -1103,28 +1104,19 @@ public class GpmlToPathway {
 //    if (verbose)  System.out.println("convertGroup: " + pvGroup.getGroupStyle());
 //    cyGroupNode.pvGroup.getGroupStyle();
     store(cyGroupNode, pvGroup,
-      GROUP_X,
-      GROUP_Y,
-      BasicVizPropStore.NODE_Z,
+      GROUP_X, GROUP_Y, BasicVizPropStore.NODE_Z,
       SELECTED_COLOR,
-      GROUP_WIDTH,
-      GROUP_HEIGHT,
-      GROUP_COLOR,
-      GROUP_FILL_COLOR,
-      GROUP_BORDER_THICKNESS,
-      GROUP_BORDER_STYLE,
-      BasicVizPropStore.NODE_ALWAYS_SEMI_TRANSPARENT,
-      GROUP_SHAPE 
+      GROUP_WIDTH, GROUP_HEIGHT,
+      GROUP_COLOR, GROUP_FILL_COLOR,
+      GROUP_BORDER_THICKNESS, GROUP_BORDER_STYLE,
+      BasicVizPropStore.NODE_ALWAYS_SEMI_TRANSPARENT, GROUP_SHAPE 
     );
-    
   }
-
   /*
    ========================================================
      Labels
    ========================================================
   */
-
 
   private void convertLabels() {
     for (final PathwayElement pvElem : pvPathway.getDataObjects()) 
@@ -1133,26 +1125,18 @@ public class GpmlToPathway {
   }
 
   private void convertLabel(final PathwayElement pvLabel) {
-    // TODO: refactor this as an annotation
-	// comment Tina: not sure if they can all be replaced by annotations because they are often connected with data nodes
 
     final CyNode cyNode = cyNet.addNode();
     pvToCyNodes.put(pvLabel, cyNode);
     store(cyNodeTbl, cyNode, pvLabel, BasicTableStore.TEXT_LABEL);
     store(cyNode, pvLabel,
-      BasicVizPropStore.NODE_X,
-      BasicVizPropStore.NODE_Y,
-      BasicVizPropStore.NODE_Z,
-      BasicVizPropStore.NODE_WIDTH,
-      BasicVizPropStore.NODE_HEIGHT,
-      BasicVizPropStore.NODE_BORDER_STYLE,
+      BasicVizPropStore.NODE_X, BasicVizPropStore.NODE_Y, BasicVizPropStore.NODE_Z,
+      BasicVizPropStore.NODE_WIDTH, BasicVizPropStore.NODE_HEIGHT,
+//      BasicVizPropStore.NODE_BORDER_STYLE,
       BasicVizPropStore.NODE_BORDER_THICKNESS,
-      BasicVizPropStore.NODE_COLOR,
-      BasicVizPropStore.NODE_SHAPE,
-      BasicVizPropStore.NODE_LABEL_FONT,
-      BasicVizPropStore.NODE_LABEL_SIZE,
-      BasicVizPropStore.NODE_TRANSPARENT,
-      SELECTED_COLOR
+      BasicVizPropStore.NODE_COLOR, BasicVizPropStore.NODE_SHAPE,
+      BasicVizPropStore.NODE_LABEL_FONT, BasicVizPropStore.NODE_LABEL_SIZE,
+      BasicVizPropStore.NODE_TRANSPARENT, SELECTED_COLOR
     );
   }
   
@@ -1192,10 +1176,12 @@ public class GpmlToPathway {
     cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_X_LOCATION, position.getX(), false));
     cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_Y_LOCATION, position.getY(), false));
     cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_Z_LOCATION, 10001.5, false));
-    cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_FILL_COLOR, color, true));
-//    cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_BORDER_WIDTH, 20.0, true));
+    cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_FILL_COLOR, color, false));
+    cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_BORDER_WIDTH, 2.0, false));
     cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_WIDTH, 1.0, true));
     cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_HEIGHT, 1.0, true));
+    cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_SIZE, 1.0, true));
+    cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_SHAPE, NodeShapeVisualProperty.ROUND_RECTANGLE, true));
 //    cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_TRANSPARENCY, 128, true));  // AST
   }
   
@@ -1239,14 +1225,12 @@ public class GpmlToPathway {
   private void newEdge(final PathwayElement pvLine, final CyNode cySourceNode, 
 		  final CyNode cyTargetNode, final boolean isStart, final boolean isEnd) {
 
+	  if (cySourceNode.equals(cyTargetNode)) return;				// remove self loops????  #81
 	final CyEdge cyEdge = cyNet.addEdge(cySourceNode, cyTargetNode, true);
     
     store(cyEdgeTbl, cyEdge, pvLine, 
-        	      BasicVizTableStore.EDGE_LINE_THICKNESS,
-        	      BasicVizTableStore.EDGE_LINE_STYLE,
-        	      BasicVizTableStore.EDGE_COLOR,
-        	      BasicVizTableStore.EDGE_CONNECTOR_TYPE
-        	      );
+	      BasicVizTableStore.EDGE_LINE_THICKNESS, BasicVizTableStore.EDGE_LINE_STYLE,
+	      BasicVizTableStore.EDGE_COLOR, BasicVizTableStore.EDGE_CONNECTOR_TYPE );
     
     storeEdgeBend(cyEdge, pvLine);
 	DelayedVizProp prop = new DelayedVizProp(cyEdge, BasicVisualLexicon.EDGE_WIDTH, 1.0, true);		// #44
@@ -1273,6 +1257,8 @@ public class GpmlToPathway {
 		else if ("Elbow".equals(connectorType))
 			bend = makeElbowEdgeBend(networkView, cyEdge, makeSegments(pvLine, cyEdge));
 
+//		if (verbose) 
+//			System.out.println("storing " + bend + " with " + bend.getAllHandles().size() + " handles");
 		DelayedVizProp prop = new DelayedVizProp(cyEdge, BasicVisualLexicon.EDGE_BEND, bend, true);
 		cyDelayedVizProps.add(prop);
 	}
@@ -1327,41 +1313,45 @@ public class GpmlToPathway {
 	}
 
 	String[] sides = {  "North", "East", "South", "West" };
-static boolean verbose = true;
+static boolean verbose = false;
 //--------------------------------------------------------------------
+// create a Bend object with a list of handles when the curve crosses
+
 	private Bend makeCurvedEdgeBend(CyNetworkView networkView, CyEdge edge, PathwayElement pvLine) {
 	    BendFactory factory = manager.getBendFactory();		
-		View<CyEdge> ev = networkView.getEdgeView(edge);
+		View<CyEdge> edgeView = networkView.getEdgeView(edge);
 	    Bend bend = factory.createBend();
 	    HandleFactory facto = manager.getHandleFactory();
-//	    MPoint start = pvLine.getMStart();
-//	    MPoint end = pvLine.getMEnd();
-//		if (verbose)	
-//			System.out.println("makeCurvedEdgeBend start at " + printPoint(start) + ", end at " + printPoint(end));
- 
+	    MPoint start = pvLine.getMStart();
+	    MPoint end = pvLine.getMEnd();
 	    int sz = segments.size();
+		if (verbose)	
+			System.out.println("makeCurvedEdgeBend with " + sz + "handles, and start at " + printPoint(start) + ", end at " + printPoint(end));
+ 
 	    for (int i=0; i<sz; i++)
 	    {
 	    	Segment seg = segments.get(i);
 	    	Point2D centerPoint  = centerPoint(seg.start, seg.end);	
-	    	Handle h = facto.createHandle(networkView, ev,  centerPoint.getX(), centerPoint.getY());
-//		  if (verbose)	
-//			  System.out.println("adding handle at " + printPoint( centerPoint));
+	    	Handle h = facto.createHandle(networkView, edgeView,  centerPoint.getX(), centerPoint.getY());
+		  if (verbose)	
+			  System.out.println("adding handles at " + printPoint( centerPoint));
 	    	bend.getAllHandles().add(h);
 	    }
+	    if (edgeView != null)   edgeView.setLockedValue(BasicVisualLexicon.EDGE_BEND, bend);
+		if (verbose)	
+			System.out.println("locked ccurve bend");
 		return bend;
 	}
 
-
+// this constructs a bend with each handle in the list twice, to make the angle sharp
 
 	private Bend makeElbowEdgeBend(CyNetworkView networkView, CyEdge edge, List<Segment> segments) {
-//		System.out.println("makeElbowEdgeBend"); 
    BendFactory factory = manager.getBendFactory();	
 	if (networkView == null)    	{
-//		System.out.println("networkView == null"); 
+		System.out.println("networkView == null"); 
 		return null;
 	}
-	View<CyEdge> ev = networkView.getEdgeView(edge);
+	View<CyEdge> edgeView = networkView.getEdgeView(edge);
     Bend bend = factory.createBend();
     HandleFactory facto = manager.getHandleFactory();
     
@@ -1369,13 +1359,20 @@ static boolean verbose = true;
     for (int i=0; i<sz-1; i++)
     {
     	Segment seg = segments.get(i);
-    	Handle h = facto.createHandle(networkView, ev,  seg.end.getX(), seg.end.getY());		// put in 2 handles for a angled bend
-	    Handle j = facto.createHandle(networkView, ev,  seg.end.getX(), seg.end.getY());
+    	Handle h = facto.createHandle(networkView, edgeView,  seg.end.getX(), seg.end.getY());		// put in 2 handles for a angled bend
+	    Handle j = facto.createHandle(networkView, edgeView,  seg.end.getX(), seg.end.getY());
 	    bend.getAllHandles().add(h);
 	    bend.getAllHandles().add(j);
-//	    
-//	    System.out.println("adding two handles at " + seg);
+		if (verbose)		System.out.println("makeElbowEdgeBend with 2 handles at " + seg); 
+
+//		if (verbose)	
+//			  System.out.println("adding two handles at " + seg);
     }
+//	if (edgeView != null)    	{
+//	    edgeView.setLockedValue(BasicVisualLexicon.EDGE_BEND, bend);
+////		System.out.println("edgeView == null"); 
+////		return null;
+//	}
 	return bend;
 }
 //--------------------------------------------------------------------
@@ -1393,19 +1390,9 @@ static boolean verbose = true;
 		String name = row.get("name", String.class);
 		return name;
 }
-	private String getNodeNameWithId(CyNode source) {
-		return getNodeName(source) + " (" + source.getSUID() + ")";
-}
-	 
-	private String printPoint(Point2D pt)
-	{
-		return ("(" + (int) pt.getX() + ", " + (int) pt.getY() + ")");
-	}
-	
-	private String printPoint(MPoint pt)
-	{
-		return ("(" + (int) pt.getX() + ", " + (int) pt.getY() + ")");
-	}
+	private String getNodeNameWithId(CyNode source) {		return getNodeName(source) + " (" + source.getSUID() + ")";}
+	private String printPoint(Point2D pt)			{		return ("(" + (int) pt.getX() + ", " + (int) pt.getY() + ")");	}
+	private String printPoint(MPoint pt)			{		return ("(" + (int) pt.getX() + ", " + (int) pt.getY() + ")");	}
 	
 //=================================================================================
 	// EDGES
