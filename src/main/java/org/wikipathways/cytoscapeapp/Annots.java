@@ -42,7 +42,6 @@ public class Annots {
 	  arrowFct =  (AnnotationFactory<ArrowAnnotation>) registrar.getService(AnnotationFactory.class,"(type=ArrowAnnotation.class)");
 	  shapeFct =(AnnotationFactory<ShapeAnnotation>)registrar.getService( AnnotationFactory.class,"(type=ShapeAnnotation.class)");
 	  textFct = (AnnotationFactory<TextAnnotation>) registrar.getService( AnnotationFactory.class,"(type=TextAnnotation.class)");
-  
   }
 
   static Map<String,String> ezMap(Object[] elems) {
@@ -50,7 +49,6 @@ public class Annots {
     for (int i = 0; i < elems.length-1; i += 2) {
       map.put(elems[i].toString(), elems[i+1].toString());
     }
-//    System.out.println("ezMap: " + map.toString());
     return map;
   }
 
@@ -59,11 +57,11 @@ public class Annots {
     mgr.addAnnotation(annot);
     return annot;
   }
-
-  public ShapeAnnotation addShape(ShapeAnnotation annot) {
-    mgr.addAnnotation(annot);
-    return annot;
-  }
+//
+//  public ShapeAnnotation addShape(ShapeAnnotation annot) {
+//    mgr.addAnnotation(annot);
+//    return annot;
+//  }
 
   public ShapeAnnotation newShape(final CyNetworkView netView, Object ... args) {
     final ShapeAnnotation annot = shapeFct.createAnnotation(ShapeAnnotation.class, netView, ezMap(args));

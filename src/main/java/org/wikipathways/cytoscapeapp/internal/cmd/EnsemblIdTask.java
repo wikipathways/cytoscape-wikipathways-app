@@ -30,7 +30,7 @@ public class EnsemblIdTask extends AbstractTask {
    private String species;
 //   private CyServiceRegistrar registrar;
    private CyTable table;
-   boolean verbose = false;
+   boolean verbose = true;
 
 	public EnsemblIdTask(final CyNetwork network, final CyServiceRegistrar reg, String organism) {
 //		this.network = network;
@@ -43,7 +43,7 @@ public class EnsemblIdTask extends AbstractTask {
 	static String ENSEMBL_COLUMN = "Ensembl";
 
 	public void run(TaskMonitor monitor) {
-		if (verbose) System.out.println("running EnsemblIdColumnTask " + species);
+		if (verbose) System.out.println("running the EnsemblIdTask " + species);
 		if (bridgeDbAvailable()) // ensemblColumn == null &&
 			buildIdMapBatch();
 	}
@@ -88,6 +88,7 @@ public class EnsemblIdTask extends AbstractTask {
 			
 	//			homogenousSourced &= src.equals(firstSource);
 			String record = id + "\t" + src + "\t" + type  + "\t" + name;
+			System.out.println(record);
 			map.put(suid, record);
 			map2.put(suid, type);
 			if (!sources.contains(src))

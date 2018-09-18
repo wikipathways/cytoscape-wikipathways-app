@@ -64,6 +64,7 @@ public class WPManager {
 
 	public void turnOnEvents() {
 		if (bypass) return;
+		if (tables == null || tables.isEmpty()) return;
 		System.out.println("turnOnEvents");
 		CyEventHelper eventHelper = getEventHelper();
 		for (CyTable table : tables.values())
@@ -73,6 +74,7 @@ public class WPManager {
 	
 	public void turnOffEvents() {
 	if (bypass) return;
+	if (tables == null || tables.isEmpty()) return;
 	System.out.println("turnOffEvents");
 		CyEventHelper eventHelper = getEventHelper();
 		for (CyTable table : tables.values())

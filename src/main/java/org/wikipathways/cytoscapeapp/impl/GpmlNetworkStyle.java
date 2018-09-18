@@ -68,42 +68,43 @@ public class GpmlNetworkStyle {
     vizStyle.setTitle(VIZ_STYLE_NAME);
     
     // set default visual properties
-    vizStyle.setDefaultValue(BasicVisualLexicon.NETWORK_TITLE, "THIS IS THE TITLE");
-    vizStyle.setDefaultValue(BasicVisualLexicon.NETWORK_HEIGHT, 400.0);
-    vizStyle.setDefaultValue(BasicVisualLexicon.NETWORK_SIZE, 550.0);
-    vizStyle.setDefaultValue(BasicVisualLexicon.NETWORK_SCALE_FACTOR, 1.0);
-    vizStyle.setDefaultValue(BasicVisualLexicon.NETWORK_WIDTH, 550.0);
-    vizStyle.setDefaultValue(BasicVisualLexicon.NETWORK_CENTER_X_LOCATION, 0.0);
-    vizStyle.setDefaultValue(BasicVisualLexicon.NETWORK_CENTER_Z_LOCATION, 0.0);
-    vizStyle.setDefaultValue(BasicVisualLexicon.NETWORK_CENTER_Y_LOCATION, 0.0);
+//    vizStyle.setDefaultValue(BasicVisualLexicon.NETWORK_TITLE, "THIS IS THE TITLE");
+//    vizStyle.setDefaultValue(BasicVisualLexicon.NETWORK_HEIGHT, 400.0);
+//    vizStyle.setDefaultValue(BasicVisualLexicon.NETWORK_SIZE, 550.0);
+//    vizStyle.setDefaultValue(BasicVisualLexicon.NETWORK_SCALE_FACTOR, 1.0);
+//    vizStyle.setDefaultValue(BasicVisualLexicon.NETWORK_WIDTH, 550.0);
+//    vizStyle.setDefaultValue(BasicVisualLexicon.NETWORK_CENTER_X_LOCATION, 0.0);
+//    vizStyle.setDefaultValue(BasicVisualLexicon.NETWORK_CENTER_Z_LOCATION, 0.0);
+//    vizStyle.setDefaultValue(BasicVisualLexicon.NETWORK_CENTER_Y_LOCATION, 0.0);
 
     vizStyle.setDefaultValue(BasicVisualLexicon.NODE_VISIBLE, true);
     vizStyle.setDefaultValue(BasicVisualLexicon.NODE_SELECTED, true);
     vizStyle.setDefaultValue(BasicVisualLexicon.NODE_DEPTH, 0.0);
     vizStyle.setDefaultValue(BasicVisualLexicon.NODE_LABEL, "");
-    vizStyle.setDefaultValue(BasicVisualLexicon.NODE_LABEL_COLOR, new Color(153,153,153));
+//    vizStyle.setDefaultValue(BasicVisualLexicon.NODE_LABEL_COLOR, new Color(153,153,153));
+    vizStyle.setDefaultValue(BasicVisualLexicon.NODE_LABEL_COLOR, Color.BLACK);
     vizStyle.setDefaultValue(BasicVisualLexicon.NODE_LABEL_FONT_SIZE, 12);
     vizStyle.setDefaultValue(BasicVisualLexicon.NODE_BORDER_WIDTH, 2.0);
     vizStyle.setDefaultValue(BasicVisualLexicon.NODE_SHAPE, NodeShapeVisualProperty.ELLIPSE);
     vizStyle.setDefaultValue(BasicVisualLexicon.NODE_SIZE, 50.0);
 
-    //?? map node size to WP.Type:  Group = 10, Anchor = 5, Metabolite = 25, Pathway = 25 
+    //?? map node size to WP.Type:  Group = 25, Anchor = 1, Label = 25
+    //??  NODE_BORDER_WIDTH:  defuault: 2 Group = 0, Anchor = 0, Label=0 
     
     vizStyle.setDefaultValue(BasicVisualLexicon.NODE_BORDER_PAINT, Color.LIGHT_GRAY);
     vizStyle.setDefaultValue(BasicVisualLexicon.NODE_FILL_COLOR, Color.WHITE);
     vizStyle.setDefaultValue(BasicVisualLexicon.NODE_SELECTED_PAINT, Color.YELLOW);
-    vizStyle.setDefaultValue(BasicVisualLexicon.NODE_LABEL_COLOR, Color.BLACK);
 
    
-    vizStyle.setDefaultValue(BasicVisualLexicon.EDGE_SELECTED, false);
-    vizStyle.setDefaultValue(BasicVisualLexicon.EDGE_TOOLTIP, "");
-    vizStyle.setDefaultValue(BasicVisualLexicon.EDGE_STROKE_SELECTED_PAINT, Color.RED);
+//    vizStyle.setDefaultValue(BasicVisualLexicon.EDGE_SELECTED, false);
+//    vizStyle.setDefaultValue(BasicVisualLexicon.EDGE_TOOLTIP, "");
+//    vizStyle.setDefaultValue(BasicVisualLexicon.EDGE_STROKE_SELECTED_PAINT, Color.RED);
     vizStyle.setDefaultValue(BasicVisualLexicon.EDGE_SOURCE_ARROW_SIZE, 6.0);
     vizStyle.setDefaultValue(BasicVisualLexicon.EDGE_STROKE_UNSELECTED_PAINT, Color.GRAY);
-    vizStyle.setDefaultValue(BasicVisualLexicon.EDGE_LABEL, "");
-    vizStyle.setDefaultValue(BasicVisualLexicon.EDGE_VISIBLE, true);
+//    vizStyle.setDefaultValue(BasicVisualLexicon.EDGE_LABEL, "");
+//    vizStyle.setDefaultValue(BasicVisualLexicon.EDGE_VISIBLE, true);
     vizStyle.setDefaultValue(BasicVisualLexicon.EDGE_WIDTH, 2.0);
-    vizStyle.setDefaultValue(BasicVisualLexicon.EDGE_STROKE_UNSELECTED_PAINT, Color.GRAY);
+//    vizStyle.setDefaultValue(BasicVisualLexicon.EDGE_STROKE_UNSELECTED_PAINT, Color.GRAY);
     vizStyle.setDefaultValue(BasicVisualLexicon.EDGE_LABEL_COLOR, Color.BLACK);
     vizStyle.setDefaultValue(BasicVisualLexicon.EDGE_UNSELECTED_PAINT, new Color(204,204,204));
     vizStyle.setDefaultValue(BasicVisualLexicon.EDGE_PAINT, Color.BLACK);

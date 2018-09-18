@@ -179,7 +179,7 @@ public class WPClientRESTImpl implements WPClient {
 			else if (argName.equals("ns2:url"))			url = argVal;
 		}
 		if ("".equals(name))	return null;
-		System.out.println("parsePathwayInfo: " + id + " " + name + " " + species + " " + url );
+//		System.out.println("parsePathwayInfo: " + id + " " + name + " " + species + " " + url );
 		return new WPPathway(id, revision, name, species, url);
 	}
 	//----------------------------
@@ -189,12 +189,12 @@ public class WPClientRESTImpl implements WPClient {
 		return new ReqTask<Reader>() {
 			protected Reader checkedRun(final TaskMonitor monitor) throws Exception {
 				String title = "Get \'" + pathway.getName() + "\' from WikiPathways";
-				System.out.println(title);
+//				System.out.println(title);
 				monitor.setTitle(title);
 				Document doc = null;
 				try {
 					String url = BASE_URL + "getPathway?pwId=" + pathway.getId();
-					System.out.println(url);
+//					System.out.println(url);
 					doc = xmlGet(url, "pwId", pathway.getId(), "revision", "0"); //0 = latest revision  //pathway.getRevision());
 				} catch (SAXParseException e) {
 					throw new Exception(String.format("'%s' is not available -- invalid GPML", pathway.getName()), e);
@@ -235,7 +235,7 @@ public class WPClientRESTImpl implements WPClient {
 			output.writeObject(species);
 			outStream.close();
 		} catch (Exception e) {
-			System.out.println("Failed to write species cache");
+			System.err.println("Failed to write species cache");
 			e.printStackTrace();
 		}
 	}
@@ -253,7 +253,7 @@ public class WPClientRESTImpl implements WPClient {
 			final List<String> result = (List<String>) object;
 			return result;
 		} catch (Exception e) {
-			System.out.println("Failed to read species cache");
+			System.err.println("Failed to read species cache");
 			e.printStackTrace();
 		}
 		return null;
@@ -281,12 +281,12 @@ public class WPClientRESTImpl implements WPClient {
 				throw new IllegalArgumentException("Invalid URL request", e);
 			}
 			request = new HttpGet(uri);
-			System.out.println(uri);
-			System.out.println(request);
+//			System.out.println(uri);
+//			System.out.println(request);
 			// issue the request
 			try {
 				resp = httpClient.execute(request);
-				System.out.println(resp);
+//				System.out.println(resp);
 				final HttpEntity entity = resp.getEntity();
 				final String encoding = entity.getContentEncoding() != null ? entity.getContentEncoding().getValue()
 						: null;

@@ -258,16 +258,15 @@ public class DelayedVizProp {
 				else
 				{
 					AffineTransform rotater = new AffineTransform();
-				rotater.rotate(startRotation, cx, cy);
-				path.transform(rotater);
-				mAnnotation.setCustomShape(path);
-				if ((Math.abs(startRotation - Math.PI / 2.0) < 0.1) || (Math.abs(startRotation + Math.PI / 2.0) < 0.1))  // #58 hack- just look for +/- 90 degree rotation, and switch height and width.
-				{
-					double t = wid;
-					wid = hght;
-					hght = t;
-	
-				}
+					rotater.rotate(startRotation, cx, cy);
+					path.transform(rotater);
+					mAnnotation.setCustomShape(path);
+					if ((Math.abs(startRotation - Math.PI / 2.0) < 0.1) || (Math.abs(startRotation + Math.PI / 2.0) < 0.1))  // #58 hack- just look for +/- 90 degree rotation, and switch height and width.
+					{
+						double t = wid;
+						wid = hght;
+						hght = t;
+					}
 				}
 			}
 			else				
