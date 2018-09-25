@@ -69,7 +69,7 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
     + "<li><i>Pathway mode</i>: Complete graphical annotations; "
     + "ideal for custom visualizations of pathways.</li>"
     + "<li><i>Network mode</i>: Simple network without graphical annotations; "
-    + "suited for algorithmic analysis.  [coming later]"
+    + "suited for algorithmic analysis. "
     + "</ul>"
     + "This app supports importing GPML files from "
     + "WikiPathways or PathVisio into Cytoscape."

@@ -30,7 +30,7 @@ public class EnsemblIdTask extends AbstractTask {
    private String species;
 //   private CyServiceRegistrar registrar;
    private CyTable table;
-   boolean verbose = true;
+   boolean verbose = false;
 
 	public EnsemblIdTask(final CyNetwork network, final CyServiceRegistrar reg, String organism) {
 //		this.network = network;
@@ -88,7 +88,7 @@ public class EnsemblIdTask extends AbstractTask {
 			
 	//			homogenousSourced &= src.equals(firstSource);
 			String record = id + "\t" + src + "\t" + type  + "\t" + name;
-			System.out.println(record);
+			if (verbose) System.out.println(record);
 			map.put(suid, record);
 			map2.put(suid, type);
 			if (!sources.contains(src))

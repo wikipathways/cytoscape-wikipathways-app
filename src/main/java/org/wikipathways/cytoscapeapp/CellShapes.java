@@ -166,7 +166,7 @@ public class CellShapes {
 	static public Arc2D.Float makeArc(double startRotation)	
 	{
 		float degrees = (float) (startRotation * 180 / Math.PI);
-		return new Arc2D.Float(0f, 0f, 100f, 10f, degrees, 180f, Arc2D.OPEN);
+		return new Arc2D.Float(0f, 0f, 100f, 10f, -degrees, -180f, Arc2D.OPEN);
   }
 //	static private Shape arcShape()				// PLACEHOLDER -- arc needs start angle & rotation
 //	{

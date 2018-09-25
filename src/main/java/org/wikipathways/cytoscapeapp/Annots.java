@@ -36,6 +36,7 @@ public class Annots {
   final AnnotationFactory<ShapeAnnotation> shapeFct;
   final AnnotationFactory<TextAnnotation> textFct;
 
+  public AnnotationManager getAnnotationManager()	{ return mgr;	}
   public Annots(CyServiceRegistrar registrar)
    {
 	  mgr =   registrar.getService(AnnotationManager.class);
@@ -54,7 +55,7 @@ public class Annots {
 
   public ArrowAnnotation newArrow(final CyNetworkView netView, Object ... args) {
     final ArrowAnnotation annot = arrowFct.createAnnotation(ArrowAnnotation.class, netView, ezMap(args));
-    mgr.addAnnotation(annot);
+//    mgr.addAnnotation(annot);
     return annot;
   }
 //
@@ -65,13 +66,13 @@ public class Annots {
 
   public ShapeAnnotation newShape(final CyNetworkView netView, Object ... args) {
     final ShapeAnnotation annot = shapeFct.createAnnotation(ShapeAnnotation.class, netView, ezMap(args));
-    mgr.addAnnotation(annot);
+//    mgr.addAnnotation(annot);
     return annot;
   }
 
   public TextAnnotation newText(final CyNetworkView netView, Object ... args) {
     final TextAnnotation annot = textFct.createAnnotation(TextAnnotation.class, netView, ezMap(args));
-    mgr.addAnnotation(annot);
+//    mgr.addAnnotation(annot);
     return annot;
   }
 }

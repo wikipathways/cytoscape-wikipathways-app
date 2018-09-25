@@ -60,7 +60,7 @@ public class DelayedVizProp {
     this.value = value;
     this.isLocked = isLocked;
   }
-	static boolean verbose = false;
+	static boolean verbose = true;
 	public String toString() {  return prop.getDisplayName() + ": " + value.toString(); }
 	public static void applyAll(final CyNetworkView netView,final Iterable<DelayedVizProp> delayedProps, WPManager mgr) 
 	{
@@ -181,7 +181,7 @@ public class DelayedVizProp {
 		CyNode src = (CyNode) delayedProp.netObj;
 		CyRow row = netView.getModel().getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS).getRow(src.getSUID());
 	    Object val = row.getAllValues().get("State");
-	    if (val != null)	    				return;
+//	    if (val != null)	    				return;
 	    if (isState(src.getSUID()))    	return;
 
 		
@@ -201,7 +201,7 @@ public class DelayedVizProp {
 			if (lookup != null && prop.value != null)
 			{
 				String propvalue1 = prop.value.toString();
-//	 			  System.out.println(lookup + ": " + propvalue1);
+	 			  System.out.println(lookup + ": " + propvalue1);
 //				int idx = propvalue1.indexOf('.');
 //				if (idx > 0)
 //					propvalue1 = propvalue1.substring(0, idx);
@@ -215,6 +215,7 @@ public class DelayedVizProp {
 			}
 		}
 		String propvalue = delayedProp.value.toString();
+		if (verbose) System.out.println("propvalue: "+propvalue);
 //		System.out.println(String.format("Size of %s: %.2f x %.2f", propvalue, wid ,hght));
 
 
@@ -226,13 +227,15 @@ public class DelayedVizProp {
 		}
 		
 		ShapeAnnotation mAnnotation = mgr.getAnnots().newShape(netView, map);
+		
 		if ("Arc".equals(propvalue))
 		{
+			if (verbose) System.out.println("Arc");
 			double startRotation = getRotation(src);
 			Arc2D.Float arc = CellShapes.makeArc(startRotation);
 		
 			mAnnotation.setCustomShape(arc);
-			mAnnotation.setFillOpacity(3);
+			mAnnotation.setFillOpacity(0);
 			double d = startRotation / (Math.PI / 2.0);
 			double epsilon = 0.001;
 			if ((d - Math.round(d) < epsilon) && ((int) Math.round(d) % 2 == 1))
@@ -244,18 +247,18 @@ public class DelayedVizProp {
 		}
 		else
 		{
-//			if (verbose) System.out.println("propvalue: "+propvalue);
 			GeneralPath path = CellShapes.getPath(propvalue);
 			if (path != null)
 			{
+				if (verbose) System.out.println("GeneralPath");
 				double cx = path.getBounds2D().getCenterX();
 				double cy = path.getBounds2D().getCenterY();
 				double startRotation = getRotation(src);
-				if (Double.isNaN(startRotation) || Math.abs(startRotation) < 0.1)
-				{
-					
-				}
-				else
+//				if (Double.isNaN(startRotation) || Math.abs(startRotation) < 0.1)
+//				{
+//					
+//				}
+//				else
 				{
 					AffineTransform rotater = new AffineTransform();
 					rotater.rotate(startRotation, cx, cy);
@@ -275,6 +278,7 @@ public class DelayedVizProp {
 				if (theShape == null)		mAnnotation.setShapeType(propvalue);  
 				else
 				{
+					if (verbose) System.out.println("\nShape");
 					double startRotation = getRotation(src);
 					AffineTransform rotater = new AffineTransform();
 					double cx = theShape.getBounds2D().getCenterX();
@@ -287,7 +291,7 @@ public class DelayedVizProp {
 			}
 			}
 		}
-
+		
 		double nodex = 0, nodey = 0;
 		PathwayElement elem = getPathwayElement(src);
 		if (elem != null)
@@ -341,6 +345,9 @@ public class DelayedVizProp {
 //				if (verbose) System.out.println(String.format("moving annotation to : %4.1f , %4.1f", x, y));
 				mAnnotation.moveAnnotation(new Point2D.Double(x, y));
 				mAnnotation.setCanvas(Annotation.BACKGROUND);
+				mAnnotation.setName(propvalue);
+				mAnnotation.setZoom(1.0);
+				mgr.getAnnotationManager().addAnnotation(mAnnotation);
 //				shapes.add(mAnnotation);
 			}
 			// view.setLockedValue(prop, 0.);

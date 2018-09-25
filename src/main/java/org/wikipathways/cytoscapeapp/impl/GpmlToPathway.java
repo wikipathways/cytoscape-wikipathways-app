@@ -51,7 +51,6 @@ import org.pathvisio.core.model.PathwayElement.MPoint;
 import org.pathvisio.core.model.ShapeType;
 import org.pathvisio.core.model.StaticProperty;
 import org.pathvisio.core.view.MIMShapes;
-import org.wikipathways.cytoscapeapp.Annots;
 
 /**
  * Converts a GPML file contained in a PathVisio Pathway object to a
@@ -97,7 +96,7 @@ public class GpmlToPathway {
 	public GpmlToPathway(
 	final WPManager     inManager,
 	final CyEventHelper     cyEventHelper,
-      final Annots            cyAnnots,
+//      final Annots            cyAnnots,
       final Pathway           pvPathway,
       final CyNetwork         cyNet) {
 		manager = inManager;
@@ -111,6 +110,7 @@ public class GpmlToPathway {
 		MIMShapes.registerShapes();
 		manager.setUpTableRefs(cyNet);
 //		System.out.println("GpmlToPathway");
+//		networkView.getCyAnnotator().
 	}
 
   /**
@@ -1166,8 +1166,12 @@ public class GpmlToPathway {
 			final CyNode cyNode = cyNet.addNode();
 			final Point2D position = pvLine.getConnectorShape().fromLineCoordinate(pvAnchor.getPosition());
 //			System.out.println("\nAnchor at " + cyNode.getSUID() + "  --------");
-			pvToCyNodes.put(pvAnchor, cyNode);
-			assignAnchorVizStyle(cyNode, position, pvLine.getColor());
+	boolean addAnchors = true;
+	if (addAnchors)
+	{
+		pvToCyNodes.put(pvAnchor, cyNode);
+		assignAnchorVizStyle(cyNode, position, pvLine.getColor());
+	}
 //			System.out.println("--------");
 		}
 	 }
@@ -1178,10 +1182,10 @@ public class GpmlToPathway {
     cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_Z_LOCATION, 10001.5, false));
     cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_FILL_COLOR, color, false));
     cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_BORDER_WIDTH, 2.0, false));
-    cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_WIDTH, 1.0, true));
-    cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_HEIGHT, 1.0, true));
-    cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_SIZE, 1.0, true));
-    cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_SHAPE, NodeShapeVisualProperty.ROUND_RECTANGLE, true));
+    cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_WIDTH, 0.0, true));
+    cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_HEIGHT, 0.0, true));
+    cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_SIZE, 0.0, true));
+    cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_SHAPE, NodeShapeVisualProperty.RECTANGLE, true));
 //    cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_TRANSPARENCY, 128, true));  // AST
   }
   

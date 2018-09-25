@@ -55,7 +55,7 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
 	private CyNetworkViewManager netViewMgr;
 	final CyLayoutAlgorithmManager layoutMgr;
 //	private NetworkTaskFactory networkTF;
-	private Annots annots;
+//	private Annots annots;
 	private GpmlVizStyle vizStyle;
 	private GpmlNetworkStyle networkStyle;
     String organism;
@@ -93,10 +93,9 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
       netViewFactory = registrar.getService(CyNetworkViewFactory.class);
       layoutMgr = registrar.getService(CyLayoutAlgorithmManager.class);
 //      networkTF = registrar.getService(NetworkTaskFactory.class);
-      annots = new Annots(registrar);
       vizStyle = new GpmlVizStyle(registrar);
       networkStyle = new GpmlNetworkStyle(registrar);
-      manager = new WPManager(registrar,annots, this );
+      manager = new WPManager(registrar, this );
    }
 //--------------------------------------------------------------
   public TaskIterator createReader(final String id, final Reader gpmlContents, final CyNetwork network, 
@@ -230,7 +229,7 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
 
 			List<DelayedVizProp> vizProps = null;
 			switch (conversionMethod) {
-			case PATHWAY: 	vizProps = (new GpmlToPathway(manager, eventHelper, annots, pathway, network)).convert(); 	break;
+			case PATHWAY: 	vizProps = (new GpmlToPathway(manager, eventHelper, pathway, network)).convert(); 	break;
 			case NETWORK:  (new GpmlToNetwork(eventHelper, pathway, network)).convert();	 				break;
 			}
 

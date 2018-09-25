@@ -69,7 +69,7 @@ public class GpmlToNetwork {
 	 */
 	public List<DelayedVizProp> convert() {
 		nodeTable.createColumn("GraphID", String.class, false);
-		nodeTable.createColumn("WP.type", String.class, false);
+		nodeTable.createColumn("Type", String.class, false);
 		nodeTable.createColumn("XrefId", String.class, false);
 		nodeTable.createColumn("XrefDatasource", String.class, false);
 		nodeTable.createColumn("Color", String.class, false);
@@ -432,7 +432,7 @@ public class GpmlToNetwork {
 	static {
 		dataNodeStaticProps.put(StaticProperty.GRAPHID, "GraphID");
 		dataNodeStaticProps.put(StaticProperty.TEXTLABEL, CyNetwork.NAME);
-		dataNodeStaticProps.put(StaticProperty.TYPE, "WP.type");
+		dataNodeStaticProps.put(StaticProperty.TYPE, "Type");
 		dataNodeStaticProps.put(StaticProperty.COLOR, "Color");
 		dataNodeStaticProps.put(StaticProperty.WIDTH, "Node Size");
 		dataNodeStaticProps.put(StaticProperty.LINETHICKNESS, "Border Width");
@@ -490,7 +490,7 @@ public class GpmlToNetwork {
 			network.addEdge(node, groupNode, false);
 			groupName = groupName + "_" + elem.getTextLabel();
 		}
-		nodeTable.getRow(groupNode.getSUID()).set("WP.type", "Group");
+		nodeTable.getRow(groupNode.getSUID()).set("Type", "Group");
 		nodeTable.getRow(groupNode.getSUID()).set("GraphID", group.getGraphId());
 		nodeTable.getRow(groupNode.getSUID()).set("name", groupName);
 
@@ -534,7 +534,7 @@ public class GpmlToNetwork {
 
 	private void convertLabel(final PathwayElement label) {
 		final CyNode node = network.addNode();
-		nodeTable.getRow(node.getSUID()).set("WP.type", "Label");
+		nodeTable.getRow(node.getSUID()).set("Type", "Label");
 		convertStaticProps(label, labelStaticProps, nodeTable, node.getSUID());
 		convertShapeTypeNone(node, label);
 		nodes.put(label, node);
@@ -561,7 +561,7 @@ public class GpmlToNetwork {
 		nodes.put(anchor, node);
 		assignAnchorVizStyle(node, Color.gray);
 		nodeTable.getRow(node.getSUID()).set("GraphID", anchor.getGraphId());
-		nodeTable.getRow(node.getSUID()).set("WP.type", "Anchor");
+		nodeTable.getRow(node.getSUID()).set("Type", "Anchor");
 	}
 
 	/*
@@ -638,7 +638,7 @@ public class GpmlToNetwork {
 	{
 		if (edge == null)  return;
 		CyRow edgeRow = edgeTable.getRow(edge.getSUID());
-		edgeRow.set("WP.type", "" + line.getEndLineType());
+		edgeRow.set("WP.Type", "" + line.getEndLineType());
 		edgeRow.set("Target Arrow Shape", "" + line.getEndLineType());
 		edgeRow.set("Width", (line.getLineThickness() + 0.01 * Math.random()));  // TODO hack to give a sortable value
 		edgeRow.set("LineStyle", line.getLineStyle() == 0 ? "Solid" : "Dots");

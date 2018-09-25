@@ -10,6 +10,7 @@ import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyTable;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.view.model.CyNetworkViewManager;
+import org.cytoscape.view.presentation.annotations.AnnotationManager;
 import org.cytoscape.view.presentation.property.values.BendFactory;
 import org.cytoscape.view.presentation.property.values.HandleFactory;
 import org.cytoscape.work.AbstractTask;
@@ -31,17 +32,18 @@ public class WPManager {
 	private	WPClient client;			// this is the http client, to be filled in after constructor
 	public void setClient(WPClient c) { client = c;	}
 	
-	public WPManager(CyServiceRegistrar reg, Annots annotations, GpmlReaderFactory gpml)
+	public WPManager(CyServiceRegistrar reg,  GpmlReaderFactory gpml)
 	{
 		registrar = reg;
 		viewMgr = registrar.getService(CyNetworkViewManager.class);
-		annots = annotations;
+		annots = new Annots(registrar);
 		gpmlReader = gpml;
 	}
 	public CyNetworkViewManager getNetworkViewMgr() 	{	return viewMgr;	}
 	public CyServiceRegistrar getRegistrar() 			{	return registrar;	}
 	public BendFactory getBendFactory() 				{	return registrar.getService(BendFactory.class);	}
 	public Annots getAnnots() 							{	return annots;	}
+	public AnnotationManager getAnnotationManager() 	{	return annots.getAnnotationManager();	}
 	public HandleFactory getHandleFactory() 			{ 	return registrar.getService(HandleFactory.class);  }
 	public CyEventHelper getEventHelper() 				{ 	return registrar.getService(CyEventHelper.class);  }
 
@@ -60,7 +62,7 @@ public class WPManager {
 	}
 	//-----------------------------------------------------
 	// this code SHOULD disable event processing during a lengthy import.  Not sure it works!
-	boolean bypass = false;
+	boolean bypass = true;
 
 	public void turnOnEvents() {
 		if (bypass) return;
