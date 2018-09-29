@@ -101,7 +101,8 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
   public TaskIterator createReader(final String id, final Reader gpmlContents, final CyNetwork network, 
 		  final GpmlConversionMethod conversionMethod, final boolean setNetworkName) {
     conversionMethods.put(network, conversionMethod);
-    return new TaskIterator(new ReaderTask(manager, gpmlContents, network, conversionMethod, setNetworkName));
+    ReaderTask t = new ReaderTask(manager, gpmlContents, network, conversionMethod, setNetworkName);
+    return new TaskIterator(t);
   }
 
   public TaskIterator createViewBuilder(final String id, final CyNetwork gpmlNetwork, final CyNetworkView networkView) {
@@ -112,7 +113,7 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
     boolean importNetwork = GpmlConversionMethod.NETWORK.equals(method);
 
     final TaskIterator iterator = new TaskIterator();
-    iterator.append(new ApplyVizProps(gpmlNetwork, networkView));
+    iterator.append(new ApplyVizPropsTask(gpmlNetwork, networkView));
     if (importNetwork) 
     		applyLayout(networkView, iterator);
     iterator.append(new UpdateViewTask(networkView, !importNetwork));
@@ -255,11 +256,11 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
   }
 
 //-----------------------------------------------------------------------
-  class ApplyVizProps extends AbstractTask {
+  class ApplyVizPropsTask extends AbstractTask {
     final CyNetwork network;
     final CyNetworkView view;
 
-    public ApplyVizProps(final CyNetwork network, final CyNetworkView view) {
+    public ApplyVizPropsTask(final CyNetwork network, final CyNetworkView view) {
       this.network = network;
       this.view = view;
     }

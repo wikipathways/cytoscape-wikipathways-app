@@ -85,18 +85,18 @@ public class GpmlToNetwork {
 		edgeTable.createColumn("Color", String.class, false);
 
 		// convert by each pathway element type
-		System.out.println("convert data nodes");
+//		System.out.println("convert data nodes");
 		convertDataNodes();
-		System.out.println("convert groups");
+//		System.out.println("convert groups");
 		convertGroups();
-		System.out.println("convert labels");
+//		System.out.println("convert labels");
 		convertLabels();
 		
-		System.out.println("find edges");
+//		System.out.println("find edges");
 		findEdges();
-		System.out.println("convert anchors");
+//		System.out.println("convert anchors");
 		convertAnchors();
-		System.out.println("convert lines");
+//		System.out.println("convert lines");
 		convertLines();
 
 

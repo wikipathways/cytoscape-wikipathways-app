@@ -24,6 +24,7 @@ import org.cytoscape.io.BasicCyFileFilter;
 import org.cytoscape.io.DataCategory;
 import org.cytoscape.io.read.AbstractInputStreamTaskFactory;
 import org.cytoscape.io.util.StreamUtil;
+import org.cytoscape.work.Task;
 import org.cytoscape.work.TaskIterator;
 import org.wikipathways.cytoscapeapp.impl.GpmlReaderFactory;
 
@@ -44,6 +45,7 @@ public class GpmlCyReaderTaskFactory extends AbstractInputStreamTaskFactory {
   }
 	
 	public TaskIterator createTaskIterator(InputStream inputStream, String fileName) {
-		return new TaskIterator(new GpmlCyReaderTask( gpmlReaderFactory, inputStream, fileName));
+		Task t = new GpmlCyReaderTask( gpmlReaderFactory, inputStream, fileName);
+		return new TaskIterator(t);
 	}
 }

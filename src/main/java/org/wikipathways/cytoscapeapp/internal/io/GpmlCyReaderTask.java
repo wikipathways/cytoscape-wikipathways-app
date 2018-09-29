@@ -26,6 +26,7 @@ import org.cytoscape.io.read.CyNetworkReader;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.work.AbstractTask;
+import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.Tunable;
 import org.cytoscape.work.util.ListSingleSelection;
@@ -38,7 +39,7 @@ import org.wikipathways.cytoscapeapp.impl.GpmlReaderFactory;
  * Reads the GPML file and creates a GPMLNetwork 
  * TODO: currently network and pathway view are initialized --> setting!
  */
-public class GpmlCyReaderTask extends AbstractTask {
+public class GpmlCyReaderTask extends AbstractTask implements CyNetworkReader {
     public static final String PATHWAY_DESC = "Pathway";
     public static final String NETWORK_DESC = "Network";
 
@@ -63,7 +64,8 @@ public class GpmlCyReaderTask extends AbstractTask {
 		String id = (index > 0) ? fileName.substring(0, index) : fileName;
         final Reader reader = new InputStreamReader(input);
         final GpmlConversionMethod method = importMethod.getSelectedValue().equals(PATHWAY_DESC)  ? GpmlConversionMethod.PATHWAY  : GpmlConversionMethod.NETWORK;
-        super.insertTasksAfterCurrentTask(gpmlReaderFactory.createReaderAndViewBuilder(id, reader, method));
+        TaskIterator iter =  gpmlReaderFactory.createReaderAndViewBuilder(id, reader, method);
+        super.insertTasksAfterCurrentTask(iter);
     }
 
     public void cancel() {
@@ -73,4 +75,7 @@ public class GpmlCyReaderTask extends AbstractTask {
             } catch (IOException e) {}
         }
     }
+	@Override	public CyNetwork[] getNetworks() {		return null;	}
+
+	@Override	public CyNetworkView buildCyNetworkView(CyNetwork network) {		return null;	}
 }

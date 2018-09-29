@@ -60,7 +60,7 @@ public class DelayedVizProp {
     this.value = value;
     this.isLocked = isLocked;
   }
-	static boolean verbose = true;
+	static boolean verbose = false;
 	public String toString() {  return prop.getDisplayName() + ": " + value.toString(); }
 	public static void applyAll(final CyNetworkView netView,final Iterable<DelayedVizProp> delayedProps, WPManager mgr) 
 	{
@@ -201,7 +201,7 @@ public class DelayedVizProp {
 			if (lookup != null && prop.value != null)
 			{
 				String propvalue1 = prop.value.toString();
-	 			  System.out.println(lookup + ": " + propvalue1);
+//	 			  System.out.println(lookup + ": " + propvalue1);
 //				int idx = propvalue1.indexOf('.');
 //				if (idx > 0)
 //					propvalue1 = propvalue1.substring(0, idx);
@@ -464,17 +464,17 @@ public class DelayedVizProp {
 //		return("delayedProp: " + propName + " " + propvalue + " " + propClass);
 //		
 //	}
-	static public void showPoint(String name, Point2D pt) // DEBUG
-	{
-		System.out.println(String.format("%s: (%3.1f, %3.1f)", name, pt.getX(), pt.getY()));
-	}
-	
-	static private Point2D.Double getNodePosition(View<CyNode> nodeView) {
-		Double x = 0., y = 0.;
-		if (nodeView != null) {
-			x = nodeView.getVisualProperty(BasicVisualLexicon.NODE_X_LOCATION);
-			y = nodeView.getVisualProperty(BasicVisualLexicon.NODE_Y_LOCATION);
-		}
-		return new Point2D.Double(x, y);
-	}
+//	static public void showPoint(String name, Point2D pt) // DEBUG
+//	{
+//		System.out.println(String.format("%s: (%3.1f, %3.1f)", name, pt.getX(), pt.getY()));
+//	}
+//	
+//	static private Point2D.Double getNodePosition(View<CyNode> nodeView) {
+//		Double x = 0., y = 0.;
+//		if (nodeView != null) {
+//			x = nodeView.getVisualProperty(BasicVisualLexicon.NODE_X_LOCATION);
+//			y = nodeView.getVisualProperty(BasicVisualLexicon.NODE_Y_LOCATION);
+//		}
+//		return new Point2D.Double(x, y);
+//	}
 }
