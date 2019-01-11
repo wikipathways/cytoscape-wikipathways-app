@@ -13,7 +13,7 @@ public enum MappingSource {
 	Ensembl ("Ensembl", "En", "", "^ENS[A-Z]*[FPTG]\\d{11}$", "ENSG00000139618"),			//|^[YFW]*$		also accept anything that starts with Y, F, W ??
 	Entrez ("Entrez Gene", "L", "", "^\\d+$", "11234"),
 	FlyBase ("FlyBase", "F", "Drosophila melanogaster", "^FB\\w{2}\\d{7}$", "FBgn0011293"),
-	KEGG ("KEGG Genes", "Kg", "", "^\\w+:[\\w\\d\\.-]*$", "syn:ssr3451" ),
+//	KEGG ("KEGG Genes", "Kg", "", "^\\w+:[\\w\\d\\.-]*$", "syn:ssr3451" ),
 	MGI ("MGI", "M", "Mus musculus", "^MGI:\\d+$", "MGI:2442292" ),
 	miRBase ("miRBase", "Mbm", "", "MIMAT\\d{7}", "MIMAT0000001" ),
 	RGD ("RGD", "R", "Rattus norvegicus", "^\\d{4,7}$", "2018" ),
