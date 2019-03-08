@@ -22,6 +22,7 @@ import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.DiscreteRange;
 import org.cytoscape.view.model.View;
 import org.cytoscape.view.model.VisualProperty;
+import org.cytoscape.view.presentation.annotations.TextAnnotation;
 import org.cytoscape.view.presentation.property.ArrowShapeVisualProperty;
 import org.cytoscape.view.presentation.property.BasicVisualLexicon;
 import org.cytoscape.view.presentation.property.EdgeBendVisualProperty;
@@ -1126,10 +1127,11 @@ public class GpmlToPathway {
 
   private void convertLabel(final PathwayElement pvLabel) {
 
-    final CyNode cyNode = cyNet.addNode();
+
+	final CyNode cyNode = cyNet.addNode();
     pvToCyNodes.put(pvLabel, cyNode);
-    store(cyNodeTbl, cyNode, pvLabel, BasicTableStore.TEXT_LABEL);
-    store(cyNode, pvLabel,
+//    store(cyNodeTbl, cyNode, pvLabel, BasicTableStore.TEXT_LABEL);
+    store(cyNode, pvLabel,BasicVizPropStore.NODE_LABEL,
       BasicVizPropStore.NODE_X, BasicVizPropStore.NODE_Y, BasicVizPropStore.NODE_Z,
       BasicVizPropStore.NODE_WIDTH, BasicVizPropStore.NODE_HEIGHT,
 //      BasicVizPropStore.NODE_BORDER_STYLE,

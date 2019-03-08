@@ -6,7 +6,6 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Arc2D;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -23,6 +22,7 @@ import org.cytoscape.view.model.View;
 import org.cytoscape.view.model.VisualProperty;
 import org.cytoscape.view.presentation.annotations.Annotation;
 import org.cytoscape.view.presentation.annotations.ShapeAnnotation;
+import org.cytoscape.view.presentation.annotations.TextAnnotation;
 import org.cytoscape.view.presentation.property.BasicVisualLexicon;
 import org.cytoscape.view.presentation.property.values.Bend;
 import org.pathvisio.core.model.PathwayElement;
@@ -76,6 +76,9 @@ public class DelayedVizProp {
 //				System.out.println(propName);
 				if ("Node Shape".equals(propName))
 					applyNodeShape(netView, delayedProps, mgr, delayedProp);
+		
+				if ("Label".equals(propName))
+					applyLabel(netView, delayedProps, mgr, delayedProp);
 		
 				if ("Edge Bend".equals(propName))
 				{
@@ -175,6 +178,51 @@ public class DelayedVizProp {
 
 	//--------------------------------------------------------------------------------
 
+	private static void applyLabel(final CyNetworkView netView,final Iterable<DelayedVizProp> delayedProps, WPManager mgr, DelayedVizProp delayedProp) 		{
+		final Map<String,String> map = new HashMap<String,String>();
+		TextAnnotation mAnnotation = mgr.getAnnots().newText(netView, map);
+		CyNode src = (CyNode) delayedProp.netObj;
+		View<CyNode> view = netView.getNodeView(src);
+		double x = 0; 
+		double y = 0;
+		double wid = 100;
+		double hght = 30;
+		String text = "UNDEFINED";
+		List<DelayedVizProp> relatedProps = getPropsByID(delayedProps, src.getSUID());
+		for (DelayedVizProp prop : relatedProps)			// we have to rescan all properties to find other attributes for the same shape
+		{
+			String propName1 = prop.prop.getDisplayName();
+			String lookup = propTranslator(propName1);
+			if (lookup != null && prop.value != null)
+			{
+				String propvalue1 = prop.value.toString();
+//	 			  System.out.println(lookup + ": " + propvalue1);
+//				int idx = propvalue1.indexOf('.');
+//				if (idx > 0)
+//					propvalue1 = propvalue1.substring(0, idx);
+				map.put(lookup, propvalue1);
+				if ("Width".equals(lookup))			wid = Double.valueOf(propvalue1);
+				if ("Height".equals(lookup))		hght = Double.valueOf(propvalue1);
+//				if ("Style".equals(lookup))			{ System.out.println("set style to: " + style);  style = propvalue1;   }
+				if ("x".equals(lookup))				x = Double.valueOf(propvalue1);
+				if ("y".equals(lookup))				y = Double.valueOf(propvalue1);
+//				if ("z".equals(lookup))				z = Double.valueOf(propvalue1);
+			}
+		}
+		if (mAnnotation != null) 
+		{
+//			if (verbose) System.out.println(String.format("moving annotation to : %4.1f , %4.1f", x, y));
+			mAnnotation.moveAnnotation(new Point2D.Double(x, y));
+			mAnnotation.setText(text);
+			mAnnotation.setCanvas(Annotation.BACKGROUND);
+//			mAnnotation.setName(propvalue);
+			mAnnotation.setZoom(1.0);
+			mgr.getAnnotationManager().addAnnotation(mAnnotation);
+//			shapes.add(mAnnotation);
+		}
+		
+	}
+	
 	private static void applyNodeShape(final CyNetworkView netView,final Iterable<DelayedVizProp> delayedProps, WPManager mgr, DelayedVizProp delayedProp) 		{
 		
 		final Map<String,String> map = new HashMap<String,String>();

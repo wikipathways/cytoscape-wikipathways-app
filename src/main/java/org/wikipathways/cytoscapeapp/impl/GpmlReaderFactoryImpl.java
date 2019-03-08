@@ -12,6 +12,7 @@ import java.util.Set;
 
 import javax.swing.SwingUtilities;
 
+import org.apache.http.util.CharArrayBuffer;
 import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.model.CyColumn;
 import org.cytoscape.model.CyNetwork;
@@ -142,6 +143,7 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
     netMgr.addNetwork(network);
     final CyNetworkView view = netViewFactory.createNetworkView(network);
     netViewMgr.addNetworkView(view);
+    String a = gpmlContents.toString();
     return createReaderAndViewBuilder(id, gpmlContents, view, conversionMethod, true);
   }
 
@@ -209,19 +211,45 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
         this.setNetworkName = setNetworkName;
     }
 
+    private void addNetworkTableColumns(String ...strings)
+    {
+		for (String s : strings)
+		{
+			CyColumn col = network.getDefaultNetworkTable().getColumn(s);
+			if (col == null)
+				 network.getDefaultNetworkTable().createColumn(s, String.class, true);
+		
+		}
+    	
+    }
 	public void run(TaskMonitor monitor) throws Exception {
 		monitor.setTitle("Construct network");
 
 		monitor.setStatusMessage("Parsing pathways file");
 		final Pathway pathway = new Pathway();
 		try {
+//			CharArrayBuffer buf = new CharArrayBuffer(2000000);
+//			gpmlContents.read(buf);
 			pathway.readFromXml(gpmlContents, true);
 			PathwayElement info = pathway.getMappInfo();
 			organism = info.getOrganism();
 			if (setNetworkName) {
+				CyRow row = network.getRow(network);
 				final String name = info.getMapInfoName() + " - " + organism;
+				final String description = info.findComment("WikiPathways-description");
 				final String nonConflictingName = netNaming.getSuggestedNetworkTitle(name);
-				network.getRow(network).set(CyNetwork.NAME, nonConflictingName);
+				row.set(CyNetwork.NAME, nonConflictingName);
+				addNetworkTableColumns("organism", "description", "title");
+				CyColumn col = network.getDefaultNetworkTable().getColumn("organism");
+//				if (col == null)
+//				{
+//					 network.getDefaultNetworkTable().createColumn("organism", String.class, true);
+//					col =  network.getDefaultNetworkTable().getColumn("organism");
+//				}
+				row.getAllValues();
+				row.set("organism", organism);
+				row.set("description", description);
+				row.set("title", info.getMapInfoName());
 				if (network instanceof CySubNetwork) {
 					final CyRootNetwork root = ((CySubNetwork) network).getRootNetwork();
 					root.getRow(root).set(CyNetwork.NAME, nonConflictingName);
