@@ -22,7 +22,6 @@ import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.DiscreteRange;
 import org.cytoscape.view.model.View;
 import org.cytoscape.view.model.VisualProperty;
-import org.cytoscape.view.presentation.annotations.TextAnnotation;
 import org.cytoscape.view.presentation.property.ArrowShapeVisualProperty;
 import org.cytoscape.view.presentation.property.BasicVisualLexicon;
 import org.cytoscape.view.presentation.property.EdgeBendVisualProperty;
@@ -35,6 +34,9 @@ import org.cytoscape.view.presentation.property.values.Handle;
 import org.cytoscape.view.presentation.property.values.HandleFactory;
 import org.cytoscape.view.presentation.property.values.LineType;
 import org.cytoscape.view.presentation.property.values.NodeShape;
+import org.pathvisio.core.biopax.BiopaxElement;
+import org.pathvisio.core.biopax.BiopaxReferenceManager;
+import org.pathvisio.core.biopax.PublicationXref;
 import org.pathvisio.core.model.ConnectorRestrictions;
 import org.pathvisio.core.model.ConnectorShape;
 import org.pathvisio.core.model.GraphLink;
@@ -44,6 +46,7 @@ import org.pathvisio.core.model.IShape;
 import org.pathvisio.core.model.LineStyle;
 import org.pathvisio.core.model.MLine;
 import org.pathvisio.core.model.ObjectType;
+import org.pathvisio.core.model.OntologyTag;
 import org.pathvisio.core.model.Pathway;
 import org.pathvisio.core.model.PathwayElement;
 import org.pathvisio.core.model.PathwayElement.Comment;
@@ -132,6 +135,7 @@ public class GpmlToPathway {
 	    convertLabels();
 	    convertAnchors();
 	    convertLines();
+	    convertCitations();
 	
 	    
 	    pvToCyNodes.clear();				// clear our data structures to be nice to the GC
@@ -904,8 +908,44 @@ public class GpmlToPathway {
     DelayedVizProp.putPathwayElement(cyNode, pvShape);
 
    }
-  
   /*
+  ========================================================
+    Citations
+  ========================================================
+ */
+ 
+  private void convertCitations() {
+    for (final PathwayElement pvElem : pvPathway.getDataObjects()) 
+      if (pvElem.getObjectType().equals(ObjectType.BIOPAX))
+      convertCitation(pvElem);
+
+    
+  }
+  
+  private void convertCitation(PathwayElement pvElem) {
+
+//	  System.out.println("convertCitation");
+//	  System.out.println(pvElem.getElementID());
+//	  BiopaxReferenceManager ref = pvElem.getBiopaxReferenceManager();
+//	  List<PublicationXref> pubs = ref.getPublicationXRefs();
+//	  System.out.println(pubs.size() + " pubs");
+//	  for (PublicationXref pub : pubs)
+//		  System.out.println(pub.getPubmedId() + "");
+//	  List<String> refs = pvElem.getBiopaxRefs();
+//	  System.out.println(refs.size() + " refs");
+//	  Pathway oe =  pvElem.getPathway();
+//	  BiopaxElement elem =  oe.getBiopax();
+//	  refs = elem.getBiopaxRefs();
+//	  ref = elem.getBiopaxReferenceManager();
+//	  System.out.println(refs.size() + " refs");
+//	  pubs = ref.getPublicationXRefs();	  
+//	  System.out.println(pubs.size() + " pubs");
+//
+//	  List<Comment> comments = pvElem.getComments();
+//	  System.out.println(comments.size() + " comments");
+}
+
+/*
    ========================================================
      States
    ========================================================
@@ -1224,7 +1264,7 @@ public class GpmlToPathway {
       cyEndNode = cyNet.addNode();
       assignAnchorVizStyle(cyEndNode, endPt);
     }    
-      newEdge(pvLine, cyStartNode, cyEndNode, true, true);
+    newEdge(pvLine, cyStartNode, cyEndNode, true, true);
   }
 //------------------------------------------
   
@@ -1235,6 +1275,9 @@ public class GpmlToPathway {
 	final CyEdge cyEdge = cyNet.addEdge(cySourceNode, cyTargetNode, true);
     
     store(cyEdgeTbl, cyEdge, pvLine, 
+//			BasicTableStore.GRAPH_ID, 
+//			XREF_ID_STORE, 
+//			XREF_DATA_SOURCE_STORE,
 	      BasicVizTableStore.EDGE_LINE_THICKNESS, BasicVizTableStore.EDGE_LINE_STYLE,
 	      BasicVizTableStore.EDGE_COLOR, BasicVizTableStore.EDGE_CONNECTOR_TYPE );
     

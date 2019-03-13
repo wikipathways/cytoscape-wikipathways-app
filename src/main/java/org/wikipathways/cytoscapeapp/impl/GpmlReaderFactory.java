@@ -79,12 +79,10 @@ public interface GpmlReaderFactory {
    * @param network The {@link org.cytoscape.model.CyNetwork} instance that will store the converted GPML pathway.
    *
    * @param method The method by which the GPML pathway is converted to a Cytoscape network.
-   *
-   * @param setNetworkName If true, this method will update the {@code network}'s name to the pathway's name specified in {@code gpmlContents}.
    */
   public TaskIterator createReader(
 		  final String id, final Reader gpmlContents,
-		  final CyNetwork network, final GpmlConversionMethod method, final boolean setNetworkName);
+		  final CyNetwork network, final GpmlConversionMethod method);
 
   /**
    * Creates a task iterator that builds the network view for a network that contains a GPML pathway.
@@ -123,10 +121,10 @@ public interface GpmlReaderFactory {
    *
    * @param setNetworkName If true, this method will update the {@code networkView}'s name to the pathway's name specified in {@code gpmlContents}.
    */
-  public TaskIterator createReaderAndViewBuilder(
-			 final String id, final Reader gpmlContents, final CyNetworkView networkView,
-			 final GpmlConversionMethod method, final boolean setNetworkName);
-
+//  public TaskIterator createReaderAndViewBuilder(
+//			 final String id, final Reader gpmlContents, final CyNetworkView networkView,
+//			 final GpmlConversionMethod method);
+//
   /**
    * Creates a task iterator that reads the GPML pathway from {@code gpmlContents}, builds the converted
    * GPML pathway, and builds the network view.
