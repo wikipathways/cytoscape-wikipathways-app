@@ -82,12 +82,12 @@ public class CyActivator extends AbstractCyActivator {
 //	reg(context,  new WPSpeciesCmdTaskFactory(client), "get-species", "wikipathways");
 //  reg(context,  new WPSearchCmdTaskFactory(client, registrar, guiClient), "search", "wikipathways");
 	
-	final  String longDesc1 = "Import a GPML file and translate it into a pathway diagram";
-	final  String longDesc2 = "Import a GPML file and translate it into a network";
-	final  String longDesc3 = "Import a GPML file and translate it into a pathway diagram";
-	final  String longDesc4 = "Import a GPML file and translate it into a network";
-	final  String longDesc5 = "Import a GPML file and translate it into a pathway diagram";
-	final  String longDesc6 = "Import a GPML file and translate it into a network";
+	final  String longDesc1 = "Import a GPML object from WikiPathways and translate it into a pathway diagram";
+	final  String longDesc2 = "Import a GPML object from WikiPathways and translate it into a network";
+	final  String longDesc3 = "Import a GPML object from WikiPathways and translate it into a pathway diagram";
+	final  String longDesc4 = "Import a GPML object from WikiPathways and translate it into a network";
+	final  String longDesc5 = "Import a GPML file from a file path and translate it into a pathway diagram";
+	final  String longDesc6 = "Import a GPML file from a file path translate it into a network";
     reg(context,  new GpmlImportCmdTaskFactory(gpmlReaderFactory, GpmlConversionMethod.PATHWAY),"import-as-pathway", "gpml", longDesc1);
     reg(context,  new GpmlImportCmdTaskFactory(gpmlReaderFactory, GpmlConversionMethod.NETWORK),"import-as-network", "gpml", longDesc2);
     reg(context,  new WPImportCmdTaskFactory(client, gpmlReaderFactory, GpmlConversionMethod.PATHWAY, taskMgr),"import-as-pathway", "wikipathways", longDesc3);

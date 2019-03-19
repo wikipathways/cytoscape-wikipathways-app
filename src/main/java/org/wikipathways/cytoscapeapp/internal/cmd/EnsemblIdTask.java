@@ -1,5 +1,6 @@
 package org.wikipathways.cytoscapeapp.internal.cmd;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -7,7 +8,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
@@ -20,7 +20,6 @@ import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.TaskMonitor;
 import org.wikipathways.cytoscapeapp.internal.cmd.mapping.BridgeDbIdMapper;
-import org.wikipathways.cytoscapeapp.internal.cmd.mapping.IdMapping;
 import org.wikipathways.cytoscapeapp.internal.cmd.mapping.MappingSource;
 
 //-----------------------------------------------------------------------
@@ -138,7 +137,8 @@ public class EnsemblIdTask extends AbstractTask {
 				final BridgeDbIdMapper map = new BridgeDbIdMapper();
 				result = map.map(geneset, source.system(), "En", species, species);
 			}
-		} catch (final NullPointerException e) {
+		} catch (final NullPointerException e)
+		{
 			SwingUtilities.invokeLater(new Runnable() {
 				@Override public void run() { 
 					String msg = e.getMessage();
@@ -147,6 +147,7 @@ public class EnsemblIdTask extends AbstractTask {
 					JOptionPane.showMessageDialog(null, msg, "Mapping Error", JOptionPane.ERROR_MESSAGE); }
 			});
 		}
+
 		return result;
 	}
 

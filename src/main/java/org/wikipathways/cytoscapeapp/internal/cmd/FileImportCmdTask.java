@@ -22,7 +22,11 @@ public class FileImportCmdTask extends AbstractTask {
   static final Pattern WP_ID_REGEX = Pattern.compile("WP\\d+");
 
 	@ContainsTunables
-  @Tunable
+  @Tunable(
+			description = "File name",
+			longDescription="The full path to the import file", 
+			exampleStringValue = "/Users/Joe/ThePathway.gpml"
+	)
   public String filename;
 
   final WPClient client;

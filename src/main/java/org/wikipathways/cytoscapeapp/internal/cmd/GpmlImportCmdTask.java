@@ -28,13 +28,13 @@ public class GpmlImportCmdTask extends AbstractTask implements ObservableTask {
 			exampleStringValue = "\"Pathway\""
 	)
   final GpmlConversionMethod method;
-	@Tunable(description = "XXXXXXXX Protein query", required = true, 
-	         longDescription="XXXXXXXX Comma separated list of protein names or identifiers",
-					 exampleStringValue="EGFR,BRCA1,BRCA2,TP53")
+	@Tunable(description = "The format of the converted file", required = true, 
+	         longDescription="GPML files can be imported as pathways with annotations, or as network only.",
+					 exampleStringValue="Pathway")
 	public String query = null;
 
-	@Tunable(description = "XXXXXXXX Species", 
-	         longDescription="XXXXXXXX Species name.  This should be the actual "+
+	@Tunable(description = "Species", 
+	         longDescription="Species name.  This should be the actual "+
 					                "taxonomic name (e.g. homo sapiens, not human)",
 					 exampleStringValue="homo sapiens")
 	public String species = null;
