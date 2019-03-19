@@ -35,7 +35,7 @@ public class GpmlImportCmdTask extends AbstractTask implements ObservableTask {
 
 	@Tunable(description = "Species", 
 	         longDescription="Species name.  This should be the actual "+
-					                "taxonomic name (e.g. homo sapiens, not human)",
+					                "taxonomic name (e.g., homo sapiens, not human)",
 					 exampleStringValue="homo sapiens")
 	public String species = null;
 
