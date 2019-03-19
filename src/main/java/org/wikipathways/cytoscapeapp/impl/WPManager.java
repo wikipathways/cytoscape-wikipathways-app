@@ -90,7 +90,8 @@ public class WPManager {
 	      final TaskIterator taskIterator = new TaskIterator(loadPathwayTask);
 	      taskIterator.append(new AbstractTask() {
 	        public void run(TaskMonitor monitor) {
-	          super.insertTasksAfterCurrentTask(gpmlReader.createReaderAndViewBuilder(pathway.getId(), loadPathwayTask.get(), method));
+	        	TaskIterator iter = gpmlReader.createReaderAndViewBuilder(pathway.getId(), loadPathwayTask.get(), method, null);
+	          super.insertTasksAfterCurrentTask(iter);
 	        }
 	      });
 	     taskMgr.execute(taskIterator, new TaskObserver() {

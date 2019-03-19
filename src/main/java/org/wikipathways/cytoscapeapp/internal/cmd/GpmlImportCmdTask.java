@@ -51,13 +51,12 @@ public class GpmlImportCmdTask extends AbstractTask implements ObservableTask {
     if (idx > 0)
     {		
     	String id = file.getName().substring(0, idx);
-    	super.insertTasksAfterCurrentTask(factory.createReaderAndViewBuilder(id, reader, method));
+    	super.insertTasksAfterCurrentTask(factory.createReaderAndViewBuilder(id, reader, method, null));
     }
   }
 
 @Override
 public <R> R getResults(Class<? extends R> type) {
-	// TODO Auto-generated method stub
 	System.out.println("DONE");
 	return null;
 }

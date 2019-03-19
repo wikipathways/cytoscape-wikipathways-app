@@ -135,7 +135,7 @@ public class GpmlToPathway {
 	    convertLabels();
 	    convertAnchors();
 	    convertLines();
-	    convertCitations();
+//	    convertCitations();
 	
 	    
 	    pvToCyNodes.clear();				// clear our data structures to be nice to the GC
@@ -913,17 +913,16 @@ public class GpmlToPathway {
     Citations
   ========================================================
  */
+//none of these access functions seemed to work, citations are scraped from the raw XML
  
-  private void convertCitations() {
-    for (final PathwayElement pvElem : pvPathway.getDataObjects()) 
-      if (pvElem.getObjectType().equals(ObjectType.BIOPAX))
-      convertCitation(pvElem);
-
-    
-  }
+//  private void convertCitations() {
+//    for (final PathwayElement pvElem : pvPathway.getDataObjects()) 
+//      if (pvElem.getObjectType().equals(ObjectType.BIOPAX))
+//      convertCitation(pvElem);
+//  }
   
-  private void convertCitation(PathwayElement pvElem) {
-
+//  private void convertCitation(PathwayElement pvElem) {
+//	  
 //	  System.out.println("convertCitation");
 //	  System.out.println(pvElem.getElementID());
 //	  BiopaxReferenceManager ref = pvElem.getBiopaxReferenceManager();
@@ -943,7 +942,7 @@ public class GpmlToPathway {
 //
 //	  List<Comment> comments = pvElem.getComments();
 //	  System.out.println(comments.size() + " comments");
-}
+//}
 
 /*
    ========================================================

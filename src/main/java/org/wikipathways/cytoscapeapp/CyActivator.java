@@ -42,7 +42,7 @@ import org.wikipathways.cytoscapeapp.internal.cmd.FileImportCmdTaskFactory;
 import org.wikipathways.cytoscapeapp.internal.cmd.GpmlImportCmdTaskFactory;
 import org.wikipathways.cytoscapeapp.internal.cmd.WPImportCmdTaskFactory;
 import org.wikipathways.cytoscapeapp.internal.guiclient.GUI;
-import org.wikipathways.cytoscapeapp.internal.io.GpmlCyReaderTaskFactory;
+import org.wikipathways.cytoscapeapp.internal.io.GpmlFileReaderTaskFactory;
 /**
  * 
  * @author martinakutmon
@@ -59,7 +59,7 @@ public class CyActivator extends AbstractCyActivator {
     final GpmlReaderFactory gpmlReaderFactory = new GpmlReaderFactoryImpl(registrar);
     registerService(context, gpmlReaderFactory, GpmlReaderFactory.class);
     final StreamUtil streamUtil = getService(context,StreamUtil.class);
-    final GpmlCyReaderTaskFactory gpmlCyReaderTaskFactory = new GpmlCyReaderTaskFactory( gpmlReaderFactory, streamUtil);
+    final GpmlFileReaderTaskFactory gpmlCyReaderTaskFactory = new GpmlFileReaderTaskFactory( gpmlReaderFactory, streamUtil);
     registerService(context, gpmlCyReaderTaskFactory, InputStreamTaskFactory.class);
 
     // --- analogous GpmlWriterFactory and the GpmlCyWriterTaskFactory to manage exports go here  
@@ -81,12 +81,19 @@ public class CyActivator extends AbstractCyActivator {
 		// ---- create and register a bunch of CommandTaskFactories
 //	reg(context,  new WPSpeciesCmdTaskFactory(client), "get-species", "wikipathways");
 //  reg(context,  new WPSearchCmdTaskFactory(client, registrar, guiClient), "search", "wikipathways");
-    reg(context,  new GpmlImportCmdTaskFactory(gpmlReaderFactory, GpmlConversionMethod.PATHWAY),"import-as-pathway", "gpml");
-    reg(context,  new GpmlImportCmdTaskFactory(gpmlReaderFactory, GpmlConversionMethod.NETWORK),"import-as-network", "gpml");
-    reg(context,  new WPImportCmdTaskFactory(client, gpmlReaderFactory, GpmlConversionMethod.PATHWAY, taskMgr),"import-as-pathway", "wikipathways");
-    reg(context,  new WPImportCmdTaskFactory(client, gpmlReaderFactory, GpmlConversionMethod.NETWORK, taskMgr),"import-as-network", "wikipathways");
-    reg(context,  new FileImportCmdTaskFactory(client, gpmlReaderFactory, GpmlConversionMethod.PATHWAY, taskMgr),"import-file-as-pathway", "wikipathways");
-    reg(context,  new FileImportCmdTaskFactory(client, gpmlReaderFactory, GpmlConversionMethod.NETWORK, taskMgr),"import-file-as-network", "wikipathways");
+	
+	final  String longDesc1 = "Import a GPML file and translate it into a pathway diagram";
+	final  String longDesc2 = "Import a GPML file and translate it into a network";
+	final  String longDesc3 = "Import a GPML file and translate it into a pathway diagram";
+	final  String longDesc4 = "Import a GPML file and translate it into a network";
+	final  String longDesc5 = "Import a GPML file and translate it into a pathway diagram";
+	final  String longDesc6 = "Import a GPML file and translate it into a network";
+    reg(context,  new GpmlImportCmdTaskFactory(gpmlReaderFactory, GpmlConversionMethod.PATHWAY),"import-as-pathway", "gpml", longDesc1);
+    reg(context,  new GpmlImportCmdTaskFactory(gpmlReaderFactory, GpmlConversionMethod.NETWORK),"import-as-network", "gpml", longDesc2);
+    reg(context,  new WPImportCmdTaskFactory(client, gpmlReaderFactory, GpmlConversionMethod.PATHWAY, taskMgr),"import-as-pathway", "wikipathways", longDesc3);
+    reg(context,  new WPImportCmdTaskFactory(client, gpmlReaderFactory, GpmlConversionMethod.NETWORK, taskMgr),"import-as-network", "wikipathways", longDesc4);
+    reg(context,  new FileImportCmdTaskFactory(client, gpmlReaderFactory, GpmlConversionMethod.PATHWAY, taskMgr),"import-file-as-pathway", "wikipathways", longDesc5);
+    reg(context,  new FileImportCmdTaskFactory(client, gpmlReaderFactory, GpmlConversionMethod.NETWORK, taskMgr),"import-file-as-network", "wikipathways", longDesc6);
 
     // --- analogous export commands go here   TODO
    
@@ -107,10 +114,18 @@ public class CyActivator extends AbstractCyActivator {
 //-----------------------------------------------------
 	String JSON_EXAMPLE = "{\"SUID\":1234}";
 
-	private void reg(BundleContext context, Object service, String cmd, String namespace)
+//	private void reg(BundleContext context, Object service, String cmd, String namespace)
+//    {
+//        registerService(context, service, TaskFactory.class, ezProps( 
+//			 ServiceProperties.COMMAND,cmd,  ServiceProperties.COMMAND_NAMESPACE, namespace, 
+//			 ServiceProperties.COMMAND_SUPPORTS_JSON, "true",  ServiceProperties.COMMAND_EXAMPLE_JSON, JSON_EXAMPLE 
+//		 ));
+// }
+	private void reg(BundleContext context, Object service, String cmd, String namespace, String desc)
     {
         registerService(context, service, TaskFactory.class, ezProps( 
 			 ServiceProperties.COMMAND,cmd,  ServiceProperties.COMMAND_NAMESPACE, namespace, 
+			 ServiceProperties.COMMAND_DESCRIPTION, desc, 
 			 ServiceProperties.COMMAND_SUPPORTS_JSON, "true",  ServiceProperties.COMMAND_EXAMPLE_JSON, JSON_EXAMPLE 
 		 ));
  }

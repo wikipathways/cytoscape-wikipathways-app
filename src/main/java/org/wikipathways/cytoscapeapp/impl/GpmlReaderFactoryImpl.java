@@ -1,8 +1,12 @@
 package org.wikipathways.cytoscapeapp.impl;
 
-import java.io.BufferedReader;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.StringReader;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,25 +61,25 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
 	CyServiceRegistrar registrar;
   final Map<CyNetwork,GpmlConversionMethod> conversionMethods = new HashMap<CyNetwork,GpmlConversionMethod>();
   final Map<CyNetwork,List<DelayedVizProp>> pendingVizProps = new HashMap<CyNetwork,List<DelayedVizProp>>();
+//
+//  private boolean semaphore = false;
+//  
+//	public void setSemaphore()
+//	{
+//		  System.out.println("setSemaphore");
+//		  if (semaphore)
+//			  System.out.println("FAIL");
+//		  else semaphore = true;
+//
+//		
+//	}
+//	public void clearSemaphore()
+//	{
+//		  System.out.println("clearSemaphore");
+//		  semaphore = false;
+//	}
 
-  private boolean semaphore = false;
-  
-	public void setSemaphore()
-	{
-		  System.out.println("setSemaphore");
-		  if (semaphore)
-			  System.out.println("FAIL");
-		  else semaphore = true;
-
-		
-	}
-	public void clearSemaphore()
-	{
-		  System.out.println("clearSemaphore");
-		  semaphore = false;
-	}
-
-
+File myFile;
   public GpmlReaderFactoryImpl(CyServiceRegistrar registrar)
   {
 //	  System.out.println("GpmlReaderFactoryImpl");
@@ -91,12 +95,13 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
       vizStyle = new GpmlVizStyle(registrar);
       networkStyle = new GpmlNetworkStyle(registrar);
       manager = new WPManager(registrar, this );
+      myFile = null;
    }
 //--------------------------------------------------------------
   public TaskIterator createReader(final String id, final Reader gpmlContents, final CyNetwork network, 
-		  final GpmlConversionMethod conversionMethod) {
+		  final GpmlConversionMethod conversionMethod, File file) {
     conversionMethods.put(network, conversionMethod);
-    ReaderTask t = new ReaderTask(manager, gpmlContents, network, conversionMethod);
+    ReaderTask t = new ReaderTask(manager, gpmlContents, network, conversionMethod, file);
     return new TaskIterator(t);
   }
 
@@ -130,16 +135,20 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
   
   }
 
-  public TaskIterator createReaderAndViewBuilder(final String id, final Reader gpmlContents, final GpmlConversionMethod conversionMethod) {
+  public TaskIterator createReaderAndViewBuilder(final String id, final Reader gpmlContents, final GpmlConversionMethod conversionMethod, File f) {
 	  System.out.println("createReaderAndViewBuilderOuter");
    final CyNetwork network = netFactory.createNetwork();
     network.getRow(network).set(CyNetwork.NAME, id);
     netMgr.addNetwork(network);
+    if (gpmlContents instanceof InputStreamReader)
+    {
+    	InputStreamReader isr = (InputStreamReader) gpmlContents;
+    	System.out.println("reset me");
+    }
     final CyNetworkView view = netViewFactory.createNetworkView(network);
     netViewMgr.addNetworkView(view);
-    String a = gpmlContents.toString();
     final TaskIterator iterator = new TaskIterator();
-    iterator.append(createReader(id, gpmlContents, network, conversionMethod));
+    iterator.append(createReader(id, gpmlContents, network, conversionMethod, f));
     iterator.append(createViewBuilder(id, network, view));
     if (organism == null)		
     	readOrganismKeywork(gpmlContents);
@@ -182,22 +191,24 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
     final CyNetwork network;
     final GpmlConversionMethod conversionMethod;
     final WPManager manager;
+    final File file;
 
     public ReaderTask(
         final WPManager wpMgr,
         final Reader gpmlContents,
         final CyNetwork network,
-        final GpmlConversionMethod conversionMethod
+        final GpmlConversionMethod conversionMethod, File file
         )
     {
         this.manager = wpMgr;
         this.gpmlContents = gpmlContents;
         this.network = network;
         this.conversionMethod = conversionMethod;
+        this.file = file;
     }
 
     private void addNetworkTableColumns(String ...strings)
-    {
+    {	
 		for (String s : strings)
 		{
 			CyColumn col = network.getDefaultNetworkTable().getColumn(s);
@@ -208,26 +219,43 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
     	
     }
 	public void run(TaskMonitor monitor) throws Exception {
+		System.out.println("running ReaderTask");
 		monitor.setTitle("Construct network");
 
 		monitor.setStatusMessage("Parsing pathways file");
 		final Pathway pathway = new Pathway();
 		try {
-			gpmlContents.mark(10000000);
+//			gpmlContents.mark(10000000);
 			char[] chars = new char[100];
 			StringBuilder builder = new StringBuilder();
 			int charsRead = -1;
-			
+			int totalRead = 0;
+//			try {
+//				gpmlContents.reset();
+//	
+//			}
+//			catch (Exception e)
+//			{
+//				System.out.println("reset failed");
+//			}
+			if (file != null)
+				gpmlContents = new InputStreamReader(new BufferedInputStream(new FileInputStream(file)));
+	
 			 do{
 				 charsRead = gpmlContents.read(chars,0,chars.length);
 				    //if we have valid chars, append them to end of string.
 				    if(charsRead>0)
-				        builder.append(chars,0,charsRead);	 
+				    {
+				    	totalRead += charsRead;
+				    	builder.append(chars,0,charsRead);	 
+				    }
 			 } while (charsRead > 0);
 			String raw = builder.toString();
 			String pmids = scrapePMIDs(raw);
 //			System.out.println(raw);
-			gpmlContents.reset();
+//			gpmlContents.reset();
+			gpmlContents = new StringReader(builder.toString());
+			System.out.println("About to call readFromXML");
 			pathway.readFromXml(gpmlContents, true);
 			PathwayElement info = pathway.getMappInfo();
 			organism = info.getOrganism();
@@ -282,13 +310,22 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
 			String subString = raw.substring(idx, idx2);
 			int idx3 = subString.lastIndexOf(">") + 1;
 			String id = subString.substring(idx3);
-			if (!id.startsWith("PW"))
+			try 
+			{
+				Long.parseLong(id);
 				pmids.append(id).append(", ");
+			}
+			catch (NumberFormatException e)
+			{
+				// id was not an integer, ie, not a PMID
+			}
 			idx++; 
 		}
 		
 		String output = pmids.toString();
-		output = output.substring(0, output.length()-2);
+		int len = output.length()- 2;
+		if (len > 1)
+			output = output.substring(0, output.length()-2);
 		return output;
 	}
 

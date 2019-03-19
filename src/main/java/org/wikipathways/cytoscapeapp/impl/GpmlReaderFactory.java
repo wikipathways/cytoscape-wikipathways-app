@@ -1,5 +1,6 @@
 package org.wikipathways.cytoscapeapp.impl;
 
+import java.io.File;
 import java.io.Reader;
 
 import org.cytoscape.io.read.CyNetworkReader;
@@ -82,7 +83,7 @@ public interface GpmlReaderFactory {
    */
   public TaskIterator createReader(
 		  final String id, final Reader gpmlContents,
-		  final CyNetwork network, final GpmlConversionMethod method);
+		  final CyNetwork network, final GpmlConversionMethod method, final File f);
 
   /**
    * Creates a task iterator that builds the network view for a network that contains a GPML pathway.
@@ -140,12 +141,12 @@ public interface GpmlReaderFactory {
    *
    * @param conversionMethod The method by which the GPML pathway is converted to a Cytoscape network.
    */
-  public TaskIterator createReaderAndViewBuilder( final String id, final Reader rdr, final GpmlConversionMethod method);
+  public TaskIterator createReaderAndViewBuilder( final String id, final Reader rdr, final GpmlConversionMethod method, File f);
   public WPManager getWPManager();
 
   public void setClient(WPClient client);
   public WPClient getClient();
-
-public void setSemaphore();
-public void clearSemaphore();
+//
+//public void setSemaphore();
+//public void clearSemaphore();
 }

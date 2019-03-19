@@ -17,6 +17,9 @@
 //
 package org.wikipathways.cytoscapeapp.internal.io;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -39,49 +42,50 @@ import org.wikipathways.cytoscapeapp.impl.GpmlReaderFactory;
  * Reads the GPML file and creates a GPMLNetwork 
  * TODO: currently network and pathway view are initialized --> setting!
  */
-public class GpmlCyReaderTask extends AbstractTask implements CyNetworkReader {
+public class GpmlFileReaderTask extends AbstractTask implements CyNetworkReader {
     public static final String PATHWAY_DESC = "Pathway";
     public static final String NETWORK_DESC = "Network";
 
     final GpmlReaderFactory gpmlReaderFactory;
-	InputStream input = null;
-    final String fileName;
+	InputStream stream = null;
+    String fileName;
 
     @Tunable(description="Import as:", groups={"WikiPathways"})
     public ListSingleSelection<String> importMethod = new ListSingleSelection<String>(PATHWAY_DESC, NETWORK_DESC);
 
-	public GpmlCyReaderTask( final GpmlReaderFactory factory, final InputStream input, final String fileName) {
+	public GpmlFileReaderTask( final GpmlReaderFactory factory, final InputStream input, final String fName) {
         gpmlReaderFactory = factory;
-        this.input = input;
-        this.fileName = fileName;
+        stream = input;
+        fileName = fName;
 	}
 
 	@Override
 	public void run(TaskMonitor monitor) throws Exception {
         monitor.setTitle("Read GPML file " + fileName);
 		monitor.setProgress(-1.0);
+		if (fileName.startsWith("file:"))
+			fileName = fileName.substring(5);
 		int index = fileName.indexOf("_");			
 		String id = (index > 0) ? fileName.substring(0, index) : fileName;
-		System.out.println(id + ": " + index + " " + fileName.substring(index));
+		System.out.println(fileName);
 
-		final Reader prereader = new InputStreamReader(input);
-		char[] buf = new char[500000];
-		int length = prereader.read(buf);
-		String s = new String(buf);
-		System.out.println(length + "\n " + s);
-		final Reader reader = new InputStreamReader(input);
-        
-        
-        
+//		final Reader prereader = new InputStreamReader(stream);
+//		char[] buf = new char[500000];
+//		int length = prereader.read(buf);
+//		String s = new String(buf);
+//		System.out.println(s);
+//
+		File f = new File(fileName);
+		final Reader reader = new InputStreamReader(new BufferedInputStream(new FileInputStream(f)));
         final GpmlConversionMethod method = importMethod.getSelectedValue().equals(PATHWAY_DESC)  ? GpmlConversionMethod.PATHWAY  : GpmlConversionMethod.NETWORK;
-        TaskIterator iter =  gpmlReaderFactory.createReaderAndViewBuilder(id, reader, method);
+        TaskIterator iter =  gpmlReaderFactory.createReaderAndViewBuilder(id, reader, method, f);
         super.insertTasksAfterCurrentTask(iter);
     }
 
     public void cancel() {
-        if (input != null) {
+        if (stream != null) {
             try {
-                input.close();
+                stream.close();
             } catch (IOException e) {}
         }
     }
