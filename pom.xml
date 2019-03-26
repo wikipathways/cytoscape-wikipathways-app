@@ -1,20 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<properties>
 		<bundle.symbolicName>org.wikipathways.cytoscapeapp</bundle.symbolicName>
 		<bundle.namespace>org.wikipathways.cytoscapeapp</bundle.namespace>
-		<cytoscape.api.version>3.6.0</cytoscape.api.version>
+		<cytoscape.api.version>3.7.1</cytoscape.api.version>
 	</properties>
 	<packaging>bundle</packaging>
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.wikipathways</groupId>
 	<artifactId>cytoscapeapp</artifactId>
-	<version>3.3.75</version>
+	<version>3.3.77</version>
 
 	<name>WikiPathways App</name>
-	
+
 
 	<build>
 		<resources>
@@ -22,7 +24,7 @@
 				<directory>src/main/resources</directory>
 			</resource>
 		</resources>
-      <finalName>WikiPathways-${project.version}</finalName>
+		<finalName>WikiPathways-${project.version}</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -64,28 +66,28 @@
 					<redirectTestOutputToFile>true</redirectTestOutputToFile>
 				</configuration>
 			</plugin>
-      <!-- Change artifact name -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-install-plugin</artifactId>
-      <version>2.5.2</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>install-file</goal>
-            </goals>
-            <phase>install</phase>
-            <configuration>
-              <file>${project.build.directory}/${project.build.finalName}.jar</file>
-              <generatePom>false</generatePom>
-              <pomFile>pom.xml</pomFile>
-              <version>${my.version}</version>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
+			<!-- Change artifact name -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-install-plugin</artifactId>
+				<version>2.5.2</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>install-file</goal>
+						</goals>
+						<phase>install</phase>
+						<configuration>
+							<file>${project.build.directory}/${project.build.finalName}.jar</file>
+							<generatePom>false</generatePom>
+							<pomFile>pom.xml</pomFile>
+							<version>${my.version}</version>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 
-      <!-- Generates the OSGi metadata based on the osgi.bnd file. -->
+			<!-- Generates the OSGi metadata based on the osgi.bnd file. -->
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
@@ -96,16 +98,16 @@
 						<Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
 						<Bundle-Version>${project.version}</Bundle-Version>
 						<Private-Package>${bundle.namespace}.internal.*,${bundle.namespace}.impl.*</Private-Package>
-           				 <Export-Package>${bundle.namespace}</Export-Package>
+						<Export-Package>${bundle.namespace}</Export-Package>
 						<Bundle-Activator>${bundle.namespace}.CyActivator</Bundle-Activator>
 						<Embed-Dependency>*;scope=!provided</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>
 						<Import-Package>*;resolution:=optional</Import-Package>
-              <Bundle-Name>WikiPathways</Bundle-Name>
+						<Bundle-Name>WikiPathways</Bundle-Name>
 					</instructions>
 				</configuration>
 			</plugin>
- 			<plugin>
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<configuration>
@@ -116,7 +118,7 @@
 	</build>
 
 	<repositories>
-            <repository>
+		<repository>
 			<id>cytoscape_snapshots</id>
 			<snapshots>
 			</snapshots>
@@ -127,7 +129,7 @@
 			<url>http://code.cytoscape.org/nexus/content/repositories/snapshots/</url>
 		</repository>
 
-  		<repository>
+		<repository>
 			<id>cytoscape_releases</id>
 			<snapshots>
 				<enabled>false</enabled>
@@ -137,28 +139,32 @@
 			<name>Cytoscape Releases</name>
 			<url>http://code.cytoscape.org/nexus/content/repositories/releases/</url>
 		</repository>
-     <repository>
-      <id>apache-repo-releases</id>
-      <url>https://repository.apache.org/content/repositories/</url>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-    </repository>
-    <repository>
-      <id>apache_maven2</id>
-      <url>http://repo.maven.apache.org/maven2/</url>
-      <releases><enabled>true</enabled></releases>
-    </repository>
-          <repository> <id>com.springsource.repository.bundles.release</id> 
-          <name>SpringSource Enterprise Bundle Repository - SpringSource Bundle Releases</name>
-           <url>http://repository.springsource.com/maven/bundles/release</url>
-           </repository> 
-           <repository> <id>com.springsource.repository.bundles.external</id> 
-           <name>SpringSource Enterprise Bundle Repository - External Bundle Releases</name> 
-           <url>http://repository.springsource.com/maven/bundles/external</url> 
-           </repository>
-  
-  </repositories>
+		<repository>
+			<id>apache-repo-releases</id>
+			<url>https://repository.apache.org/content/repositories/</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+		</repository>
+		<repository>
+			<id>apache_maven2</id>
+			<url>http://repo.maven.apache.org/maven2/</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+		</repository>
+		<repository>
+			<id>com.springsource.repository.bundles.release</id>
+			<name>SpringSource Enterprise Bundle Repository - SpringSource Bundle Releases</name>
+			<url>http://repository.springsource.com/maven/bundles/release</url>
+		</repository>
+		<repository>
+			<id>com.springsource.repository.bundles.external</id>
+			<name>SpringSource Enterprise Bundle Repository - External Bundle Releases</name>
+			<url>http://repository.springsource.com/maven/bundles/external</url>
+		</repository>
+
+	</repositories>
 
 	<!-- Dependencies needed to compile this project. -->
 	<dependencies>
@@ -175,46 +181,46 @@
 			<version>4.2.0</version>
 			<scope>provided</scope>
 		</dependency>
-		
 
-	 	 <dependency>
+
+		<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>swing-application-api</artifactId>
 			<version>${cytoscape.api.version}</version>
 			<scope>provided</scope>
-		</dependency>  
-  
- 		<dependency>
+		</dependency>
+
+		<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>session-api</artifactId>
 			<version>${cytoscape.api.version}</version>
 			<scope>provided</scope>
-		</dependency> 
-	 	<dependency>
+		</dependency>
+		<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>webservice-api</artifactId>
 			<version>${cytoscape.api.version}</version>
 			<scope>provided</scope>
 		</dependency>
-	 	<dependency>
-    		<groupId>org.cytoscape</groupId>
-    		<artifactId>io-api</artifactId>
-    		<version>${cytoscape.api.version}</version>
-		<scope>provided</scope>
-		</dependency> 
-	 	 <dependency>
+		<dependency>
+			<groupId>org.cytoscape</groupId>
+			<artifactId>io-api</artifactId>
+			<version>${cytoscape.api.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>swing-util-api</artifactId>
 			<version>${cytoscape.api.version}</version>
 			<scope>provided</scope>
 		</dependency>
- 		<dependency>
-    		<groupId>org.cytoscape</groupId>
-    		<artifactId>swing-app-api</artifactId>
- 	   	<version>${cytoscape.api.version}</version>
-		<scope>provided</scope>
-		</dependency>  
- 		<dependency>
+		<dependency>
+			<groupId>org.cytoscape</groupId>
+			<artifactId>swing-app-api</artifactId>
+			<version>${cytoscape.api.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>app-api</artifactId>
 			<version>${cytoscape.api.version}</version>
@@ -225,50 +231,54 @@
 			<artifactId>presentation-api</artifactId>
 			<version>${cytoscape.api.version}</version>
 			<scope>provided</scope>
-		</dependency> 
- 		<dependency>
+		</dependency>
+		<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>vizmap-api</artifactId>
 			<version>${cytoscape.api.version}</version>
 			<scope>provided</scope>
-		</dependency> 
-		<dependency>
-    		<groupId>org.cytoscape</groupId>
-    		<artifactId>work-api</artifactId>
-    		<version>${cytoscape.api.version}</version>
-		<scope>provided</scope>
 		</dependency>
-         <dependency>
-                 <groupId>org.cytoscape</groupId>
-                 <artifactId>viewmodel-api</artifactId>
-                 <version>${cytoscape.api.version}</version>
-                 <scope>provided</scope>
-         </dependency>
-         <dependency>
-                 <groupId>org.cytoscape</groupId>
-                 <artifactId>application-api</artifactId>
-                 <version>${cytoscape.api.version}</version>
-                 <scope>provided</scope>
-         </dependency>
-         <dependency>
-                 <groupId>org.cytoscape</groupId>
-                 <artifactId>model-api</artifactId>
-                 <version>${cytoscape.api.version}</version>
-                 <scope>provided</scope>
-         </dependency>
-         <dependency>
-                 <groupId>org.cytoscape</groupId>
-                 <artifactId>event-api</artifactId>
-                 <version>${cytoscape.api.version}</version>
-                 <scope>provided</scope>
-         </dependency>
-         <dependency>
-                 <groupId>org.cytoscape</groupId>
-                 <artifactId>work-swing-api</artifactId>
-                 <version>${cytoscape.api.version}</version>
-                 <scope>provided</scope>
-         </dependency> 
-
+		<dependency>
+			<groupId>org.cytoscape</groupId>
+			<artifactId>work-api</artifactId>
+			<version>${cytoscape.api.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.cytoscape</groupId>
+			<artifactId>viewmodel-api</artifactId>
+			<version>${cytoscape.api.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.cytoscape</groupId>
+			<artifactId>application-api</artifactId>
+			<version>${cytoscape.api.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.cytoscape</groupId>
+			<artifactId>model-api</artifactId>
+			<version>${cytoscape.api.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.cytoscape</groupId>
+			<artifactId>event-api</artifactId>
+			<version>${cytoscape.api.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.cytoscape</groupId>
+			<artifactId>work-swing-api</artifactId>
+			<version>${cytoscape.api.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<version>4.3.6</version>
+		</dependency>
 
 
 		<!-- Logging -->
@@ -278,42 +288,48 @@
 			<version>1.5.2</version>
 			<scope>provided</scope>
 		</dependency>
-		
-		<!-- local dependencies --> 
+
+
+		<!-- local dependencies -->
 		<dependency>
 			<groupId>com.springsource</groupId>
 			<artifactId>org.jdom</artifactId>
 			<version>1.1.0</version>
 			<optional>true</optional>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/localRepo/com.springsource.org.jdom-1.1.0.jar</systemPath>
 		</dependency>
-		<dependency> 
-      		<groupId>org.pathvisio</groupId> 
-      		<artifactId>pathvisio-core</artifactId> 
-      		<version>3.2.2</version> 
-      		<optional>true</optional>
-    	</dependency> 
- 		<dependency> 
-      		<groupId>org.bridgedb</groupId> 
-      		<artifactId>bridgedb</artifactId> 
-      		<version>2.0.0</version> 
-      		<optional>true</optional>
-    	</dependency>
-		<dependency> 
-      		<groupId>org.bridgedb</groupId> 
-      		<artifactId>bridgedb-bio</artifactId> 
-      		<version>2.0.0</version> 
-      		<optional>true</optional>
-    	</dependency> 
-    	<dependency> 
-      		<groupId>derby</groupId> 
-      		<artifactId>derby</artifactId> 
-      		<version>10.4</version> 
-      		<optional>true</optional>
-    	</dependency> 
-     <dependency>
-      <groupId>org.apache.httpcomponents</groupId>
-      <artifactId>httpclient</artifactId>
-      <version>4.3.6</version>
-    </dependency>
+		<dependency>
+			<groupId>org.pathvisio</groupId>
+			<artifactId>pathvisio-core</artifactId>
+			<version>3.2.2</version>
+			<optional>true</optional>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/localRepo/org.pathvisio.core.jar</systemPath>
+		</dependency>
+		<dependency>
+			<groupId>org.bridgedb</groupId>
+			<artifactId>bridgedb</artifactId>
+			<version>2.0.0</version>
+			<optional>true</optional>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/localRepo/org.bridgedb.jar</systemPath>
+		</dependency>
+		<dependency>
+			<groupId>org.bridgedb</groupId>
+			<artifactId>bridgedb-bio</artifactId>
+			<version>2.0.0</version>
+			<optional>true</optional>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/localRepo/org.bridgedb.bio.jar</systemPath>
+		</dependency>
+		<dependency>
+			<groupId>derby</groupId>
+			<artifactId>derby</artifactId>
+			<version>10.4</version>
+			<optional>true</optional>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/localRepo/derby.jar</systemPath>
+		</dependency>
 	</dependencies>
-  </project>
+</project>
