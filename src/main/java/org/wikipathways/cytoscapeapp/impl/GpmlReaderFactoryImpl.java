@@ -150,7 +150,7 @@ File myFile;
     final TaskIterator iterator = new TaskIterator();
     iterator.append(createReader(id, gpmlContents, network, conversionMethod, f));
     iterator.append(createViewBuilder(id, network, view));
-    if (organism == null)		
+//    if (organism == null)		
     	readOrganismKeywork(gpmlContents);
 
     iterator.append(new EnsemblIdTask(network, registrar, organism));
