@@ -213,7 +213,7 @@ File myFile;
 		{
 			CyColumn col = network.getDefaultNetworkTable().getColumn(s);
 			if (col == null)
-				 network.getDefaultNetworkTable().createColumn(s, String.class, true);
+				 network.getDefaultNetworkTable().createColumn(s, String.class, false);
 		
 		}
     	

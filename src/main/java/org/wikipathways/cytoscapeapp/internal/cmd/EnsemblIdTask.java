@@ -59,7 +59,7 @@ public class EnsemblIdTask extends AbstractTask {
 		List<String> sources = new ArrayList<String>();
 		CyColumn ensemblColumn  = table.getColumn(ENSEMBL_COLUMN);
 		if  (ensemblColumn == null)
-			table.createColumn(ENSEMBL_COLUMN, String.class, true);
+			table.createColumn(ENSEMBL_COLUMN, String.class, false);
 		if (verbose) System.out.println("\nbuildIdMapBatch\n");
 		List<CyRow> rows = table.getAllRows();
 		if (rows.isEmpty()) 
