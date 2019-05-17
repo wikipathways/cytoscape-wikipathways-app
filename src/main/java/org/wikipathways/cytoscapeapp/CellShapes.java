@@ -290,7 +290,7 @@ static public GeneralPath makeBrace()
 	path.quadTo(6, 2, 6, 0);
 	path.quadTo(6, 2, 9, 2);
 	path.quadTo(12, 2, 12, 4);
-	path.closePath();
+//	path.closePath();
 	return path;
 }
 
