@@ -71,9 +71,9 @@ public class CyActivator extends AbstractCyActivator {
 	final CyApplicationConfiguration appConf = getService(context, CyApplicationConfiguration.class);
 	final WPClientFactory clientFactory = new WPClientRESTFactoryImpl(appConf, gpmlReaderFactory.getWPManager());
 	registerService(context, clientFactory, WPClientFactory.class);
-	final TaskManager<?, ?> taskMgr = getService(context, SynchronousTaskManager.class);
 	final WPClient client = clientFactory.create();
 	gpmlReaderFactory.setClient(client);
+	final TaskManager<?, ?> taskMgr = getService(context, SynchronousTaskManager.class);
 	final OpenBrowser openBrowser = getService(context, OpenBrowser.class);
 	final GUI guiClient = new GUI(taskMgr, client, openBrowser, gpmlReaderFactory);
 	registerAllServices(context, guiClient);
@@ -88,12 +88,18 @@ public class CyActivator extends AbstractCyActivator {
 	final  String longDesc4 = "Import a GPML object from WikiPathways and translate it into a network";
 	final  String longDesc5 = "Import a GPML file from a file path and translate it into a pathway diagram";
 	final  String longDesc6 = "Import a GPML file from a file path translate it into a network";
-    reg(context,  new GpmlImportCmdTaskFactory(gpmlReaderFactory, GpmlConversionMethod.PATHWAY),"import-as-pathway", "gpml", longDesc1);
-    reg(context,  new GpmlImportCmdTaskFactory(gpmlReaderFactory, GpmlConversionMethod.NETWORK),"import-as-network", "gpml", longDesc2);
-    reg(context,  new WPImportCmdTaskFactory(client, gpmlReaderFactory, GpmlConversionMethod.PATHWAY, taskMgr),"import-as-pathway", "wikipathways", longDesc3);
-    reg(context,  new WPImportCmdTaskFactory(client, gpmlReaderFactory, GpmlConversionMethod.NETWORK, taskMgr),"import-as-network", "wikipathways", longDesc4);
+//    reg(context,  new GpmlImportCmdTaskFactory(gpmlReaderFactory, GpmlConversionMethod.PATHWAY),"import-as-pathway", "gpml", longDesc1);
+//    reg(context,  new GpmlImportCmdTaskFactory(gpmlReaderFactory, GpmlConversionMethod.NETWORK),"import-as-network", "gpml", longDesc2);
+//    reg(context,  new WPImportCmdTaskFactory(client, gpmlReaderFactory, GpmlConversionMethod.PATHWAY, taskMgr),"import-as-pathway", "wikipathways", longDesc3);
+//    reg(context,  new WPImportCmdTaskFactory(client, gpmlReaderFactory, GpmlConversionMethod.NETWORK, taskMgr),"import-as-network", "wikipathways", longDesc4);
     reg(context,  new FileImportCmdTaskFactory(client, gpmlReaderFactory, GpmlConversionMethod.PATHWAY, taskMgr),"import-file-as-pathway", "wikipathways", longDesc5);
     reg(context,  new FileImportCmdTaskFactory(client, gpmlReaderFactory, GpmlConversionMethod.NETWORK, taskMgr),"import-file-as-network", "wikipathways", longDesc6);
+ 
+    
+//	final  String longDesc7 = "Open a file and translate it into a pathway diagram";
+//	final  String longDesc8 = "Open a file and translate it into a network";
+//    reg(context,  new FileImportCmdTaskFactory(client, gpmlReaderFactory, GpmlConversionMethod.NETWORK, taskMgr),"import-as-file", "wikipathways", longDesc7);
+//    reg(context,  new FileImportCmdTaskFactory(client, gpmlReaderFactory, GpmlConversionMethod.NETWORK, taskMgr),"import-as-file", "wikipathways", longDesc8);
 
     // --- analogous export commands go here   TODO
    

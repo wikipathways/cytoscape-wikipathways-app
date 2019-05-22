@@ -1274,7 +1274,7 @@ public class GpmlToPathway {
 	final CyEdge cyEdge = cyNet.addEdge(cySourceNode, cyTargetNode, true);
     
     store(cyEdgeTbl, cyEdge, pvLine, 
-//			BasicTableStore.GRAPH_ID, 
+//			BasicTableStore.TEXT_LABEL, 
 //			XREF_ID_STORE, 
 //			XREF_DATA_SOURCE_STORE,
 	      BasicVizTableStore.EDGE_LINE_THICKNESS, BasicVizTableStore.EDGE_LINE_STYLE,
@@ -1290,7 +1290,22 @@ public class GpmlToPathway {
     
     if (isEnd) 
       store(cyEdgeTbl, cyEdge, pvLine, BasicVizTableStore.EDGE_END_ARROW);
-    
+ 
+    // #107  Edge Table is missing name, shared name, interaction, shared interaction
+    CyNode src = cyEdge.getSource();
+    CyNode targ = cyEdge.getTarget();
+    CyRow srcRow = cyNodeTbl.getRow(src.getSUID());
+    CyRow targRow = cyNodeTbl.getRow(targ.getSUID());
+    CyRow edgeRow = cyEdgeTbl.getRow(cyEdge.getSUID());
+    String srcName = srcRow.get("name", String.class);
+    String interaction = edgeRow.get("EndArrow", String.class);
+    String targName = targRow.get("name", String.class);
+    String edgeName = srcName + " " + interaction + " " + targName;
+    edgeRow.set("name", edgeName);
+    edgeRow.set("shared name", edgeName);
+    edgeRow.set("interaction", interaction);
+    edgeRow.set("shared interaction", interaction);
+   
     
   }
   
@@ -1432,13 +1447,13 @@ static boolean verbose = false;
 		return manager.getNetworkViewMgr().getNetworkViews(cyNet).iterator().next();
 	}
 	
-	private String getNodeName(CyNode source) {
-		CyTable nodeTable = networkView.getModel().getDefaultNodeTable();
-		CyRow row = nodeTable.getRow(source.getSUID());
-		String name = row.get("name", String.class);
-		return name;
-}
-	private String getNodeNameWithId(CyNode source) {		return getNodeName(source) + " (" + source.getSUID() + ")";}
+//	private String getNodeName(CyNode source) {
+//		CyTable nodeTable = networkView.getModel().getDefaultNodeTable();
+//		CyRow row = nodeTable.getRow(source.getSUID());
+//		String name = row.get("name", String.class);
+//		return name;
+//}
+//	private String getNodeNameWithId(CyNode source) {		return getNodeName(source) + " (" + source.getSUID() + ")";}
 	private String printPoint(Point2D pt)			{		return ("(" + (int) pt.getX() + ", " + (int) pt.getY() + ")");	}
 	private String printPoint(MPoint pt)			{		return ("(" + (int) pt.getX() + ", " + (int) pt.getY() + ")");	}
 	

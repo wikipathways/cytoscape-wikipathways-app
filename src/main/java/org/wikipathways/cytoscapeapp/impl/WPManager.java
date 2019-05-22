@@ -28,16 +28,16 @@ public class WPManager {
 	final CyServiceRegistrar registrar;
 	final Annots annots;
 	final CyNetworkViewManager viewMgr;
-	final GpmlReaderFactory gpmlReader;
+	final GpmlReaderFactory gpmlReaderFactory;
 	private	WPClient client;			// this is the http client, to be filled in after constructor
 	public void setClient(WPClient c) { client = c;	}
 	
-	public WPManager(CyServiceRegistrar reg,  GpmlReaderFactory gpml)
+	public WPManager(CyServiceRegistrar reg,  GpmlReaderFactory gpmlF)
 	{
 		registrar = reg;
 		viewMgr = registrar.getService(CyNetworkViewManager.class);
 		annots = new Annots(registrar);
-		gpmlReader = gpml;
+		gpmlReaderFactory = gpmlF;
 	}
 	public CyNetworkViewManager getNetworkViewMgr() 	{	return viewMgr;	}
 	public CyServiceRegistrar getRegistrar() 			{	return registrar;	}
@@ -49,16 +49,16 @@ public class WPManager {
 
 
 	//-----------------------------------------------------
-	private Object networkView;
+//	private Object networkView;
 	private Map<String,CyTable> tables;
 	
 	public void setUpTableRefs(CyNetwork cyNet) {
-		if (networkView == null)
-		{
+//		if (networkView == null)
+//		{
 			CyNetworkTableManager netTablMgr = registrar.getService(CyNetworkTableManager.class);
-			networkView = getNetworkViewMgr().getNetworkViews(cyNet).iterator().next();
+//			Object networkView = getNetworkViewMgr().getNetworkViews(cyNet).iterator().next();
 			tables = netTablMgr.getTables(cyNet, CyNode.class);		
-		}
+//		}
 	}
 	//-----------------------------------------------------
 	// this code SHOULD disable event processing during a lengthy import.  Not sure it works!
@@ -90,7 +90,7 @@ public class WPManager {
 	      final TaskIterator taskIterator = new TaskIterator(loadPathwayTask);
 	      taskIterator.append(new AbstractTask() {
 	        public void run(TaskMonitor monitor) {
-	        	TaskIterator iter = gpmlReader.createReaderAndViewBuilder(pathway.getId(), loadPathwayTask.get(), method, null);
+	        	TaskIterator iter = gpmlReaderFactory.createReaderAndViewBuilder(pathway.getId(), loadPathwayTask.get(), method, null);
 	          super.insertTasksAfterCurrentTask(iter);
 	        }
 	      });

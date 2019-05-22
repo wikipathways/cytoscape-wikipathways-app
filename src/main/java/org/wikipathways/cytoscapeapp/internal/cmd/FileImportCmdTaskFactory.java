@@ -26,6 +26,6 @@ public class FileImportCmdTaskFactory extends AbstractTaskFactory {
   }
 
   public TaskIterator createTaskIterator() {
-    return new TaskIterator(new WPImportCmdTask(client, factory, method, taskMgr));
+    return new TaskIterator(new FileImportCmdTask(client, factory, method, taskMgr));
   }
 }

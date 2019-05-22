@@ -101,6 +101,7 @@ File myFile;
   public TaskIterator createReader(final String id, final Reader gpmlContents, final CyNetwork network, 
 		  final GpmlConversionMethod conversionMethod, File file) {
     conversionMethods.put(network, conversionMethod);
+//    manager = new WPManager(registrar, this );
     ReaderTask t = new ReaderTask(manager, gpmlContents, network, conversionMethod, file);
     return new TaskIterator(t);
   }
@@ -153,7 +154,8 @@ File myFile;
 //    if (organism == null)		
     	readOrganismKeywork(gpmlContents);
 
-    iterator.append(new EnsemblIdTask(network, registrar, organism));
+     iterator.append(new EnsemblIdTask(network, registrar, organism));
+     iterator.append(new EnsemblIdTask(network, registrar, organism));
     return iterator;
   }
 
@@ -307,6 +309,8 @@ File myFile;
 			idx = raw.indexOf(start, idx);
 			if (idx < 0) break;
 			int idx2 = raw.indexOf(end,  idx + 1);
+			if (idx2 < 0) break;			// no closing tag found
+			if (idx2 - idx > 200) break;		// closing tag is too far beyond opening
 			String subString = raw.substring(idx, idx2);
 			int idx3 = subString.lastIndexOf(">") + 1;
 			String id = subString.substring(idx3);

@@ -75,7 +75,7 @@ public class GUI extends AbstractWebServiceGUIClient implements NetworkImportWeb
     + "WikiPathways or PathVisio into Cytoscape."
     + "</html>";
 
-private static final boolean VERBOSE = false;
+private static final boolean VERBOSE = true;
 
   final String PATHWAY_IMG = getClass().getResource("/pathway.png").toString();
   final String NETWORK_IMG = getClass().getResource("/network.png").toString();

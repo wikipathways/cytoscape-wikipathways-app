@@ -19,7 +19,7 @@ import org.wikipathways.cytoscapeapp.impl.ResultTask;
 import org.wikipathways.cytoscapeapp.impl.WPPathway;
 
 public class FileImportCmdTask extends AbstractTask {
-  static final Pattern WP_ID_REGEX = Pattern.compile("WP\\d+");
+//  static final Pattern WP_ID_REGEX = Pattern.compile("WP\\d+");
 
 	@ContainsTunables
   @Tunable(
@@ -31,12 +31,12 @@ public class FileImportCmdTask extends AbstractTask {
 
   final WPClient client;
   final GpmlReaderFactory factory;
-	@Tunable(
-			description = "GPML Conversion Method",
-			gravity = 2.0,
-			longDescription="Whether the import produces a pathway or network ", 
-			exampleStringValue = "\"Pathway\""
-	)
+//	@Tunable(
+//			description = "GPML Conversion Method",
+//			gravity = 2.0,
+//			longDescription="Whether the import produces a pathway or network ", 
+//			exampleStringValue = "\"Pathway\""
+//	)
 	  final GpmlConversionMethod method;
   TaskManager<?,?> taskMgr;
 
@@ -49,10 +49,10 @@ public class FileImportCmdTask extends AbstractTask {
 
   public void run(TaskMonitor monitor) {
     if (filename == null || filename.length() == 0) {
-      throw new IllegalArgumentException("id must be specified");
+      throw new IllegalArgumentException("filename must be specified");
     }
     filename = filename.trim().toUpperCase();
-    if (filename.startsWith("file://"))   filename=filename.substring(6);	// strip front off a url, leaving /
+    if (filename.startsWith("FILE://"))   filename=filename.substring(6);	// strip front off a url, leaving /
 
     final ResultTask<WPPathway> infoTask = client.pathwayInfoTask(filename);
     final TaskIterator taskIterator = new TaskIterator(infoTask);
