@@ -286,7 +286,7 @@ File myFile;
 			List<DelayedVizProp> vizProps = null;
 			switch (conversionMethod) {
 			case PATHWAY: 	vizProps = (new GpmlToPathway(manager, eventHelper, pathway, network)).convert(); 	break;
-			case NETWORK:  (new GpmlToNetwork(eventHelper, pathway, network)).convert();	 				break;
+			case NETWORK: (new GpmlToNetwork(eventHelper, pathway, network)).convert();	 				break;
 			}
 
 			if (vizProps != null)

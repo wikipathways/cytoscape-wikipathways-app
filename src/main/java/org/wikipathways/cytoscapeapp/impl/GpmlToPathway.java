@@ -77,7 +77,7 @@ public class GpmlToPathway {
    */
   final Map<GraphLink.GraphIdContainer,CyNode> pvToCyNodes = new HashMap<GraphLink.GraphIdContainer,CyNode>();
 
-  final List<DelayedVizProp> cyDelayedVizProps = new ArrayList<DelayedVizProp>();
+  List<DelayedVizProp> cyDelayedVizProps;
 
 //  private final CyEventHelper   cyEventHelper;
 //  private final Annots          cyAnnots;
@@ -121,6 +121,7 @@ public class GpmlToPathway {
    * Convert the pathway given in the constructor.
    */
 	public List<DelayedVizProp> convert() {
+		cyDelayedVizProps = new ArrayList<DelayedVizProp>();
 		MIMShapes.registerShapes();
 		manager.turnOffEvents();
 //		System.out.println("GraphID = " + pvPathway.getUniqueGraphId());
@@ -799,7 +800,8 @@ public class GpmlToPathway {
     {
       final DelayedVizProp[] props = vizPropStore.store(cyNetObj, pvElem);
       for (DelayedVizProp prop : props) 
-        cyDelayedVizProps.add(prop);
+    	  if (prop != null)
+    		  cyDelayedVizProps.add(prop);
     }
   }
 

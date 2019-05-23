@@ -39,7 +39,7 @@ import org.wikipathways.cytoscapeapp.impl.GpmlReaderFactoryImpl;
 import org.wikipathways.cytoscapeapp.impl.WPClientRESTFactoryImpl;
 import org.wikipathways.cytoscapeapp.impl.search.WPNetworkSearchTaskFactory;
 import org.wikipathways.cytoscapeapp.internal.cmd.FileImportCmdTaskFactory;
-import org.wikipathways.cytoscapeapp.internal.cmd.GpmlImportCmdTaskFactory;
+//import org.wikipathways.cytoscapeapp.internal.cmd.GpmlImportCmdTaskFactory;
 import org.wikipathways.cytoscapeapp.internal.cmd.WPImportCmdTaskFactory;
 import org.wikipathways.cytoscapeapp.internal.guiclient.GUI;
 import org.wikipathways.cytoscapeapp.internal.io.GpmlFileReaderTaskFactory;
@@ -90,8 +90,8 @@ public class CyActivator extends AbstractCyActivator {
 	final  String longDesc6 = "Import a GPML file from a file path translate it into a network";
 //    reg(context,  new GpmlImportCmdTaskFactory(gpmlReaderFactory, GpmlConversionMethod.PATHWAY),"import-as-pathway", "gpml", longDesc1);
 //    reg(context,  new GpmlImportCmdTaskFactory(gpmlReaderFactory, GpmlConversionMethod.NETWORK),"import-as-network", "gpml", longDesc2);
-//    reg(context,  new WPImportCmdTaskFactory(client, gpmlReaderFactory, GpmlConversionMethod.PATHWAY, taskMgr),"import-as-pathway", "wikipathways", longDesc3);
-//    reg(context,  new WPImportCmdTaskFactory(client, gpmlReaderFactory, GpmlConversionMethod.NETWORK, taskMgr),"import-as-network", "wikipathways", longDesc4);
+    reg(context,  new WPImportCmdTaskFactory(client, gpmlReaderFactory, GpmlConversionMethod.PATHWAY, taskMgr),"import-as-pathway", "wikipathways", longDesc3);
+    reg(context,  new WPImportCmdTaskFactory(client, gpmlReaderFactory, GpmlConversionMethod.NETWORK, taskMgr),"import-as-network", "wikipathways", longDesc4);
     reg(context,  new FileImportCmdTaskFactory(client, gpmlReaderFactory, GpmlConversionMethod.PATHWAY, taskMgr),"import-file-as-pathway", "wikipathways", longDesc5);
     reg(context,  new FileImportCmdTaskFactory(client, gpmlReaderFactory, GpmlConversionMethod.NETWORK, taskMgr),"import-file-as-network", "wikipathways", longDesc6);
  

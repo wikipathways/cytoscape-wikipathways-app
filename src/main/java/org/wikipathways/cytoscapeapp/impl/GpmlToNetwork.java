@@ -42,7 +42,7 @@ public class GpmlToNetwork {
 	 */
 	final Map<GraphLink.GraphIdContainer, CyNode> nodes = new HashMap<GraphLink.GraphIdContainer, CyNode>();
 
-	final List<DelayedVizProp> delayedVizProps = new ArrayList<DelayedVizProp>();
+	List<DelayedVizProp> delayedVizProps = new ArrayList<DelayedVizProp>();
 
   final CyEventHelper eventHelper;
 	final Pathway pathway;
@@ -68,7 +68,8 @@ public class GpmlToNetwork {
 	 * Convert the pathway given in the constructor.
 	 */
 	public List<DelayedVizProp> convert() {
-		nodeTable.createColumn("GraphID", String.class, false);
+		 delayedVizProps = new ArrayList<DelayedVizProp>();
+		 nodeTable.createColumn("GraphID", String.class, false);
 		nodeTable.createColumn("Type", String.class, false);
 		nodeTable.createColumn("XrefId", String.class, false);
 		nodeTable.createColumn("XrefDatasource", String.class, false);
