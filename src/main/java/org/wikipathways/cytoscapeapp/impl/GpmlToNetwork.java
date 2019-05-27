@@ -296,7 +296,7 @@ public class GpmlToNetwork {
 	private void convertShapeTypeNone(final CyNode node, final PathwayElement elem) {
 		if (ShapeType.NONE.equals(elem.getShapeType())) {
 			delayedVizProps.add(new DelayedVizProp(node,BasicVisualLexicon.NODE_BORDER_WIDTH, 2.0, true));
-			delayedVizProps.add(new DelayedVizProp(node,BasicVisualLexicon.NODE_BORDER_TRANSPARENCY, 0.0, true));
+			delayedVizProps.add(new DelayedVizProp(node,BasicVisualLexicon.NODE_BORDER_TRANSPARENCY, 0, true));
 		}
 	}
 
@@ -437,7 +437,7 @@ public class GpmlToNetwork {
 //	    	      BasicVizTableStore.NODE_ROTATION,
 	      BasicVizTableStore.NODE_SIZE,
 //	      BasicVizTableStore.NODE_FILL_COLOR,
-	      BasicVizTableStore.NODE_LABEL_SIZE,
+//	      BasicVizTableStore.NODE_LABEL_SIZE,
 	      BasicVizTableStore.NODE_COLOR,
 	      BasicVizTableStore.NODE_BORDER_THICKNESS,
 	      BasicVizTableStore.EDGE_COLOR,

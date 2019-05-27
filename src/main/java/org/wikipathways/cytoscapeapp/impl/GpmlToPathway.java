@@ -213,6 +213,18 @@ public class GpmlToPathway {
 		    }
 		  };
 
+		  static final Converter FONT_SIZE_CONVERT = new Converter() {		// AST
+			    public Object toCyValue(Object[] pvValues) {
+			    
+			    	if (pvValues[0] instanceof Double)
+			    		return (Double)pvValues[0];
+//		    		return (int) Math.round((Double)pvValues[0]);
+			    	if (pvValues[0] instanceof Integer)
+			    		return (int) pvValues[0];
+			    	return 0;
+			    }
+			  };
+
   static final Converter PV_ARROW_CONVERTER = new Converter() {
     public Object toCyValue(Object[] pvValues) {
      String name =   ((org.pathvisio.core.model.LineType) pvValues[0]).getName();
@@ -385,7 +397,7 @@ public class GpmlToPathway {
     public static final Extracter FILL_COLOR_STRING   = new BasicExtracter(PV_COLOR_STRING_CONVERTER, StaticProperty.FILLCOLOR);
     public static final Extracter COLOR               = new BasicExtracter(StaticProperty.COLOR);
     public static final Extracter FILL_COLOR          = new BasicExtracter(StaticProperty.FILLCOLOR);
-    public static final Extracter FONT_SIZE           = new BasicExtracter(StaticProperty.FONTSIZE);
+    public static final Extracter FONT_SIZE           = new BasicExtracter(StaticProperty.FONTSIZE);   //FONT_SIZE_CONVERT, 
     public static final Extracter FONT                = new BasicExtracter(PV_FONT_CONVERTER, StaticProperty.FONTNAME, StaticProperty.FONTWEIGHT, StaticProperty.FONTSTYLE);
     public static final Extracter FONT_NAME           = new BasicExtracter(PV_FONT_NAME_CONVERTER, StaticProperty.FONTNAME, StaticProperty.FONTWEIGHT, StaticProperty.FONTSTYLE);
     public static final Extracter TRANSPARENT         = new BasicExtracter(PV_TRANSPARENT_CONVERTER, StaticProperty.SHAPETYPE, StaticProperty.TRANSPARENT);
