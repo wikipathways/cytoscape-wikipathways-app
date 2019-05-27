@@ -1314,7 +1314,7 @@ public class GpmlToPathway {
     String srcName = srcRow.get("name", String.class);
     String interaction = edgeRow.get("EndArrow", String.class);
     String targName = targRow.get("name", String.class);
-    String edgeName = srcName + " " + interaction + " " + targName;
+    String edgeName = srcName + " (" + interaction + ") " + targName;
     edgeRow.set("name", edgeName);
     edgeRow.set("shared name", edgeName);
     edgeRow.set("interaction", interaction);
