@@ -29,7 +29,7 @@ public class EnsemblIdTask extends AbstractTask {
    private String species;
 //   private CyServiceRegistrar registrar;
    private CyTable table;
-   boolean verbose = true;
+   boolean verbose = false;
 
 	public EnsemblIdTask(final CyNetwork network, final CyServiceRegistrar reg, String organism) {
 //		this.network = network;

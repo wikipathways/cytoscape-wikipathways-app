@@ -24,10 +24,10 @@ public class FileImportCmdTask extends AbstractTask {
 	@ContainsTunables
   @Tunable(
 			description = "File name",
-			longDescription="The full path to the import file", 
-			exampleStringValue = "/Users/Joe/ThePathway.gpml"
+			longDescription="The full path to the import file, in quotes", 
+			exampleStringValue = "file=\"/Users/Joe/ThePathway.gpml\""
 	)
-  public String filename;
+  public String file;
 
   final WPClient client;
   final GpmlReaderFactory factory;
@@ -48,13 +48,13 @@ public class FileImportCmdTask extends AbstractTask {
   }
 
   public void run(TaskMonitor monitor) {
-    if (filename == null || filename.length() == 0) {
-      throw new IllegalArgumentException("filename must be specified");
+    if (file == null || file.length() == 0) {
+      throw new IllegalArgumentException("file must be specified");
     }
-    filename = filename.trim().toUpperCase();
-    if (filename.startsWith("FILE://"))   filename=filename.substring(6);	// strip front off a url, leaving /
+//    filename = filename.trim().toUpperCase();
+    if (file.startsWith("file://"))   file=file.substring(6);	// strip front off a url, leaving /
 
-    final ResultTask<WPPathway> infoTask = client.pathwayInfoTask(filename);
+    final ResultTask<WPPathway> infoTask = client.pathwayInfoTask(file);
     final TaskIterator taskIterator = new TaskIterator(infoTask);
       taskIterator.append(new AbstractTask() {
         public void run(TaskMonitor monitor) {

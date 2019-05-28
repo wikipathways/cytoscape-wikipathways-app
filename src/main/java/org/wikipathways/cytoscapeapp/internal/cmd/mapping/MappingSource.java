@@ -10,6 +10,11 @@ public enum MappingSource {
 
 //	Unspecified ("Unspecified", "", "", "^[A-Za-z0-9]+", "" ),
 	HGNC ("HGNC", "H", "Homo sapiens", "^[A-Za-z0-9]+", "DAPK1" ),
+	HMDB ("HMDB", "Ch", "", "^[A-Za-z0-9]+", "HMDB001" ),
+	ChEBI ("ChEBI", "Ce", "", "^CHEBI:[0-9]+", "CHEBI:001" ),
+	Chemspider ("Chemspider", "Cs", "", "^[0-9]+", "121001" ),
+	KEGGCompound ("KEGG Compound", "Ck", "", "^[A-Za-z0-9]+", "C15941" ),
+	PubChemCompound ("PubChem-compound", "Cpc", "", "^[0-9]+", "115941" ),
 	Ensembl ("Ensembl", "En", "", "^ENS[A-Z]*[FPTG]\\d{11}$", "ENSG00000139618"),			//|^[YFW]*$		also accept anything that starts with Y, F, W ??
 	Entrez ("Entrez Gene", "L", "", "^\\d+$", "11234"),
 	FlyBase ("FlyBase", "F", "Drosophila melanogaster", "^FB\\w{2}\\d{7}$", "FBgn0011293"),

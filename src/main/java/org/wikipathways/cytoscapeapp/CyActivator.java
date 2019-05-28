@@ -95,7 +95,8 @@ public class CyActivator extends AbstractCyActivator {
     reg(context,  new FileImportCmdTaskFactory(client, gpmlReaderFactory, GpmlConversionMethod.PATHWAY, taskMgr),"import-file-as-pathway", "wikipathways", longDesc5);
     reg(context,  new FileImportCmdTaskFactory(client, gpmlReaderFactory, GpmlConversionMethod.NETWORK, taskMgr),"import-file-as-network", "wikipathways", longDesc6);
  
-    
+//    reg(context, gpmlCyReaderTaskFactory, "import-file-as-pathway", "wikipathways", longDesc5);
+
 //	final  String longDesc7 = "Open a file and translate it into a pathway diagram";
 //	final  String longDesc8 = "Open a file and translate it into a network";
 //    reg(context,  new FileImportCmdTaskFactory(client, gpmlReaderFactory, GpmlConversionMethod.NETWORK, taskMgr),"import-as-file", "wikipathways", longDesc7);
