@@ -61,7 +61,7 @@ public class DelayedVizProp {
     this.isLocked = isLocked;
   }
 	static boolean verbose = false;
-	public String toString() {  return prop.getDisplayName() + ": " + value.toString(); }
+	public String toString() {  return netObj.getSUID() + " @ " + prop.getDisplayName() + ": " + value.toString(); }
 	public static void applyAll(final CyNetworkView netView,final Iterable<DelayedVizProp> delayedProps, WPManager mgr) 
 	{
 		try 
@@ -111,6 +111,8 @@ public class DelayedVizProp {
 			      }
 			   try
 			   {
+				   if (isPosition)
+					   System.out.println(delayedProp.netObj.toString() + ": " + propName + " = " + value);
 					if (delayedProp.isLocked && !isPosition)
 						view.setLockedValue(delayedProp.prop, value);
 					else
@@ -262,6 +264,7 @@ public class DelayedVizProp {
 //				if ("z".equals(lookup))				z = Double.valueOf(propvalue1);
 			}
 		}
+		System.out.println("applyNodeShape " + src + ": " + x + ", " + y );	
 		String propvalue = delayedProp.value.toString();
 		if (verbose) System.out.println("propvalue: "+propvalue);
 //		System.out.println(String.format("Size of %s: %.2f x %.2f", propvalue, wid ,hght));

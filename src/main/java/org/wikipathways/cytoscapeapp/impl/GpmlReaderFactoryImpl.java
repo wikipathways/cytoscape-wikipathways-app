@@ -59,6 +59,7 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
 	private GpmlVizStyle vizStyle;
 	private GpmlNetworkStyle networkStyle;
     String organism;
+    boolean verbose = false;
 	CyServiceRegistrar registrar;
   final Map<CyNetwork,GpmlConversionMethod> conversionMethods = new HashMap<CyNetwork,GpmlConversionMethod>();
   final Map<CyNetwork,List<DelayedVizProp>> pendingVizProps = new HashMap<CyNetwork,List<DelayedVizProp>>();
@@ -138,14 +139,14 @@ File myFile;
   }
 
   public TaskIterator createReaderAndViewBuilder(final String id, final Reader gpmlContents, final GpmlConversionMethod conversionMethod, File f) {
-	  System.out.println("createReaderAndViewBuilderOuter");
+	  if (verbose)  System.out.println("createReaderAndViewBuilderOuter");
    final CyNetwork network = netFactory.createNetwork();
     network.getRow(network).set(CyNetwork.NAME, id);
     netMgr.addNetwork(network);
     if (gpmlContents instanceof InputStreamReader)
     {
     	InputStreamReader isr = (InputStreamReader) gpmlContents;
-    	System.out.println("reset me");
+    	if (verbose) System.out.println("reset me");
     }
     final CyNetworkView view = netViewFactory.createNetworkView(network);
     netViewMgr.addNetworkView(view);
@@ -180,7 +181,7 @@ File myFile;
 					String tail = str.substring(start + 1);
 					int end = tail.indexOf('"');
 					organism = tail.substring(0,end);
-					System.out.println(organism);
+					if (verbose) System.out.println(organism);
 					
 				}
 			}
@@ -222,7 +223,7 @@ File myFile;
     	
     }
 	public void run(TaskMonitor monitor) throws Exception {
-		System.out.println("running ReaderTask");
+		if (verbose) System.out.println("running ReaderTask");
 		monitor.setTitle("Construct network");
 
 		monitor.setStatusMessage("Parsing pathways file");
@@ -258,7 +259,7 @@ File myFile;
 //			System.out.println(raw);
 //			gpmlContents.reset();
 			gpmlContents = new StringReader(builder.toString());
-			System.out.println("About to call readFromXML");
+			if (verbose) System.out.println("About to call readFromXML");
 			pathway.readFromXml(gpmlContents, true);
 			PathwayElement info = pathway.getMappInfo();
 			organism = info.getOrganism();
