@@ -111,7 +111,7 @@ public class DelayedVizProp {
 			      }
 			   try
 			   {
-				   if (isPosition)
+				   if (isPosition && verbose)
 					   System.out.println(delayedProp.netObj.toString() + ": " + propName + " = " + value);
 					if (delayedProp.isLocked && !isPosition)
 						view.setLockedValue(delayedProp.prop, value);
@@ -264,7 +264,7 @@ public class DelayedVizProp {
 //				if ("z".equals(lookup))				z = Double.valueOf(propvalue1);
 			}
 		}
-		System.out.println("applyNodeShape " + src + ": " + x + ", " + y );	
+		if (verbose) System.out.println("applyNodeShape " + src + ": " + x + ", " + y );	
 		String propvalue = delayedProp.value.toString();
 		if (verbose) System.out.println("propvalue: "+propvalue);
 //		System.out.println(String.format("Size of %s: %.2f x %.2f", propvalue, wid ,hght));
