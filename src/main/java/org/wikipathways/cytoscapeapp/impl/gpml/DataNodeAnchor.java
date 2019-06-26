@@ -1,8 +1,6 @@
 package org.wikipathways.cytoscapeapp.impl.gpml;
-//package diagrams.pViz.model;
 //
 //import diagrams.pViz.view.VNode;
-//import javafx.scene.shape.Shape;
 //import model.AttributeMap;
 //
 ///*

@@ -1,14 +1,5 @@
 package org.wikipathways.cytoscapeapp.impl.gpml;
 
-//import diagrams.pViz.view.VNode;
-
-/*
- * Model Node
- * A data structure that contains all persistent attributes
- * of a node in our graph. 
- * 
- * It is in charge of the VNode which is a StackPane in the view system.
- */
 public class DataNodeState extends XRefable {
 
 //	protected VNode hoststack;

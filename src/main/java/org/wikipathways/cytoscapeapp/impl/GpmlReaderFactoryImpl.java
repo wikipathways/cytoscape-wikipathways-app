@@ -258,6 +258,10 @@ File myFile;
 			String pmids = scrapePMIDs(raw);
 //			System.out.println(raw);
 //			gpmlContents.reset();
+//			if (verbose) System.out.println("About to call newParser");
+//			GPML newParser = new GPML(manager, pathway, network);
+//			newParser.read(builder.toString());
+			
 			gpmlContents = new StringReader(builder.toString());
 			if (verbose) System.out.println("About to call readFromXML");
 			pathway.readFromXml(gpmlContents, true);

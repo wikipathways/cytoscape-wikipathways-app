@@ -1,59 +1,44 @@
 package org.wikipathways.cytoscapeapp.impl.gpml;
 
-import java.io.File;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
+import org.cytoscape.model.CyNetwork;
+import org.pathvisio.core.model.Pathway;
+import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.NodeList;
+import org.wikipathways.cytoscapeapp.impl.WPManager;
 
 
 public class GPML {
 
 	private Controller controller;
 	private Model model;
-//	private Pasteboard pasteboard;
-//	String activeLayer = "Content";
-	public GPML(Model m, String layer) {
-		model = m;
-		controller = model.getController();
+	private Pathway pathway;	
+	private CyNetwork network;
+	
+	public GPML(WPManager mgr, Pathway path, CyNetwork net)
+	{
+		this();
+		pathway = path;
+		network = net;
+	}
+	public GPML() {
+		model = new Model();
+		controller = new Controller(model);
 	}
 //	private Controller getController() { 	return model.getController();	}
 	//----------------------------------------------------------------------------
-//	public static GeneSetRecord readGeneList(File file, Species inSpecies)
-//	{
-//		org.w3c.dom.Document doc = FileUtil.openXML(file);
-//		if (doc == null) return null;
-//		List<Gene> list = FXCollections.observableArrayList();
-//		GeneSetRecord record = new GeneSetRecord(file.getName());
-//		record.setSpecies(inSpecies.common());
-//		record.setName(file.getName());
-//		
-//		NodeList nodes = doc.getElementsByTagName("DataNode");
-//		int len = nodes.getLength();
-//		for (int i=0; i<len; i++)
-//		{
-//			org.w3c.dom.Node domNode = nodes.item(i);
-//			NamedNodeMap nodemap = domNode.getAttributes();
-//			org.w3c.dom.Node type = nodemap.getNamedItem("Type");
-//			String val = type == null ? "" : type.getNodeValue();
-//			org.w3c.dom.Node id = nodemap.getNamedItem("GraphId");
-//			String graphid = id == null ? "" : id.getNodeValue();
-////			if ("GeneProduct".equals(val) || "Protein".equals(val))
-////			{
-////				String textLabel = nodemap.getNamedItem("TextLabel").getNodeValue();
-////				Gene existing = Model.findInList(list, textLabel);
-////				if (existing == null)
-////					list.add(new Gene(record, textLabel, graphid));
-////				System.out.println(textLabel + " " + ((existing == null) ? "unique" : "found"));
-////			}
-//		}
-//		record.setGeneSet(list);
-//		return record;
-//	}
-	//----------------------------------------------------------------------------
-
+//----------------------------------------------------------------------------
+	public void read(String s)
+	{
+		try {
+			Document doc = FileUtil.convertStringToDocument(s);
+			read(doc);
+		} 
+		catch (Exception e) {	e.printStackTrace();	}
+	}
 	public void read(org.w3c.dom.Document doc)
 	{
 //		if (doc != null) return;
@@ -402,8 +387,6 @@ public class GPML {
 	public DataNode parseGPMLLabel(org.w3c.dom.Node labelNode) {
 		DataNode label = new DataNode(model);
 		label.setType("Label");
-//		if (label.getStack() != null)
-//			label.getStack().setLayerName("Background");
 		NodeList elems = labelNode.getChildNodes();
 		label.add(labelNode.getAttributes());
 		String idval = label.get("GraphId");
@@ -419,19 +402,14 @@ public class GPML {
 			label.putInteger("GraphId",graphId);
 			label.setId(graphId);
 		}
-//		label.setId(label.getId());
 		String txt = label.get("TextLabel");
 		if (txt == null) txt = "Undefined";
 		label.setName(txt);
-//		Label label = new Label(txt);
-//		label.setManaged(false);
 		String name = "";
 		for (int i=0; i<elems.getLength(); i++)
 		{
 			org.w3c.dom.Node child = elems.item(i);
 			name = child.getNodeName();
-//			if (name != null && name.equals("TextLabel")) 
-//				label.setText(child.getNodeValue());
 			if (name != null && name.equals("Attribute")) 
 			{
 				NamedNodeMap attrs = child.getAttributes();
@@ -731,5 +709,36 @@ public class GPML {
 //			if (named != null)
 //				attrMap.put(named.getNodeName(), named.getNodeValue());
 //		}
-		
+//		public static GeneSetRecord readGeneList(File file, Species inSpecies)
+//		{
+//			org.w3c.dom.Document doc = FileUtil.openXML(file);
+//			if (doc == null) return null;
+//			List<Gene> list = FXCollections.observableArrayList();
+//			GeneSetRecord record = new GeneSetRecord(file.getName());
+//			record.setSpecies(inSpecies.common());
+//			record.setName(file.getName());
+//			
+//			NodeList nodes = doc.getElementsByTagName("DataNode");
+//			int len = nodes.getLength();
+//			for (int i=0; i<len; i++)
+//			{
+//				org.w3c.dom.Node domNode = nodes.item(i);
+//				NamedNodeMap nodemap = domNode.getAttributes();
+//				org.w3c.dom.Node type = nodemap.getNamedItem("Type");
+//				String val = type == null ? "" : type.getNodeValue();
+//				org.w3c.dom.Node id = nodemap.getNamedItem("GraphId");
+//				String graphid = id == null ? "" : id.getNodeValue();
+////				if ("GeneProduct".equals(val) || "Protein".equals(val))
+////				{
+////					String textLabel = nodemap.getNamedItem("TextLabel").getNodeValue();
+////					Gene existing = Model.findInList(list, textLabel);
+////					if (existing == null)
+////						list.add(new Gene(record, textLabel, graphid));
+////					System.out.println(textLabel + " " + ((existing == null) ? "unique" : "found"));
+////				}
+//			}
+//			record.setGeneSet(list);
+//			return record;
+//		}
+			
 }

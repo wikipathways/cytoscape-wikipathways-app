@@ -91,7 +91,7 @@
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
-				<version>2.3.7</version>
+				<version>3.2.0</version>
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
@@ -168,13 +168,14 @@
 
 	<!-- Dependencies needed to compile this project. -->
 	<dependencies>
-
+<!-- 
 		<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>core-task-api</artifactId>
 			<version>${cytoscape.api.version}</version>
 			<scope>provided</scope>
 		</dependency>
+-->
 		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.core</artifactId>
@@ -182,98 +183,101 @@
 			<scope>provided</scope>
 		</dependency>
 
-
-		<dependency>
+<!-- 		<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>swing-application-api</artifactId>
 			<version>${cytoscape.api.version}</version>
 			<scope>provided</scope>
 		</dependency>
 
-		<dependency>
+ --><!-- 		<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>session-api</artifactId>
 			<version>${cytoscape.api.version}</version>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
+ -->
+ 		<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>webservice-api</artifactId>
 			<version>${cytoscape.api.version}</version>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
+
+ <!-- 		<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>io-api</artifactId>
 			<version>${cytoscape.api.version}</version>
 			<scope>provided</scope>
-		</dependency>
-		<dependency>
+		</dependency> -->
+<!--  		<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>swing-util-api</artifactId>
 			<version>${cytoscape.api.version}</version>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
+ --> 		<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>swing-app-api</artifactId>
 			<version>${cytoscape.api.version}</version>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
+<!-- 		<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>app-api</artifactId>
 			<version>${cytoscape.api.version}</version>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
+ --><!-- 		<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>presentation-api</artifactId>
 			<version>${cytoscape.api.version}</version>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
+ --><!-- 		<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>vizmap-api</artifactId>
 			<version>${cytoscape.api.version}</version>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
+ --><!-- 		<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>work-api</artifactId>
 			<version>${cytoscape.api.version}</version>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
+ --><!-- 		<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>viewmodel-api</artifactId>
 			<version>${cytoscape.api.version}</version>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
+ --><!-- 		<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>application-api</artifactId>
 			<version>${cytoscape.api.version}</version>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
+ -->	<!-- 	<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>model-api</artifactId>
 			<version>${cytoscape.api.version}</version>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
+ --><!-- 		<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>event-api</artifactId>
 			<version>${cytoscape.api.version}</version>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
+ --><!-- 		<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>work-swing-api</artifactId>
 			<version>${cytoscape.api.version}</version>
 			<scope>provided</scope>
-		</dependency>
+		</dependency> 
+ -->		
+		
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
@@ -282,16 +286,10 @@
 
 
 		<!-- Logging -->
-		<dependency>
-			<groupId>org.ops4j.pax.logging</groupId>
-			<artifactId>pax-logging-api</artifactId>
-			<version>1.5.2</version>
-			<scope>provided</scope>
-		</dependency>
 
 
 		<!-- local dependencies -->
-		<dependency>
+<!-- 		<dependency>
 			<groupId>com.springsource</groupId>
 			<artifactId>org.jdom</artifactId>
 			<version>1.1.0</version>
@@ -299,7 +297,7 @@
 			<scope>system</scope>
 			<systemPath>${project.basedir}/localRepo/com.springsource.org.jdom-1.1.0.jar</systemPath>
 		</dependency>
-		<dependency>
+ -->		<dependency>
 			<groupId>org.pathvisio</groupId>
 			<artifactId>pathvisio-core</artifactId>
 			<version>3.2.2</version>

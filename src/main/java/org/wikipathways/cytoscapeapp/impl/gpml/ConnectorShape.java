@@ -16,8 +16,8 @@
 //
 package org.wikipathways.cytoscapeapp.impl.gpml;
 
-import javafx.geometry.Point2D;
-import javafx.scene.shape.Shape;
+import java.awt.Shape;
+import java.awt.geom.Point2D;
 
 /**
  * Implement this to provide a line shape for connectors.
@@ -74,7 +74,7 @@ public interface ConnectorShape {
 	 * A waypoint, a point through which the connector passes. Each waypoint
 	 * will have a handle in the view, so the user can modify it's position.
 	 */
-	public class WayPoint extends Point2D {
+	public class WayPoint extends Point2D.Double {
 		public WayPoint(Point2D position) {
 			super(position.getX(), position.getY());
 		}
@@ -118,7 +118,7 @@ System.err.println("SET LOCATION");
 
 		/** the center of the bounding box around start, end */
 		public Point2D getMCenter() {
-			return new Point2D(
+			return new Point2D.Double(
 					start.getX() + (end.getX() - start.getX()) / 2,
 					start.getY() + (end.getY() - start.getY()) / 2
 			);
@@ -148,7 +148,7 @@ System.err.println("SET LOCATION");
 			xe = xe - xshift;
 			ye = ye - yshift;
 
-			return new Point2D(xe,ye);
+			return new Point2D.Double(xe,ye);
 		}
 
 

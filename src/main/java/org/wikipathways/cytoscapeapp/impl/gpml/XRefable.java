@@ -1,7 +1,5 @@
 package org.wikipathways.cytoscapeapp.impl.gpml;
 
-
-
 abstract public class XRefable extends AttributeMap
 {
 	public XRefable()

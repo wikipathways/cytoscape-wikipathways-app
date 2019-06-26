@@ -1,4 +1,5 @@
 package org.wikipathways.cytoscapeapp.impl.gpml;
+
 import java.util.List;
 
 public class QuadValue {

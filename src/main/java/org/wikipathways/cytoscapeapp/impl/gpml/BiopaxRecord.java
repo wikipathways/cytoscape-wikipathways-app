@@ -5,9 +5,6 @@ import java.util.List;
 
 import org.w3c.dom.NamedNodeMap;
 
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
-
 @SuppressWarnings("serial")
 public class BiopaxRecord extends HashMap<String, String> {
 

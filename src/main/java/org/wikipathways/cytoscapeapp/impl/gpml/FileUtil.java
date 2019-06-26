@@ -39,43 +39,25 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
-//import com.opencsv.CSVReader;
-
-import javafx.application.Application;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.embed.swing.SwingFXUtils;
-import javafx.scene.control.TableView;
-import javafx.scene.image.Image;
-import javafx.scene.input.Dragboard;
-import javafx.stage.FileChooser;
-//import model.AttributeValue;
-//import model.dao.CSVTableData;
-//import model.dao.MixedDataRow;
-//import services.SystemInfo;
-//import xml.XMLTreeItem;
-
 public class FileUtil
 {
-	static public void openFile(Application app, File f)
-	{
-		try
-		{
-			app.getHostServices().showDocument(f.toURI().toURL().toExternalForm());
-		}
-		catch (Exception e){}
-	}
-
-	static public void openFile(Application app, Path f)
-	{
-		try
-		{
-			app.getHostServices().showDocument(f.toUri().toURL().toExternalForm());
-		}
-		catch (Exception e){}
-	}
+//	static public void openFile(Application app, File f)
+//	{
+//		try
+//		{
+//			app.getHostServices().showDocument(f.toURI().toURL().toExternalForm());
+//		}
+//		catch (Exception e){}
+//	}
+//
+//	static public void openFile(Application app, Path f)
+//	{
+//		try
+//		{
+//			app.getHostServices().showDocument(f.toUri().toURL().toExternalForm());
+//		}
+//		catch (Exception e){}
+//	}
 
 	static public Document openXML(File f) 
 	{
@@ -150,7 +132,7 @@ public class FileUtil
 //		}
 //	}
 	//-------------------------------------------------------------	
-	static public void findkeys(Node node, ObservableList<AttributeValue> list)
+	static public void findkeys(Node node, List<AttributeValue> list)
 	{
 		String type = node.getNodeName();
 		if ("key".equals(type))
@@ -344,7 +326,7 @@ public class FileUtil
     }
 	//--------------------------------------------------------------------------------------
 	// @formatter:off
-static public boolean hasXMLFiles(Dragboard db)	{	return db.getFiles().stream().filter(f -> isXML(f)).count() > 0;	}
+//static public boolean hasXMLFiles(Dragboard db)	{	return db.getFiles().stream().filter(f -> isXML(f)).count() > 0;	}
 
 	public static boolean isImageFile(File f){		return isPNG(f) || isJPEG(f);	}
 	public static boolean isTextFile(File f){		return isTXT(f) || isCSV(f);	}
@@ -366,8 +348,8 @@ static public boolean hasXMLFiles(Dragboard db)	{	return db.getFiles().stream().
 	public static boolean isDataFile(File f){		return fileEndsWith(f,".data");	}
 	public static boolean isCDT(File f)		{		return fileEndsWith(f,".cdt");	}
 
-	static public FileChooser.ExtensionFilter zipFilter = new FileChooser.ExtensionFilter("Zip files (*.zip)", "*.zip", "*.gz", "*.acs");
-	static public FileChooser.ExtensionFilter fcsFilter = new FileChooser.ExtensionFilter("FCS files", "*.fcs", "*.lmd");
+//	static public FileChooser.ExtensionFilter zipFilter = new FileChooser.ExtensionFilter("Zip files (*.zip)", "*.zip", "*.gz", "*.acs");
+//	static public FileChooser.ExtensionFilter fcsFilter = new FileChooser.ExtensionFilter("FCS files", "*.fcs", "*.lmd");
 	// @formatter:om
 	
 	static private boolean fileEndsWith(File f, String ...extensions)
@@ -383,12 +365,12 @@ static public boolean hasXMLFiles(Dragboard db)	{	return db.getFiles().stream().
 		return fileEndsWith(p.toFile(), extensions);
 	}
 	
-	static public String readFiles(Dragboard db)
-	{
-		StringBuilder buff = new StringBuilder();
-		db.getFiles().forEach(f ->readFile(f, buff));
-		return buff.toString();
-	}
+//	static public String readFiles(Dragboard db)
+//	{
+//		StringBuilder buff = new StringBuilder();
+//		db.getFiles().forEach(f ->readFile(f, buff));
+//		return buff.toString();
+//	}
 
 	static public void readFile(File inFile, StringBuilder buff)
 	{
@@ -533,7 +515,7 @@ static public boolean hasXMLFiles(Dragboard db)	{	return db.getFiles().stream().
 
 	//--------------------------------------------------------------------------------
 	// keep a cache of the images for extensions we've seen
-	static HashMap<String, Image> mapOfFileExtToSmallIcon = new HashMap<String, Image>();
+//	static HashMap<String, Image> mapOfFileExtToSmallIcon = new HashMap<String, Image>();
 
 	public static String getFileExt(String fname)
 	{
@@ -553,46 +535,46 @@ static public boolean hasXMLFiles(Dragboard db)	{	return db.getFiles().stream().
 //		}
 		return icon;
 	}
+//
+//	public static Image getFileIcon(String fname)
+//	{
+//		final String ext = getFileExt(fname);
+//
+//		Image fileIcon = mapOfFileExtToSmallIcon.get(ext);
+//		if (fileIcon == null)
+//		{
+//			javax.swing.Icon jswingIcon = null;
+//			File file = new File(fname);
+//			if (file.exists()) jswingIcon = getJSwingIconFromFileSystem(file);
+//			else
+//			{
+//				File tempFile = null;
+//				try
+//				{
+//					tempFile = File.createTempFile("icon", ext);
+//					jswingIcon = getJSwingIconFromFileSystem(tempFile);
+//				} catch (IOException ignored)
+//				{} // Cannot create temporary file.
+//				finally
+//				{
+//					if (tempFile != null) tempFile.delete();
+//				}
+//			}
+//			if (jswingIcon != null)
+//			{
+//				fileIcon = jswingIconToImage(jswingIcon);
+//				mapOfFileExtToSmallIcon.put(ext, fileIcon);
+//			}
+//		}
+//		return fileIcon;
+//	}
 
-	public static Image getFileIcon(String fname)
-	{
-		final String ext = getFileExt(fname);
-
-		Image fileIcon = mapOfFileExtToSmallIcon.get(ext);
-		if (fileIcon == null)
-		{
-			javax.swing.Icon jswingIcon = null;
-			File file = new File(fname);
-			if (file.exists()) jswingIcon = getJSwingIconFromFileSystem(file);
-			else
-			{
-				File tempFile = null;
-				try
-				{
-					tempFile = File.createTempFile("icon", ext);
-					jswingIcon = getJSwingIconFromFileSystem(tempFile);
-				} catch (IOException ignored)
-				{} // Cannot create temporary file.
-				finally
-				{
-					if (tempFile != null) tempFile.delete();
-				}
-			}
-			if (jswingIcon != null)
-			{
-				fileIcon = jswingIconToImage(jswingIcon);
-				mapOfFileExtToSmallIcon.put(ext, fileIcon);
-			}
-		}
-		return fileIcon;
-	}
-
-	public static Image jswingIconToImage(javax.swing.Icon jswingIcon)
-	{
-		BufferedImage bufferedImage = new BufferedImage(jswingIcon.getIconWidth(), jswingIcon.getIconHeight(), BufferedImage.TYPE_INT_ARGB);
-		jswingIcon.paintIcon(null, bufferedImage.getGraphics(), 0, 0);
-		return SwingFXUtils.toFXImage(bufferedImage, null);
-	}
+//	public static Image jswingIconToImage(javax.swing.Icon jswingIcon)
+//	{
+//		BufferedImage bufferedImage = new BufferedImage(jswingIcon.getIconWidth(), jswingIcon.getIconHeight(), BufferedImage.TYPE_INT_ARGB);
+//		jswingIcon.paintIcon(null, bufferedImage.getGraphics(), 0, 0);
+//		return SwingFXUtils.toFXImage(bufferedImage, null);
+//	}
 
 	public static void moveToTrash(File file)
 	{

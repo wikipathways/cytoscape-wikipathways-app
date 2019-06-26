@@ -1,12 +1,8 @@
 package org.wikipathways.cytoscapeapp.impl.gpml;
 
-import java.awt.Color;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.pathvisio.core.view.Group;
-import org.wikipathways.cytoscapeapp.impl.gpml.AttributeMap.Circle2D;
 
 
 

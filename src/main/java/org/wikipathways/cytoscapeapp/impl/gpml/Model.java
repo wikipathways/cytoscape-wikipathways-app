@@ -95,12 +95,12 @@ public class Model
 	private String docHeader() {		return xmlHeader +  "<Pathway>\n";	}
 	
 	private void serializeComments(StringBuilder saver) {
-		for (CommentRecord rec : getComments())
-			saver.append(rec.toGPML());
+//		for (CommentRecord rec : getComments())
+//			saver.append(rec.toGPML());
 	}
 	private void serializeReferences(StringBuilder saver) {
-		for (BiopaxRecord rec : getReferences())
-			saver.append(rec.toGPML());
+//		for (BiopaxRecord rec : getReferences())
+//			saver.append(rec.toGPML());
 	}
 	private void serializeNodes(StringBuilder saver) {
 		for (DataNode node : getNodes())
@@ -166,7 +166,7 @@ public class Model
 	public void clearRefs() 				{	references.clear();	}
 	public List<BiopaxRecord> getReferences() { return references;	}
 	// **-------------------------------------------------------------------------------
-		public void addResource(DataNode mnode)		
+	public void addResource(DataNode mnode)		
 	{  
 		if (mnode != null) 
 			addResource(mnode.getId(), mnode);

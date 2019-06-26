@@ -1,4 +1,4 @@
-package org.wikipathways.cytoscapeapp.impl;
+package org.wikipathways.cytoscapeapp.impl.gpml;
 
 import java.awt.Color;
 import java.awt.Shape;

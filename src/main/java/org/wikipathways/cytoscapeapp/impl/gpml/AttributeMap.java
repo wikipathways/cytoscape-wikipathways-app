@@ -2,7 +2,6 @@ package org.wikipathways.cytoscapeapp.impl.gpml;
 
 import java.awt.Color;
 import java.awt.Paint;
-import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
