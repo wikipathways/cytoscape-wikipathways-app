@@ -1,5 +1,6 @@
 package org.wikipathways.cytoscapeapp.impl;
 
+import java.io.File;
 import java.io.Reader;
 import java.util.Map;
 
@@ -90,7 +91,7 @@ public class WPManager {
 	      final TaskIterator taskIterator = new TaskIterator(loadPathwayTask);
 	      taskIterator.append(new AbstractTask() {
 	        public void run(TaskMonitor monitor) {
-	        	TaskIterator iter = gpmlReaderFactory.createReaderAndViewBuilder(pathway.getId(), loadPathwayTask.get(), method, null);
+	        	TaskIterator iter = gpmlReaderFactory.createReaderAndViewBuilder(pathway.getId(), loadPathwayTask.get(), method, null);  //
 	          super.insertTasksAfterCurrentTask(iter);
 	        }
 	      });
@@ -100,5 +101,18 @@ public class WPManager {
 	 });
 
 //    		}   		
+	}
+	File storedFile = null;
+	public void setFile(File f)	{ storedFile = f;	}
+	public File getFile() {
+		return storedFile;
+	}
+
+	private String organism = "";
+	public void setOrganism(String org) {
+		organism = org;
+		}
+	public String getOrganism() {
+		return organism;
 	}
 }

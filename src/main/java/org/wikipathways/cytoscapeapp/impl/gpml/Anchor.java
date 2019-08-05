@@ -1,6 +1,6 @@
 package org.wikipathways.cytoscapeapp.impl.gpml;
 
-public class Anchor extends DataNode {		// extends DataNode
+public class Anchor extends DataNode {
 
 	/**
 	 *  An Anchor is a DataNode that lives along an edge of a line.  
@@ -9,40 +9,33 @@ public class Anchor extends DataNode {		// extends DataNode
 	
 	private static final long serialVersionUID = 1L;
 //	private Circle myShape;
-	private Interaction myInteraction;
+	private String myInteractionId;
 
 	
 	public boolean isAnchor() 					{		return true;}
-	public Interaction getInteraction() 		{  	return myInteraction;	}
-	public void setInteraction(Edge e) 		
+	public String getInteraction() 		{  	return myInteractionId;	}
+	public void setInteraction(String id) 		
 	{  
-		myInteraction = (Interaction) e;  
-		setInteractionId (e == null ? -1 : e.getId());	
+//		myInteraction = (Interaction) e;  
+		setInteractionId (id);	
 	}
-	public int getInteractionId() 					{  	return  getInteger("InteractionId");	}
-	public void setInteractionId(int e) 			{  	putInteger("InteractionId", e);	}
+	public String getInteractionId() 				{  	return  get("InteractionId");	}
+	public void setInteractionId(String e) 			{  	put("InteractionId", e);	}
 //	
 	public double getAnchorPosition()				{  	return getDouble("Position");	}
 	public void setPosition(double d)				{   putDouble("Position", d);	}
 	//=========================================================================
 
-	public Anchor(org.w3c.dom.Node node, Model m, int interactionId)
+	public Anchor(org.w3c.dom.Node node, Model m, String interactionId)
 	{
 		this(new AttributeMap(node.getAttributes()), m, interactionId);	
 	}	
 	
-	public Anchor(AttributeMap attr, Model m, int interactionId)
+	public Anchor(AttributeMap attr, Model m, String interactionId)
 	{
 		super(attr, m);
-//		myShape = new Circle();
-//		myShape.setRadius(4);
-//		myShape.visibleProperty().bind(m.getController().getInspector().anchorVisibleProperty());
-//		myShape.setFill(Color.BISQUE);
-//		myShape.setStroke(Color.DARKOLIVEGREEN);
-//		new VNodeGestures(stack, m.getPasteboard());
-//		getStack().getFigure().visibleProperty().bind(m.getController().getInspector().anchorVisibleProperty());
 		setName(String.format("Anchor @ %.2f", getAnchorPosition()));
-		setInteraction(m.findInteractionById(interactionId));
+		setInteractionId(interactionId);
 	}
 
 	//=========================================================================
@@ -78,10 +71,8 @@ public class Anchor extends DataNode {		// extends DataNode
 //=========================================================================
 	public String toString()
 	{
-		String type =  getType();
-		if (type == null) type = get("Type") ;		
-		if (type == null) type = "Unspecified";		
-		return String.format("Anchor of type=\"%s\" />", type);  // On Edge from %s to %s   , getStartName(), getEndName()
+		return getAttributes().toString();
+		
 	}
 	
 	public String toGPML()

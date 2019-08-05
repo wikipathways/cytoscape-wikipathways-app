@@ -1,6 +1,5 @@
 package org.wikipathways.cytoscapeapp.internal.cmd;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -16,9 +15,9 @@ import org.cytoscape.model.CyColumn;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyRow;
 import org.cytoscape.model.CyTable;
-import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.TaskMonitor;
+import org.wikipathways.cytoscapeapp.impl.WPManager;
 import org.wikipathways.cytoscapeapp.internal.cmd.mapping.BridgeDbIdMapper;
 import org.wikipathways.cytoscapeapp.internal.cmd.mapping.MappingSource;
 
@@ -26,23 +25,25 @@ import org.wikipathways.cytoscapeapp.internal.cmd.mapping.MappingSource;
 
 public class EnsemblIdTask extends AbstractTask {
 //   private CyNetwork network;
-   private String species;
+//   private String species;
 //   private CyServiceRegistrar registrar;
    private CyTable table;
    boolean verbose = false;
-
-	public EnsemblIdTask(final CyNetwork network, final CyServiceRegistrar reg, String organism) {
+   private WPManager manager;
+   
+	public EnsemblIdTask(final CyNetwork network, final WPManager mgr) {
 //		this.network = network;
 		table = network.getDefaultNodeTable();
 //		registrar = reg;
+		manager = mgr;
 		if (verbose)  System.out.println("create EnsemblIdTask");
-		species = organism;
+//		species = organism;
 	}
 
 	static String ENSEMBL_COLUMN = "Ensembl";
 
 	public void run(TaskMonitor monitor) {
-		if (verbose) System.out.println("running the EnsemblIdTask " + species);
+		if (verbose) System.out.println("running the EnsemblIdTask " + manager.getOrganism());
 		if (bridgeDbAvailable()) // ensemblColumn == null &&
 			buildIdMapBatch();
 	}
@@ -124,6 +125,7 @@ public class EnsemblIdTask extends AbstractTask {
 //-------------------------------------------------------------------
 	private Map<String, String> translateSet(String src, Set<String> geneset) {
 		
+		String species = manager.getOrganism();
 		Map<String, String> result = new HashMap<String, String>();
 		try {
 			MappingSource source = MappingSource.nameLookup(src);

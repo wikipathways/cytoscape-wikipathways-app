@@ -1,6 +1,5 @@
 package org.wikipathways.cytoscapeapp.internal.cmd;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -16,9 +15,9 @@ import org.cytoscape.model.CyColumn;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyRow;
 import org.cytoscape.model.CyTable;
-import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.TaskMonitor;
+import org.wikipathways.cytoscapeapp.impl.WPManager;
 import org.wikipathways.cytoscapeapp.internal.cmd.mapping.BridgeDbIdMapper;
 import org.wikipathways.cytoscapeapp.internal.cmd.mapping.MappingSource;
 
@@ -26,23 +25,25 @@ import org.wikipathways.cytoscapeapp.internal.cmd.mapping.MappingSource;
 
 public class WikidataIdTask extends AbstractTask {
 //   private CyNetwork network;
-   private String species;
+//   private String species;
 //   private CyServiceRegistrar registrar;
    private CyTable table;
    boolean verbose = false;
+   WPManager manager;
 
-	public WikidataIdTask(final CyNetwork network, final CyServiceRegistrar reg, String organism) {
+	public WikidataIdTask(final CyNetwork network, final WPManager mgr) {
 //		this.network = network;
 		table = network.getDefaultNodeTable();
 //		registrar = reg;
 		if (verbose)  System.out.println("create WikidataIdTask");
-		species = organism;
+//		species = organism;
+		manager = mgr;
 	}
 
 	static String Wikidata_COLUMN = "Wikidata";
 
 	public void run(TaskMonitor monitor) {
-		if (verbose) System.out.println("running the WikidataIdTask " + species);
+		if (verbose) System.out.println("running the WikidataIdTask " + manager.getOrganism());
 		if (bridgeDbAvailable()) 
 			buildIdMapBatch();
 	}
@@ -123,7 +124,8 @@ public class WikidataIdTask extends AbstractTask {
 //-------------------------------------------------------------------
 	private Map<String, String> translateSet(String src, Set<String> geneset) {
 		
-		Map<String, String> result = new HashMap<String, String>();
+		 String organism = manager.getOrganism();
+		 Map<String, String> result = new HashMap<String, String>();
 		try {
 			MappingSource source = MappingSource.nameLookup(src);
 			if ("Wikidata".equals(src))
@@ -139,7 +141,7 @@ public class WikidataIdTask extends AbstractTask {
 			else if (source != null)
 			{
 				final BridgeDbIdMapper map = new BridgeDbIdMapper();
-				result = map.map(geneset, source.system(), "Wd", species, species);
+				result = map.map(geneset, source.system(), "Wd", organism, organism);
 			}
 		} catch (final NullPointerException e)
 		{

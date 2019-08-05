@@ -68,8 +68,8 @@ public class FileUtil
 		}
 		catch (Exception e) {	return null;	}
 	}
-	
-	static public String openXMLfile(File f)
+
+		static public String openXMLfile(File f)
 	{
 		try{
 			Document parseddoc = openXML(f);
@@ -319,7 +319,9 @@ public class FileUtil
         DocumentBuilder builder;  
         try 
         {  
-            builder = factory.newDocumentBuilder();  
+           String s = xmlStr.substring(0, 50);
+           System.out.println(s);
+           builder = factory.newDocumentBuilder();  
             Document doc = builder.parse( new InputSource( new StringReader( xmlStr ) ) ); 
             return doc;
         } catch (Exception e) {  	throw e;    } 

@@ -18,7 +18,7 @@ public class DataNodeState extends XRefable {
 	{
 		super(am);
 		model = m;
-		copyAttributesToProperties();
+//		copyAttributesToProperties();
 		setName("State: " + get("TextLabel"));
 		
 //		stack = new VNode(this, m.getController().getPasteboard());

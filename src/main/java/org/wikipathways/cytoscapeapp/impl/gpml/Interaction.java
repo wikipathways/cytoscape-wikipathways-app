@@ -4,23 +4,23 @@ package org.wikipathways.cytoscapeapp.impl.gpml;
 
 import java.util.List;
 
-import org.wikipathways.cytoscapeapp.impl.gpml.RelPosition.Pos;
+import org.cytoscape.model.CyEdge;
 
 
-public class Interaction extends Edge implements Comparable<Interaction>
+public class Interaction  implements Comparable<Interaction>  //extends Edge
 {
 	/**
 	 * 		Interaction is the biological wrapper around Edge
 	 */
 	private static final long serialVersionUID = 1L;
 //	GeneListRecord geneListRecord;
-	protected XRefable source;
-	protected XRefable target;
+//	protected XRefable source;
+//	protected XRefable target;
 
 	private String interactionType = new String();		
 	public void setInteractionType(String s) 	 	{ interactionType = s;}
 	public  String getInterType()  					{ return interactionType;}
-
+private Edge edge;
 //	private SimpleStringProperty arrowType = new SimpleStringProperty();		
 //	public StringProperty  arrowTypeProperty()  { return arrowType;}
 //	public void setArrowType(String s) 	 	{ arrowType.set(s);}
@@ -29,56 +29,29 @@ public class Interaction extends Edge implements Comparable<Interaction>
 	public void dump()	{ System.out.println( toString());	}		//get("GraphId") +
 	public Interaction(Model inModel)
 	{
-		super(inModel);
+		edge = new Edge(inModel);
 //		if (!inModel.containsEdge(this))
 //			inModel.addEdge(this);
 		interactionType ="arrow";
 	}
 	
 	//------------------------------------------------------------------------------------------
-	public Interaction(AttributeMap attr, Model inModel, List<GPMLPoint> pts, List<Anchor> anchors)
+	public Interaction(AttributeMap attr, Model inModel, List<GPMLPoint> pts)		//, List<Anchor> anchors
 	{
-		super(attr, inModel, pts, anchors);
+		edge = new Edge(this, attr, inModel, pts); //, List<Anchor> anchors
 		interactionType = attr.get("ArrowHead");
 		GPMLPoint.setInteraction(pts, this);
 	}
 
-	public Interaction(Model model, DataNode src, Pos srcPosition, 
-			DataNode targ, RelPosition targPosition, ArrowType arrow, EdgeType edge) 
-	{
-		this(model,src,targ, null);
-		setInteractionType(arrow.toString());
-		put("EdgeType", edge.toString());
-//		setArrowType(arrow.toString());
-		putDouble("LineThickness", 1.5);
-		
-//		String newId = newEdgeId();
-//		put("GraphId", newId);
-//		setGraphId(newId);
-////		GPMLPoint  startPoint = new GPMLPoint(src.getPortPosition(srcPosition));
-//		startPoint.setRelPosition(srcPosition);
-//		startPoint.setGraphRef(src.getGraphId());
-//		setStartPoint(startPoint.getPoint());
-//		startPoint.setPos(srcPosition);
-		
-//		GPMLPoint endPoint = new GPMLPoint(targ.getRelativePosition(targPosition));
-//		endPoint.setRelX(targPosition.x());
-//		endPoint.setRelY(targPosition.y());
-//		setEndPoint(endPoint.getPoint());
-//		endPoint.setGraphRef(targ.getGraphId());
-//		endPoint.setPos(targPosition);
-//		endPoint.setArrowType(arrow);
-	}	
-
-	public Interaction(Model inModel, DataNode start, DataNode end, AttributeMap attr) 		//, List<GPMLPoint> pts, List<Anchor> anchors
-	{
-    	super( inModel, start, end,  attr);	
-     }
-	
+//	public Interaction(Model inModel, DataNode start, DataNode end, AttributeMap attr) 		//, List<GPMLPoint> pts, List<Anchor> anchors
+//	{
+//		edge = new Edge(this, inModel, start, end,  attr);	
+//     }
+	String getName() { return edge.getName();}
  //------------------------------------------------------------------------------------------
 	public int compareTo(Interaction other)
 	{
-		return getName().compareToIgnoreCase(other.getName());
+		return edge.getName().compareToIgnoreCase(other.getName());
 	}
 //	
 //	public void rebind(String sourceId) {
@@ -94,23 +67,23 @@ public class Interaction extends Edge implements Comparable<Interaction>
 	{
 		String name =  getName();
 		if (StringUtil.isEmpty(name)) name = "-"; 
-		int id =  getId();
+		String id =  edge.getId();
 //		String str = (edgeLine == null) ? "X" : edgeLine.toString();
 		return name + " [" + id + "] " + " " + getInterType();
 	}
 
    public String toGPML()
    {
-		StringBuffer b = new StringBuffer(String.format("<Interaction GraphId=\"%s\" >\n", getSafe("GraphId")));
+		StringBuffer b = new StringBuffer(String.format("<Interaction GraphId=\"%s\" >\n", edge.getSafe("GraphId")));
 		b.append("<Graphics ");
-		b.append(attributeList(new String[]{"ConnectorType", "ZOrder","LineStyle","LineThickness"}));
+		b.append(edge.getAttributes().attributeList(new String[]{"ConnectorType", "ZOrder","LineStyle","LineThickness"}));
 		b.append (" >\n");
 		
-		b.append (getPointsStr());
-		b.append (getAnchorsStr());
+		b.append (edge.getPointsStr());
+		b.append (edge.getAnchorsStr());
 		b.append("</Graphics>\n");
-		String db = get("database");
-		String dbid =  get("dbid");
+		String db = edge.get("database");
+		String dbid =  edge.get("dbid");
 		if (db != null && dbid != null)
 			b.append(String.format("<Xref Database=\"%s\" ID=\"%s\" />\n", db, dbid));
 		b.append("</Interaction>\n");
@@ -121,10 +94,10 @@ public class Interaction extends Edge implements Comparable<Interaction>
 	public MIM getInteractionType() {	return MIM.lookup(getInterType());	}
 
 	public boolean isWellConnected() {
-		return getStartNode() != null && getEndNode() != null;
+		return !(StringUtil.isEmpty(edge.getSourceid()) || StringUtil.isEmpty(edge.getTargetid()));
 	}
 	public void setNameFromState() {
-		String arrow = get("ArrowHead");
+		String arrow = edge.get("ArrowHead");
 		if (arrow == null) arrow = "arrow";
 		else arrow = arrow.toLowerCase();
 		setInteractionType(arrow);
@@ -145,9 +118,15 @@ public class Interaction extends Edge implements Comparable<Interaction>
 		else if (arrow.contains("gap")) 		arrow = " >";
 		else if (arrow.contains("reg")) 		arrow = "-R";
 
-		int target = getInteger("targetid");
-		String	targetName = ( target > 0) ? getModel().getNodeName(target) :  "??";
-		setName("--" + arrow + " " + targetName);
+		int target = edge.getInteger("targetid");
+		String	targetName = ( target > 0) ? edge.getModel().getNodeName(target) :  "??";
+		edge.getAttributes().setName("--" + arrow + " " + targetName);
 	}
+	CyEdge cyEdge;
+	public void setCyEdge(CyEdge e) {		cyEdge = e; }
+	public CyEdge getCyEdge() 		{		return cyEdge;	}
+	public boolean touches(String nodeId) {	return edge.touches(nodeId);	}
+	public Edge getEdge() {		return edge;	}
+	public AttributeMap getEdgeAttributes() {		return edge.getAttributes();	}
 	
 }

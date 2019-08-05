@@ -35,17 +35,16 @@ import org.wikipathways.cytoscapeapp.impl.GpmlReaderFactory;
  *
  */
 public class GpmlFileReaderTaskFactory extends AbstractInputStreamTaskFactory {
-  final GpmlReaderFactory gpmlReaderFactory;
+  final GpmlReaderFactory factory;
 
-  public GpmlFileReaderTaskFactory(
-      final GpmlReaderFactory gpmlReaderFactory,
-      final StreamUtil streamUtil) {
+  public GpmlFileReaderTaskFactory( final GpmlReaderFactory gpmlReaderFactory, final StreamUtil streamUtil) 
+  {
     super(new BasicCyFileFilter(new String[]{"gpml"}, new String[]{"text/xml"}, "GPML files", DataCategory.NETWORK, streamUtil));
-    this.gpmlReaderFactory = gpmlReaderFactory;
+    factory = gpmlReaderFactory;
   }
 	
 	public TaskIterator createTaskIterator(InputStream inputStream, String fileName) {
-		Task t = new GpmlFileReaderTask( gpmlReaderFactory, inputStream, fileName);
+		Task t = new GpmlFileReaderTask( factory, inputStream, fileName);
 		return new TaskIterator(t);
 	}
 }

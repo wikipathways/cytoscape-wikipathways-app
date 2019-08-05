@@ -1,5 +1,6 @@
 package org.wikipathways.cytoscapeapp.impl.gpml;
 
+import java.awt.geom.Point2D;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -26,7 +27,7 @@ public class DataNodeGroup extends DataNode {
 
 	// go thru all children and get the enclosing rectangle
 	// set the models attributes, and tell the stack to resize its shape
-	public void calcBounds()
+	public Point2D.Double calcBounds()
 	{
 		System.out.print("Group " + getGraphId() + " has membership of " + members.size());
 //		groupView.getChildren().clear();
@@ -55,8 +56,11 @@ public class DataNodeGroup extends DataNode {
 			if (top < minY)  	minY = top;
 			if (bottom > maxY)  maxY = bottom;
 		}
-		minX += 12;			// TODO FUDGE
-		maxX += 12;
+		int MARGIN = 5;
+		minX -= MARGIN;			// TODO FUDGE
+		maxX += MARGIN;
+		minY -= MARGIN;		
+		maxY += MARGIN;
 		putDouble("X", minX);
 		putDouble("Y", minY);
 		putDouble("CenterX", (minX + maxX) / 2.0);
@@ -67,65 +71,33 @@ public class DataNodeGroup extends DataNode {
 //		getStack().setRect(minX, minY, maxX - minX, maxY - minY);
 //		ShapeFactory.resizeFigureToNode(getStack());
 		System.out.println(String.format(" and Bounds: [ ( %.2f,  %.2f )  %.2f x  %.2f]", minX, minY, maxX - minX, maxY - minY)); 
+		return new Point2D.Double(minX,minY);
 	}
 //---------------------------------------------------------------------------
 	public void assignMembers() {
 		String groupId = get("GroupId");
 		if (groupId == null) 		return;		//ERROR
 		clearMembers();
-		Map<Integer, DataNode> nodes = model.getDataNodeMap();
-//		Pasteboard pasteboard = model.getController().getPasteboard();
-		for (int nodeKey : nodes.keySet())
+		Map<String, DataNode> nodes = model.getDataNodeMap();
+		for (String nodeKey : nodes.keySet())
 		{
 			DataNode nod = nodes.get(nodeKey);
 			String groupRef = nod.get("GroupRef");
 			if (groupId.equals(groupRef))
-			{
 				addMember(nod);
-//				pasteboard.bringInFront(nod, getStack());
-			}
 		}
-		calcBounds();
-		double minX = getDouble("X");
-		double minY = getDouble("Y");
-//		int i = -1 * getMembers().size() / 2;
-//		double myHeight = getDouble("Height");
-		for (DataNode node : getMembers())
-		{
-			if (compoundNode)
-			{
-				
-			}
-			else
-			{
-//				VNode childstack = node.getStack();
-//				childstack.setId("" + node.getGraphId());
-//	//			pasteboard.getContentLayer().remove(childstack);
-//				stack.getChildren().add(childstack);
-//				double x = node.getDouble("X");
-//				double y = node.getDouble("Y");
-//				double w = node.getDouble("Width");
-//				double h = node.getDouble("Height");
-//				childstack.setTranslateX(x-minX);
-//				childstack.setTranslateY(y-minY-h);
-//				childstack.setMouseTransparent(true);
-			}
-		}
-//		System.out.println("inGroup: " + stack.getChildren().size());
-		updateView();
-		
+		Point2D.Double topLeft = calcBounds();
+//		moveMembers(-topLeft.getX(), -topLeft.getY());
+	}
+	double getLeft()
+	{
+		 return getDouble("X") - getDouble("Width") / 2.0;
 	}
 
-//	public BoundingBox getBounds() {
-//		double padding = 5;
-//		return new BoundingBox(minX-padding,minY-padding,0, maxX-minX + 2 * padding, maxY-minY+ 2 * padding, 0);
-//	}
-
-	public void updateView() {
-//		if (stack != null) 
-//			stack.setRect(getDouble("X"), getDouble("Y"), getDouble("Width"), getDouble("Height"));		
+	double getTop()
+	{
+		 return getDouble("Y") - getDouble("Height") / 2.0;
 	}
-
 
 	public void moveMembers(double dx, double dy) {
 		for (DataNode node : members)
@@ -172,14 +144,14 @@ public class DataNodeGroup extends DataNode {
 	public String toGPML()	{ 
 		StringBuilder bldr = new StringBuilder();
 		buildNodeOpen(bldr);
-		buildXRefTag(bldr);
+		attributes.buildXRefTag(bldr);
 //		buildNodeClose(bldr);
 		return bldr.toString();
 	}
 	String elementType = "Group";
 	String[]  nodeAttrs = {  "TextLabel", "GroupId", "GraphId", "Style", "GroupRef"};
 	private void buildNodeOpen(StringBuilder bldr) {
-		bldr.append("<Group " + attributeList(nodeAttrs) + " />\n");
+		bldr.append("<Group " + attributes.attributeList(nodeAttrs) + " />\n");
 	}
 
 }

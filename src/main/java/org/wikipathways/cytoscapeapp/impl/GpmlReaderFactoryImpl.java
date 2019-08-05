@@ -1,28 +1,18 @@
 package org.wikipathways.cytoscapeapp.impl;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.io.StringReader;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.swing.SwingUtilities;
 
 import org.cytoscape.event.CyEventHelper;
-import org.cytoscape.model.CyColumn;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNetworkFactory;
 import org.cytoscape.model.CyNetworkManager;
-import org.cytoscape.model.CyRow;
-import org.cytoscape.model.subnetwork.CyRootNetwork;
-import org.cytoscape.model.subnetwork.CySubNetwork;
 import org.cytoscape.service.util.CyServiceRegistrar;
-import org.cytoscape.session.CyNetworkNaming;
 import org.cytoscape.view.layout.CyLayoutAlgorithm;
 import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
 import org.cytoscape.view.model.CyNetworkView;
@@ -32,11 +22,9 @@ import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.ObservableTask;
 import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskMonitor;
-import org.pathvisio.core.model.Pathway;
-import org.pathvisio.core.model.PathwayElement;
+//import org.pathvisio.core.model.Pathway;
 import org.wikipathways.cytoscapeapp.WPClient;
-import org.wikipathways.cytoscapeapp.internal.cmd.EnsemblIdTask;
-import org.wikipathways.cytoscapeapp.internal.cmd.WikidataIdTask;
+import org.wikipathways.cytoscapeapp.impl.gpml.GPML;
 
 
 public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
@@ -50,7 +38,7 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
 	private CyEventHelper eventHelper;
 	private CyNetworkFactory netFactory;
 	private CyNetworkManager netMgr;
-	private CyNetworkNaming netNaming;
+//	private CyNetworkNaming netNaming;
 	private CyNetworkViewFactory netViewFactory;
 	private CyNetworkViewManager netViewMgr;
 	final CyLayoutAlgorithmManager layoutMgr;
@@ -59,10 +47,10 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
 	private GpmlVizStyle vizStyle;
 	private GpmlNetworkStyle networkStyle;
     String organism;
-    boolean verbose = false;
-	CyServiceRegistrar registrar;
+    boolean verbose = true;
+    private CyServiceRegistrar registrar;
   final Map<CyNetwork,GpmlConversionMethod> conversionMethods = new HashMap<CyNetwork,GpmlConversionMethod>();
-  final Map<CyNetwork,List<DelayedVizProp>> pendingVizProps = new HashMap<CyNetwork,List<DelayedVizProp>>();
+//  final Map<CyNetwork,List<DelayedVizProp>> pendingVizProps = new HashMap<CyNetwork,List<DelayedVizProp>>();
 //
 //  private boolean semaphore = false;
 //  
@@ -81,14 +69,14 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
 //		  semaphore = false;
 //	}
 
-File myFile;
+//File myFile;
   public GpmlReaderFactoryImpl(CyServiceRegistrar registrar)
   {
 //	  System.out.println("GpmlReaderFactoryImpl");
 	  this.registrar = registrar;
 	  eventHelper = registrar.getService(CyEventHelper.class);
       netMgr =  registrar.getService(CyNetworkManager.class);
-      netNaming = registrar.getService(CyNetworkNaming.class);
+//      netNaming = registrar.getService(CyNetworkNaming.class);
       netFactory = registrar.getService(CyNetworkFactory.class);
       netViewMgr = registrar.getService(CyNetworkViewManager.class);
       netViewFactory = registrar.getService(CyNetworkViewFactory.class);
@@ -97,14 +85,13 @@ File myFile;
       vizStyle = new GpmlVizStyle(registrar);
       networkStyle = new GpmlNetworkStyle(registrar);
       manager = new WPManager(registrar, this );
-      myFile = null;
+//      myFile = null;
    }
 //--------------------------------------------------------------
-  public TaskIterator createReader(final String id, final Reader gpmlContents, final CyNetwork network, 
-		  final GpmlConversionMethod conversionMethod, File file) {
+  public TaskIterator createReader(final String id, final Reader gpmlContents, final CyNetwork network, 		//
+		  final GpmlConversionMethod conversionMethod, InputStream inStream) {
     conversionMethods.put(network, conversionMethod);
-//    manager = new WPManager(registrar, this );
-    ReaderTask t = new ReaderTask(manager, gpmlContents, network, conversionMethod, file);
+    ReaderTask t = new ReaderTask(manager, gpmlContents,  network, conversionMethod, inStream);  //
     return new TaskIterator(t);
   }
 
@@ -116,10 +103,12 @@ File myFile;
     boolean importNetwork = GpmlConversionMethod.NETWORK.equals(method);
 
     final TaskIterator iterator = new TaskIterator();
-    iterator.append(new ApplyVizPropsTask(gpmlNetwork, networkView));
+//    iterator.append(new ApplyVizPropsTask(gpmlNetwork, networkView));
     if (importNetwork) 
     		applyLayout(networkView, iterator);
-    iterator.append(new UpdateViewTask(networkView, !importNetwork));
+boolean update = false;
+if (update)
+	iterator.append(new UpdateViewTask(networkView, !importNetwork));
     return iterator;
   }
 
@@ -137,97 +126,67 @@ File myFile;
       });
   
   }
-
-  public TaskIterator createReaderAndViewBuilder(final String id, final Reader gpmlContents, final GpmlConversionMethod conversionMethod, File f) {
+//
+  public TaskIterator createReaderAndViewBuilder(final String id,  final Reader gpmlContents,final GpmlConversionMethod conversionMethod, InputStream inputStream) {
 	  if (verbose)  System.out.println("createReaderAndViewBuilderOuter");
    final CyNetwork network = netFactory.createNetwork();
     network.getRow(network).set(CyNetwork.NAME, id);
     netMgr.addNetwork(network);
-    if (gpmlContents instanceof InputStreamReader)
-    {
-    	InputStreamReader isr = (InputStreamReader) gpmlContents;
-    	if (verbose) System.out.println("reset me");
-    }
+//    if (gpmlContents instanceof InputStreamReader)
+//    {
+//    	InputStreamReader isr = (InputStreamReader) gpmlContents;
+//    	if (verbose) System.out.println("reset me");
+//    }
     final CyNetworkView view = netViewFactory.createNetworkView(network);
     netViewMgr.addNetworkView(view);
     final TaskIterator iterator = new TaskIterator();
-    iterator.append(createReader(id, gpmlContents, network, conversionMethod, f));
+    iterator.append(createReader(id, gpmlContents, network, conversionMethod, inputStream));   //
     iterator.append(createViewBuilder(id, network, view));
-//    if (organism == null)		
-    	readOrganismKeywork(gpmlContents);
-
-     iterator.append(new EnsemblIdTask(network, registrar, organism));
-     iterator.append(new WikidataIdTask(network, registrar, organism));
+//    iterator.append(new EnsemblIdTask(network, manager));
+//    iterator.append(new WikidataIdTask(network, manager));
     return iterator;
   }
 
 
-  	//HACK -- read organsim out of the raw xml
-  	private void readOrganismKeywork(final Reader gpmlContents) {
-	
-		try 
-		{ 
-//			int len = ((StringReader) gpmlContents).read();
-			char[] chs = new char[2001];
-			gpmlContents.read(chs, 0, 2000);
-			gpmlContents.reset();
-			String str = new String(chs);
-			int idx = str.indexOf("Organism=");
-			if (idx > 0)
-			{
-				int start = idx + "Organism=".length();
-				if (str.charAt(start) == '"')
-				{
-					String tail = str.substring(start + 1);
-					int end = tail.indexOf('"');
-					organism = tail.substring(0,end);
-					if (verbose) System.out.println(organism);
-					
-				}
-			}
-		}
-		catch (Exception e) {}
-		
-	}
-//-----------------------------------------------------------------------
+ //-----------------------------------------------------------------------
   class ReaderTask extends AbstractTask {
     volatile Reader gpmlContents = null;
     final CyNetwork network;
     final GpmlConversionMethod conversionMethod;
     final WPManager manager;
-    final File file;
+    final InputStream stream;
 
     public ReaderTask(
         final WPManager wpMgr,
         final Reader gpmlContents,
         final CyNetwork network,
-        final GpmlConversionMethod conversionMethod, File file
+        final GpmlConversionMethod conversionMethod, InputStream str
         )
     {
         this.manager = wpMgr;
         this.gpmlContents = gpmlContents;
         this.network = network;
         this.conversionMethod = conversionMethod;
-        this.file = file;
+        this.stream = str;
     }
 
-    private void addNetworkTableColumns(String ...strings)
-    {	
-		for (String s : strings)
-		{
-			CyColumn col = network.getDefaultNetworkTable().getColumn(s);
-			if (col == null)
-				 network.getDefaultNetworkTable().createColumn(s, String.class, false);
-		
-		}
-    	
-    }
+//    private void addNetworkTableColumns(String ...strings)
+//    {	
+//		for (String s : strings)
+//		{
+//			CyColumn col = network.getDefaultNetworkTable().getColumn(s);
+//			if (col == null)
+//				 network.getDefaultNetworkTable().createColumn(s, String.class, false);
+//		
+//		}
+//    	
+//    }
 	public void run(TaskMonitor monitor) throws Exception {
 		if (verbose) System.out.println("running ReaderTask");
 		monitor.setTitle("Construct network");
 
 		monitor.setStatusMessage("Parsing pathways file");
-		final Pathway pathway = new Pathway();
+//		final Pathway pathway = new Pathway();
 		try {
 //			gpmlContents.mark(10000000);
 			char[] chars = new char[100];
@@ -242,8 +201,11 @@ File myFile;
 //			{
 //				System.out.println("reset failed");
 //			}
-			if (file != null)
-				gpmlContents = new InputStreamReader(new BufferedInputStream(new FileInputStream(file)));
+//			if (file != null)
+//				gpmlContents = new InputStreamReader(new BufferedInputStream(new FileInputStream(file)));
+//			stream.reset();
+			if (stream != null)
+			 gpmlContents = new InputStreamReader(stream);
 	
 			 do{
 				 charsRead = gpmlContents.read(chars,0,chars.length);
@@ -256,47 +218,49 @@ File myFile;
 			 } while (charsRead > 0);
 			String raw = builder.toString();
 			String pmids = scrapePMIDs(raw);
+			manager.setOrganism(scrapeOrganism(raw));
 //			System.out.println(raw);
 //			gpmlContents.reset();
-//			if (verbose) System.out.println("About to call newParser");
-//			GPML newParser = new GPML(manager, pathway, network);
-//			newParser.read(builder.toString());
+			if (verbose) System.out.println("About to call newParser");
+			GPML newParser = new GPML(manager, network, eventHelper);
+			newParser.read(raw);
+//			Thread.sleep(1000);
+			newParser.writePathway(conversionMethod);
+//			
+//			gpmlContents = new StringReader(raw);
+//			if (verbose) System.out.println("About to call readFromXML");
+////			pathway.readFromXml(gpmlContents, true);
+//			Document doc = FileUtil.convertStringToDocument(builder.toString()); 
 			
-			gpmlContents = new StringReader(builder.toString());
-			if (verbose) System.out.println("About to call readFromXML");
-			pathway.readFromXml(gpmlContents, true);
-			PathwayElement info = pathway.getMappInfo();
-			organism = info.getOrganism();
-			CyRow row = network.getRow(network);
-			final String name = info.getMapInfoName() + " - " + organism;
-			final String description = info.findComment("WikiPathways-description");
-			final String nonConflictingName = netNaming.getSuggestedNetworkTitle(name);
-			row.set(CyNetwork.NAME, nonConflictingName);
-			addNetworkTableColumns("organism", "description", "title", "pmids");
-			CyColumn col = network.getDefaultNetworkTable().getColumn("organism");
-//				if (col == null)
-//				{
-//					 network.getDefaultNetworkTable().createColumn("organism", String.class, true);
-//					col =  network.getDefaultNetworkTable().getColumn("organism");
-//				}
-			row.getAllValues();
-			row.set("pmids", pmids);
-			row.set("organism", organism);
-			row.set("description", description);
-			row.set("title", info.getMapInfoName());
-			if (network instanceof CySubNetwork) {
-				final CyRootNetwork root = ((CySubNetwork) network).getRootNetwork();
-				root.getRow(root).set(CyNetwork.NAME, nonConflictingName);
-			}
+	//------------		
+//			PathwayElement info = pathway.getMappInfo();
+//			organism = info.getOrganism();
+//			CyRow row = network.getRow(network);
+//			final String name = info.getMapInfoName() + " - " + organism;
+//			final String description = info.findComment("WikiPathways-description");
+//			final String nonConflictingName = netNaming.getSuggestedNetworkTitle(name);
+//			row.set(CyNetwork.NAME, nonConflictingName);
+//			addNetworkTableColumns("organism", "description", "title", "pmids");
+//
+//			row.getAllValues();
+//			row.set("pmids", pmids);
+//			row.set("organism", organism);
+//			row.set("description", description);
+//			row.set("title", info.getMapInfoName());
+//			if (network instanceof CySubNetwork) {
+//				final CyRootNetwork root = ((CySubNetwork) network).getRootNetwork();
+//				root.getRow(root).set(CyNetwork.NAME, nonConflictingName);
+//			}
 
-			List<DelayedVizProp> vizProps = null;
-			switch (conversionMethod) {
-			case PATHWAY: 	vizProps = (new GpmlToPathway(manager, eventHelper, pathway, network)).convert(); 	break;
-			case NETWORK: (new GpmlToNetwork(eventHelper, pathway, network)).convert();	 				break;
-			}
-
-			if (vizProps != null)
-				pendingVizProps.put(network, vizProps);
+//			addXML(doc);
+//			List<DelayedVizProp> vizProps = null;
+//			switch (conversionMethod) {
+//			case PATHWAY: 	vizProps = (new GpmlToPathway(manager, eventHelper, pathway, network)).convert(); 	break;
+//			case NETWORK: (new GpmlToNetwork(eventHelper, pathway, network)).convert();	 				break;
+//			}
+//
+//			if (vizProps != null)
+//				pendingVizProps.put(network, vizProps);
 
 		} catch (Exception e) {
 			throw new Exception("Pathway not available -- invalid GPML", e);
@@ -305,8 +269,51 @@ File myFile;
 		}
 	}
 
-
-	private String scrapePMIDs(String raw) {
+//
+//	private void addXML(Document doc) {
+//		if (conversionMethod == GpmlConversionMethod.PATHWAY)
+//		{
+//			
+//		}
+//		else
+//		{
+//			
+//		}
+//			
+//		
+//	}
+	private String scrapeOrganism(final String raw) {
+		int idx = raw.indexOf("Organism=");
+		if (idx > 0)
+		{
+			int start = idx + "Organism=".length();
+			if (raw.charAt(start) == '"')
+			{
+				String tail = raw.substring(start + 1);
+				int end = tail.indexOf('"');
+				organism = tail.substring(0,end);
+				if (verbose) System.out.println(organism);
+				
+			}
+		}
+		return "";
+	}
+ 	//HACK -- read organism out of the raw xml
+  	private void readOrganismKeyword(final Reader gpmlContents) {
+	
+		try 
+		{ 
+//			int len = ((StringReader) gpmlContents).read();
+			char[] chs = new char[2001];
+			gpmlContents.read(chs, 0, 2000);
+			gpmlContents.reset();
+			String str = new String(chs);
+		}
+		catch (Exception e) {}
+		
+	}
+	
+	private String scrapePMIDs(final String raw) {
 		String start = "<bp:ID ";
 		String end = "</bp:ID>";
 		StringBuilder pmids = new StringBuilder();
@@ -340,12 +347,12 @@ File myFile;
 	}
 
 	public void cancel() {
-      final Reader gpmlContents2 = gpmlContents;
-      if (gpmlContents2 == null) return;
-      try {
-          gpmlContents2.close();
-        } catch (IOException e) {}
-        gpmlContents = null;
+//      final Reader gpmlContents2 = gpmlContents;
+//      if (gpmlContents2 == null) return;
+//      try {
+//          gpmlContents2.close();
+//        } catch (IOException e) {}
+//        gpmlContents = null;
    }
   }
 
@@ -360,13 +367,13 @@ File myFile;
     }
 
     public void run(TaskMonitor monitor) {
-      final List<DelayedVizProp> vizProps = pendingVizProps.get(network);
-      eventHelper.flushPayloadEvents(); // guarantee that all node and edge views have been created
-      try { Thread.sleep(1000); } catch (Exception e) {} // wait for flush payload events to take hold
-      DelayedVizProp.applyAll(view, vizProps, manager); // apply our visual style
-      if (vizProps != null)
-    	  	vizProps.clear(); // be nice to the GC
-      pendingVizProps.remove(network);
+//      final List<DelayedVizProp> vizProps = pendingVizProps.get(network);
+//      eventHelper.flushPayloadEvents(); // guarantee that all node and edge views have been created
+//      try { Thread.sleep(1000); } catch (Exception e) {} // wait for flush payload events to take hold
+//      DelayedVizProp.applyAll(view, vizProps, manager); // apply our visual style
+//      if (vizProps != null)
+//    	  	vizProps.clear(); // be nice to the GC
+//      pendingVizProps.remove(network);
     }
   }
 
@@ -402,13 +409,16 @@ File myFile;
     }
 
     private void updateViewInner(boolean importAsPathway) throws Exception {
+    	   System.out.println("updateViewInner");
     if (importAsPathway) 	vizStyle.apply(view);
      else    				networkStyle.apply(view);
       view.fitContent();
-      view.updateView();
-    }
+   	view.updateView();
+    System.out.println("/updateViewInner");
+   }
 
     public <R> R getResults(Class<? extends R> type) {
+    	System.err.println();
       final CyNetwork network = view.getModel();
       if (String.class.equals(type))  		return (R) network.getRow(network).get(CyNetwork.NAME, String.class);
       if (Long.class.equals(type))         	return (R) network.getSUID();

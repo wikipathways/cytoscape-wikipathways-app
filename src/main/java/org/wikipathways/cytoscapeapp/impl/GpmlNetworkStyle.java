@@ -113,20 +113,20 @@ public class GpmlNetworkStyle {
    
     
     // create viz mappings
-    for (final GpmlToNetwork.VizTableStore vizTableStore : GpmlToNetwork.getAllVizTableStores()) 
-    {
-      final Map<?,?> mapping = vizTableStore.getMapping();
-      String colName =  vizTableStore.getCyColumnName();
-      Class<?> colType = vizTableStore.getCyColumnType();
-      final VisualMappingFunctionFactory fnFactory = (mapping == null) ? passFnFactory : discFnFactory;
-      for (final VisualProperty<?> vizProp : vizTableStore.getCyVizProps()) 
-      {
-        final VisualMappingFunction<?,?> fn = fnFactory.createVisualMappingFunction( colName, colType, vizProp);
-        if (mapping != null && fn instanceof DiscreteMapping  ) 
-          ((DiscreteMapping) fn).putAll(mapping);
-        vizStyle.addVisualMappingFunction(fn);
-      }
-    }
+//    for (final GpmlToNetwork.VizTableStore vizTableStore : GpmlToNetwork.getAllVizTableStores()) 
+//    {
+//      final Map<?,?> mapping = vizTableStore.getMapping();
+//      String colName =  vizTableStore.getCyColumnName();
+//      Class<?> colType = vizTableStore.getCyColumnType();
+//      final VisualMappingFunctionFactory fnFactory = (mapping == null) ? passFnFactory : discFnFactory;
+//      for (final VisualProperty<?> vizProp : vizTableStore.getCyVizProps()) 
+//      {
+//        final VisualMappingFunction<?,?> fn = fnFactory.createVisualMappingFunction( colName, colType, vizProp);
+//        if (mapping != null && fn instanceof DiscreteMapping  ) 
+//          ((DiscreteMapping) fn).putAll(mapping);
+//        vizStyle.addVisualMappingFunction(fn);
+//      }
+//    }
     vizMapMgr.addVisualStyle(vizStyle);
     return vizStyle;
   }

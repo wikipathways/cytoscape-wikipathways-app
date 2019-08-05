@@ -18,7 +18,7 @@ public class Segment {
 	public Point2D.Double getStart() { return start;	}
 	public Point2D.Double getCenter()	{ return new Point2D.Double((end.getX() + start.getX()) / 2., (end.getY() + start.getY()) / 2.); }
 	double length() { return distance(end, start);	}
-	public String toString() { return "(" + (int) getStart().getX() + ", " +  (int) getStart().getY() +  " -> " + (int) getEnd().getX() + ", " +  (int) getEnd().getY() + ")"; }
+	public String toString() { return "(" + (int) getStart().getX() + ", " +  (int) getStart().getY() +  ") -> (" + (int) getEnd().getX() + ", " +  (int) getEnd().getY() + ")"; }
 	public Line2D.Double getLine()	{ return new Line2D.Double(start.getX(), start.getY(), end.getX(), end.getY());  }
 	
 	static public Segment createStraightSegment(Point2D.Double start, Point2D.Double end, int axis) {

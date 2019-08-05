@@ -11,7 +11,7 @@ public class GPMLPoint {
 	private double relX = 0;
 	private double relY = 0;
 	private ArrowType head = ArrowType.none;
-	private int graphRef;
+	private String graphRef;
 	private Interaction interaction;
 	public void setInteraction(Interaction s)	{ interaction = s;	}
 
@@ -24,8 +24,8 @@ public class GPMLPoint {
 	public Point2D.Double getPoint()			{ return new Point2D.Double(x,y);	}
 	public void setPoint(Point2D.Double p)		{ if (p != null) { setX(p.getX()); setY(p.getY()); }  }
 
-	public int getGraphRef()			{ return graphRef;	}
-	public void setGraphRef(int s)		{ graphRef = s;	}
+	public String getGraphRef()			{ return graphRef;	}
+	public void setGraphRef(String s)		{ graphRef = s;	}
 
 	public ArrowType getArrowType()		{ return head;	}
 	public void setArrowType(ArrowType s)	{ head = s;	}
@@ -41,7 +41,7 @@ public class GPMLPoint {
 	public GPMLPoint(Point2D.Double pt, Interaction i) {
 		this(pt.getX(), pt.getY());
 		interaction = i;
-		graphRef = i == null ? 0 : i.getSourceid();
+		graphRef = i == null ? "" : i.getEdge().getSourceid();
 	}
 	
 	public GPMLPoint(Point2D.Double pt) {
@@ -73,18 +73,19 @@ public class GPMLPoint {
 			else if ("ArrowHead".equals(name))  head = ArrowType.lookup(val);
 			else if ("GraphRef".equals(name))  
 			{
-				if (StringUtil.isNumber(val))
-					graphRef = StringUtil.toInteger(val);
-				else 
-				{
-					DataNode nod = model.find(val);
-					if (nod != null)
-						graphRef = nod.getId(); 
-			}	}
+//				if (StringUtil.isNumber(val))
+					graphRef = val; //StringUtil.toInteger(val);
+//				else 
+//				{
+//					DataNode nod = model.find(val);
+//					if (nod != null)
+//						graphRef = nod.getId(); 
+//			}	
+			}
 			
 		}
-		if (graphRef == 0)
-			System.err.println(String.format("%s %d (%.2f, %.2f)",  head.toString(),graphRef, x ,y )); 
+		if (StringUtil.isEmpty(graphRef))
+			System.err.println(String.format("%s %s (%.2f, %.2f)",  head.toString(),graphRef, x ,y )); 
 		System.out.println(String.format("%s (%.2f, %.2f)",  head.toString(),x ,y )); 
 	}
 //	else if ("org.pathvisio.DoubleLineProperty".equals(name))  
@@ -109,7 +110,7 @@ public class GPMLPoint {
 	{
 		if (interaction != null)		// the dragLine has no interaction defined
 		{
-			DataNode dataNode = interaction.getModel().findDataNode(graphRef);
+			DataNode dataNode = interaction.getEdge().getModel().findDataNode(graphRef);
 			if (dataNode != null)
 				setXY(dataNode, relX, relY);
 		}

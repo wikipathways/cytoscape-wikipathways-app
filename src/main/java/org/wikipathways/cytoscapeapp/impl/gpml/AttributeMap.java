@@ -205,7 +205,7 @@ public class AttributeMap extends HashMap<String, String>
 		return r;
 	}
 	//-------------------------------------------------------------
-	public void putRect(Rectangle r)	
+	public void putRect(Rectangle2D r)	
 	{
 		put("ShapeType", "Rectangle");
 		put("Width", "" + r.getWidth());
@@ -272,10 +272,30 @@ public class AttributeMap extends HashMap<String, String>
 		put("-fx-stroke-weight", ""  + width);
 	}
 	//-------------------------------------------------------------
+
+
 	//-------------------------------------------------------------
 	public Paint getPaint(String key)		{	return StringUtil.getPaint(get(key));	}
 	public void putPaint(String key, Color stroke)		{	put(key, stroke.toString());	}
- 
+	public static Color colorFromString(final String sv, Color deflt)		// reads 0xff1100 or #ff1100 or ff1100
+	{
+		if (sv == null) return deflt;
+		try {
+			int offset = 0;
+			String cstr = sv.trim();
+			if (cstr.charAt(0) == '#')					offset = 1;
+			else if (cstr.startsWith("0x"))				offset = 2;
+			cstr = cstr.substring(offset, Math.min(offset+8, cstr.length()));
+			return new Color( Integer.parseInt(cstr, 16), cstr.length() == 8);
+				
+		} catch (Exception ex2) { }					
+		return deflt;
+	}
+	public static String colorToString(Color c)
+	{
+		return String.format("%x%x%x", c.getRed(), c.getGreen(), c.getBlue());
+	}
+
 	 //-------------------------------------------------------------
 	public void putBool(String key, boolean b )		{	put(key, b ? "true" : "false");	}
 	public boolean getBool(String key, boolean b )	
@@ -285,21 +305,9 @@ public class AttributeMap extends HashMap<String, String>
 		return val.toLowerCase().equals("true");
 	}
 	 //-------------------------------------------------------------
-	public void putColor(String key, Color c )		{	put( key, c.toString());	}
+	public void putColor(String key, Color c )		{	put( key, colorToString(c));	}
 	
-	public Color getColor(String key )	
-	{	
-		String val = get( key);
-		if (StringUtil.isEmpty(val))	return Color.WHITE;
-		try
-		{
-			return Color.WHITE;  //Color.web(val);	
-		}
-		catch (Exception e)
-		{
-			return Color.RED;
-		}
-	}
+	public Color getColor(String key)	{	return colorFromString(get(key), Color.black);	}
 	//-------------------------------------------------------------
 	public void putAll(String... strs )	
 	{

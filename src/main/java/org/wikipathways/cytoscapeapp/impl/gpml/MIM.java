@@ -9,12 +9,12 @@ public enum MIM
     MIM_STIMULATION("mim-stimulation", "Arrow"),
     MIM_MODIFICATION("mim-modification", "Arrow"),
     MIM_CATALYSIS("mim-catalysis", "Arrow"),
-    MIM_INHIBITION("mim-inhibition", "Arrow"),
+    MIM_INHIBITION("mim-inhibition", "tbar"),
     MIM_CLEAVAGE("mim-cleavage", "Arrow"),
     MIM_COVALENT_BOND("mim-covalent-bond", "Arrow"),
     MIM_BRANCHING_LEFT("mim-branching-left", null),
     MIM_BRANCHING_RIGHT("mim-branching-right", null),
-    MIM_TRANSLATION("mim-transcription-translation", "Arrow"),
+    MIM_TRANSLATION("mim-transcription-translation", "HalfCircle"),
     MIM_GAP("mim-gap", null);
 
 	private String id;
@@ -37,6 +37,7 @@ public enum MIM
 			if (m.id.equals(name)) return m;
 		return MIM_BINDING;
 	}
+	public String getId() { return id; }
 
 	
 }

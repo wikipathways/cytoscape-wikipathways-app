@@ -34,13 +34,13 @@ class NodeAttribute
 //-------------------------------------------------------------------
 class EdgeAttribute
 {
-	int propOf;	
+	String propOf;	
 	String name;
 	String val;
 	String type;
 	String subnet;
 
-	EdgeAttribute(int pr, String nam, String v, String typ, String sub)
+	EdgeAttribute(String pr, String nam, String v, String typ, String sub)
 	{
 		propOf = pr;
 		name = nam;
@@ -101,15 +101,15 @@ public class CXObject {
 	//-------------------------------------------------------------------
 	class Edge
 	{
-		int id;	
-		int src;
-		int targ;
+		String id;	
+		String src;
+		String targ;
 		String type;
 		public String toString()
 		{
 			return line("@id", id) + line("s", src) + line("t", targ) + line("i", type);
 		}
-		public Edge(int i, int s, int t, String typ)
+		public Edge(String i, String s, String t, String typ)
 		{
 			id = i;
 			src = s;
@@ -119,12 +119,12 @@ public class CXObject {
 	}
 	public void addEdge(Interaction e) {
 		
-		int id = e.getId();
-		Edge edge = new Edge(id, e.getSourceid(), e.getTargetid(), e.getInterType());
+		String id = e.getEdge().getId();
+		Edge edge = new Edge(id, e.getEdge().getSourceid(), e.getEdge().getTargetid(), e.getInterType());
 		edges.add(edge);
-		for (String s : e.keySet())
+		for (String s : e.getEdge().getAttributes().keySet())
 		{
-			EdgeAttribute ea = new EdgeAttribute(id, s, e.get(s), "string", "");
+			EdgeAttribute ea = new EdgeAttribute(id, s, e.getEdge().get(s), "string", "");
 			edgeAttributes.add(ea);
 		}
 	}

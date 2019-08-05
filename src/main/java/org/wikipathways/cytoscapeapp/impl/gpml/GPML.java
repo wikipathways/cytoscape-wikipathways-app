@@ -3,36 +3,46 @@ package org.wikipathways.cytoscapeapp.impl.gpml;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.model.CyNetwork;
-import org.pathvisio.core.model.Pathway;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.NodeList;
+import org.wikipathways.cytoscapeapp.impl.GpmlConversionMethod;
 import org.wikipathways.cytoscapeapp.impl.WPManager;
 
 
 public class GPML {
 
-	private Controller controller;
+//	private Controller controller;
 	private Model model;
-	private Pathway pathway;	
+//	private Pathway pathway;	
 	private CyNetwork network;
+	private WPManager manager;
+	private CyEventHelper helper;
 	
-	public GPML(WPManager mgr, Pathway path, CyNetwork net)
+	public GPML(WPManager mgr, CyNetwork net, CyEventHelper hlpr)
 	{
 		this();
-		pathway = path;
+//		pathway = path;
 		network = net;
+		manager = mgr;
+		helper= hlpr;
 	}
 	public GPML() {
 		model = new Model();
-		controller = new Controller(model);
+//		controller = new Controller(model);
 	}
 //	private Controller getController() { 	return model.getController();	}
 	//----------------------------------------------------------------------------
+	public void writePathway(GpmlConversionMethod method) {
+		model.writePathway(manager, network, helper, method);
+		
+	}
 //----------------------------------------------------------------------------
 	public void read(String s)
 	{
+		if (s.length() < 50) return;
 		try {
 			Document doc = FileUtil.convertStringToDocument(s);
 			read(doc);
@@ -99,15 +109,9 @@ public class GPML {
 		{
 			org.w3c.dom.Node child = nodes.item(i);
 			DataNode node = parseGPMLDataNode(child, model);
-			addDataNode(node);
-			System.out.println("adding: " + node + "\n");
+			model.addResource(node.getGraphId(), node);
+			System.out.println("adding node: " + node + "\n");
 		}
-	}
-	
-	private void addDataNode(DataNode node) {
-//		controller.addDataNode(node);
-
-		
 	}
 
 	private void parseStateNodes(NodeList nodes) {
@@ -127,18 +131,21 @@ public class GPML {
 		{
 			org.w3c.dom.Node xml = edges.item(i);
 			Interaction edge = parseGPMLInteraction(xml, model);
-			controller.addInteraction(edge);
+			model.addEdge(edge);
 		}
+		secondPassOnInteractions();
+		
 	}
+	
 	boolean verbose = true;
 	private void parseShapes(NodeList shapes, final String shapeType) {
 		for (int i=0; i<shapes.getLength(); i++)
 		{
 			org.w3c.dom.Node child = shapes.item(i);
-			if (verbose)
-				System.out.println("");
 			DataNode node = parseGPMLDataNode(child, model);
 			String s= shapeType;
+			if (verbose)
+				System.out.println(s);
 			if ("Shape".equals(shapeType))
 				s = node.get("ShapeType");
 			if (node != null)
@@ -196,7 +203,7 @@ public class GPML {
 		}
 		String type = node.get("Type");
 		if (isFixed(type))  node.put("Resizable", "false");
-		node.copyAttributesToProperties();
+//		node.copyAttributesToProperties();
 		return node;
 	}
 
@@ -210,8 +217,9 @@ public class GPML {
 //		node.put("Layer", activeLayer);
 		node.add(datanode.getAttributes());
 		String inId = node.get("GraphId");
-		if (!StringUtil.isNumber(inId))
-			node.putInteger("GraphId", m.gensym(inId));
+		node.put("OldId", inId);
+//		if (!StringUtil.isNumber(inId))
+//			node.putInteger("GraphId", m.gensym(inId));
 		NodeList elems = datanode.getChildNodes();
 		for (int i=0; i<elems.getLength(); i++)
 		{
@@ -241,7 +249,7 @@ public class GPML {
 						key = grandchild.getTextContent();
 					else 
 						val = grandchild.getTextContent();
-					System.out.println(grandchild.getNodeName() + " " + key + ": " + val );
+//					System.out.println(grandchild.getNodeName() + " " + key + ": " + val );
 				}
 				if (key != null && val != null)
 					 node.put(key, val);
@@ -271,8 +279,8 @@ public class GPML {
 //			node.copyAttributesToProperties();
 		}
 		String type = node.get("Type");
-		if (isFixed(type))  node.put("Resizable", "false");
-		node.copyAttributesToProperties();
+		node.put("Resizable",(isFixed(type)) ?  "false" : "true");
+//		node.copyAttributesToProperties();
 		return node;
 	}
 	
@@ -282,25 +290,25 @@ public class GPML {
 		return "GeneProduct Metabolite Protein RNA Pathway".contains(s);
 	}
 		//----------------------------------------------------------------------------
-	public Interaction parseGPMLInteraction(org.w3c.dom.Node edgeML, Model m) {
+	private Interaction parseGPMLInteraction(org.w3c.dom.Node edgeML, Model m) {
 	try
 	{
 		List<GPMLPoint> points = new ArrayList<GPMLPoint>();
 		List<Anchor> anchors = new ArrayList<Anchor>();
 		AttributeMap attrib = new AttributeMap(edgeML.getAttributes());
 		NodeList elems = edgeML.getChildNodes();
-		int graphId = -1;
-		String val = attrib.get("GraphId");
-		if (StringUtil.isNumber(val))
-			graphId = StringUtil.toInteger(val);
-		else 
-		{
-			DataNode nod = model.find(val);
-			if (nod != null)
-				graphId = nod.getId(); 
-			graphId = m.gensym(val);
-			attrib.putInteger("GraphId",graphId);
-		}
+		String graphId = attrib.get("GraphId");
+//		attrib.put("OldId", graphId);
+//		if (StringUtil.isNumber(val))
+//			graphId = StringUtil.toInteger(val);
+//		else 
+//		{
+//			DataNode nod = model.find(val);
+//			if (nod != null)
+//				graphId = nod.getId(); 
+////			graphId = m.gensym(val);
+////			attrib.putInteger("GraphId",graphId);
+//		}
 
 		for (int i=0; i<elems.getLength(); i++)
 		{
@@ -310,6 +318,7 @@ public class GPML {
 			{
 				attrib.add(n.getAttributes());
 				NodeList pts = n.getChildNodes();
+				int pointCt = 0;
 				for (int j=0; j<pts.getLength(); j++)
 				{
 					org.w3c.dom.Node pt = pts.item(j);
@@ -317,24 +326,28 @@ public class GPML {
 					{
 						GPMLPoint gpt = new GPMLPoint(pt, m);
 						points.add(gpt);
-						String key = j > 0 ? "targetid" : "sourceid";
-						attrib.putInteger(key, gpt.getGraphRef());
+						
+						String key = pointCt > 0 ? "targetid" : "sourceid";
+						pointCt++;
+						attrib.put(key, gpt.getGraphRef());
 						ArrowType type = gpt.getArrowType();
 						if (type != null)
-							attrib.put("ArrowHead", type.toString());
+							attrib.put("ArrowHead", type.getInteractionType(gpt).getId());
 					}
 					if ("Anchor".equals(pt.getNodeName()))
 					{
-						
+						NamedNodeMap nnMap = pt.getAttributes();
+//						for (int k=0; k<nnMap.getLength(); k++)
+//						{
+//							org.w3c.dom.Node grandchild = nnMap.item(k);
+//							String grandname = grandchild.getNodeName();
+//							if ("GraphId".equals(grandname))
+//								oldId = grandchild.getNodeValue();
+//						}
 						Anchor anchor = new Anchor(pt, m, graphId);
-						String oldid = anchor.get("GraphId");
-						int id;
-						if (StringUtil.isNumber(oldid))
-							id = StringUtil.toInteger(oldid);
-						else id = m.gensym(oldid);
-						anchor.putInteger("GraphId", id);
-						anchor.setId(id);
 						anchors.add(anchor);
+						model.addResource(anchor.getGraphId(), anchor);
+//						System.out.println("Anchor " + anchor.getGraphId() + " in " + graphId);
 //						getController().addAnchor(anchor);
 					}
 				}
@@ -349,31 +362,24 @@ public class GPML {
 		DataNode endNode = null, startNode = null;
 		if (z > 1)
 		{
-			GPMLPoint startPt = points.get(0);
-			int strtId = startPt.getGraphRef();
-			startNode = m.find(strtId);
-			attrib.putInteger("sourceid", strtId);
-		
 			GPMLPoint lastPt = points.get(z-1);
-			int ending = lastPt.getGraphRef();
-			endNode = m.find(ending);
-			attrib.putInteger("targetid", ending);
 			ArrowType arwType = lastPt.getArrowType();
 			if (arwType != null)
-				attrib.put("ArrowHead", arwType.toString());
+				attrib.put("ArrowHead", arwType.getInteractionType(lastPt).getId());
 		}
 		else
 		{
 			System.err.println("z = " + z);
 			return null;
 		}
-		Interaction interaction = new Interaction(attrib, m, points, anchors);
+		Interaction interaction = new Interaction(attrib, m, points);
+		
 //		interaction.put("Layer", "Content");
-		interaction.add(edgeML.getAttributes());
-		interaction.putInteger("GraphId", graphId);
-		interaction.copyAttributesToProperties();		// copy attributes into properties for tree table editing
-		interaction.setStartNode(startNode);
-		interaction.setEndNode(endNode);
+		interaction.getEdgeAttributes().add(edgeML.getAttributes());
+		interaction.getEdge().put("GraphId", graphId);
+//		interaction.getEdge().getAttributes().copyAttributesToProperties();		// copy attributes into properties for tree table editing
+//		interaction.getEdge().setStartNode(startNode);
+//		interaction.getEdge().setEndNode(endNode);
 		
 		return interaction;
 	}
@@ -384,24 +390,51 @@ public class GPML {
 	}
 	}	
 	
-	public DataNode parseGPMLLabel(org.w3c.dom.Node labelNode) {
+	
+	private void secondPassOnInteractions()
+	{
+		for (Interaction i : model.getEdges())
+		{
+			List<GPMLPoint> points = i.getEdge().getPoints();
+			int z = points.size();
+			DataNode endNode = null, startNode = null;
+			if (z > 1)
+			{
+				GPMLPoint startPt = points.get(0);
+				String strtId = startPt.getGraphRef();
+//				startNode = model.find(strtId);
+				i.getEdgeAttributes().put("sourceid", strtId);
+//				i.getEdge().setStartNode(startNode);
+				GPMLPoint lastPt = points.get(z-1);
+				String ending = lastPt.getGraphRef();
+//				endNode = model.find(ending);
+				i.getEdgeAttributes().put("targetid", ending);
+//				i.getEdge().setEndNode(endNode);
+				ArrowType arwType = lastPt.getArrowType();
+				if (arwType != null)
+					i.getEdgeAttributes().put("ArrowHead", arwType.getInteractionType(lastPt).getId());
+			}
+		}
+	}
+	
+	private DataNode parseGPMLLabel(org.w3c.dom.Node labelNode) {
 		DataNode label = new DataNode(model);
 		label.setType("Label");
 		NodeList elems = labelNode.getChildNodes();
 		label.add(labelNode.getAttributes());
 		String idval = label.get("GraphId");
-		int graphId = -1;
-		if (StringUtil.isNumber(idval))
-			graphId = StringUtil.toInteger(idval);
-		else 
-		{
-			DataNode nod = model.find(idval);
-			if (nod != null)
-				graphId = nod.getId(); 
-			graphId = model.gensym(idval);
-			label.putInteger("GraphId",graphId);
-			label.setId(graphId);
-		}
+		String graphId = "";
+//		if (StringUtil.isNumber(idval))
+//			graphId = StringUtil.toInteger(idval);
+//		else 
+//		{
+//			DataNode nod = model.find(idval);
+//			if (nod != null)
+//				graphId = nod.getId(); 
+//			graphId = model.gensym(idval);
+//			label.putInteger("GraphId",graphId);
+//			label.setId(graphId);
+//		}
 		String txt = label.get("TextLabel");
 		if (txt == null) txt = "Undefined";
 		label.setName(txt);
@@ -508,7 +541,7 @@ public class GPML {
 			{
 				try 
 				{
-					controller.addGroup(parseGPMLGroup(child, attrs));	
+					model.addGroup(parseGPMLGroup(child, attrs));	
 				}
 				catch (Exception e) {
 					System.err.println("parseGroups");
@@ -527,16 +560,19 @@ public class GPML {
 		if (attrs.getNamedItem("Style") != null)
 			style = attrs.getNamedItem("Style").getNodeValue();
 		String graphId = "NONE";
+		String oldId = graphId;
 		if (attrs.getNamedItem("GraphId") != null)
 		{
-			graphId = attrs.getNamedItem("GraphId").getNodeValue();
+			oldId = graphId = attrs.getNamedItem("GraphId").getNodeValue();
 		}
 		AttributeMap attrMap = new AttributeMap();
 		String shapeType = "Complex".equals(style) ? "ComplexComponent" : "GroupComponent";
-		attrMap.putAll("GraphId", graphId, "GroupId", groupId, "ShapeType", shapeType, "Style", style, "Fill", "F7F7F0", "LineStyle", "Broken");
+//		if (!StringUtil.isNumber(oldId))
+//			graphId = "" +  model.gensym(oldId);
+		attrMap.putAll("GraphId", graphId, "GroupId", groupId, "ShapeType", shapeType, "Style", style, "Fill", "F7F7F0", "LineStyle", "Broken", "OldId" , oldId);
 		DataNodeGroup newGroup = new DataNodeGroup(attrMap,model, true);
 
-		newGroup.copyAttributesToProperties();
+//		newGroup.copyAttributesToProperties();
 //		newGroup.setName(newGroup.get("Style") + " [" + newGroup.get("GroupId") + "]");
 //		System.out.println("Making group with name = " + newGroup.getName());
 		return newGroup;
@@ -565,34 +601,25 @@ public class GPML {
 
 
 		public void addShapeNode(DataNode shapeNode, String shapeType) {
-//		pasteboard.setActiveLayer("Background");	
 			shapeNode.setType("Shape");
 			shapeNode.put("Type", "Shape");
 			shapeNode.put("ShapeType", shapeType);
 			shapeNode.setName(shapeNode.get("ShapeType"));
-//			VNode vnode = new VNode(shapeNode, pasteboard);
-//			pasteboard.add(vnode);
 			model.addResource(shapeNode);
 			model.addShape(shapeNode);
-//			vnode.setStyle("double-border");
 			
 		}
+	
 		public void addLabel(DataNode label) {
-//			pasteboard.setActiveLayer("Content");	
 			label.put("Layer", "Background");
 			label.setType("Label");
 			label.put("Type", "Label");
-//			VNode vnode = new VNode(label, pasteboard);
-//			vnode.setMouseTransparent(false);
-//			pasteboard.add(vnode);
 			model.addResource(label);
 			model.addLabel(label);
 		}
 
-
 		public void addStateNode(DataNodeState statenode) {
-//			pasteboard.setActiveLayer("Content");	
-			Integer graphRef = statenode.getInteger("GraphRef");
+			String graphRef = statenode.get("GraphRef");
 			DataNode host = model.findDataNode(graphRef);
 			if (host != null)
 			{
@@ -601,7 +628,7 @@ public class GPML {
 			}
 			
 		}
-	
+
 		//----------------------------------------------------------------------------
 		//----------------------------------------------------------------------------
 	// UNUSED ??

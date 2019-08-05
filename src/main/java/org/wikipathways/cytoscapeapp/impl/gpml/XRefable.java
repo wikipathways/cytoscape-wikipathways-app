@@ -1,43 +1,8 @@
 package org.wikipathways.cytoscapeapp.impl.gpml;
 
-abstract public class XRefable extends AttributeMap
+public class XRefable extends AttributeMap
 {
-	public XRefable()
-	{
-		this("", 0,"","","",0);
-	}
-	public XRefable(String inName)
-	{
-		this(inName, 0,"","","",0);
-	}
-	public XRefable(AttributeMap other)
-	{
-		this();
-		if (other != null)
-		for(String s: other.keySet())
-			put(s,other.get(s));
-
-		}
-	public void copyAttributesToProperties()
-	{
-		String s;
-		s = get("Name"); 		if (s != null) setName(s);
-		int i = getInteger("GraphId");		if (i > 0) setGraphId(i);
-		s = get("Database"); 	if (s != null) setDatabase(s);
-		s = get("ID"); 			if (s != null) setDbid(s);
-		s = get("Type"); 		if (s != null) setType(s);
-		s = get("GroupRef"); 	if (s != null) setGroupRef(getInteger("GroupRef"));
-	}
-	public void copyPropertiesToAttributes()
-	{
-		put("Name", getName());
-		putInteger("GraphId", getGraphId());
-		put("Database", getDatabase());
-		put("ID", getDbid());
-		put("Type", getType());
-		putInteger("GroupRef", getGroupRef());
-	}
-	public XRefable(String inName, int inId, String inDb, String inDbid, String inType, int inGroupRef)
+	public XRefable(String inName, String inId, String inDb, String inDbid, String inType, String inGroupRef)
 	{
 		setName(inName);
 		setGraphId(inId);
@@ -46,6 +11,39 @@ abstract public class XRefable extends AttributeMap
 		setType(inType);
 		setGroupRef(inGroupRef);
 	}
+	public XRefable()
+	{
+		this("", "","","","","");
+	}
+	public XRefable(AttributeMap other)
+	{
+//		this();
+		if (other != null)
+		for(String s: other.keySet())
+			put(s,other.get(s));
+
+		}
+
+	//--------------------------------------------------------
+//	public void copyAttributesToProperties()
+//	{
+//		String s;
+//		s = get("Name"); 		if (s != null) setName(s);
+//		s = get("GraphId");		if (s != null) setGraphId(s);
+//		s = get("Database"); 	if (s != null) setDatabase(s);
+//		s = get("ID"); 			if (s != null) setDbid(s);
+//		s = get("Type"); 		if (s != null) setType(s);
+//		s = get("GroupRef"); 	if (s != null) setGroupRef(getInteger("GroupRef"));
+//	}
+//	public void copyPropertiesToAttributes()
+//	{
+//		put("Name", getName());
+//		put("GraphId", getGraphId());
+//		put("Database", getDatabase());
+//		put("ID", getDbid());
+//		put("Type", getType());
+//		putInteger("GroupRef", getGroupRef());
+//	}
 //	public void setProperties() {
 //		setName(get("TextLabel"));
 //		setGraphId(get("GraphId"));
@@ -74,34 +72,36 @@ abstract public class XRefable extends AttributeMap
 		return bldr.toString();
 	}
 
-	protected Double valuePropety = new Double(0.);
-	public Double getValue()  { return valuePropety;}
-	public void setValue(Double s)  { valuePropety = s;}
+//	protected Double valuePropety = new Double(0.);
+//	public Double getValue()  { return getDouble("Value");}
+//	
+//	public void setValue(Double s)  { valuePropety = s;}
+//	
+//	protected String name = new String();		// HGNC
+	public String getName()  { return get("Name");}
+	public void setName(String s)  { put("Name", s);}
 	
-	protected String name = new String();		// HGNC
-	public String getName()  { return name;}
-	public void setName(String s)  { name = s;}
 	
-	protected Integer graphid = new Integer(0);
-	public int getGraphId()  { return graphid;}
-	public void setGraphId(int s)  { graphid = s;}
-	public void setId(int s)  { setGraphId(s);}
+//	protected String graphid = "-1";
+	public String getGraphId()  { return get("GraphId");}
+	public void setGraphId(String s)  {  put("GraphId", s); }
+	public void setId(String s)  { setGraphId(s);}
 
-	Integer groupRef = new Integer(0);
-	public int getGroupRef()  { return groupRef;}
-	public void setGroupRef(int s)  { groupRef = s;}
+//	String groupRef = new Integer(0);
+	public String getGroupRef()  { return get("GroupRef");}
+	public void setGroupRef(String s)  { put("GroupRef", s);}
 
-	protected String database = "";
-	public String getDatabase()  { return database;}	
-	public void setDatabase(String s)  { database = s;}
+//	protected String database = "";
+	public String getDatabase()  { return get("Database");}	
+	public void setDatabase(String s)  { put("Database", s);}
 
-	protected String dbid = "";
-	public String getDbid()  { return dbid;}
-	public void setDbid(String s)  { dbid = s;}
+//	protected String dbid = "";
+	public String getDbid()  { return get("DbId");}
+	public void setDbid(String s)  { put("DbId", s);}
 
-	protected String type = "";
-	public String getType()  { return type;}
-	public void setType(String s)  { type = s;}
+//	protected String type = "";
+	public String getType()  { return get("Type");}
+	public void setType(String s)  {put("Type", s);}
 
 	public String toString()	{ return getName() + " (" + getGraphId() + ")"; }
 }

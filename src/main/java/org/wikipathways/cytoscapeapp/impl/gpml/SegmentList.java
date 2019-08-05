@@ -51,9 +51,14 @@ public class SegmentList extends ArrayList<Segment> {
 	}
 	
 	
-	private void dump(Point2D[] wps) {
+	void dump(Point2D[] wps) {
 		for (Point2D pt : wps)
 			System.out.println(pt.toString());
+		for (Segment seg : this)
+			System.out.println(seg.toString());
+		
+	}
+	void dump() {
 		for (Segment seg : this)
 			System.out.println(seg.toString());
 		
