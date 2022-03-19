@@ -667,6 +667,20 @@ public class GpmlToNetwork {
 		edgeRow.set("LineStyle", line.getLineStyle() == 0 ? "Solid" : "Dots");
 		edgeRow.set("Color", colorToString(line.getColor()));
 
+		// #107  Edge Table is missing name, shared name, interaction, shared interaction
+	    	CyNode src = edge.getSource();
+	    	CyNode targ = edge.getTarget();
+	    	CyRow srcRow = nodeTable.getRow(src.getSUID());
+	    	CyRow targRow = nodeTable.getRow(targ.getSUID());
+	    	String srcName = srcRow.get("name", String.class);
+	    	String interaction = edgeRow.get("Target Arrow Shape", String.class);
+	    	String targName = targRow.get("name", String.class);
+	    	String edgeName = srcName + " (" + interaction + ") " + targName;
+	    	edgeRow.set("name", edgeName);
+	    	edgeRow.set("shared name", edgeName);
+	    	edgeRow.set("interaction", interaction);
+	    	edgeRow.set("shared interaction", interaction);
+		
 		if (isFirst)
 			convertViewStaticProp(line, edge, StaticProperty.STARTLINETYPE, BasicVisualLexicon.EDGE_SOURCE_ARROW_SHAPE);
 		if (isLast)
