@@ -1247,7 +1247,20 @@ public class GpmlToPathway {
     if (isEnd) 
       store(cyEdgeTbl, cyEdge, pvLine, BasicVizTableStore.EDGE_END_ARROW);
     
-    
+    // #107  Edge Table is missing name, shared name, interaction, shared interaction
+    CyNode src = cyEdge.getSource();
+    CyNode targ = cyEdge.getTarget();
+    CyRow srcRow = cyNodeTbl.getRow(src.getSUID());
+    CyRow targRow = cyNodeTbl.getRow(targ.getSUID());
+    CyRow edgeRow = cyEdgeTbl.getRow(cyEdge.getSUID());
+    String srcName = srcRow.get("name", String.class);
+    String interaction = edgeRow.get("EndArrow", String.class);
+    String targName = targRow.get("name", String.class);
+    String edgeName = srcName + " (" + interaction + ") " + targName;
+    edgeRow.set("name", edgeName);
+    edgeRow.set("shared name", edgeName);
+    edgeRow.set("interaction", interaction);
+    edgeRow.set("shared interaction", interaction);
   }
   
   
