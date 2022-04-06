@@ -6,7 +6,6 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Arc2D;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -23,6 +22,7 @@ import org.cytoscape.view.model.View;
 import org.cytoscape.view.model.VisualProperty;
 import org.cytoscape.view.presentation.annotations.Annotation;
 import org.cytoscape.view.presentation.annotations.ShapeAnnotation;
+import org.cytoscape.view.presentation.annotations.TextAnnotation;
 import org.cytoscape.view.presentation.property.BasicVisualLexicon;
 import org.cytoscape.view.presentation.property.values.Bend;
 import org.pathvisio.core.model.PathwayElement;
@@ -45,7 +45,7 @@ import org.wikipathways.cytoscapeapp.CellShapes;
  * How do we get around this problem? While we're reading GPML, we create the network topology
  * and store our desired visual style in DelayedVizProp instances.
  * After we finish reading GPML, we ensure that view objects have been created for
- * all our new nodes and edges (via CyEventHelper.flushPayloadEvents). 
+ * all our new nodes and edges (via CyEventHelper.flushPayloadEvents).
  * Finally we apply the visual style stored in the DelayedVizProp objects.
  */
 public class DelayedVizProp {
@@ -62,12 +62,12 @@ public class DelayedVizProp {
   }
 	static boolean verbose = false;
 	public String toString() {  return prop.getDisplayName() + ": " + value.toString(); }
-	public static void applyAll(final CyNetworkView netView,final Iterable<DelayedVizProp> delayedProps, WPManager mgr) 
+	public static void applyAll(final CyNetworkView netView,final Iterable<DelayedVizProp> delayedProps, WPManager mgr)
 	{
-		try 
+		try
 		{
 			mgr.turnOffEvents();
-			for ( DelayedVizProp delayedProp : delayedProps) 
+			for ( DelayedVizProp delayedProp : delayedProps)
 			{
 				final Object value = delayedProp.value;
 				if (value == null) continue;
@@ -76,7 +76,10 @@ public class DelayedVizProp {
 //				System.out.println(propName);
 				if ("Node Shape".equals(propName))
 					applyNodeShape(netView, delayedProps, mgr, delayedProp);
-		
+
+        if ("Label".equals(propName))
+  				applyLabel(netView, delayedProps, mgr, delayedProp);
+
 				if ("Edge Bend".equals(propName))
 				{
 //					applyEdgeBend(netView, mgr, delayedProp);
@@ -85,19 +88,19 @@ public class DelayedVizProp {
 					if (edgeView != null && ( delayedProp.value instanceof Bend))
 						edgeView.setLockedValue(BasicVisualLexicon.EDGE_BEND, (Bend) delayedProp.value);
 				}
-				
+
 			      View<?> view = null;
-			      if (delayedProp.netObj instanceof CyNode) 
+			      if (delayedProp.netObj instanceof CyNode)
 			      {
 			        final CyNode node = (CyNode) delayedProp.netObj;
 			        view = netView.getNodeView(node);
-			      } else if (delayedProp.netObj instanceof CyEdge) 
+			      } else if (delayedProp.netObj instanceof CyEdge)
 			      {
 			        final CyEdge edge = (CyEdge) delayedProp.netObj;
 			        view = netView.getEdgeView(edge);
 			      }
 			     if (view == null) continue;
-			
+
 			     String prop = delayedProp.prop.getIdString();
 			      boolean isPosition = prop.equals("NODE_X_LOCATION") || prop.equals("NODE_Y_LOCATION");
 			      boolean isDimension = prop.equals("WIDTH") || prop.equals("HEIGHT");
@@ -114,7 +117,7 @@ public class DelayedVizProp {
 						view.setVisualProperty(delayedProp.prop, value);
 			  	}
 			    catch (IllegalArgumentException ex)
-				{ 
+				{
 					System.err.println(delayedProp.prop + " - " + value);
 					continue;
 				}
@@ -122,8 +125,8 @@ public class DelayedVizProp {
 			wpManagerInstance = mgr;
 //			postProcessShapes();
 		}
-		catch (Exception e) {		} 
-		finally 
+		catch (Exception e) {		}
+		finally
 		{
 			mgr.turnOnEvents();
 //			netView.updateView();
@@ -143,7 +146,7 @@ public class DelayedVizProp {
 //				ShapeAnnotation shape = shapes.remove(shapes.size() - 1);
 //				shape.setCanvas(Annotation.BACKGROUND);
 //				// BUG -- this causes a ~ 1" vertical offset of all shapes
-//				shape.removeAnnotation();			// remove and readd the annotation to register the canvas change 
+//				shape.removeAnnotation();			// remove and readd the annotation to register the canvas change
 //				wpManagerInstance.getAnnots().addShape(shape);
 //			}
 //		}}
@@ -174,9 +177,53 @@ public class DelayedVizProp {
 	public static PathwayElement getPathwayElement(CyEdge e)				{		return pvEdges.get(e);	}
 
 	//--------------------------------------------------------------------------------
+  private static void applyLabel(final CyNetworkView netView,final Iterable<DelayedVizProp> delayedProps, WPManager mgr, DelayedVizProp delayedProp) 		{
+  		final Map<String,String> map = new HashMap<String,String>();
+  		TextAnnotation mAnnotation = mgr.getAnnots().newText(netView, map);
+  		CyNode src = (CyNode) delayedProp.netObj;
+  		View<CyNode> view = netView.getNodeView(src);
+  		double x = 0;
+  		double y = 0;
+  		double wid = 100;
+  		double hght = 30;
+  		String text = "UNDEFINED";
+  		List<DelayedVizProp> relatedProps = getPropsByID(delayedProps, src.getSUID());
+  		for (DelayedVizProp prop : relatedProps)			// we have to rescan all properties to find other attributes for the same shape
+  		{
+  			String propName1 = prop.prop.getDisplayName();
+  			String lookup = propTranslator(propName1);
+  			if (lookup != null && prop.value != null)
+  			{
+  				String propvalue1 = prop.value.toString();
+  //	 			  System.out.println(lookup + ": " + propvalue1);
+  //				int idx = propvalue1.indexOf('.');
+  //				if (idx > 0)
+  //					propvalue1 = propvalue1.substring(0, idx);
+  				map.put(lookup, propvalue1);
+  				if ("Width".equals(lookup))			wid = Double.valueOf(propvalue1);
+  				if ("Height".equals(lookup))		hght = Double.valueOf(propvalue1);
+  //				if ("Style".equals(lookup))			{ System.out.println("set style to: " + style);  style = propvalue1;   }
+  				if ("x".equals(lookup))				x = Double.valueOf(propvalue1);
+  				if ("y".equals(lookup))				y = Double.valueOf(propvalue1);
+  //				if ("z".equals(lookup))				z = Double.valueOf(propvalue1);
+  			}
+  		}
+  		if (mAnnotation != null)
+  		{
+  //			if (verbose) System.out.println(String.format("moving annotation to : %4.1f , %4.1f", x, y));
+  			mAnnotation.moveAnnotation(new Point2D.Double(x, y));
+  			mAnnotation.setText(text);
+  			mAnnotation.setCanvas(Annotation.BACKGROUND);
+  //			mAnnotation.setName(propvalue);
+  			mAnnotation.setZoom(1.0);
+  			mgr.getAnnotationManager().addAnnotation(mAnnotation);
+  //			shapes.add(mAnnotation);
+  		}
+
+  	}
 
 	private static void applyNodeShape(final CyNetworkView netView,final Iterable<DelayedVizProp> delayedProps, WPManager mgr, DelayedVizProp delayedProp) 		{
-		
+
 		final Map<String,String> map = new HashMap<String,String>();
 		CyNode src = (CyNode) delayedProp.netObj;
 		CyRow row = netView.getModel().getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS).getRow(src.getSUID());
@@ -184,7 +231,7 @@ public class DelayedVizProp {
 //	    if (val != null)	    				return;
 	    if (isState(src.getSUID()))    	return;
 
-		
+
 		CyNetwork network = netView.getModel();
 		List<CyNode> neighbors = network.getNeighborList(src, CyEdge.Type.ANY);
 		List<DelayedVizProp> relatedProps = getPropsByID(delayedProps, src.getSUID());
@@ -222,18 +269,18 @@ public class DelayedVizProp {
 		if ("Rectangle".equals(propvalue) || "Octagon".equals(propvalue))			// HACK - should look for group node
 		{
 			//Nothing to do here; Group style is set in GpmlToPathway.java
-			
+
 			return;
 		}
-		
+
 		ShapeAnnotation mAnnotation = mgr.getAnnots().newShape(netView, map);
-		
+
 		if ("Arc".equals(propvalue))
 		{
 			if (verbose) System.out.println("Arc");
 			double startRotation = getRotation(src);
 			Arc2D.Float arc = CellShapes.makeArc(startRotation);
-		
+
 			mAnnotation.setCustomShape(arc);
 			mAnnotation.setFillOpacity(0);
 			double d = startRotation / (Math.PI / 2.0);
@@ -256,7 +303,7 @@ public class DelayedVizProp {
 				double startRotation = getRotation(src);
 //				if (Double.isNaN(startRotation) || Math.abs(startRotation) < 0.1)
 //				{
-//					
+//
 //				}
 //				else
 				{
@@ -272,10 +319,10 @@ public class DelayedVizProp {
 					}
 				}
 			}
-			else				
+			else
 			{
 				Shape theShape = CellShapes.getShape(propvalue);
-				if (theShape == null)		mAnnotation.setShapeType(propvalue);  
+				if (theShape == null)		mAnnotation.setShapeType(propvalue);
 				else
 				{
 					if (verbose) System.out.println("\nShape");
@@ -291,7 +338,7 @@ public class DelayedVizProp {
 			}
 			}
 		}
-		
+
 		double nodex = 0, nodey = 0;
 		PathwayElement elem = getPathwayElement(src);
 		if (elem != null)
@@ -299,7 +346,7 @@ public class DelayedVizProp {
 			Color stroke = elem.getColor();
 			mAnnotation.setBorderColor(stroke);
 			mAnnotation.setBorderWidth(elem.getLineThickness());
-			Color fill = elem.getFillColor(); 
+			Color fill = elem.getFillColor();
 			if ("Brace".equals(propvalue))
 				fill = Color.white;
 			mAnnotation.setFillColor(fill);
@@ -322,7 +369,7 @@ public class DelayedVizProp {
 //			double cy = bounds.getCenterY();
 //			double w = bounds.getWidth();
 //			double h = bounds.getHeight();
-			
+
 			nodex = x + relx * wid/2;
 			nodey = y + rely * hght/2;
 		}
@@ -330,17 +377,17 @@ public class DelayedVizProp {
 //		Color fill2 = (Color) view.getVisualProperty(BasicVisualLexicon.NODE_COLOR);
 //		System.out.println("Filling annotation with " + fill.toString());
 //		mAnnotation.setBorderColor(Color.green);
-		
+
 		boolean legalSize = (wid > 0 && hght > 0);
 		if (legalSize)
 			mAnnotation.setSize(wid, hght);
 		boolean legalXY = (!(Double.isNaN(x) || Double.isNaN(y)));
-		
-		if (legalXY && legalSize) 
+
+		if (legalXY && legalSize)
 		{
 			x -= (wid / 2.);
 			y -= (hght / 2.);
-			if (mAnnotation != null) 
+			if (mAnnotation != null)
 			{
 //				if (verbose) System.out.println(String.format("moving annotation to : %4.1f , %4.1f", x, y));
 				mAnnotation.moveAnnotation(new Point2D.Double(x, y));
@@ -352,22 +399,22 @@ public class DelayedVizProp {
 			}
 			// view.setLockedValue(prop, 0.);
 		}
-//		if (verbose) 
+//		if (verbose)
 //		{
 //			System.out.println("size: "+ (int) x + ",  "+ (int)  y +  " # " + (int) wid + ",  "+ (int)  hght);
-//			System.out.println("mAnnotation: "+ mAnnotation);	
+//			System.out.println("mAnnotation: "+ mAnnotation);
 //			System.out.println("---> legal size: "+ legalSize + " legal pos: "+ legalXY);
 //		}
-		
+
 		boolean noNeighbors = neighbors.size() == 0;
-		boolean deleteNode = noNeighbors;  //thePath != null;		
+		boolean deleteNode = noNeighbors;  //thePath != null;
 		if (deleteNode)
 		{
 			view.setVisualProperty(BasicVisualLexicon.NODE_VISIBLE, false);
-			netView.getModel().removeNodes(Collections.singletonList((src)));	
+			netView.getModel().removeNodes(Collections.singletonList((src)));
 //			mAnnotation.setCanvas("background");		//	BUG:  this will cause annotation to move to 0,0!
 		}
-		else 
+		else
 		{
 			if (elem != null)
 			{
@@ -438,10 +485,10 @@ public class DelayedVizProp {
 
 	//--------------------------------------------------------------------------------
 	private static String propTranslator(String inName) {
-		if ("Node X Location".equalsIgnoreCase(inName)) return "x";		
-		if ("Node Y Location".equalsIgnoreCase(inName)) return "y";		
-		if ("Node Width".equalsIgnoreCase(inName)) return "Width";		
-		if ("Node Height".equalsIgnoreCase(inName)) return "Height";		
+		if ("Node X Location".equalsIgnoreCase(inName)) return "x";
+		if ("Node Y Location".equalsIgnoreCase(inName)) return "y";
+		if ("Node Width".equalsIgnoreCase(inName)) return "Width";
+		if ("Node Height".equalsIgnoreCase(inName)) return "Height";
 		return inName;
 	}
 
@@ -462,13 +509,13 @@ public class DelayedVizProp {
 //		String propvalue = value == null ? "EMPTY" : value.toString();
 //		String propClass = value == null ? "EMPTY" : value.getClass().toString();
 //		return("delayedProp: " + propName + " " + propvalue + " " + propClass);
-//		
+//
 //	}
 //	static public void showPoint(String name, Point2D pt) // DEBUG
 //	{
 //		System.out.println(String.format("%s: (%3.1f, %3.1f)", name, pt.getX(), pt.getY()));
 //	}
-//	
+//
 //	static private Point2D.Double getNodePosition(View<CyNode> nodeView) {
 //		Double x = 0., y = 0.;
 //		if (nodeView != null) {

@@ -22,6 +22,7 @@ import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.DiscreteRange;
 import org.cytoscape.view.model.View;
 import org.cytoscape.view.model.VisualProperty;
+import org.cytoscape.view.presentation.annotations.TextAnnotation;
 import org.cytoscape.view.presentation.property.ArrowShapeVisualProperty;
 import org.cytoscape.view.presentation.property.BasicVisualLexicon;
 import org.cytoscape.view.presentation.property.EdgeBendVisualProperty;
@@ -56,7 +57,7 @@ import org.pathvisio.core.view.MIMShapes;
  * Converts a GPML file contained in a PathVisio Pathway object to a
  * Cytoscape network view, and it tries to reproduce
  * the pathway's visual representation.
- * 
+ *
  * Style information is sync'd with PathVisio Java, e.g. see:
  * https://github.com/PathVisio/pathvisio/blob/master/modules/org.pathvisio.core/src/org/pathvisio/core/view/GroupPainterRegistry.java
  */
@@ -122,7 +123,7 @@ public class GpmlToPathway {
 //		System.out.println("GraphID = " + pvPathway.getUniqueGraphId());
 	    setupCyTables();
 		// Disable all events from our table
-	
+
 	    // convert by each pathway element type
 	    convertDataNodes();
 	    convertShapes();
@@ -131,8 +132,8 @@ public class GpmlToPathway {
 	    convertLabels();
 	    convertAnchors();
 	    convertLines();
-	
-	    
+
+
 	    pvToCyNodes.clear();				// clear our data structures to be nice to the GC
 		return cyDelayedVizProps;
 	}
@@ -263,7 +264,7 @@ public class GpmlToPathway {
 
   /**
    * Uses PathVisio's {@code StaticProperty.FONTNAME}, {@code StaticProperty.FONTWEIGHT},
-   * and {@code StaticProperty.FONTSTYLE} to return the font. 
+   * and {@code StaticProperty.FONTSTYLE} to return the font.
    */
   static final Converter PV_FONT_CONVERTER = new Converter() {
     public Object toCyValue(Object[] pvValues) {
@@ -279,19 +280,19 @@ public class GpmlToPathway {
 
   /**
    * Uses PathVisio's {@code StaticProperty.FONTNAME}, {@code StaticProperty.FONTWEIGHT},
-   * and {@code StaticProperty.FONTSTYLE} to return the font name. 
+   * and {@code StaticProperty.FONTSTYLE} to return the font name.
    */
   static final Converter PV_FONT_NAME_CONVERTER = new Converter() {
     public Object toCyValue(Object[] pvValues) {
     	try {
       return ((Font) PV_FONT_CONVERTER.toCyValue(pvValues)).getFontName();
     	}
-    	catch (ClassCastException e)  	{  return null;  	} 
+    	catch (ClassCastException e)  	{  return null;  	}
     }
   };
 
   /**
-   * Uses PathVisio's {@code StaticProperty.SHAPETYPE} and 
+   * Uses PathVisio's {@code StaticProperty.SHAPETYPE} and
    * {@code StaticProperty.LINETHICKNESS}. Cytoscape has no equivalent
    * of PathVisio's ShapeType.NONE. ShapeType.NONE is reproduced by
    * setting the line thickness to 0.
@@ -301,13 +302,13 @@ public class GpmlToPathway {
     	try {
     	      final ShapeType pvShapeType = (ShapeType) pvValues[0];
     	      final Double pvLineThickness = (Double) pvValues[1];
-    	      if (ShapeType.NONE.equals(pvShapeType)) 
-    	        return 0.0;  
+    	      if (ShapeType.NONE.equals(pvShapeType))
+    	        return 0.0;
     	      return pvLineThickness;
-  		
+
     	} catch (ClassCastException e)
     	{
-        return 0.0;  
+        return 0.0;
     	}
     }
   };
@@ -326,7 +327,7 @@ public class GpmlToPathway {
       return String.format("#%02x%02x%02x", r, g, b);
     	} catch (ClassCastException e)
     	{
-        return "#ff0000";  
+        return "#ff0000";
     	}
    }
   };
@@ -355,7 +356,7 @@ public class GpmlToPathway {
    * Some non-static property values include data source values and X, Y
    * coordinates for PathVisio State elements.
    *
-   * If an {@code Extracter} uses a static property value, it 
+   * If an {@code Extracter} uses a static property value, it
    * calls a {@code Converter} to convert the static property value
    * to a value Cytoscape can use.
    */
@@ -445,7 +446,7 @@ public class GpmlToPathway {
 
     	  return obj;
      }
-     catch (Exception e) { 
+     catch (Exception e) {
     	 System.err.println("Class Cast");
     	 return null;	}
     }
@@ -530,7 +531,7 @@ public class GpmlToPathway {
    * visual property values. The WikiPathways visual style,
    * specified in {@code GpmlVizStyle}, looks at known {@code VizTableStore}s
    * (as returned by {@code getAllVizPropStores()})
-   * to create a series of discrete and passthrough mappings for all 
+   * to create a series of discrete and passthrough mappings for all
    * {@code VizTableStore} columns.
    */
   public static interface VizTableStore extends TableStore {
@@ -565,7 +566,7 @@ public class GpmlToPathway {
 
   static Map<String,ArrowShape> PV_ARROW_MAP = new HashMap<String,ArrowShape>();
   static {
-    PV_ARROW_MAP.put("Arrow",              ArrowShapeVisualProperty.DELTA);	
+    PV_ARROW_MAP.put("Arrow",              ArrowShapeVisualProperty.DELTA);
     PV_ARROW_MAP.put("Line",               ArrowShapeVisualProperty.NONE);
     PV_ARROW_MAP.put("TBar",               ArrowShapeVisualProperty.T);
     PV_ARROW_MAP.put("mim-binding",        ArrowShapeVisualProperty.ARROW);
@@ -594,16 +595,16 @@ public class GpmlToPathway {
     PV_SHAPE_MAP.put("Ellipse",          NodeShapeVisualProperty.ELLIPSE);
     PV_SHAPE_MAP.put("Oval",             NodeShapeVisualProperty.ELLIPSE);
     PV_SHAPE_MAP.put("Octagon",          NodeShapeVisualProperty.OCTAGON);
-    PV_SHAPE_MAP.put("Cell",          	new NodeShapeImpl("Cell")); 
+    PV_SHAPE_MAP.put("Cell",          	new NodeShapeImpl("Cell"));
     PV_SHAPE_MAP.put("Nucleus",          new NodeShapeImpl("Nucleus"));
     PV_SHAPE_MAP.put("Organelle",        NodeShapeVisualProperty.ROUND_RECTANGLE);
-    PV_SHAPE_MAP.put("Mitochondria",     new NodeShapeImpl("Mitochondria"));	
-    PV_SHAPE_MAP.put("Sarcoplasmic Reticulum", new NodeShapeImpl("Sarcoplasmic Reticulum"));	
-    PV_SHAPE_MAP.put("Endoplasmic Reticulum", new NodeShapeImpl("Endoplasmic Reticulum"));	
-    PV_SHAPE_MAP.put("Golgi Apparatus", new NodeShapeImpl("Golgi Apparatus"));	
-    PV_SHAPE_MAP.put("Brace",     		new NodeShapeImpl("Brace"));		
-    PV_SHAPE_MAP.put("Arc",     			new NodeShapeImpl("Arc"));		
-    
+    PV_SHAPE_MAP.put("Mitochondria",     new NodeShapeImpl("Mitochondria"));
+    PV_SHAPE_MAP.put("Sarcoplasmic Reticulum", new NodeShapeImpl("Sarcoplasmic Reticulum"));
+    PV_SHAPE_MAP.put("Endoplasmic Reticulum", new NodeShapeImpl("Endoplasmic Reticulum"));
+    PV_SHAPE_MAP.put("Golgi Apparatus", new NodeShapeImpl("Golgi Apparatus"));
+    PV_SHAPE_MAP.put("Brace",     		new NodeShapeImpl("Brace"));
+    PV_SHAPE_MAP.put("Arc",     			new NodeShapeImpl("Arc"));
+
 
   }
 	private static final class NodeShapeImpl extends AbstractVisualPropertyValue implements NodeShape {
@@ -629,7 +630,7 @@ public class GpmlToPathway {
     PV_LINE_STYLE_MAP.put("Dashed", getCyNodeLineType("Dash"));
     PV_LINE_STYLE_MAP.put("Dots",   getCyNodeLineType("Dots"));
   }
-  // AST			
+  // AST
   static Map<String,String> PV_CONNECTORTYPE_MAP = new HashMap<String,String>();
   static {
 	  PV_CONNECTORTYPE_MAP.put("Straight",  "Straight");
@@ -652,7 +653,7 @@ public class GpmlToPathway {
     public static final VizTableStore NODE_TRANSPARENT      = new BasicVizTableStore("Transparent",                   BasicExtracter.TRANSPARENT, PV_TRANSPARENT_MAP, BasicVisualLexicon.NODE_TRANSPARENCY);
     public static final VizTableStore NODE_BORDER_THICKNESS = new BasicVizTableStore("BorderThickness", Double.class, BasicExtracter.NODE_LINE_THICKNESS,             BasicVisualLexicon.NODE_BORDER_WIDTH);
     public static final VizTableStore NODE_SHAPE            = new BasicVizTableStore("Shape",                         BasicExtracter.SHAPE, PV_SHAPE_MAP,             BasicVisualLexicon.NODE_SHAPE);
-    
+
     public static final VizTableStore EDGE_COLOR            = new BasicVizTableStore("Color",                         BasicExtracter.COLOR_STRING,                    BasicVisualLexicon.EDGE_UNSELECTED_PAINT);
     public static final VizTableStore EDGE_LINE_STYLE       = new BasicVizTableStore("LineStyle",                     BasicExtracter.LINE_STYLE_NAME, PV_LINE_STYLE_MAP, BasicVisualLexicon.EDGE_LINE_TYPE);
     public static final VizTableStore EDGE_LINE_THICKNESS   = new BasicVizTableStore("LineThickness", Double.class,   BasicExtracter.EDGE_LINE_THICKNESS,             BasicVisualLexicon.EDGE_WIDTH);
@@ -660,10 +661,10 @@ public class GpmlToPathway {
     public static final VizTableStore EDGE_END_ARROW        = new BasicVizTableStore("EndArrow",                      BasicExtracter.END_ARROW_STYLE, PV_ARROW_MAP,   BasicVisualLexicon.EDGE_TARGET_ARROW_SHAPE);
 
     //AST
-    public static final VizTableStore EDGE_CONNECTOR_TYPE     = new BasicVizTableStore("ConnectorType",             
-    		BasicExtracter.LINE_CONNECTOR_TYPE, PV_CONNECTORTYPE_MAP,  
+    public static final VizTableStore EDGE_CONNECTOR_TYPE     = new BasicVizTableStore("ConnectorType",
+    		BasicExtracter.LINE_CONNECTOR_TYPE, PV_CONNECTORTYPE_MAP,
     		BasicVisualLexicon.EDGE_TOOLTIP);
-    
+
 
     final VisualProperty<?>[] vizProps;
     final Map<?,?> mapping; // null means passthru
@@ -728,9 +729,9 @@ public class GpmlToPathway {
   }
 
   void store(final CyTable cyTable, final CyIdentifiable cyNetObj, final PathwayElement pvElem, final TableStore ... tableStores) {
-    for (final TableStore tableStore : tableStores) 
+    for (final TableStore tableStore : tableStores)
       tableStore.store(cyTable, cyNetObj, pvElem);
-    
+
   }
 
   /**
@@ -791,10 +792,10 @@ public class GpmlToPathway {
   }
 
   void store(final CyIdentifiable cyNetObj, final PathwayElement pvElem, final BasicVizPropStore ... vizPropStores) {
-    for (final BasicVizPropStore vizPropStore : vizPropStores) 
+    for (final BasicVizPropStore vizPropStore : vizPropStores)
     {
       final DelayedVizProp[] props = vizPropStore.store(cyNetObj, pvElem);
-      for (DelayedVizProp prop : props) 
+      for (DelayedVizProp prop : props)
         cyDelayedVizProps.add(prop);
     }
   }
@@ -822,7 +823,7 @@ public class GpmlToPathway {
   static final Extracter TYPE_EXTRACTER = new Extracter() {
     public Object extract(final PathwayElement pvElem) {
       if(pvElem == null)      return null;
-//       System.out.println("" + pvElem.getDataNodeType()); 
+//       System.out.println("" + pvElem.getDataNodeType());
        return pvElem.getDataNodeType();
     }
   };
@@ -833,7 +834,7 @@ public class GpmlToPathway {
   static final TableStore TYPE_STORE = new BasicTableStore("Type", TYPE_EXTRACTER);
 
   private void convertDataNodes() {
-    for (final PathwayElement pvElem : pvPathway.getDataObjects()) 
+    for (final PathwayElement pvElem : pvPathway.getDataObjects())
       if (pvElem.getObjectType().equals(ObjectType.DATANODE))
     	  convertDataNode(pvElem);
   }
@@ -842,18 +843,18 @@ public class GpmlToPathway {
   private void convertDataNode(final PathwayElement pvDataNode) {
     final CyNode cyNode = cyNet.addNode();
     pvToCyNodes.put(pvDataNode, cyNode);
-		store(cyNodeTbl, cyNode, pvDataNode, 
-				BasicTableStore.GRAPH_ID, 
-				XREF_ID_STORE, 
+		store(cyNodeTbl, cyNode, pvDataNode,
+				BasicTableStore.GRAPH_ID,
+				XREF_ID_STORE,
 				XREF_DATA_SOURCE_STORE,
-				TYPE_STORE, 
-				BasicTableStore.TEXT_LABEL, 
-				BasicVizTableStore.NODE_WIDTH, 
+				TYPE_STORE,
+				BasicTableStore.TEXT_LABEL,
+				BasicVizTableStore.NODE_WIDTH,
 				BasicVizTableStore.NODE_HEIGHT,
-				BasicVizTableStore.NODE_FILL_COLOR, 
-				BasicVizTableStore.NODE_COLOR, 
+				BasicVizTableStore.NODE_FILL_COLOR,
+				BasicVizTableStore.NODE_COLOR,
 				BasicVizTableStore.NODE_LABEL_FONT,
-				BasicVizTableStore.NODE_LABEL_SIZE, 
+				BasicVizTableStore.NODE_LABEL_SIZE,
 				BasicVizTableStore.NODE_TRANSPARENT,
 //				BasicVizTableStore.NODE_BORDER_STYLE,
 				 BasicVizTableStore.NODE_BORDER_THICKNESS,
@@ -869,7 +870,7 @@ public class GpmlToPathway {
   static final TableStore IS_GPML_SHAPE = new BasicTableStore("IsGPMLShape", Boolean.class, new DefaultExtracter(true));
 
   private void convertShapes() {
-    for (final PathwayElement pvElem : pvPathway.getDataObjects()) 
+    for (final PathwayElement pvElem : pvPathway.getDataObjects())
       if (pvElem.getObjectType().equals(ObjectType.SHAPE))
     	  convertShape(pvElem);
   }
@@ -880,7 +881,7 @@ public class GpmlToPathway {
     IShape shtype = pvShape.getShapeType();
     if (shtype == null) 	return;
 
-//    if (verbose)  
+//    if (verbose)
 //    {
 //    	System.out.println("convertShape: " + (shtype == null ? "NONE" : shtype.getName()) + " " + id + " " + pvShape.getFillColor());
 //    	System.out.println("at: " + (int) pvShape.getMCenterX() + ", " +  (int) pvShape.getMCenterY());
@@ -888,23 +889,23 @@ public class GpmlToPathway {
     store(cyNodeTbl, cyNode, pvShape, BasicTableStore.GRAPH_ID, BasicTableStore.TEXT_LABEL, IS_GPML_SHAPE);
     store(cyNode, pvShape,
       NODE_X, NODE_Y, NODE_Z,
-//      BasicTableStore.NODE_TYPE, 
-      NODE_WIDTH, 
+//      BasicTableStore.NODE_TYPE,
+      NODE_WIDTH,
       NODE_HEIGHT,
       NODE_FILL_COLOR,  NODE_COLOR,
       NODE_LABEL_FONT, NODE_LABEL_SIZE,
       NODE_ALWAYS_TRANSPARENT,
-//      NODE_BORDER_STYLE,  
-      NODE_BORDER_THICKNESS, 
-      NODE_SHAPE, 
-      SELECTED_COLOR 
+//      NODE_BORDER_STYLE,
+      NODE_BORDER_THICKNESS,
+      NODE_SHAPE,
+      SELECTED_COLOR
     );
     double rotation =  pvShape.getRotation();
     DelayedVizProp.putRotation(cyNode, rotation);
     DelayedVizProp.putPathwayElement(cyNode, pvShape);
 
    }
-  
+
   /*
    ========================================================
      States
@@ -917,7 +918,7 @@ public class GpmlToPathway {
       return pvParent.getMCenterX() + (pvState.getRelX() * pvParent.getMWidth() / 2.0);
     }
   };
-  
+
   final Extracter STATE_Y_EXTRACTER = new Extracter() {
     public Object extract(final PathwayElement pvState) {
       final PathwayElement pvParent = (PathwayElement) pvPathway.getGraphIdContainer(pvState.getGraphRef());
@@ -930,7 +931,7 @@ public class GpmlToPathway {
 
   private void convertStates() {
 	DelayedVizProp.clearStateList();
-    for (final PathwayElement pvElem : pvPathway.getDataObjects()) 
+    for (final PathwayElement pvElem : pvPathway.getDataObjects())
       if (pvElem.getObjectType().equals(ObjectType.STATE))
       convertState(pvElem);
   }
@@ -941,7 +942,7 @@ public class GpmlToPathway {
 
     pvToCyNodes.put(pvState, cyNode);
     store(cyNodeTbl, cyNode, pvState, BasicTableStore.TEXT_LABEL );
-    
+
 //    CyRow row0 = cyNodeTbl.getRow(cyNode.getSUID());
 //	System.out.println("stored: " + row0.get("name", String.class));
 
@@ -952,7 +953,7 @@ public class GpmlToPathway {
       NODE_Z,
       NODE_WIDTH, NODE_HEIGHT,
       NODE_FILL_COLOR, NODE_COLOR,
-      NODE_LABEL, NODE_LABEL_FONT, NODE_LABEL_SIZE, 
+      NODE_LABEL, NODE_LABEL_FONT, NODE_LABEL_SIZE,
       NODE_TRANSPARENT,
       NODE_BORDER_THICKNESS, NODE_SHAPE
 //    NODE_BORDER_STYLE,
@@ -962,7 +963,7 @@ public class GpmlToPathway {
 //    		BasicVisualLexicon.NODE_FILL_COLOR, new Color(250, 0, 0), true);
 //    cyDelayedVizProps.add(fillColorProp);
     CyRow row = cyNodeTbl.getRow(cyNode.getSUID());
-    if (row == null) 
+    if (row == null)
 	{
     	System.err.println("NO ROW " + cyNode.getSUID());
     	return;
@@ -991,7 +992,7 @@ public class GpmlToPathway {
         		{
         			cyNodeTbl.createColumn(attr, String.class, false, "");
         			col = cyNodeTbl.getColumn(attr);
-        			
+
         		}
         		row.set(attr, val);
 //        		if (graphRef != null)
@@ -1005,9 +1006,9 @@ public class GpmlToPathway {
 //        		}
         	}
     	}
-    }    
+    }
   }
-  
+
   /*
    ========================================================
      Groups
@@ -1021,7 +1022,7 @@ public class GpmlToPathway {
   static final Extracter GROUP_Y_EXTRACTER = new Extracter() {
     public Object extract(final PathwayElement pvGroup) { return pvGroup.getMCenterY(); }
   };
-  
+
   static final Extracter GROUP_W_EXTRACTER = new Extracter() {
     public Object extract(final PathwayElement pvGroup) { return pvGroup.getMWidth(); }
   };
@@ -1035,9 +1036,9 @@ public class GpmlToPathway {
       final String styleName = (String) pvValues[0];
       final GroupStyle style = styleName != null ? GroupStyle.fromName(styleName) : null;
       if (GroupStyle.COMPLEX.equals(style))
-          return NodeShapeVisualProperty.OCTAGON; 
+          return NodeShapeVisualProperty.OCTAGON;
       else
-          return NodeShapeVisualProperty.RECTANGLE; 
+          return NodeShapeVisualProperty.RECTANGLE;
     }
   };
 
@@ -1062,7 +1063,7 @@ public class GpmlToPathway {
       final String styleName = (String) pvValues[0];
       final GroupStyle style = styleName != null ? GroupStyle.fromName(styleName) : null;
       if (GroupStyle.COMPLEX.equals(style))
-    	  return getCyNodeLineType("Solid"); 
+    	  return getCyNodeLineType("Solid");
       return getCyNodeLineType("Dash");
     }
   };
@@ -1110,7 +1111,7 @@ public class GpmlToPathway {
       GROUP_WIDTH, GROUP_HEIGHT,
       GROUP_COLOR, GROUP_FILL_COLOR,
       GROUP_BORDER_THICKNESS, GROUP_BORDER_STYLE,
-      NODE_ALWAYS_SEMI_TRANSPARENT, GROUP_SHAPE 
+      NODE_ALWAYS_SEMI_TRANSPARENT, GROUP_SHAPE
     );
   }
   /*
@@ -1120,7 +1121,7 @@ public class GpmlToPathway {
   */
 
   private void convertLabels() {
-    for (final PathwayElement pvElem : pvPathway.getDataObjects()) 
+    for (final PathwayElement pvElem : pvPathway.getDataObjects())
       if (pvElem.getObjectType().equals(ObjectType.LABEL))
     	  convertLabel(pvElem);
   }
@@ -1129,8 +1130,7 @@ public class GpmlToPathway {
 
     final CyNode cyNode = cyNet.addNode();
     pvToCyNodes.put(pvLabel, cyNode);
-    store(cyNodeTbl, cyNode, pvLabel, BasicTableStore.TEXT_LABEL);
-    store(cyNode, pvLabel,
+    store(cyNode, pvLabel, NODE_LABEL,
       NODE_X, NODE_Y, NODE_Z,
       NODE_WIDTH, NODE_HEIGHT,
 //      NODE_BORDER_STYLE,
@@ -1140,7 +1140,7 @@ public class GpmlToPathway {
       NODE_TRANSPARENT, SELECTED_COLOR
     );
   }
-  
+
   /*
    ========================================================
      Anchors
@@ -1189,7 +1189,7 @@ public class GpmlToPathway {
     cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_SHAPE, NodeShapeVisualProperty.RECTANGLE, true));
 //    cyDelayedVizProps.add(new DelayedVizProp(node, BasicVisualLexicon.NODE_TRANSPARENCY, 128, true));  // AST
   }
-  
+
   /*
    ========================================================
      Lines
@@ -1222,32 +1222,32 @@ public class GpmlToPathway {
     if (cyEndNode == null) {
       cyEndNode = cyNet.addNode();
       assignAnchorVizStyle(cyEndNode, endPt);
-    }    
+    }
       newEdge(pvLine, cyStartNode, cyEndNode, true, true);
   }
 //------------------------------------------
-  
-  private void newEdge(final PathwayElement pvLine, final CyNode cySourceNode, 
+
+  private void newEdge(final PathwayElement pvLine, final CyNode cySourceNode,
 		  final CyNode cyTargetNode, final boolean isStart, final boolean isEnd) {
 
 	  if (cySourceNode.equals(cyTargetNode)) return;				// remove self loops????  #81
 	final CyEdge cyEdge = cyNet.addEdge(cySourceNode, cyTargetNode, true);
-    
-    store(cyEdgeTbl, cyEdge, pvLine, 
+
+    store(cyEdgeTbl, cyEdge, pvLine,
 	      BasicVizTableStore.EDGE_LINE_THICKNESS, BasicVizTableStore.EDGE_LINE_STYLE,
 	      BasicVizTableStore.EDGE_COLOR, BasicVizTableStore.EDGE_CONNECTOR_TYPE );
-    
+
     storeEdgeBend(cyEdge, pvLine);
 	DelayedVizProp prop = new DelayedVizProp(cyEdge, BasicVisualLexicon.EDGE_WIDTH, 1.0, true);		// #44
 	cyDelayedVizProps.add(prop);
 
     // Arrow heads defined here
-    if (isStart) 
+    if (isStart)
       store(cyEdgeTbl, cyEdge, pvLine, BasicVizTableStore.EDGE_START_ARROW);
-    
-    if (isEnd) 
+
+    if (isEnd)
       store(cyEdgeTbl, cyEdge, pvLine, BasicVizTableStore.EDGE_END_ARROW);
-    
+
     // #107  Edge Table is missing name, shared name, interaction, shared interaction
     CyNode src = cyEdge.getSource();
     CyNode targ = cyEdge.getTarget();
@@ -1263,9 +1263,9 @@ public class GpmlToPathway {
     edgeRow.set("interaction", interaction);
     edgeRow.set("shared interaction", interaction);
   }
-  
-  
-	private void storeEdgeBend(final CyEdge cyEdge, final PathwayElement pvLine) 
+
+
+	private void storeEdgeBend(final CyEdge cyEdge, final PathwayElement pvLine)
 	{
 		String connectorType = pvLine.getConnectorType().toString();
 		makeSegments(pvLine, cyEdge);
@@ -1275,14 +1275,14 @@ public class GpmlToPathway {
 		else if ("Elbow".equals(connectorType))
 			bend = makeElbowEdgeBend(networkView, cyEdge, makeSegments(pvLine, cyEdge));
 
-//		if (verbose) 
+//		if (verbose)
 //			System.out.println("storing " + bend + " with " + bend.getAllHandles().size() + " handles");
 		DelayedVizProp prop = new DelayedVizProp(cyEdge, BasicVisualLexicon.EDGE_BEND, bend, true);
 		cyDelayedVizProps.add(prop);
 	}
-	
-  
-  
+
+
+
 	private List<Segment> makeSegments(final PathwayElement pvLine, final CyEdge cyEdge)
 	{
 //if (verbose)
@@ -1290,20 +1290,20 @@ public class GpmlToPathway {
 //	  	System.out.println("makeSegments: " + pvLine.getStartGraphRef() + " -> " + pvLine.getEndGraphRef() );
 //	  	System.out.println("");
 //}
-//		
+//
 		List<MPoint> pts = pvLine.getMPoints();
 	  	MPoint mStart = pts.get(0);
 	  	int len = pts.size();
 	  	MPoint mEnd = pts.get(len-1);
 //	  	if (verbose)	  	System.out.println("length: " + len + " points");
-	  	
+
 		double startRelX = mStart.getRelX();
 		double startRelY = mStart.getRelY();
 		double endRelX = mEnd.getRelX();
 		double endRelY = mEnd.getRelY();
 	  	Point2D startPt = mStart.toPoint2D();
 	  	Point2D endPt = mEnd.toPoint2D();
-  	
+
 		int startSide = getSide(startRelX, startRelY);
 		if (startSide < 0)
 			startSide = getNearestSide(startPt, endPt);
@@ -1316,16 +1316,16 @@ public class GpmlToPathway {
 //	System.out.println("Source: " + getNodeNameWithId(cyEdge.getSource()) + printPoint(startPt) + " on " + sides[startSide] + " side");
 //  	System.out.println("Target: "  + getNodeNameWithId(cyEdge.getTarget()) + printPoint(endPt) + " on " + sides[endSide] + " side");
 //		}
-		
+
 	  	Point2D[] wps = calculateWayPoints(startPt, endPt, startSide, endSide);
 	    segments = calculateSegments(startPt, endPt, startSide, endSide, wps);
 	    return segments;
 	}
-	
+
 	private int getNearestSide(Point2D startPt, Point2D endPt) {
 		double dx = endPt.getX() - startPt.getX();
 		double dy= endPt.getY() - startPt.getY();
-		if (Math.abs(dy) > Math.abs(dx) ) 
+		if (Math.abs(dy) > Math.abs(dx) )
 			return (dy > 0) ? ConnectorRestrictions.SIDE_SOUTH : ConnectorRestrictions.SIDE_NORTH;
 		return (dx > 0) ? ConnectorRestrictions.SIDE_EAST : ConnectorRestrictions.SIDE_WEST;
 	}
@@ -1336,27 +1336,27 @@ static boolean verbose = false;
 // create a Bend object with a list of handles when the curve crosses
 
 	private Bend makeCurvedEdgeBend(CyNetworkView networkView, CyEdge edge, PathwayElement pvLine) {
-	    BendFactory factory = manager.getBendFactory();		
+	    BendFactory factory = manager.getBendFactory();
 		View<CyEdge> edgeView = networkView.getEdgeView(edge);
 	    Bend bend = factory.createBend();
 	    HandleFactory facto = manager.getHandleFactory();
 	    MPoint start = pvLine.getMStart();
 	    MPoint end = pvLine.getMEnd();
 	    int sz = segments.size();
-		if (verbose)	
+		if (verbose)
 			System.out.println("makeCurvedEdgeBend with " + sz + "handles, and start at " + printPoint(start) + ", end at " + printPoint(end));
- 
+
 	    for (int i=0; i<sz; i++)
 	    {
 	    	Segment seg = segments.get(i);
-	    	Point2D centerPoint  = centerPoint(seg.start, seg.end);	
+	    	Point2D centerPoint  = centerPoint(seg.start, seg.end);
 	    	Handle h = facto.createHandle(networkView, edgeView,  centerPoint.getX(), centerPoint.getY());
-		  if (verbose)	
+		  if (verbose)
 			  System.out.println("adding handles at " + printPoint( centerPoint));
 	    	bend.getAllHandles().add(h);
 	    }
 	    if (edgeView != null)   edgeView.setLockedValue(BasicVisualLexicon.EDGE_BEND, bend);
-		if (verbose)	
+		if (verbose)
 			System.out.println("locked ccurve bend");
 		return bend;
 	}
@@ -1364,15 +1364,15 @@ static boolean verbose = false;
 // this constructs a bend with each handle in the list twice, to make the angle sharp
 
 	private Bend makeElbowEdgeBend(CyNetworkView networkView, CyEdge edge, List<Segment> segments) {
-   BendFactory factory = manager.getBendFactory();	
+   BendFactory factory = manager.getBendFactory();
 	if (networkView == null)    	{
-		System.out.println("networkView == null"); 
+		System.out.println("networkView == null");
 		return null;
 	}
 	View<CyEdge> edgeView = networkView.getEdgeView(edge);
     Bend bend = factory.createBend();
     HandleFactory facto = manager.getHandleFactory();
-    
+
     int sz = segments.size();
     for (int i=0; i<sz-1; i++)
     {
@@ -1381,14 +1381,14 @@ static boolean verbose = false;
 	    Handle j = facto.createHandle(networkView, edgeView,  seg.end.getX(), seg.end.getY());
 	    bend.getAllHandles().add(h);
 	    bend.getAllHandles().add(j);
-		if (verbose)		System.out.println("makeElbowEdgeBend with 2 handles at " + seg); 
+		if (verbose)		System.out.println("makeElbowEdgeBend with 2 handles at " + seg);
 
-//		if (verbose)	
+//		if (verbose)
 //			  System.out.println("adding two handles at " + seg);
     }
 //	if (edgeView != null)    	{
 //	    edgeView.setLockedValue(BasicVisualLexicon.EDGE_BEND, bend);
-////		System.out.println("edgeView == null"); 
+////		System.out.println("edgeView == null");
 ////		return null;
 //	}
 	return bend;
@@ -1401,7 +1401,7 @@ static boolean verbose = false;
 	private CyNetworkView getNetworkView(CyNetwork cyNet) {
 		return manager.getNetworkViewMgr().getNetworkViews(cyNet).iterator().next();
 	}
-	
+
 	private String getNodeName(CyNode source) {
 		CyTable nodeTable = networkView.getModel().getDefaultNodeTable();
 		CyRow row = nodeTable.getRow(source.getSUID());
@@ -1411,10 +1411,10 @@ static boolean verbose = false;
 	private String getNodeNameWithId(CyNode source) {		return getNodeName(source) + " (" + source.getSUID() + ")";}
 	private String printPoint(Point2D pt)			{		return ("(" + (int) pt.getX() + ", " + (int) pt.getY() + ")");	}
 	private String printPoint(MPoint pt)			{		return ("(" + (int) pt.getX() + ", " + (int) pt.getY() + ")");	}
-	
+
 //=================================================================================
 	// EDGES
-	
+
 	List<Segment> segments;
 	List<Segment> getSegments()	{ return segments;	}
 	private final static double SEGMENT_OFFSET = 40;
@@ -1459,7 +1459,7 @@ static boolean verbose = false;
 			 *      |---
 			 */
 			//Start with middle waypoint
-			waypoints[1] = centerPoint(start, end); 
+			waypoints[1] = centerPoint(start, end);
 			waypoints[0] = calculateWayPoint(start, waypoints[1], startAxis, startDirection);
 			waypoints[2] = calculateWayPoint(end, waypoints[1], endAxis, endDirection);
 		}
@@ -1470,7 +1470,7 @@ static boolean verbose = false;
 		 *           |  |
 		 *           |---
 		 */
-				waypoints[2] = centerPoint(start, end); 
+				waypoints[2] = centerPoint(start, end);
 				waypoints[1] = calculateWayPoint(start, waypoints[2], startAxis, startDirection);
 				waypoints[0] = calculateWayPoint(start, waypoints[1], startAxis, startDirection);
 				waypoints[3] = calculateWayPoint(end, waypoints[1], endAxis, endDirection);
@@ -1498,7 +1498,7 @@ static boolean verbose = false;
 		if(nrSegments == 2) { //No waypoints
 			segments[0] = createStraightSegment(start, end, startAxis);
 			segments[1] = createStraightSegment(segments[0].getMEnd(), end, getOppositeAxis(startAxis));
-		} else 
+		} else
 		{
 			segments[0] = createStraightSegment(start, waypts[0], startAxis );
 			int axis = 1 - startAxis;
@@ -1527,7 +1527,7 @@ static boolean verbose = false;
 		double length() { return distance(end, start);	}
 		public String toString() { return "(" + (int) getMStart().getX() + ", " +  (int) getMStart().getY() +  " -> " + (int) getMEnd().getX() + ", " +  (int) getMStart().getY() + ")"; }
 	}
-	
+
 	protected Segment createStraightSegment(Point2D start, Point2D end, int axis) {
 		double ex = end.getX();
 		double ey = end.getY();
@@ -1584,8 +1584,8 @@ BLW		2	3	2	1
 TLW		2	3	2	1
 	There should be some logic behind this, but hey, it's Friday...
 	(so we just hard code the array)
-	
-BUG:  	There should be some cases where 4 is returned !!  
+
+BUG:  	There should be some cases where 4 is returned !!
 	 */
 	private int[][][] waypointNumbers;
 
@@ -1635,7 +1635,7 @@ BUG:  	There should be some cases where 4 is returned !!
 		return getNrWaypoints(x, y, z) + 2;
 	}
 
-    protected Point2D fromLineCoordinate(double l, List<Segment> segments) 
+    protected Point2D fromLineCoordinate(double l, List<Segment> segments)
     {
 		double totalLength = getTotalLength(segments);
 		double pixelsRemaining = totalLength * l;
@@ -1645,7 +1645,7 @@ BUG:  	There should be some cases where 4 is returned !!
 		// count off each segment from pixelsRemaining, until there aren't enough pixels left
 		Segment segment = null;
 		double slength = 0.0;
-		for(Segment s : segments) 
+		for(Segment s : segments)
 		{
 			slength = s.length();
 			segment = s;
@@ -1670,7 +1670,7 @@ BUG:  	There should be some cases where 4 is returned !!
 
 
 	/** @returns sum of the lengths of the segments */
-	static private double getTotalLength (List<Segment> segments) 
+	static private double getTotalLength (List<Segment> segments)
 	{
 		double totLength = 0.0;
 		for (Segment seg : segments)
@@ -1678,12 +1678,12 @@ BUG:  	There should be some cases where 4 is returned !!
 		return totLength;
 	}
 	//-----------------------------------------------
-	static private Point2D centerPoint(Point2D start, Point2D end) 
+	static private Point2D centerPoint(Point2D start, Point2D end)
 	{
 		return new Point2D.Double( (start.getX() + end.getX() ) / 2, (start.getY() + end.getY()) / 2 );
 	}
-	
-	static private double distance(Point2D a, Point2D b)	
+
+	static private double distance(Point2D a, Point2D b)
 	{
 		double dx = a.getX() - b.getX();
 		double dy = a.getY() - b.getY();

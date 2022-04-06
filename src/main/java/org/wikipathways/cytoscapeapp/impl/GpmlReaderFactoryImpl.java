@@ -12,6 +12,7 @@ import java.util.Set;
 
 import javax.swing.SwingUtilities;
 
+import org.apache.http.util.CharArrayBuffer;
 import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.model.CyColumn;
 import org.cytoscape.model.CyNetwork;
@@ -46,7 +47,7 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
 	private WPClient client;
 	@Override public void setClient(WPClient inClient) {	client = inClient;  manager.setClient(client); }
 	@Override public  WPClient getClient() {	return client;}
-	
+
 	private CyEventHelper eventHelper;
 	private CyNetworkFactory netFactory;
 	private CyNetworkManager netMgr;
@@ -64,7 +65,7 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
   final Map<CyNetwork,List<DelayedVizProp>> pendingVizProps = new HashMap<CyNetwork,List<DelayedVizProp>>();
 
   private boolean semaphore = false;
-  
+
 	public void setSemaphore()
 	{
 		  System.out.println("setSemaphore");
@@ -72,7 +73,7 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
 			  System.out.println("FAIL");
 		  else semaphore = true;
 
-		
+
 	}
 	public void clearSemaphore()
 	{
@@ -98,7 +99,7 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
       manager = new WPManager(registrar, this );
    }
 //--------------------------------------------------------------
-  public TaskIterator createReader(final String id, final Reader gpmlContents, final CyNetwork network, 
+  public TaskIterator createReader(final String id, final Reader gpmlContents, final CyNetwork network,
 		  final GpmlConversionMethod conversionMethod, final boolean setNetworkName) {
     conversionMethods.put(network, conversionMethod);
     ReaderTask t = new ReaderTask(manager, gpmlContents, network, conversionMethod, setNetworkName);
@@ -108,13 +109,13 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
   public TaskIterator createViewBuilder(final String id, final CyNetwork gpmlNetwork, final CyNetworkView networkView) {
 
     final GpmlConversionMethod method = conversionMethods.get(gpmlNetwork);
-    if (method == null) 
+    if (method == null)
         throw new IllegalArgumentException("gpmlNetwork is invalid");
     boolean importNetwork = GpmlConversionMethod.NETWORK.equals(method);
 
     final TaskIterator iterator = new TaskIterator();
     iterator.append(new ApplyVizPropsTask(gpmlNetwork, networkView));
-    if (importNetwork) 
+    if (importNetwork)
     		applyLayout(networkView, iterator);
     iterator.append(new UpdateViewTask(networkView, !importNetwork));
     return iterator;
@@ -132,7 +133,7 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
           super.insertTasksAfterCurrentTask(layoutIterator);
         }
       });
-  
+
   }
 
   public TaskIterator createReaderAndViewBuilder(final String id, final Reader gpmlContents, final GpmlConversionMethod conversionMethod) {
@@ -142,30 +143,31 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
     netMgr.addNetwork(network);
     final CyNetworkView view = netViewFactory.createNetworkView(network);
     netViewMgr.addNetworkView(view);
+		String a = gpmlContents.toString();
     return createReaderAndViewBuilder(id, gpmlContents, view, conversionMethod, true);
   }
 
   public TaskIterator createReaderAndViewBuilder(final String id,  final Reader gpmlContents, final CyNetworkView networkView,
-	      final GpmlConversionMethod conversionMethod, final boolean setNetworkName) 
+	      final GpmlConversionMethod conversionMethod, final boolean setNetworkName)
 	  {
 		  System.out.println("createReaderAndViewBuilder");
 	    final TaskIterator iterator = new TaskIterator();
 	    final CyNetwork network = networkView.getModel();
 	    iterator.append(createReader(id, gpmlContents, network, conversionMethod, setNetworkName));
 	    iterator.append(createViewBuilder(id, network, networkView));
-	    if (organism == null)		
+	    if (organism == null)
 	    	readOrganismKeywork(gpmlContents);
 
 	    iterator.append(new EnsemblIdTask(network, registrar, organism));
 	    return iterator;
 	  }
-  
+
 
   	//HACK -- read organsim out of the raw xml
   	private void readOrganismKeywork(final Reader gpmlContents) {
-	
-		try 
-		{ 
+
+		try
+		{
 			char[] chs = new char[3000];
 			gpmlContents.read(chs, 0, 2000);
 			gpmlContents.reset();
@@ -180,12 +182,12 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
 					int end = tail.indexOf('"');
 					organism = tail.substring(0,end);
 					System.out.println(organism);
-					
+
 				}
 			}
 		}
 		catch (Exception e) {}
-		
+
 	}
 //-----------------------------------------------------------------------
   class ReaderTask extends AbstractTask {
@@ -200,13 +202,25 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
         final Reader gpmlContents,
         final CyNetwork network,
         final GpmlConversionMethod conversionMethod,
-        final boolean setNetworkName) 
+        final boolean setNetworkName)
     {
         this.manager = wpMgr;
         this.gpmlContents = gpmlContents;
         this.network = network;
         this.conversionMethod = conversionMethod;
         this.setNetworkName = setNetworkName;
+    }
+
+		private void addNetworkTableColumns(String ...strings)
+    {
+		for (String s : strings)
+		{
+			CyColumn col = network.getDefaultNetworkTable().getColumn(s);
+			if (col == null)
+				 network.getDefaultNetworkTable().createColumn(s, String.class, true);
+
+		}
+
     }
 
 	public void run(TaskMonitor monitor) throws Exception {
@@ -219,9 +233,22 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
 			PathwayElement info = pathway.getMappInfo();
 			organism = info.getOrganism();
 			if (setNetworkName) {
+				CyRow row = network.getRow(network);
 				final String name = info.getMapInfoName() + " - " + organism;
+				final String description = info.findComment("WikiPathways-description");
 				final String nonConflictingName = netNaming.getSuggestedNetworkTitle(name);
-				network.getRow(network).set(CyNetwork.NAME, nonConflictingName);
+				row.set(CyNetwork.NAME, nonConflictingName);
+				addNetworkTableColumns("organism", "description", "title");
+				CyColumn col = network.getDefaultNetworkTable().getColumn("organism");
+				//				if (col == null)
+				//				{
+				//					 network.getDefaultNetworkTable().createColumn("organism", String.class, true);
+				//					col =  network.getDefaultNetworkTable().getColumn("organism");
+				//				}
+				row.getAllValues();
+				row.set("organism", organism);
+				row.set("description", description);
+				row.set("title", info.getMapInfoName());
 				if (network instanceof CySubNetwork) {
 					final CyRootNetwork root = ((CySubNetwork) network).getRootNetwork();
 					root.getRow(root).set(CyNetwork.NAME, nonConflictingName);
@@ -279,10 +306,10 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
 //-----------------------------------------------------------------------
   class UpdateViewTask extends AbstractTask implements ObservableTask {
     final CyNetworkView view;
-  
+
     boolean importAsPathway;
-    public UpdateViewTask(final CyNetworkView view, boolean importAsPathway) 
-    { 
+    public UpdateViewTask(final CyNetworkView view, boolean importAsPathway)
+    {
     	this.view = view;
     	this.importAsPathway = importAsPathway;
     }
@@ -294,7 +321,7 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
       } catch (Exception e) {  throw new Exception("Failed to build view", e);  }
     }
 
-    
+
     private void updateView(boolean importAsPathway) throws Exception {
       if (!SwingUtilities.isEventDispatchThread()) {
         SwingUtilities.invokeAndWait(new Runnable() {
@@ -325,4 +352,3 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
   }
 
 }
-
