@@ -6,5 +6,3 @@ Here we provide additional documentation, tutorials and development details for 
 * [How to add a new dependency as a local jar file?](../../wiki/Add-local-dependency)
 * [How to run WikiPathways-app with Cytoscape 3?](../../wiki/Run-WikiPathways-app)
 * [Troubleshooting.](../../wiki/Troubleshooting)
-
-EXTRA
