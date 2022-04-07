@@ -28,7 +28,15 @@ public enum MappingSource {
 	ChEBI ("ChEBI", "Ce", "", "^(CHEBI:)?\\d+$", "CHEBI:36927" ),
 	HMDB ("HMDB", "Ch", "", "^HMDB(\\d{2})?\\d{5}$", "HMDB0000001" ),
 	Wikidata ("Wikidata", "Wd", "", "^Q\\d+$", "Q407962" ),
-	LIPIDMAPS ("LIPID MAPS", "Lm", "", "^LM(FA|GL|GP|SP|ST|PR|SL|PK)[0-9]{2}([0-9a-zA-Z]{2,8})?$", "LMPR0102010012" );
+	LIPIDMAPS ("LIPID MAPS", "Lm", "", "^LM(FA|GL|GP|SP|ST|PR|SL|PK)[0-9]{2}([0-9a-zA-Z]{2,8})?$", "LMPR0102010012" ),
+	INCHIKEY ("InChIKey", "Ik", "", "^[A-Z]{14}\\-[A-Z]{10}(\\-[A-Z])?", "QTBSBXVTEAMEQO-UHFFFAOYSA-N" ),
+	CAS ("CAS", "Ca", "", "^\\d{1,7}\\-\\d{2}\\-\\d$", "50-00-0" ),
+	CHEMBL ("ChEMBL compound", "Cl", "", "^CHEMBL\\d+$", "CHEMBL308052" ),
+	CHEMSPIDER ("Chemspider", "Cs", "", "^\\d+$", "56586" ),
+	KEGG_COMPOUND ("KEGG Compound", "Cs", "", "^C\\d+$", "C12345" ),
+	PUBCHEM_COMPOUND ("PubChem-compound", "Cpc", "", "^\\d+$", "100101" ),
+	//Reaction Databases:	
+	RHEA ("Rhea", "Rh", "", "^\\d{5}$", "12345" );
 
 	private final String descriptor;
 	private final String system;
