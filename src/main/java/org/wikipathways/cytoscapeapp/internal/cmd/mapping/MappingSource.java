@@ -26,7 +26,9 @@ public enum MappingSource {
 	ZFIN ("ZFIN", "Z", "Danio rerio", "ZDB\\-GENE\\-\\d+\\-\\d+", "ZDB-GENE-041118-11"),
 	//Metabolite Databases:	
 	ChEBI ("ChEBI", "Ce", "", "^(CHEBI:)?\\d+$", "CHEBI:36927" ),
-	HMDB ("HMDB", "Ch", "", "^HMDB(\\d{2})?\\d{5}$", "HMDB0000001" );
+	HMDB ("HMDB", "Ch", "", "^HMDB(\\d{2})?\\d{5}$", "HMDB0000001" ),
+	Wikidata ("Wikidata", "Wd", "", "^Q\\d+$", "Q407962" ),
+	LIPIDMAPS ("LIPID MAPS", "Lm", "", "^LM(FA|GL|GP|SP|ST|PR|SL|PK)[0-9]{2}([0-9a-zA-Z]{2,8})?$", "LMPR0102010012" );
 
 	private final String descriptor;
 	private final String system;
