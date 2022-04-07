@@ -1,4 +1,4 @@
-**Welcome to the WikiPathways-app for Cytoscape!**
+## Welcome to the WikiPathways-app for Cytoscape!
 
 Here we provide additional documentation, tutorials and development details for the WikiPathways app for Cytoscape.
 
@@ -7,6 +7,6 @@ Here we provide additional documentation, tutorials and development details for 
 * [How to run WikiPathways-app with Cytoscape 3?](../../wiki/Run-WikiPathways-app)
 * [Troubleshooting.](../../wiki/Troubleshooting)
 
-**Developers
+## Developers
 
 The `develop` branch is the default branch where the latest code should be maintained. Release branches (e.g., 3.3.9) should be frozen after release. The `archive` branch hold old, broken code from the prior `main` branch.
