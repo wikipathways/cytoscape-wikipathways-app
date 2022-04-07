@@ -1,0 +1,12 @@
+# OSGi Target #
+###############
+target*
+dependency-reduced-pom.xml
+
+# Eclipse stuff #
+#################
+.metadata*
+wikipathways.app/.*
+.classpath
+.project
+.settings*
