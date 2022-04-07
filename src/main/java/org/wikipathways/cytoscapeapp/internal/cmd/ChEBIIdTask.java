@@ -22,11 +22,19 @@ import org.wikipathways.cytoscapeapp.impl.WPManager;
 import org.wikipathways.cytoscapeapp.internal.cmd.mapping.BridgeDbIdMapper;
 import org.wikipathways.cytoscapeapp.internal.cmd.mapping.MappingSource;
 
+/**
+ * This is used to express one-to-one relationships of biological identifiers 
+
+ * @author Denise Slenter Github:DeniseSl22
+ *
+ */
+
 //-----------------------------------------------------------------------
 
 public class ChEBIIdTask extends AbstractTask {
 //   private CyNetwork network;
    private String species;
+   private String prefix;
 //   private CyServiceRegistrar registrar;
    private CyTable table;
    boolean verbose = false;
@@ -37,6 +45,7 @@ public class ChEBIIdTask extends AbstractTask {
 //		registrar = reg;
 		if (verbose)  System.out.println("create ChEBIIdTask");
 		species = organism;
+		prefix = "CHEBI:";
 	}
 
 	static String CHEBI_COLUMN = "ChEBI";
@@ -125,6 +134,7 @@ public class ChEBIIdTask extends AbstractTask {
 	private Map<String, String> translateSet(String src, Set<String> metaboliteset) {
 		
 		Map<String, String> result = new HashMap<String, String>();
+		//Map<String, String> result_CHEBI = new HashMap<String, String>();
 		try {
 			MappingSource source = MappingSource.nameLookup(src);
 			if ("ChEBI".equals(src))
@@ -134,8 +144,23 @@ public class ChEBIIdTask extends AbstractTask {
 			}
 			else if (source != null)
 			{
+				
 				final BridgeDbIdMapper map = new BridgeDbIdMapper();
 				result = map.map(metaboliteset, source.system(), "Ce", species, species);
+				
+				//Resolving inconsistency in ChEBI ID system (with our without 'CHEBI:' prefix):
+
+					for (Map.Entry<String, String> entry : result.entrySet()){
+						String key = entry.getKey();
+						String individual_values = entry.getValue();
+						if(individual_values.startsWith(prefix)){continue;}
+						else{
+							String updated_values = "CHEBI:" + individual_values;
+							result.put(key, updated_values);
+				    	//}  
+					}
+				}
+
 			}
 		} catch (final NullPointerException e){
 			SwingUtilities.invokeLater(new Runnable() {
