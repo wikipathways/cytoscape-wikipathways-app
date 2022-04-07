@@ -9,4 +9,4 @@ Here we provide additional documentation, tutorials and development details for 
 
 ## Developers
 
-The `develop` branch is the default branch where the latest code should be maintained. Release branches (e.g., 3.3.9) should be frozen after release. The `archive` branch hold old, broken code from the prior `main` branch.
+The `develop` branch is the default branch where the latest code should be maintained. Release branches (e.g., 3.3.9) should be frozen after release. The `archive` branch contains old, broken code from the prior `main` branch.
