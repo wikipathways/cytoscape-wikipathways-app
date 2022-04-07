@@ -37,6 +37,7 @@ import org.pathvisio.core.model.PathwayElement;
 import org.wikipathways.cytoscapeapp.Annots;
 import org.wikipathways.cytoscapeapp.WPClient;
 import org.wikipathways.cytoscapeapp.internal.cmd.EnsemblIdTask;
+import org.wikipathways.cytoscapeapp.internal.cmd.ChEBIIdTask;
 
 
 public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
@@ -157,6 +158,7 @@ public class GpmlReaderFactoryImpl implements GpmlReaderFactory  {
 	    	readOrganismKeywork(gpmlContents);
 
 	    iterator.append(new EnsemblIdTask(network, registrar, organism));
+	    iterator.append(new ChEBIIdTask(network, registrar, organism));
 	    return iterator;
 	  }
   
