@@ -9,6 +9,7 @@ import java.util.regex.Pattern;
 public enum MappingSource {
 
 //	Unspecified ("Unspecified", "", "", "^[A-Za-z0-9]+", "" ),
+	//GeneProtein Databases:
 	HGNC ("HGNC", "H", "Homo sapiens", "^[A-Za-z0-9]+", "DAPK1" ),
 	Ensembl ("Ensembl", "En", "", "^ENS[A-Z]*[FPTG]\\d{11}$", "ENSG00000139618"),			//|^[YFW]*$		also accept anything that starts with Y, F, W ??
 	Entrez ("Entrez Gene", "L", "", "^\\d+$", "11234"),
@@ -22,7 +23,10 @@ public enum MappingSource {
 	UniGene ("UniGene", "U", "", "[A-Z][a-z][a-z]?\\.\\d+", "Hs.553708" ),
 	Uniprot ("Uniprot-TrEMBL", "S", "", "^([A-N,R-Z][0-9][A-Z][A-Z, 0-9][A-Z, 0-9][0-9])|([O,P,Q][0-9][A-Z, 0-9][A-Z, 0-9][A-Z, 0-9][0-9])(\\.\\d+)?|([A-N,R-Z][0-9][A-Z][A-Z, 0-9][A-Z, 0-9][0-9][A-Z][A-Z, 0-9][A-Z, 0-9][0-9])$", "P62158"),
 	WormBase ("WormBase", "W", "Caenorhabditis elegans", "^WBGene\\d{8}$", "WBGene00000001" ),
-	ZFIN ("ZFIN", "Z", "Danio rerio", "ZDB\\-GENE\\-\\d+\\-\\d+", "ZDB-GENE-041118-11");
+	ZFIN ("ZFIN", "Z", "Danio rerio", "ZDB\\-GENE\\-\\d+\\-\\d+", "ZDB-GENE-041118-11"),
+	//Metabolite Databases:	
+	ChEBI ("ChEBI", "Ce", "", "^(CHEBI:)?\\d+$", "CHEBI:36927" ),
+	HMDB ("HMDB", "Ch", "", "^HMDB(\\d{2})?\\d{5}$", "HMDB0000001" );
 
 	private final String descriptor;
 	private final String system;
