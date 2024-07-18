@@ -111,9 +111,11 @@ public class WPClientRESTImpl implements WPClient {
                     species = retrieveSpeciesFromCache();
                 if (species != null) return species;
 
+                // Fetch the JSON content
                 final String jsonString = jsonGet(NEW_BASE_URL+ "listOrganisms.json");
                 if (super.cancelled) return null;
                 
+                // Parse the JSON content
                 final JSONObject jsonObject = new JSONObject(jsonString);
                 final JSONArray organismArray = jsonObject.getJSONArray("organisms");
                 final List<String> species = new ArrayList<>();
@@ -141,72 +143,113 @@ public class WPClientRESTImpl implements WPClient {
         return content.toString();
     }
 
-	public ResultTask<List<WPPathway>> freeTextSearchTask(final String query, final String species) {
-		return new ReqTask<List<WPPathway>>() {
-			protected List<WPPathway> checkedRun(final TaskMonitor monitor) throws Exception {
-//				System.out.println("Search WikiPathways for \'" + query + "\'");
-				monitor.setTitle("Search WikiPathways for \'" + query + "\'");
-				final List<WPPathway> result = new ArrayList<WPPathway>();
-				if (query.trim().isEmpty()) return result;
-				String lower = query.toLowerCase();
-				String fix1 = lower.replace(" and ", " AND ");
-				String fixed = fix1.replace(" or ", " OR ");
-				final Document doc = xmlGet(BASE_URL + "findPathwaysByText", "query", fixed, "species", species == null ? "" : species); // AST
-				if (super.cancelled)					return result;
-				if (doc == null) 						return result;
-				boolean hasChildren = doc.hasChildNodes();
-				if (!hasChildren)					return result;
-				
-				final Node responseNode = doc.getFirstChild();
-				final NodeList resultNodes = responseNode.getChildNodes();
-				int len = resultNodes.getLength();
-				for (int i = 0; i < len; i++) {
-					final Node resultNode = resultNodes.item(i);
-					final WPPathway pathway = parsePathwayInfo(resultNode);
-					if (pathway != null)
-						result.add(pathway);
-				}
-				return result;
-			}
-		};
-	}
+	@Override
+    public ResultTask<List<WPPathway>> freeTextSearchTask(final String query, final String species) {
+        return new ReqTask<List<WPPathway>>() {
+            protected List<WPPathway> checkedRun(final TaskMonitor monitor) throws Exception {
+                monitor.setTitle("Search WikiPathways for '" + query + "'");
+                final List<WPPathway> result = new ArrayList<>();
+                if (query.trim().isEmpty()) return result;
 
-	public ResultTask<WPPathway> pathwayInfoTask(final String id) {
-		return new ReqTask<WPPathway>() {
-			protected WPPathway checkedRun(final TaskMonitor monitor) throws Exception {
-				monitor.setTitle("Retrieve info for \'" + id + "\'");
-				final Document doc = xmlGet(BASE_URL + "getPathwayInfo", "pwId", id);
-				docPeek(doc);
-				if (super.cancelled)
-					return null;
-				final Node responseNode = doc.getFirstChild();
-				final NodeList resultNodes = responseNode.getChildNodes();
-				return parsePathwayInfo(resultNodes.item(1));
+                // Fetch the JSON content
+                final String jsonString = jsonGet(NEW_BASE_URL + "findPathwaysByText.json");
+                if (super.cancelled) return result;
+                if (jsonString == null) return result;
+
+                // Parse the JSON content
+                final JSONObject jsonObject = new JSONObject(jsonString);
+                final JSONArray pathwayArray = jsonObject.getJSONArray("pathwayInfo");
+
+                for (int i = 0; i < pathwayArray.length(); i++) {
+                    final JSONObject pathwayObject = pathwayArray.getJSONObject(i);
+                    final WPPathway pathway = parsePathwayInfo(pathwayObject);
+
+                    if (pathway != null) {
+                        result.add(pathway);
+                    }
+                }
+
+                // Filter results based on query and field
+                List<WPPathway> filteredResults = filterPathways(result, query, species);
+                return filteredResults;
+            }
+        };
+    }
+	private List<WPPathway> filterPathways(List<WPPathway> pathways, String query, String species) {
+		List<WPPathway> filteredResults = new ArrayList<>();
+		String lowerQuery = query.toLowerCase();
+	
+		for (WPPathway pathway : pathways) {
+			boolean matches = false;
+	
+			// Ensure exact match for 'id' field
+			if (pathway.getId().equalsIgnoreCase(query)) {
+				matches = true;
+			} else {
+				// Check other fields for partial matches
+				matches = pathway.getName().toLowerCase().contains(lowerQuery) ||
+						  pathway.getSpecies().toLowerCase().contains(lowerQuery) ||
+						  pathway.getDescription().toLowerCase().contains(lowerQuery) ||
+						  pathway.getAuthors().toLowerCase().contains(lowerQuery) ||
+						  pathway.getDatanodes().toLowerCase().contains(lowerQuery) ||
+						  pathway.getAnnotations().toLowerCase().contains(lowerQuery) ||
+						  pathway.getCitedIn().toLowerCase().contains(lowerQuery);
 			}
-		};
+	
+			if (species != null && !species.isEmpty()) {
+				matches = matches && pathway.getSpecies().equalsIgnoreCase(species);
+			}
+	
+			if (matches) {
+				filteredResults.add(pathway);
+			}
+		}
+	
+		// Filter again to ensure only exact id match if query is id
+		if (query.toLowerCase().startsWith("wp")) {
+			filteredResults.removeIf(p -> !p.getId().equalsIgnoreCase(query));
+		}
+	
+		return filteredResults;
 	}
+    public ResultTask<WPPathway> pathwayInfoTask(final String id) {
+        return new ReqTask<WPPathway>() {
+            protected WPPathway checkedRun(final TaskMonitor monitor) throws Exception {
+                monitor.setTitle("Retrieve info for '" + id + "'");
+                
+                // Fetch the JSON content
+                final String jsonString = jsonGet(NEW_BASE_URL + "getPathwayInfo.json?pwId=" + id);
+                if (super.cancelled) return null;
+                if (jsonString == null) return null;
+
+                // Parse the JSON content
+                final JSONObject pathwayObject = new JSONObject(jsonString);
+
+                // Create and return the WPPathway object
+                return parsePathwayInfo(pathwayObject);
+            }
+        };
+    }
 	
 
-	private static WPPathway parsePathwayInfo(final Node node) {
-		final NodeList argNodes = node.getChildNodes();
-		String id = "", revision = "", name = "", species = "", url = "";
-		for (int j = 0; j  < argNodes.getLength(); j++) {
-			final Node argNode = argNodes.item(j);
-			final String argName = argNode.getNodeName();
-			final String argVal = argNode.getTextContent();
-			if (argName.equals("ns2:id"))				id = argVal;
-			else if (argName.equals("ns2:revision"))     revision = argVal;
-			else if (argName.equals("ns2:name"))			name = argVal;
-			else if (argName.equals("ns2:species"))		species = argVal;
-			else if (argName.equals("ns2:url"))			url = argVal;
-		}
-		if ("".equals(name))	return null;
-//		System.out.println("parsePathwayInfo: " + id + " " + name + " " + species + " " + url );
-		return new WPPathway(id, revision, name, species, url);
-	}
-	//----------------------------
 
+	private WPPathway parsePathwayInfo(final JSONObject pathwayObject) {
+        String id = pathwayObject.optString("id", "");
+        String revision = pathwayObject.optString("revision", "");
+        String name = pathwayObject.optString("name", "");
+        String species = pathwayObject.optString("species", "");
+        String url = pathwayObject.optString("url", "");
+        String description = pathwayObject.optString("description", "");
+        String authors = pathwayObject.optString("authors", "");
+        String datanodes = pathwayObject.optString("datanodes", "");
+        String annotations = pathwayObject.optString("annotations", "");
+        String citedIn = pathwayObject.optString("citedIn", "");
 
+        if (name.isEmpty()) return null;
+
+        return new WPPathway(id, revision, name, species, url, description, authors, datanodes, annotations, citedIn);
+    }
+    
 	public ResultTask<Reader> gpmlContentsTask(final WPPathway pathway) {
 		return new ReqTask<Reader>() {
 			protected Reader checkedRun(final TaskMonitor monitor) throws Exception {
