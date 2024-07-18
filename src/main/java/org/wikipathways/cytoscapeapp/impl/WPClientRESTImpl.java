@@ -16,19 +16,23 @@
 
 package org.wikipathways.cytoscapeapp.impl;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Reader;
 import java.io.StringReader;
+import java.net.HttpURLConnection;
 import java.net.ProxySelector;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.net.URL;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -54,8 +58,13 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 public class WPClientRESTImpl implements WPClient {
 	protected static final String BASE_URL = "http://webservice.wikipathways.org/";
+	protected static final String NEW_BASE_URL = "https://www.wikipathways.org/json/";
+
 
 	final private CyApplicationConfiguration appConf;		//  gives access to a species cache file
 	final private DocumentBuilder xmlParser;
@@ -94,30 +103,43 @@ public class WPClientRESTImpl implements WPClient {
 
 
 	public ResultTask<List<String>> getSpeciesListTask() {
-		return new ReqTask<List<String>>() {
-			protected List<String> checkedRun(final TaskMonitor monitor) throws Exception {
-				monitor.setTitle("Retrieve list of organisms from WikiPathways");
+        return new ReqTask<List<String>>() {
+            protected List<String> checkedRun(final TaskMonitor monitor) throws Exception {
+                monitor.setTitle("Retrieve list of organisms from WikiPathways");
 
-				if (species == null) 
-					species = retrieveSpeciesFromCache();
-				if (species != null)   return species;
-			
-				final Document doc = xmlGet(BASE_URL + "listOrganisms");
-				if (super.cancelled)	return null;
-				final Node responseNode = doc.getFirstChild();
-				final NodeList organismNodes = responseNode.getChildNodes();
-				final List<String> species = new ArrayList<String>();
-				for (int i = 0; i < organismNodes.getLength(); i++) {
-					final Node organismNode = organismNodes.item(i);
-					if (organismNode.getNodeType() == Node.ELEMENT_NODE) 
-						species.add(organismNode.getTextContent());
-				}
+                if (species == null) 
+                    species = retrieveSpeciesFromCache();
+                if (species != null) return species;
 
-				storeSpeciesToCache(species);
-				return species;
-			}
-		};
-	}
+                final String jsonString = jsonGet(NEW_BASE_URL+ "listOrganisms.json");
+                if (super.cancelled) return null;
+                
+                final JSONObject jsonObject = new JSONObject(jsonString);
+                final JSONArray organismArray = jsonObject.getJSONArray("organisms");
+                final List<String> species = new ArrayList<>();
+                for (int i = 0; i < organismArray.length(); i++) {
+                    species.add(organismArray.getString(i));
+                }
+
+                storeSpeciesToCache(species);
+                return species;
+            }
+        };
+    }
+    private String jsonGet(String urlString) throws Exception {
+        URL url = new URL(urlString);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("GET");
+        BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+        String inputLine;
+        StringBuilder content = new StringBuilder();
+        while ((inputLine = in.readLine()) != null) {
+            content.append(inputLine);
+        }
+        in.close();
+        conn.disconnect();
+        return content.toString();
+    }
 
 	public ResultTask<List<WPPathway>> freeTextSearchTask(final String query, final String species) {
 		return new ReqTask<List<WPPathway>>() {
