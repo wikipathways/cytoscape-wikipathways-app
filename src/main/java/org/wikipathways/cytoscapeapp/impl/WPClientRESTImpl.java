@@ -212,24 +212,33 @@ public class WPClientRESTImpl implements WPClient {
 	
 		return filteredResults;
 	}
-    public ResultTask<WPPathway> pathwayInfoTask(final String id) {
-        return new ReqTask<WPPathway>() {
-            protected WPPathway checkedRun(final TaskMonitor monitor) throws Exception {
-                monitor.setTitle("Retrieve info for '" + id + "'");
-                
-                // Fetch the JSON content
-                final String jsonString = jsonGet(NEW_BASE_URL + "getPathwayInfo.json?pwId=" + id);
-                if (super.cancelled) return null;
-                if (jsonString == null) return null;
-
-                // Parse the JSON content
-                final JSONObject pathwayObject = new JSONObject(jsonString);
-
-                // Create and return the WPPathway object
-                return parsePathwayInfo(pathwayObject);
-            }
-        };
-    }
+	
+	public ResultTask<WPPathway> pathwayInfoTask(final String id) {
+		return new ReqTask<WPPathway>() {
+			protected WPPathway checkedRun(final TaskMonitor monitor) throws Exception {
+				monitor.setTitle("Retrieve info for '" + id + "'");
+				
+				// Fetch the JSON content
+				final String jsonString = jsonGet(NEW_BASE_URL + "getPathwayInfo.json");
+				if (super.cancelled) return null;
+				if (jsonString == null) return null;
+	
+				// Parse the JSON content
+				final JSONObject jsonObject = new JSONObject(jsonString);
+				final JSONArray pathwayArray = jsonObject.getJSONArray("pathwayInfo");
+	
+				for (int i = 0; i < pathwayArray.length(); i++) {
+					final JSONObject pathwayObject = pathwayArray.getJSONObject(i);
+					if (pathwayObject.getString("id").equalsIgnoreCase(id)) {
+						// Create and return the WPPathway object
+						return parsePathwayInfo(pathwayObject);
+					}
+				}
+	
+				return null; // Return null if no matching pathway is found
+			}
+		};
+	}
 	
 
 
