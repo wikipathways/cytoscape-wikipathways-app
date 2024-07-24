@@ -10,3 +10,6 @@ wikipathways.app/.*
 .classpath
 .project
 .settings*
+
+.DS_Store
+*/.DS_Store
