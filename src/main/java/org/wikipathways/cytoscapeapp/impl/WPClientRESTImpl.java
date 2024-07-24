@@ -38,7 +38,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -50,20 +49,18 @@ import org.apache.http.impl.conn.SystemDefaultRoutePlanner;
 import org.cytoscape.application.CyApplicationConfiguration;
 import org.cytoscape.work.TaskMonitor;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.wikipathways.cytoscapeapp.WPClient;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class WPClientRESTImpl implements WPClient {
-	protected static final String BASE_URL = "http://webservice.wikipathways.org/";
-	protected static final String NEW_BASE_URL = "https://www.wikipathways.org/json/";
+	protected static final String BASE_URL = "https://www.wikipathways.org/";
+	protected static final String BASE_URL_JSON = "https://www.wikipathways.org/json/";
 
 
 	final private CyApplicationConfiguration appConf;		//  gives access to a species cache file
@@ -112,7 +109,7 @@ public class WPClientRESTImpl implements WPClient {
                 if (species != null) return species;
 
                 // Fetch the JSON content
-                final String jsonString = jsonGet(NEW_BASE_URL+ "listOrganisms.json");
+                final String jsonString = jsonGet(BASE_URL_JSON+ "listOrganisms.json");
                 if (super.cancelled) return null;
                 
                 // Parse the JSON content
@@ -152,7 +149,7 @@ public class WPClientRESTImpl implements WPClient {
                 if (query.trim().isEmpty()) return result;
 
                 // Fetch the JSON content
-                final String jsonString = jsonGet(NEW_BASE_URL + "findPathwaysByText.json");
+                final String jsonString = jsonGet(BASE_URL_JSON + "findPathwaysByText.json");
                 if (super.cancelled) return result;
                 if (jsonString == null) return result;
 
@@ -212,14 +209,14 @@ public class WPClientRESTImpl implements WPClient {
 	
 		return filteredResults;
 	}
-	
+
 	public ResultTask<WPPathway> pathwayInfoTask(final String id) {
 		return new ReqTask<WPPathway>() {
 			protected WPPathway checkedRun(final TaskMonitor monitor) throws Exception {
 				monitor.setTitle("Retrieve info for '" + id + "'");
 				
 				// Fetch the JSON content
-				final String jsonString = jsonGet(NEW_BASE_URL + "getPathwayInfo.json");
+				final String jsonString = jsonGet(BASE_URL_JSON + "getPathwayInfo.json");
 				if (super.cancelled) return null;
 				if (jsonString == null) return null;
 	
@@ -265,30 +262,16 @@ public class WPClientRESTImpl implements WPClient {
 				String title = "Get \'" + pathway.getName() + "\' from WikiPathways";
 //				System.out.println(title);
 				monitor.setTitle(title);
-				Document doc = null;
-				try {
-					String url = BASE_URL + "getPathway?pwId=" + pathway.getId();
-//					System.out.println(url);
-					doc = xmlGet(url, "pwId", pathway.getId(), "revision", "0"); //0 = latest revision  //pathway.getRevision());
-				} catch (SAXParseException e) {
-					throw new Exception(String.format("'%s' is not available -- invalid GPML", pathway.getName()), e);
-				}
-				if (super.cancelled)
-					return null;
-
-//				NodeList nodes = doc.getChildNodes();
-//				for (int i=0; i<nodes.getLength(); i++)
-//					System.out.println(nodes.item(i));
-
-				docPeek(doc);
-				final Node responseNode = doc.getFirstChild();
-				final Node pathwayNode = findChildNode(responseNode, "ns1:pathway");
-				final Node gpmlNode = findChildNode(pathwayNode, "ns2:gpml");
-				final String gpmlContents = new String(Base64.decodeBase64(gpmlNode.getTextContent()), "UTF-8");
-				return new StringReader(gpmlContents);
+				String url = BASE_URL + "wikipathways-assets/pathways/" + pathway.getId() + "/" + pathway.getId() + ".gpml";
+				String jsonResponse = jsonGet(url);
+				if (super.cancelled) return null;
+				if (jsonResponse == null) return null;
+				return new StringReader(jsonResponse);
 			}
 		};
 	}
+
+
 	//----------------------------
 	private File getSpeciesCacheFile() {
 		final File confDir = appConf.getAppConfigurationDirectoryLocation(this.getClass());
@@ -403,29 +386,6 @@ public class WPClientRESTImpl implements WPClient {
 				}
 			}
 		}
-	}
-	private void docPeek(Document doc)
-	{
-		elemPeek(doc.getDocumentElement());
-	}
-	
-	private void elemPeek(Node parent )
-	{
-       try { // get the first element
-//        Element element = doc.getDocumentElement();
-
-        // get all child nodes
-        NodeList nodes = parent.getChildNodes();
-
-        // print the text content of each child
-        for (int i = 0; i < nodes.getLength(); i++) {
-        	Node node = nodes.item(i);
-           //System.out.println("" +node.getTextContent());
-           elemPeek(node);
-        }
-     } catch (Exception ex) {
-        ex.printStackTrace();
-     }
 	}
 
 	protected static Node findChildNode(final Node parentNode, final String nodeName) {
