@@ -31,6 +31,7 @@ import java.net.HttpURLConnection;
 import java.net.ProxySelector;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.net.URL;
 
@@ -141,56 +142,72 @@ public class WPClientRESTImpl implements WPClient {
     }
 
 	@Override
-    public ResultTask<List<WPPathway>> freeTextSearchTask(final String query, final String species) {
-        return new ReqTask<List<WPPathway>>() {
-            protected List<WPPathway> checkedRun(final TaskMonitor monitor) throws Exception {
-                monitor.setTitle("Search WikiPathways for '" + query + "'");
-                final List<WPPathway> result = new ArrayList<>();
-                if (query.trim().isEmpty()) return result;
-
-                // Fetch the JSON content
-                final String jsonString = jsonGet(BASE_URL_JSON + "findPathwaysByText.json");
-                if (super.cancelled) return result;
-                if (jsonString == null) return result;
-
-                // Parse the JSON content
-                final JSONObject jsonObject = new JSONObject(jsonString);
-                final JSONArray pathwayArray = jsonObject.getJSONArray("pathwayInfo");
-
-                for (int i = 0; i < pathwayArray.length(); i++) {
-                    final JSONObject pathwayObject = pathwayArray.getJSONObject(i);
-                    final WPPathway pathway = parsePathwayInfo(pathwayObject);
-
-                    if (pathway != null) {
-                        result.add(pathway);
-                    }
-                }
-
-                // Filter results based on query and field
-                List<WPPathway> filteredResults = filterPathways(result, query, species);
-                return filteredResults;
-            }
-        };
-    }
+	public ResultTask<List<WPPathway>> freeTextSearchTask(final String query, final String species) {
+		return new ReqTask<List<WPPathway>>() {
+			protected List<WPPathway> checkedRun(final TaskMonitor monitor) throws Exception {
+				monitor.setTitle("Search WikiPathways for '" + query + "'");
+				final List<WPPathway> result = new ArrayList<>();
+				if (query.trim().isEmpty()) return result;
+	
+				// Fetch the JSON content
+				final String jsonString = jsonGet(BASE_URL_JSON + "findPathwaysByText.json");
+				if (super.cancelled) return result;
+				if (jsonString == null) return result;
+	
+				// Parse the JSON content
+				final JSONObject jsonObject = new JSONObject(jsonString);
+				final JSONArray pathwayArray = jsonObject.getJSONArray("pathwayInfo");
+				for (int i = 0; i < pathwayArray.length(); i++) {
+					final JSONObject pathwayObject = pathwayArray.getJSONObject(i);
+					final WPPathway pathway = parsePathwayInfo(pathwayObject);
+					if (pathway != null) {
+						result.add(pathway);
+					}
+				}
+	
+				// Filter results based on query and species
+				List<WPPathway> filteredResults = filterPathways(result, query, species);
+				return filteredResults;
+			}
+		};
+	}
+	
 	private List<WPPathway> filterPathways(List<WPPathway> pathways, String query, String species) {
 		List<WPPathway> filteredResults = new ArrayList<>();
-		String lowerQuery = query.toLowerCase();
+		boolean isExactMatch = query.startsWith("\"") && query.endsWith("\"");
+		String lowerQuery = isExactMatch ? query.substring(1, query.length() - 1).toLowerCase() : query.toLowerCase();
+	
+		// Split the query by commas and whitespace for 'and' search in datanodes
+		String[] queryParts = lowerQuery.split("\\s*,\\s*|\\s+");
+		List<String> queryTerms = new ArrayList<>();
+		for (String part : queryParts) {
+			queryTerms.add(part.trim());
+		}
 	
 		for (WPPathway pathway : pathways) {
 			boolean matches = false;
 	
-			// Ensure exact match for 'id' field
-			if (pathway.getId().equalsIgnoreCase(query)) {
-				matches = true;
+			if (isExactMatch) {
+				// Exact match search: match only if the name field matches the exact phrase
+				matches = pathway.getName().equalsIgnoreCase(lowerQuery);
 			} else {
-				// Check other fields for partial matches
+				// General search: check all fields for partial matches
 				matches = pathway.getName().toLowerCase().contains(lowerQuery) ||
 						  pathway.getSpecies().toLowerCase().contains(lowerQuery) ||
 						  pathway.getDescription().toLowerCase().contains(lowerQuery) ||
 						  pathway.getAuthors().toLowerCase().contains(lowerQuery) ||
-						  pathway.getDatanodes().toLowerCase().contains(lowerQuery) ||
 						  pathway.getAnnotations().toLowerCase().contains(lowerQuery) ||
 						  pathway.getCitedIn().toLowerCase().contains(lowerQuery);
+						  
+				// Check datanodes for all query terms
+				boolean allTermsMatch = true;
+				for (String term : queryTerms) {
+					if (!pathway.getDatanodes().toLowerCase().contains(term)) {
+						allTermsMatch = false;
+						break;
+					}
+				}
+				matches = matches || allTermsMatch;
 			}
 	
 			if (species != null && !species.isEmpty()) {
@@ -209,6 +226,9 @@ public class WPClientRESTImpl implements WPClient {
 	
 		return filteredResults;
 	}
+	
+	
+
 
 	public ResultTask<WPPathway> pathwayInfoTask(final String id) {
 		return new ReqTask<WPPathway>() {
