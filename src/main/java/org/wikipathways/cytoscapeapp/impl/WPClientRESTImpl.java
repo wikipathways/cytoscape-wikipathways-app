@@ -187,6 +187,13 @@ public class WPClientRESTImpl implements WPClient {
 		for (WPPathway pathway : pathways) {
 			boolean matches = false;
 	
+			// ID match with exact case-insensitive comparison
+			if (pathway.getId().equalsIgnoreCase(query)) {
+				filteredResults.clear();  // Clear any previous results because we only want this exact match
+				filteredResults.add(pathway);
+				return filteredResults;   // Return immediately as we have found an exact ID match
+			}
+	
 			if (isExactMatch) {
 				// Exact match search: match only if the name field matches the exact phrase
 				matches = pathway.getName().equalsIgnoreCase(lowerQuery);
@@ -198,7 +205,7 @@ public class WPClientRESTImpl implements WPClient {
 						  pathway.getAuthors().toLowerCase().contains(lowerQuery) ||
 						  pathway.getAnnotations().toLowerCase().contains(lowerQuery) ||
 						  pathway.getCitedIn().toLowerCase().contains(lowerQuery);
-						  
+	
 				// Check datanodes for all query terms
 				boolean allTermsMatch = true;
 				for (String term : queryTerms) {
@@ -219,13 +226,9 @@ public class WPClientRESTImpl implements WPClient {
 			}
 		}
 	
-		// Filter again to ensure only exact id match if query is id
-		if (query.toLowerCase().startsWith("wp")) {
-			filteredResults.removeIf(p -> !p.getId().equalsIgnoreCase(query));
-		}
-	
 		return filteredResults;
 	}
+	
 	
 	
 
